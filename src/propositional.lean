@@ -77,7 +77,9 @@ section noclassical
     assume h: p ↔ ¬p,
     have hpnp, from h.mp,
     have hnpp, from h.mpr,
-    sorry,
+    suffices hnp: ¬p, from absurd (hnpp hnp) hnp,
+    assume hp: p,
+    exact absurd hp (hpnp hp),
   end
   example : (p → q) → (¬q → ¬p) :=
   begin
