@@ -161,8 +161,10 @@ section existential
 
     show false, from absurd h₂ h,
   end
+  #check ¬ ∃ x, p x
+  #check ¬p
   example : (¬ ∃ x, p x) ↔ (∀ x, ¬ p x) := sorry
-  theorem thm : (¬ ∀ x, p x) ↔ (∃ x, ¬ p x) :=
+  example: (¬ ∀ x, p x) ↔ (∃ x, ¬ p x) :=
   begin
     -- non-constructive
     apply iff.intro,

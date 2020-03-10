@@ -34,7 +34,19 @@ section noclassical
   end
 
   -- associativity of ∧ and ∨
-  example : (p ∧ q) ∧ r ↔ p ∧ (q ∧ r) := sorry
+  example : (p ∧ q) ∧ r ↔ p ∧ (q ∧ r) :=
+  begin
+    apply iff.intro,
+    assume h,
+    cases h with hpq hr,
+    cases hpq with hp hq,
+    exact ⟨hp, ⟨hq, hr⟩⟩,
+
+    assume h,
+    cases h with hp hqr,
+    cases hqr with hq hr,
+    exact ⟨⟨hp, hq⟩, hr⟩,
+  end
   example : (p ∨ q) ∨ r ↔ p ∨ (q ∨ r) := sorry
 
   -- distributivity
@@ -51,8 +63,43 @@ section noclassical
 
   -- other properties
   example : (p → (q → r)) ↔ (p ∧ q → r) := sorry
-  example : ((p ∨ q) → r) ↔ (p → r) ∧ (q → r) := sorry
-  example : ¬(p ∨ q) ↔ ¬p ∧ ¬q := sorry
+  example : ((p ∨ q) → r) ↔ (p → r) ∧ (q → r) :=
+  begin
+    apply iff.intro,
+    assume h,
+    constructor,
+      assume hp,
+      have hpq : p ∨ q, left, from hp,
+      exact h hpq,
+
+      assume hq,
+      have hpq : p ∨ q, right, from hq,
+      exact h hpq,
+    assume h hpq,
+    cases h with hpr hqr,
+    cases hpq with hp hq,
+    exact hpr hp,
+    exact hqr hq,
+  end
+  example : ¬(p ∨ q) ↔ ¬p ∧ ¬q :=
+  begin
+    apply iff.intro,
+    assume h,
+    constructor,
+    assume hp,
+    have hpq : p ∨ q, from (or.inl hp),
+    show false, from absurd hpq h,
+    assume hq,
+    have hpq : p ∨ q, from (or.inr hq),
+    show false, from absurd hpq h,
+
+    assume h hpq,
+    cases hpq with hp hq,
+    cases h with hnp _,
+    contradiction,
+    cases h with _ hnq,
+    contradiction,
+  end
   example : ¬p ∨ ¬q → ¬(p ∧ q) := sorry
   example : ¬(p ∧ ¬p) :=
   begin
@@ -79,7 +126,8 @@ section noclassical
     have hnpp, from h.mpr,
     suffices hnp: ¬p, from absurd (hnpp hnp) hnp,
     assume hp: p,
-    exact absurd hp (hpnp hp),
+    have h₂, from (hpnp hp),
+    contradiction,
   end
   example : (p → q) → (¬q → ¬p) :=
   begin
@@ -87,7 +135,7 @@ section noclassical
     assume hnq: ¬q,
     assume hp: p,
     have hq: q, from h hp,
-    exact absurd hq hnq,
+    contradiction,
   end
 end noclassical
 
@@ -104,5 +152,16 @@ section classical
   example : (¬q → ¬p) → (p → q) := sorry
   -- trivial application of law of excluded middle
   example : p ∨ ¬p := em p
-  example : (((p → q) → p) → p) := sorry
+  example : (((p → q) → p) → p) :=
+  begin
+    assume h,
+    apply by_contradiction,
+    assume hnp,
+    have hpq: p → q,
+    assume hp,
+    contradiction,
+
+    have hp, from h hpq,
+    contradiction,
+  end
 end classical
