@@ -1,42 +1,40 @@
+-- A point is a basic object
 axiom point : Type
-
--- Disclaimer:
--- Most of this is completely wrong, as there
--- should be a bunch of extra hypotheses exerting
--- that points/lines do not coincide.
--- It might be possible to prove false.
--- Lots of the axioms are missing, some types
--- are defined in the wrong way, some definitions
--- are suspicious
 
 -- Basic definitions & axioms
 -- See https://en.wikipedia.org/wiki/Hilbert's_axioms
 -- TODO: Document the axioms properly in LaTeX
 
 -- Ternary relation for points
-axiom between : point → point → point → Prop
+axiom between (A B C : point) :  Prop
+notation A `∗` B `∗` C := between A B C
 
-inductive line : Type
--- Construct the line between two distinct points
-| mk (a b : point) (h : a ≠ b) : line
+-- A line is a basic object
+axiom line : Type
 
 -- Relation between a point and a line
 axiom lies_on : point → line → Prop
+infix `⊏`:50 := lies_on
 
+-- Given two distinct points there exists a line that they
+-- both lie on.
+axiom line_containing {A B : point} (distinct : A ≠ B) :
+∃ (ℓ : line), A ⊏ ℓ ∧ B ⊏ ℓ
+
+#check @line_containing
+
+-- Two lines are equal iff they share every point
 axiom line_eq (ℓ₁ ℓ₂ : line) :
 ℓ₁ = ℓ₂ ↔
-∀ (a : point) (h : lies_on a ℓ₁), lies_on a ℓ₂
+∀ (X : point) (h : X ⊏ ℓ₁), X ⊏ ℓ₂
 
 -- Angle
 structure angle := (ℓ₁ ℓ₂ : line)
--- Two angles are congruent if they are the same size
-axiom cong_ang : angle → angle → Prop
+
 -- Line segment
-structure segment := (p₁ p₂ : point)
--- Two line segments are congruent if they are the same
--- length
-axiom cong_seg : segment → segment → Prop
+structure segment := (P₁ P₂ : point)
 
 -- You lie on a segment iff you are between the endpoints
-def lies_on_seg (p : point) (s : segment) : Prop :=
-between s.p₁ p s.p₂
+def lies_on_seg (A : point) (s : segment) : Prop :=
+s.P₁ ∗ A ∗ s.P₂
+infix `⊏`:50 := lies_on_seg

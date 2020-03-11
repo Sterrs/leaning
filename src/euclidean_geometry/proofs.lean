@@ -1,19 +1,17 @@
 import .basic .incidence .order
 
--- Read disclaimer in basic.lean
-
 -- Some proofs to get started
 
 open classical
 
 -- Prove the existence of a point
 -- I don't know if we can actually get the point
-theorem there_is_a_point : ∃ (a : point), true :=
+theorem there_is_a_point : ∃ (A : point), true :=
 begin
-  cases noncoll3 with a ha,
+  cases noncoll3 with A hA,
   constructor,
   assumption,
-  exact true.intro,
+  trivial,
 end
 
 -- Show that the intersect relation is symmetric
@@ -21,19 +19,24 @@ theorem intersect_symm {ℓ₁ ℓ₂ : line} :
 intersect ℓ₁ ℓ₂ → intersect ℓ₂ ℓ₁ :=
 begin
   assume h,
-  cases h with p hp,
-  cases hp with h1 h2,
+  cases h with P hP,
+  cases hP with h1 h2,
   have hl, from and.intro h2 h1,
-  existsi p,
+  existsi P,
   assumption,
 end
 
 -- Show that the parallel relation is symmetric
 theorem parallel_symm {ℓ₁ ℓ₂ : line} :
-parallel ℓ₁ ℓ₂ → parallel ℓ₂ ℓ₁ :=
+ℓ₁ ∥ ℓ₂ → ℓ₂ ∥ ℓ₁ :=
 begin
-  assume h hi21,
-  have hi12, from intersect_symm hi21,
+  assume h,
+  cases h with heq nin,
+  left, symmetry, assumption,
+
+  right,
+  assume hi,
+  have := intersect_symm hi,
   contradiction,
 end
 
@@ -54,63 +57,57 @@ begin
   exact (h₂ a) hab.left,
 end
 
--- Equal lines are not parallel
-lemma eq_not_parallel {ℓ₁ ℓ₂ : line} :
-ℓ₁ = ℓ₂ → ¬ parallel ℓ₁ ℓ₂ :=
-begin
-  assume h hpara,
-  have hinter, from (equal_intersect ℓ₁ ℓ₂) h,
-  contradiction,
-end
-
--- Parallel lines are not equal
-lemma para_not_eq {ℓ₁ ℓ₂ : line} :
-parallel ℓ₁ ℓ₂ → ℓ₁ ≠ ℓ₂ :=
-begin
-  -- Is there a more straightforward way to
-  -- get this from the previous lemma?
-  assume hpara heq,
-  have h, from eq_not_parallel heq,
-  contradiction,
-end
-
-#check euclid_unique
--- Given ℓ₁ ℓ₂ intersect, if l parallel to one it must
+-- Given a b intersect, if ℓ parallel to one it must
 -- also intersect the other
-lemma parallel_intersect {ℓ₁ ℓ₂ l : line}
-(distinct : ℓ₁ ≠ ℓ₂)
-(hpara : parallel ℓ₁ l) (h : intersect ℓ₁ ℓ₂) :
-intersect ℓ₂ l :=
+lemma parallel_intersect {a b ℓ : line}
+(distinct : a ≠ b)
+(hpara : a ∥ ℓ) (h : intersect a b) :
+intersect b ℓ :=
 begin
-  cases h with p hp,
-  apply classical.by_contradiction,
-  assume hni,
-  have : ℓ₁ = ℓ₂,
-  have pnl : ¬ lies_on p l,
-  assume hpnl : lies_on p l,
-  have hℓ₁l: intersect ℓ₁ l,
-  existsi p,
-  exact ⟨hp.left, hpnl⟩,
-  contradiction,
+  -- Consider case where a = ℓ separately
+  cases hpara,
 
-  apply euclid_unique ℓ₁ ℓ₂ l p,
+  rw ←hpara,
+  apply intersect_symm,
   assumption,
-  exact ⟨hp.left, hpara⟩,
-  exact ⟨hp.right, hni⟩,
 
+  -- We want to form a contradiction to Euclid's axiom
+  apply by_contradiction,
+  assume hnb,
+  cases h with P hP,
+  -- Let's build the hypotheses we need for Euclid
+  have ha : a ∥ ℓ, right, assumption,
+  have hb: b ∥ ℓ, right, assumption,
+  -- This one is unnecessarily complicated
+  have hnP : ¬ P ⊏ ℓ,
+    assume hPonℓ,
+    have : intersect a ℓ,
+    existsi P,
+    split,
+      from hP.left,
+      assumption,
+    contradiction,
+  -- Now use Euclid's uniqueness to form contradiction
+  have := euclid_unique hnP ⟨hP.left, ha⟩ ⟨hP.right, hb⟩,
   contradiction,
 end
 
+#check parallel_intersect
 -- Transitivity of parallel
 theorem parallel_trans {ℓ₁ ℓ₂ ℓ₃ : line} (distinct : ℓ₁ ≠ ℓ₃):
-parallel ℓ₁ ℓ₂ → parallel ℓ₂ ℓ₃ → parallel ℓ₁ ℓ₃ :=
+ℓ₁ ∥ ℓ₂ → ℓ₂ ∥ ℓ₃ → ℓ₁ ∥ ℓ₃ :=
 begin
   assume h12 h23,
+  cases h12; cases h23,
+  rw ←h23, left, assumption,
+  rw h12, right, assumption,
+  rw ←h23, right, assumption,
+  -- The 'hard' case
+  right,
   assume hi13,
-  have hneq23, from para_not_eq h23,
-  have hneq12, from para_not_eq h12,
-  have h₁,
-  from parallel_intersect distinct h12 hi13,
-  have h₂, from intersect_symm h₁,
+  -- We need a parallel hypothesis back (ugly)
+  have hpara : ℓ₁ ∥ ℓ₂, right, assumption,
+  have := parallel_intersect distinct hpara hi13,
+  have := intersect_symm this,
   contradiction,
 end
