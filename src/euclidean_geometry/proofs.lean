@@ -4,17 +4,8 @@ import .basic .incidence .order
 
 open classical
 
--- Prove the existence of a point
--- I don't know if we can actually get the point
-theorem there_is_a_point : ∃ (A : point), true :=
-begin
-  cases noncoll3 with A hA,
-  constructor,
-  assumption,
-  trivial,
-end
-
 -- Show that the intersect relation is symmetric
+@[simp, symm]
 theorem intersect_symm {ℓ₁ ℓ₂ : line} :
 intersect ℓ₁ ℓ₂ → intersect ℓ₂ ℓ₁ :=
 begin
@@ -27,6 +18,7 @@ begin
 end
 
 -- Show that the parallel relation is symmetric
+@[simp, symm]
 theorem parallel_symm {ℓ₁ ℓ₂ : line} :
 ℓ₁ ∥ ℓ₂ → ℓ₂ ∥ ℓ₁ :=
 begin
@@ -68,7 +60,7 @@ begin
   cases hpara,
 
   rw ←hpara,
-  apply intersect_symm,
+  symmetry,
   assumption,
 
   -- We want to form a contradiction to Euclid's axiom
@@ -92,8 +84,8 @@ begin
   contradiction,
 end
 
-#check parallel_intersect
 -- Transitivity of parallel
+@[simp, trans]
 theorem parallel_trans {ℓ₁ ℓ₂ ℓ₃ : line} (distinct : ℓ₁ ≠ ℓ₃):
 ℓ₁ ∥ ℓ₂ → ℓ₂ ∥ ℓ₃ → ℓ₁ ∥ ℓ₃ :=
 begin

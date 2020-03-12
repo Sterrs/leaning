@@ -1,7 +1,7 @@
 import .basic
 
 -- The line between any two points is unique
-axiom unique_line {A B : point} {ℓ₁ ℓ₂ : line}:
+axiom line_unique {A B : point} {ℓ₁ ℓ₂ : line}:
 (A ⊏ ℓ₁ ∧ A ⊏ ℓ₂ ∧ B ⊏ ℓ₁ ∧ B ⊏ ℓ₂)
 → (ℓ₁ = ℓ₂) ∨ (A = B)
 
@@ -16,7 +16,8 @@ def collinear (A B C : point) : Prop :=
 
 -- There exist three points not all on the same line
 axiom noncoll3 :
-∃ (X Y Z : point), ¬ collinear X Y Z
+∃ (X Y Z : point),
+(X ≠ Y) ∧ (Y ≠ Z) ∧ (Z ≠ X) ∧ ¬ collinear X Y Z
 
 -- Two lines intersect if they share a point
 def intersect (ℓ₁ ℓ₂ : line) : Prop :=

@@ -21,14 +21,13 @@ infix `⊏`:50 := lies_on
 axiom line_containing {A B : point} (distinct : A ≠ B) :
 ∃ (ℓ : line), A ⊏ ℓ ∧ B ⊏ ℓ
 
-#check @line_containing
-
 -- Two lines are equal iff they share every point
-axiom line_eq (ℓ₁ ℓ₂ : line) :
+axiom line_eq {ℓ₁ ℓ₂ : line} :
 ℓ₁ = ℓ₂ ↔
 ∀ (X : point) (h : X ⊏ ℓ₁), X ⊏ ℓ₂
 
 -- Angle
+-- Lines need not be different
 structure angle := (ℓ₁ ℓ₂ : line)
 
 -- Line segment
@@ -36,5 +35,5 @@ structure segment := (P₁ P₂ : point)
 
 -- You lie on a segment iff you are between the endpoints
 def lies_on_seg (A : point) (s : segment) : Prop :=
-s.P₁ ∗ A ∗ s.P₂
+s.P₁∗A∗s.P₂
 infix `⊏`:50 := lies_on_seg
