@@ -1,3 +1,6 @@
+-- stops name comflicts
+namespace hidden
+
 inductive mynat
 | zero : mynat
 | succ (n : mynat) : mynat
@@ -5,145 +8,160 @@ inductive mynat
 -- so I can use succ instead of mynat.succ
 open mynat
 
+-- this instance stuff is pure voodoo but it seems to make the notation work
+instance: has_zero mynat := ⟨zero⟩
+instance: has_one mynat := ⟨succ zero⟩
+
 def add: mynat → mynat → mynat
-| m zero := m
+| m 0 := m
 | m (succ n) := succ (add m n)
 
+instance: has_add mynat := ⟨add⟩
+
 def mul: mynat → mynat → mynat
-| m zero := zero
-| m (succ n) := add m (mul m n)
+| m 0 := 0
+| m (succ n) := m + mul m n
+
+instance: has_mul mynat := ⟨mul⟩
 
 -- a^b should be number of functions from a b-set to an a-set. fight me
 def pow: mynat → mynat → mynat
-| m zero := succ zero
-| m (succ n) := mul m (pow m n)
+| m 0 := 1
+| m (succ n) := m * pow m n
 
 variables m n k: mynat
 
--- It's probably bad style to make these theorems but idk how else I'm
--- supposed to refer to these things. Also how do I make it so I can just
--- call it add_zero? And how do I get nice infix notation and make it so I
--- can write 0?
-theorem add_zero2: add m zero = m :=
-begin
-    refl,
-end
+theorem add_zero: m + 0 = m := rfl
 
-theorem add_succ2: add m (succ n) = succ (add m n) :=
-begin
-    refl,
-end
+theorem add_succ: m + succ n = succ (m + n) := rfl
 
-theorem zero_add2: add zero m = m :=
+-- so for some reason all the old code breaks with the new operator instances,
+-- so I have to go and replace zero with 0 wherever I used induction. How fix???
+theorem zz: zero = 0 := rfl
+
+theorem zero_add: 0 + m = m :=
 begin
     induction m,
-    rw add_zero2,
-    rw [add_succ2, m_ih],
+    repeat {rw zz},
+    rw add_zero,
+    rw [add_succ, m_ih],
 end
 
-theorem succ_add2: add (succ m) n = succ (add m n) :=
+theorem succ_add: succ m + n = succ (m + n) :=
 begin
     induction n,
-    repeat {rw add_zero2},
-    repeat {rw add_succ2},
+    repeat {rw zz},
+    repeat {rw add_zero},
+    repeat {rw add_succ},
     rw n_ih,
 end
 
-theorem add_assoc2: add (add m n) k = add m (add n k) :=
+theorem add_assoc: (m + n) + k = m + (n + k) :=
 begin
     induction k,
-    repeat {rw add_zero2},
-    repeat {rw add_succ2},
+    repeat {rw zz},
+    repeat {rw add_zero},
+    repeat {rw add_succ},
     rw k_ih,
 end
 
-theorem add_comm2: add m n = add n m :=
+theorem add_comm: m + n = n + m :=
 begin
     induction n,
-    rw [add_zero2, zero_add2],
-    rw [add_succ2, succ_add2, n_ih],
+    repeat {rw zz},
+    rw [add_zero, zero_add],
+    rw [add_succ, succ_add, n_ih],
 end
 
-theorem mul_zero2: mul m zero = zero :=
-begin
-    refl,
-end
+theorem mul_zero: m * 0 = 0 := rfl
 
-theorem mul_succ2: mul m (succ n) = add m (mul m n) :=
-begin
-    refl,
-end
+theorem mul_succ: m * (succ n) = m + (m * n) := rfl
 
-theorem zero_mul2: mul zero m = zero :=
+theorem mul_one: m * 1 = m := rfl
+
+theorem zero_mul: 0 * m = 0 :=
 begin
     induction m,
-    rw mul_zero2,
-    rw [mul_succ2, m_ih, add_zero2],
+    repeat {rw zz},
+    rw mul_zero,
+    rw [mul_succ, m_ih, add_zero],
 end
 
-theorem succ_mul2: mul (succ m) n = add (mul m n) n :=
+theorem one_mul: 1 * m = m :=
+begin
+    induction m,
+    repeat {rw zz},
+    rw mul_zero,
+    rw [mul_succ, m_ih],
+    calc 1 + m_n = succ 0 + m_n   : rfl
+             ... = succ (0 + m_n) : by rw succ_add
+             ... = succ m_n       : by rw zero_add,
+end
+
+theorem succ_mul: (succ m) * n = m * n + n :=
 begin
     induction n,
-    repeat {rw mul_zero2},
-    rw add_zero2,
-    repeat {rw mul_succ2},
+    repeat {rw zz},
+    repeat {rw mul_zero},
+    rw add_zero,
+    repeat {rw mul_succ},
     rw n_ih,
-    rw [add_succ2, succ_add2, add_assoc2],
+    rw [add_succ, succ_add, add_assoc],
 end
 
-theorem mul_distrib2: mul m (add n k) = add (mul m n) (mul m k) :=
+theorem mul_distrib: m * (n + k) = m * n + m * k :=
 begin
     induction m,
-    repeat {rw zero_mul2},
-    rw add_zero2,
-    repeat {rw succ_mul2},
+    repeat {rw zz},
+    repeat {rw zero_mul},
+    rw add_zero,
+    repeat {rw succ_mul},
     rw m_ih,
-    repeat {rw add_assoc2},
-    rw add_comm2 (mul m_n k) (add n k),
-    rw add_comm2 (mul m_n k) k,
-    rw add_assoc2,
+    repeat {rw add_assoc},
+    rw add_comm (m_n * k) (n + k),
+    rw add_comm (m_n * k) k,
+    rw add_assoc,
 end
 
-theorem mul_assoc2: mul (mul m n) k = mul m (mul n k) :=
+theorem mul_assoc: (m * n) * k = m * (n * k) :=
 begin
     induction k,
-    repeat {rw mul_zero2},
-    repeat {rw mul_succ2},
-    rw mul_distrib2,
+    repeat {rw zz},
+    repeat {rw mul_zero},
+    repeat {rw mul_succ},
+    rw mul_distrib,
     rw k_ih,
 end
 
-theorem mul_comm2: mul m n = mul n m :=
+theorem mul_comm: m * n = n * m :=
 begin
     induction n,
-    rw [mul_zero2, zero_mul2],
-    rw [mul_succ2, succ_mul2, n_ih, add_comm2],
+    repeat {rw zz},
+    rw [mul_zero, zero_mul],
+    rw [mul_succ, succ_mul, n_ih, add_comm],
 end
 
-theorem pow_zero2: pow m zero = succ zero :=
-begin
-    refl,
-end
+theorem pow_zero: pow m 0 = 1 := rfl
 
-theorem pow_succ2: pow m (succ n) = mul m (pow m n) :=
-begin
-    refl,
-end
+theorem pow_succ: pow m (succ n) = m * (pow m n) := rfl
 
-theorem zero_pow2: m ≠ zero → pow zero m = zero :=
+theorem zero_pow: m ≠ 0 → pow 0 m = 0 :=
 begin
     intro hmnz,
     induction m,
     contradiction,
-    rw [pow_succ2, zero_mul2],
+    rw [pow_succ, zero_mul],
 end
 
-theorem pow_add2: pow m (add n k) = mul (pow m n) (pow m k) :=
+theorem pow_add: pow m (n + k) = (pow m n) * (pow m k) :=
 begin
     induction k,
-    rw [add_zero2, pow_zero2, mul_succ2, mul_zero2, add_zero2],
-    rw [add_succ2, pow_succ2, pow_succ2, k_ih],
-    rw ← mul_assoc2 m (pow m n) (pow m k_n),
-    rw mul_comm2 m (pow m n),
-    rw mul_assoc2,
+    repeat {rw zz},
+    rw [add_zero, pow_zero, mul_one],
+    rw [add_succ, pow_succ, pow_succ, k_ih],
+    rw ← mul_assoc m (pow m n) (pow m k_n),
+    rw mul_comm m (pow m n),
+    rw mul_assoc,
 end
+
+end hidden
