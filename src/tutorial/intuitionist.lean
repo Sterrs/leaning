@@ -61,10 +61,10 @@ begin
     have hnp: ¬p,
     assume hp,
     have hpnp: p ∨ ¬p,
-    left, from hp,
+    apply or.inl, from hp,
     exfalso, from hnpnp hpnp,
     have hpnp: p ∨ ¬p,
-    right, from hnp,
+    apply or.inr, from hnp,
     exfalso, from hnpnp hpnp,
 end
 
