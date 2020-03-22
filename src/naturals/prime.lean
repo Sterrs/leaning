@@ -5,7 +5,7 @@ namespace hidden
 open mynat
 
 def prime (m: mynat) := m ≠ 1 ∧ ∀ k: mynat, k ∣ m → k = 1 ∨ k = m
-def composite (m : mynat) := ∃ a b : mynat, a ≠ 1 ∧ b ≠ 1 ∧ a * b = m
+def composite (m : mynat) := ∃ a b: mynat, a ≠ 1 ∧ b ≠ 1 ∧ a * b = m
 def coprime (m n : mynat) := ∀ k: mynat, k ∣ m → k ∣ n → k = 1
 
 variables m n p k : mynat
@@ -15,50 +15,119 @@ begin
   assume h0pm,
   cases h0pm,
   have h2d0 := dvd_zero 2,
-  have h2n2: 2 ≠ 2,
-  have h2eq01 := h0pm_right 2 h2d0,
-  cases h2eq01,
-  cases h2eq01,
-  cases h2eq01,
+  have h2n2: 2 ≠ 2, {
+    have h2eq01 := h0pm_right 2 h2d0,
+    cases h2eq01,
+    cases h2eq01,
+    cases h2eq01,
+  },
   from h2n2 rfl,
 end
 
 theorem one_nprime: ¬prime 1 :=
 begin
   assume h1pm,
-  cases h1pm,
-  from h1pm_left rfl,
+  cases h1pm with h1ne1 _,
+  from h1ne1 rfl,
+end
+
+theorem zero_composite: composite 0 :=
+begin
+  existsi zero,
+  existsi zero,
+  split, {
+    assume h01,
+    cases h01,
+  }, {
+    split, {
+    assume h01,
+    cases h01,
+    },
+    simp,
+  },
+end
+
+theorem one_ncomposite: ¬composite 1 :=
+begin
+  assume h1cmp,
+  cases h1cmp with a h,
+  cases h with b h,
+  cases h with han1 h,
+  cases h with hbn1 hab1,
+  from han1 (one_unit _ _ hab1),
+end
+
+theorem two_ncomposite: ¬composite 2 :=
+begin
+  assume h2cmp,
+  cases h2cmp with a h,
+  cases h with b h,
+  cases h with han1 h,
+  cases h with hbn1 hab2,
+  cases a, {
+    simp at hab2,
+    cases hab2,
+  }, {
+    cases b, {
+      simp at hab2,
+      cases hab2,
+    }, {
+      cases a, {
+        simp at han1,
+        contradiction,
+      }, {
+        cases b, {
+          simp at hbn1,
+          contradiction,
+        }, {
+          simp at hab2,
+          have h := succ_inj _ _ hab2,
+          have h' := succ_inj _ _ h,
+          from succ_ne_zero _ h',
+        }
+      }
+    }
+  }
 end
 
 -- prove 2 is prime by a massive case-bash
 -- frankly this was just proved by going into a tactics red mist
 theorem two_prime: prime 2 :=
 begin
-  split,
-  assume h21,
-  cases h21,
-  intro k,
-  assume hk2,
-  cases hk2 with n hn,
-  cases k,
-  rw [zz, mul_zero] at hn,
-  cases hn,
-  cases k,
-  simp,
-  repeat {rw mul_succ at hn},
-  cases n,
-  rw zz at *,
-  simp at hn,
-  cases hn,
-  simp at hn,
-  cases n,
-  simp at hn,
-  cc,
-  have x := succ_inj _ _ hn,
-  simp at x,
-  have y := succ_inj _ _ x,
-  rw zz at y,
-  exfalso, from succ_ne_zero _ (eq.symm y),
+  split, {
+    assume h21,
+    cases h21,
+      }, {
+    intro k,
+    assume hk2,
+    cases hk2 with n hn,
+    cases k, {
+      simp at hn,
+      cases hn,
+    }, {
+      cases k, {
+        simp,
+      }, {
+        simp at hn,
+        cases n, {
+          simp at hn,
+          cases hn,
+        }, {
+          simp at hn,
+          cases n, {
+            simp at hn,
+            cc,
+          }, {
+            have x := succ_inj _ _ hn,
+            simp at x,
+            have y := succ_inj _ _ x,
+            simp at y,
+            exfalso, from succ_ne_zero _ (eq.symm y),
+          }
+        }
+      }
+    }
+  }
 end
 
 @[symm]
@@ -76,6 +145,7 @@ begin
   assume _ hk,
   from dvd_one k hk,
 end
+
 theorem one_coprime: coprime 1 m :=
 coprime_symm (coprime_one m)
 

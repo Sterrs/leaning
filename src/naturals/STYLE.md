@@ -19,6 +19,7 @@ Just a rough guide as to what style I'm trying to use
   about.
 - The unary operators `¬`, `←` should *not* be followed by a space.
 - The binary operators `+`, `*`, `^`, `∣`, `→`, should be surrounded by a space
+- For colons, usually put no space before and one space after
   on either side.
 - Parenthesise as you see fit.
 - In weird ambiguous re-write situations, try to use `conv`.

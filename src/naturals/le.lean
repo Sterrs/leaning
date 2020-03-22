@@ -4,7 +4,7 @@ namespace hidden
 
 open mynat
 
-def le (m n: mynat) :=  ∃ (k: mynat), n = m + k
+def le (m n: mynat) :=  ∃ k: mynat, n = m + k
 -- notation
 instance: has_le mynat := ⟨le⟩
 
