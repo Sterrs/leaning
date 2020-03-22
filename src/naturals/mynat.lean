@@ -418,11 +418,13 @@ begin
     from hmm (le_refl m),
 end
 
--- TODO: can this be proven classically?
 theorem lt_impl_le: m < n → m ≤ n :=
 begin
     assume hmn,
-    sorry
+    apply or.elim (le_total_order m n),
+    assume hmltn, from hmltn,
+    assume hnm,
+    exfalso, from hmn hnm,
 end
 
 -- this is pitched as a kind of long-term goal
