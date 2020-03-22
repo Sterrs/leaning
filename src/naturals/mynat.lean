@@ -57,6 +57,7 @@ instance: has_dvd mynat := ⟨divides⟩
 -- take care that you must use "\mid"
 def even (m: mynat) := 2 ∣ m
 def prime (m: mynat) := m ≠ 1 ∧ ∀ k: mynat, k ∣ m → k = 1 ∨ k = m
+def coprime (m n : mynat) := ∀ k: mynat, (k ∣ m ∧ k ∣ n) → k = 1
 -- gosh, how do you define gcd?
 -- you can kind of define it using Euclid's algorithm and total ordering of ≤
 /- def gcd: mynat → mynat → mynat
@@ -205,7 +206,7 @@ begin
 end
 
 @[simp]
-theorem mul_distrib: m * (n + k) = m * n + m * k :=
+theorem mul_add: m * (n + k) = m * n + m * k :=
 begin
     induction m,
     repeat {rw zz},
@@ -225,7 +226,7 @@ begin
     induction k,
     refl,
     repeat {rw mul_succ},
-    rw mul_distrib,
+    rw mul_add,
     rw k_ih,
 end
 
@@ -236,6 +237,15 @@ begin
     repeat {rw zz},
     rw [mul_zero, zero_mul],
     rw [mul_succ, succ_mul, n_ih, add_comm],
+end
+
+@[simp]
+theorem add_mul: (m + n)*k = m*k + n*k :=
+begin
+    rw mul_comm,
+    rw mul_add,
+    rw mul_comm m,
+    rw mul_comm n,
 end
 
 theorem mul_integral: m ≠ 0 → m * n = 0 → n = 0 :=
@@ -366,7 +376,7 @@ begin
     cases (le_total_order n k) with hnk hkn,
     cases hnk with d hd,
     -- why oh why does this rewrite BOTH the m * n
-    rw [hd, mul_distrib, ←add_zero (m * n), add_assoc] at hmnmk,
+    rw [hd, mul_add, ←add_zero (m * n), add_assoc] at hmnmk,
     have hdz' := add_cancel (m * n) 0 (0 + m * d) hmnmk,
     rw zero_add at hdz',
     have hdz := mul_integral _ _ hmnz (eq.symm hdz'),
@@ -374,7 +384,7 @@ begin
     -- this is basically copy-pasted (ie yanked-putted)
     cases hkn with d hd,
     -- why oh why does this rewrite BOTH the m * n
-    rw [hd, mul_distrib, ←add_zero (m * k), add_assoc] at hmnmk,
+    rw [hd, mul_add, ←add_zero (m * k), add_assoc] at hmnmk,
     have hdz' := add_cancel (m * k) (0 + m * d) 0 hmnmk,
     rw zero_add at hdz',
     have hdz := mul_integral _ _ hmnz hdz',
@@ -393,7 +403,7 @@ begin
     repeat {rw succ_mul},
     repeat {rw hd},
     existsi k_n * d + d,
-    rw mul_distrib,
+    rw mul_add,
     rw [add_assoc _ m _, ←add_assoc m _ _, add_comm m (k_n * d)],
     repeat {rw add_assoc},
 end
@@ -637,6 +647,7 @@ begin
     from hnk hkln,
 end
 
+@[trans]
 theorem dvd_trans: m ∣ n → n ∣ k → m ∣ k :=
 begin
     assume hmn hnk,
@@ -652,12 +663,22 @@ begin
     rw zero_mul,
 end
 
+theorem zero_dvd: 0 ∣ m → m=0 :=
+begin
+    assume h,
+    cases h with k hk,
+    rw mul_zero at hk,
+    from hk,
+end
+
 theorem one_dvd: 1 ∣ m :=
 begin
     existsi m,
     refl,
 end
 
+-- Allows resolving goals of form m ∣ m by writing refl
+@[refl]
 theorem dvd_refl: m ∣ m :=
 begin
     existsi (1: mynat),
@@ -748,7 +769,6 @@ begin
     rw zz at *,
     simp at hn,
     rw hn,
-    from dvd_refl _,
     rw zz at *,
     rw [zero_mul, add_comm] at hn,
     exfalso, from succ_ne_zero _ (add_integral _ _ hn),
@@ -813,6 +833,41 @@ begin
     existsi succ d,
     simp,
     from hmn hcontr,
+end
+
+theorem dvd_one: m ∣ 1 → m = 1 :=
+begin
+    assume h,
+    cases h with k hk,
+    rw mul_comm at hk,
+    have : m*k = 1,
+        symmetry, assumption,
+    have := one_unit m k this,
+        assumption,
+end
+
+theorem dvd_remainder (j : mynat):
+j ∣ m → j ∣ n → m + k = n → j ∣ k :=
+begin
+    assume hm hn heq,
+    cases hm with a ha,
+    cases hn with b hb,
+    rw [ha, hb] at heq,
+    sorry, -- Oof, case bash, or implement subtraction?
+end
+
+theorem not_dvd_succ: m ∣ succ m → m=1 :=
+begin
+    assume h,
+    cases h with a ha,
+    rw ←add_one_succ at ha,
+    rw mul_comm at ha,
+    have : m ∣ 1,
+        apply @dvd_remainder m (m*a) 1 m,
+        refl,
+        apply dvd_mul, refl,
+        assumption,
+    exact dvd_one m this,
 end
 
 theorem zero_nprime: ¬ prime 0 :=
