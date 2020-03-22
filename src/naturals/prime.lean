@@ -1,4 +1,4 @@
-import naturals.dvd
+import naturals.dvd naturals.induction
 
 namespace hidden
 
@@ -15,12 +15,18 @@ begin
   assume h0pm,
   cases h0pm,
   have h2d0 := dvd_zero 2,
+<<<<<<< HEAD
   have h2n2: 2 ≠ 2, {
     have h2eq01 := h0pm_right 2 h2d0,
     cases h2eq01,
     cases h2eq01,
     cases h2eq01,
   },
+=======
+  have h2n2: 2 ≠ 2,
+  have h2eq01 := h0pm_right 2 h2d0,
+  repeat { cases h2eq01 },
+>>>>>>> Begin to prove that every natural that's not one is divisible by a prime
   from h2n2 rfl,
 end
 
@@ -175,18 +181,62 @@ begin
   sorry, -- Is this classical?
 end
 
+-- Surely classical
+theorem em_prime:
+prime p ∨ ¬prime p := sorry
+
 -- Classical?
-theorem nprime_imp_composite:
-¬prime m → composite m :=
+theorem nprime_imp_ncomp_or_one:
+¬prime m → composite m ∨ m = 1 :=
 begin
   sorry,
 end
 
 -- Requires strong induction, and perhaps classical
+#check lt_ndvd
 theorem prime_divisor:
 m ≠ 1 → ∃ p : mynat, prime p ∧ p ∣ m :=
 begin
-  sorry,
+  assume h,
+  apply strong_induction
+    (λ m, m ≠ 1 → ∃ p : mynat, prime p ∧ p ∣ m), {
+    assume h,
+    existsi (2:mynat),
+    split, from two_prime,
+    from dvd_zero 2,
+  } , {
+    intro n,
+    assume hn hn0,
+    cases em_prime (succ n) with hp hnp, {
+      existsi succ n,
+      split, assumption, refl,
+    }, {
+      have hcomp_or_one :=
+        nprime_imp_ncomp_or_one (succ n) hnp,
+      cases hcomp_or_one with hcomp h1, {
+        cases hcomp with a h₁,
+        cases h₁ with b hab,
+        have ha₁ := hn a,
+        have hadvds : a ∣ succ n, {
+          have := hab.right.right,
+          existsi b,
+          symmetry,
+          rw mul_comm,
+          assumption,
+        },
+        have halen : a ≤ n, {
+          apply (le_iff_lt_succ a n).mpr,
+          sorry,
+        },
+        have ha₂ := ha₁ halen hab.left,
+        cases ha₂ with p hp,
+        existsi p,
+        split, from hp.left,
+        from dvd_trans p a (succ n) hp.right hadvds,
+      }, contradiction,
+    },
+  },
+  assumption,
 end
 
 -- let's work our way up to primes
