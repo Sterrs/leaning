@@ -57,6 +57,29 @@ begin
     from succ_ne_zero _ (eq.symm hd'),
 end
 
+-- this is far too long
+theorem lt_comb (a b c d: mynat): a < b → c < d → a + c < b + d :=
+begin
+    assume hab hcd,
+    assume hbdac,
+    cases (le_total_order a b),
+    cases (le_total_order c d),
+    have hacbd := le_comb a b c d h h_1,
+    have hacebd := le_anticomm _ _ hacbd hbdac,
+    cases h with x hx,
+    cases h_1 with y hy,
+    rw [hx, hy, add_assoc] at hacebd,
+    have hcxcy := add_cancel _ _ _ hacebd,
+    rw [add_comm, add_assoc, ←add_zero c] at hcxcy,
+    have hxy := add_cancel _ _ _ hcxcy,
+    have hy0 := add_integral _ _ (eq.symm hxy),
+    rw hy0 at hy,
+    rw [hy, add_zero] at hcd,
+    from hcd (le_refl c),
+    from hcd h_1,
+    from hab h,
+end
+
 theorem lt_nzero: ¬ m < 0 :=
 begin
     assume mlz,

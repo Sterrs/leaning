@@ -119,6 +119,13 @@ begin
     sorry,
 end
 
+-- let's work our way up to primes
+-- Should this be here?
+theorem even_square: 2 ∣ m * m → 2 ∣ m :=
+begin
+    sorry
+end
+
 theorem two_only_even_prime: prime m → 2 ∣ m → m = 2 :=
 begin
     assume hmpm h2dm,

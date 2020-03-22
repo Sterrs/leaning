@@ -22,6 +22,16 @@ begin
     refl,
 end
 
+theorem le_comb (a b c d: mynat): a ≤ b → c ≤ d → a + c ≤ b + d :=
+begin
+    assume hab hcd,
+    cases hab with x hx,
+    cases hcd with y hy,
+    existsi x + y,
+    rw [hx, hy, ←add_assoc, add_assoc a x c, add_comm x c],
+    repeat {rw add_assoc},
+end
+
 -- aka Horn's Lemma
 theorem succ_le_succ: m ≤ n → succ m ≤ succ n :=
 begin
@@ -187,11 +197,11 @@ begin
     from add_integral m k sum0,
 end
 
-theorem le_antisymm: m ≤ n ∧ n ≤ m → m = n :=
+theorem le_anticomm: m ≤ n → n ≤ m → m = n :=
 begin
-    assume hmnnm,
-    cases hmnnm.left with d hd,
-    cases hmnnm.right with d' hd',
+    assume hmn hnm,
+    cases hmn with d hd,
+    cases hnm with d' hd',
     have hdz: d = 0,
     have hndd: n + 0 = n + d' + d,
     rw [←hd', add_zero, hd],
