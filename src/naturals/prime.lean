@@ -15,18 +15,9 @@ begin
   assume h0pm,
   cases h0pm,
   have h2d0 := dvd_zero 2,
-<<<<<<< HEAD
-  have h2n2: 2 ≠ 2, {
-    have h2eq01 := h0pm_right 2 h2d0,
-    cases h2eq01,
-    cases h2eq01,
-    cases h2eq01,
-  },
-=======
   have h2n2: 2 ≠ 2,
   have h2eq01 := h0pm_right 2 h2d0,
   repeat { cases h2eq01 },
->>>>>>> Begin to prove that every natural that's not one is divisible by a prime
   from h2n2 rfl,
 end
 
