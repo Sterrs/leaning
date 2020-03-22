@@ -22,25 +22,25 @@ variables m n k p: mynat
 theorem fib_k_formula:
 fib (m + k + 1) = fib k * fib m + fib (k + 1) * fib (m + 1) :=
 begin
-    induction k,
-    repeat {rw zz},
-    rw [add_zero, fib_zero, zero_mul],
-    repeat {rw zero_add},
-    rw [fib_one, one_mul],
-    repeat {rw add_succ},
-    repeat {rw succ_add},
-    -- double base case required (???)
-    induction k_n,
-    repeat {rw zz},
-    repeat {rw ←one_eq_succ_zero},
-    repeat {rw add_succ},
-    repeat {rw add_zero},
-    repeat {rw fib_succsucc},
-    simp,
-    rw add_one_succ at *,
-    rw add_one_succ at *,
-    rw add_succ at *,
-    sorry
+  induction k,
+  repeat {rw zz},
+  rw [add_zero, fib_zero, zero_mul],
+  repeat {rw zero_add},
+  rw [fib_one, one_mul],
+  repeat {rw add_succ},
+  repeat {rw succ_add},
+  -- double base case required (???)
+  induction k_n,
+  repeat {rw zz},
+  repeat {rw ←one_eq_succ_zero},
+  repeat {rw add_succ},
+  repeat {rw add_zero},
+  repeat {rw fib_succsucc},
+  simp,
+  rw add_one_succ at *,
+  rw add_one_succ at *,
+  rw add_succ at *,
+  sorry
 end
 
 end hidden
