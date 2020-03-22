@@ -504,6 +504,14 @@ begin
     rw zero_mul,
 end
 
+theorem zero_dvd: 0 ∣ m → m=0 :=
+begin
+    assume h,
+    cases h with k hk,
+    rw mul_zero at hk,
+    from hk,
+end
+
 theorem one_dvd: 1 ∣ m :=
 begin
     existsi m,
