@@ -17,27 +17,33 @@ theorem strong_induction
 ∀ k: mynat, statement k :=
 begin
   intro k,
-  have h_aux: ∀ N: mynat, (∀ M: mynat, M ≤ N → statement M),
-  intro N,
-  induction N,
-  simp,
-  intro M,
-  assume hMl0,
-  have hM0 := le_zero _ hMl0,
-  rw hM0,
-  from base_case,
-  intro M,
-  assume hMlesN,
-  cases hMlesN with d hd,
-  cases d,
-  simp at hd,
-  rw ←hd,
-  from inductive_step N_n N_ih,
-  have hMleN: M ≤ N_n,
-  existsi d,
-  simp at hd,
-  from hd,
-  from N_ih M hMleN,
+  have h_aux: ∀ N: mynat, (∀ M: mynat, M ≤ N → statement M), {
+    intro N,
+    induction N, {
+      simp,
+      intro M,
+      assume hMl0,
+      have hM0 := le_zero _ hMl0,
+      rw hM0,
+      from base_case,
+    }, {
+      intro M,
+      assume hMlesN,
+      cases hMlesN with d hd,
+      cases d, {
+        simp at hd,
+        rw ←hd,
+        from inductive_step N_n N_ih,
+      }, {
+        have hMleN: M ≤ N_n, {
+          existsi d,
+          simp at hd,
+          assumption,
+        },
+        from N_ih M hMleN,
+      },
+    }
+  },
   from h_aux (succ k) k (le_to_add k 1),
 end
 
