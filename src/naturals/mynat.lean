@@ -427,6 +427,40 @@ begin
     exfalso, from hmn hnm,
 end
 
+theorem dvd_trans: m ∣ n → n ∣ k → m ∣ k :=
+begin
+    assume hmn hnk,
+    cases hmn with a ha,
+    cases hnk with b hb,
+    existsi a * b,
+    rw [hb, ha, ←mul_assoc, mul_comm b a],
+end
+
+theorem one_dvd: 1 ∣ m :=
+begin
+    existsi m,
+    refl,
+end
+
+theorem dvd_refl: m ∣ m :=
+begin
+    existsi (1: mynat),
+    rw one_mul,
+end
+
+theorem one_unit: m * n = 1 → m = 1 :=
+begin
+    sorry
+end
+
+theorem dvd_anticomm: m ∣ n → n ∣ m → m = n :=
+begin
+    assume hmn hnm,
+    cases hmn with a ha,
+    cases hnm with b hb,
+    sorry
+end
+
 -- this is pitched as a kind of long-term goal
 theorem euclids_lemma: prime p → p ∣ m * n → p ∣ m ∨ p ∣ n :=
 begin
