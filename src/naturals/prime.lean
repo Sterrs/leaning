@@ -60,6 +60,24 @@ begin
     exfalso, from succ_ne_zero _ (eq.symm y),
 end
 
+@[symm]
+theorem coprime_symm {m n : mynat} : coprime m n → coprime n m :=
+begin
+    assume h,
+    intro k,
+    assume hkn hkm,
+    exact h k hkm hkn,
+end
+
+theorem coprime_one: coprime m 1 :=
+begin
+    intro k,
+    assume _ hk,
+    from dvd_one k hk,
+end
+theorem one_coprime: coprime 1 m :=
+coprime_symm (coprime_one m)
+
 theorem coprime_succ: coprime m (succ m) :=
 begin
     intro a,
@@ -76,6 +94,8 @@ begin
         assumption,
     from dvd_one a this,
 end
+theorem succ_coprime: coprime (succ m) m :=
+coprime_symm (coprime_succ m)
 
 theorem two_only_even_prime: prime m → 2 ∣ m → m = 2 :=
 begin
