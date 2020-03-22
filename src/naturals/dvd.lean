@@ -213,7 +213,8 @@ begin
     from dvd_anticomm _ _ hm1 (one_dvd m),
 end
 
-theorem dvd_remainder (j : mynat):
+-- Reorder variables
+theorem dvd_remainder (m k n j : mynat):
 j ∣ m → j ∣ n → m + k = n → j ∣ k :=
 begin
     assume hjm hjn hmkn,
@@ -225,18 +226,32 @@ begin
     from dvd_cancel_lots _ _ _ hjn,
 end
 
-theorem not_dvd_succ: m ∣ succ m → m=1 :=
+-- Useful for e.g. infinitude of primes
+theorem dvd_succ_too: k ∣ m → k ∣ succ m → k=1 :=
+begin
+    assume hm hsucc,
+    cases hm with a ha,
+    cases hsucc with b hb,
+    rw [←add_one_succ, ha] at hb,
+    rw mul_comm a at hb,
+    rw mul_comm b at hb,
+    suffices : k ∣ 1,
+        exact dvd_one k this,
+    apply dvd_remainder (k*a) 1 (k*b) k,
+        apply dvd_mul k a k,
+        refl,
+        apply dvd_mul k b k,
+        refl,
+    assumption,
+end
+
+theorem dvd_succ: m ∣ succ m → m=1 :=
 begin
     assume h,
-    cases h with a ha,
-    rw ←add_one_succ at ha,
-    rw mul_comm at ha,
-    have : m ∣ 1,
-        apply @dvd_remainder m (m*a) 1 m,
+    have : m ∣ m, refl,
+    apply dvd_succ_too m m,
         refl,
-        apply dvd_mul, refl,
-        assumption,
-    exact dvd_one m this,
+    assumption,
 end
 
 -- let's work our way up to primes
