@@ -134,7 +134,7 @@ begin
 end
 
 -- somehow this feels like it's not using le_iff_lt_succ enough
-theorem lt_iff_le_or_eq: m ≤ n ↔ m < n ∨ m = n :=
+theorem le_iff_lt_or_eq: m ≤ n ↔ m < n ∨ m = n :=
 begin
   split,
   assume hmn,

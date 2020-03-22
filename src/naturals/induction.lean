@@ -11,7 +11,9 @@ open mynat
 theorem strong_induction
 (statement: mynat → Prop)
 (base_case: statement 0)
-(inductive_step: ∀ n: mynat, (∀ m: mynat, m ≤ n → statement m) → statement (succ n)):
+(inductive_step: ∀ n: mynat,
+                  (∀ m: mynat, m ≤ n → statement m)
+                    → statement (succ n)):
 ∀ k: mynat, statement k :=
 begin
   intro k,

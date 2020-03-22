@@ -13,7 +13,7 @@ variables m n p k : mynat
 theorem zero_le: 0 ≤ m :=
 begin
   existsi m,
-  rw zero_add,
+  simp,
 end
 
 theorem le_to_add: m ≤ m + n :=
@@ -38,7 +38,7 @@ begin
   assume hmn,
   cases hmn with k hk,
   existsi k,
-  rw [succ_add, hk],
+  simp [hk],
 end
 
 theorem le_add: m ≤ n → m + k ≤ n + k :=
@@ -63,74 +63,71 @@ end
 
 theorem le_total_order: m ≤ n ∨ n ≤ m :=
 begin
-  induction n,
-  repeat {rw zz},
-  right,
-  from zero_le m,
-  cases n_ih,
-  cases n_ih with k hk,
-  left,
-  existsi succ k,
-  rw [add_succ, hk],
-  cases n_ih with k hk,
-  cases k,
-  left,
-  existsi succ 0,
-  rw hk,
-  rw add_succ,
-  refl,
-  right,
-  existsi k,
-  rw [hk, succ_add, add_succ],
+  induction n, {
+    repeat {rw zz},
+    right,
+    from zero_le m,
+  }, {
+    cases n_ih with hmn hnm, {
+      cases hmn with k hk,
+      left,
+      existsi succ k,
+      rw [add_succ, hk],
+    }, {
+      cases hnm with k hk,
+      cases k, {
+        left,
+        existsi (1: mynat),
+        simp [hk],
+      }, {
+        right,
+        existsi k,
+        simp [hk],
+      },
+    }
+  },
 end
 
 -- the infamous theorem, proved intuitively via total ordering
 -- can this be made wlog?
 theorem mul_cancel: m ≠ 0 → m * n = m * k → n = k :=
 begin
-  assume hmnz,
-  assume hmnmk,
-  cases (le_total_order n k) with hnk hkn,
-  cases hnk with d hd,
-  -- why oh why does this rewrite BOTH the m * n
-  rw [hd, mul_add, ←add_zero (m * n), add_assoc] at hmnmk,
-  have hdz' := add_cancel (m * n) 0 (0 + m * d) hmnmk,
-  rw zero_add at hdz',
-  have hdz := mul_integral _ _ hmnz (eq.symm hdz'),
-  rw [hd, hdz, add_zero],
-  -- this is basically copy-pasted (ie yanked-putted)
-  cases hkn with d hd,
-  -- why oh why does this rewrite BOTH the m * n
-  rw [hd, mul_add, ←add_zero (m * k), add_assoc] at hmnmk,
-  have hdz' := add_cancel (m * k) (0 + m * d) 0 hmnmk,
-  rw zero_add at hdz',
-  have hdz := mul_integral _ _ hmnz hdz',
-  rw [hd, hdz, add_zero],
+  assume hmnz hmnmk,
+  cases (le_total_order n k) with hnk hkn, {
+    cases hnk with d hd,
+    rw [hd, mul_add] at hmnmk,
+    have hdz' := add_cancel_to_zero _ _ hmnmk,
+    have hdz := mul_integral _ _ hmnz hdz',
+    simp [hd, hdz],
+  }, {
+    -- this is basically copy-pasted (ie yank-putted)
+    cases hkn with d hd,
+    rw [hd, mul_add] at hmnmk,
+    have hdz' := add_cancel_to_zero _ _ (eq.symm hmnmk),
+    have hdz := mul_integral _ _ hmnz hdz',
+    simp [hd, hdz],
+  },
 end
 
 theorem mul_cancel_to_one: m ≠ 0 → m = m * k → k = 1 :=
 begin
-  assume h0 h,
-  rw [←mul_one m, mul_assoc, one_mul] at h,
-  rw mul_cancel m 1 k,
-  repeat {assumption},
+  assume hmn0 hmmk,
+  rw [←mul_one m, mul_assoc, one_mul] at hmmk,
+  rw mul_cancel m 1 k hmn0,
+  assumption,
 end
 
 theorem le_mul: m ≤ n → k * m ≤ k * n :=
 begin
   assume hmn,
   cases hmn with d hd,
-  induction k,
-  repeat {rw zz},
-  existsi (0: mynat),
-  repeat {rw zero_mul},
-  refl,
-  repeat {rw succ_mul},
-  repeat {rw hd},
-  existsi k_n * d + d,
-  rw mul_add,
-  rw [add_assoc _ m _, ←add_assoc m _ _, add_comm m (k_n * d)],
-  repeat {rw add_assoc},
+  induction k, {
+    existsi (0: mynat),
+    simp,
+  }, {
+    existsi k_n * d + d,
+    simp [hd],
+  },
 end
 
 theorem le_trans: m ≤ n → n ≤ k → m ≤ k :=
@@ -161,7 +158,7 @@ begin
   cases hsmsn with d hd,
   existsi d,
   simp at hd,
-  from hd,
+  assumption,
 end
 
 theorem le_cancel_strong: m + k ≤ n → m ≤ n :=
@@ -169,8 +166,7 @@ begin
   assume hmkn,
   cases hmkn with d hd,
   existsi k + d,
-  rw hd,
-  rw add_assoc,
+  rw [hd, add_assoc],
 end
 
 theorem le_add_rhs: m ≤ n → m ≤ n + k :=
@@ -178,23 +174,24 @@ begin
   assume hmn,
   apply le_cancel_strong _ _ k,
   apply le_add _ _ k,
-  cc,
+  assumption,
 end
 
 theorem le_one: m ≤ 1 → m = 0 ∨ m = 1 :=
 begin
   assume h,
   cases h with k hk,
-  cases k,
+  cases k, {
+    right,
     simp at hk,
-    right, symmetry,
+    symmetry,
     assumption,
-  -- Have to manually show 1 = m + succ k → 1 = 1 + (m + k)
-  rw [←add_one_succ, ←add_assoc] at hk,
-  rw add_comm at hk,
-  have sum0 := (add_cancel_to_zero 1 (m + k)) hk,
-  left,
-  from add_integral m k sum0,
+  }, {
+    left,
+    simp at hk,
+    have hmk0 := succ_inj _ _ hk,
+    from add_integral _ _ (eq.symm hmk0),
+  },
 end
 
 theorem le_antisymm: m ≤ n → n ≤ m → m = n :=
@@ -202,15 +199,12 @@ begin
   assume hmn hnm,
   cases hmn with d hd,
   cases hnm with d' hd',
-  have hdz: d = 0,
-  have hndd: n + 0 = n + d' + d,
-  rw [←hd', add_zero, hd],
-  apply add_integral _ d',
-  apply eq.symm,
-  rw add_comm,
-  rw add_assoc at hndd,
-  from add_cancel n _ _ hndd,
-  rw [hd, hdz, add_zero],
+  have hdz: d = 0, {
+    rw [hd', add_assoc, add_comm _ d] at hd,
+    have hzdd := add_cancel_to_zero _ _ hd,
+    from add_integral _ _ hzdd,
+  },
+  simp [hd, hdz],
 end
 
 end hidden
