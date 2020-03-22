@@ -2,6 +2,7 @@
 
 -- TODO:
 -- shorten things using other better tactics
+-- work through the sporadic confused comments
 -- implement more theorems about more sophisticated arithmetic (divisibility?)
 -- endgame: perhaps some of the N&S course, maybe an example sheet question?
 
@@ -53,17 +54,32 @@ instance: has_dvd mynat := ⟨divides⟩
 -- take care that you must use "\mid"
 def even (m: mynat) := 2 ∣ m
 def prime (m: mynat) := m ≠ 1 ∧ ∀ k: mynat, k ∣ m → k = 1 ∨ k = m
+-- gosh, how do you define gcd?
+-- you can kind of define it using Euclid's algorithm and total ordering of ≤
+/- def gcd: mynat → mynat → mynat
+| m 0 := m
+| m n := if m ≤ n then gcd m (n - m)
+ -/
+
+-- it's kind of crazy that Lean just automatically proves this is well-defined
+-- (try changing fib succ to fib succ succ)
+def fib: mynat → mynat
+| 0 := 0
+| 1 := 1
+| (succ (succ n)) := fib n + fib (succ n)
 
 variables m n k p: mynat
 
-theorem add_zero: m + 0 = m := rfl
+-- I'm simping liberally for future reasons
+@[simp] theorem add_zero: m + 0 = m := rfl
 
-theorem add_succ: m + succ n = succ (m + n) := rfl
+@[simp] theorem add_succ: m + succ n = succ (m + n) := rfl
 
 -- so for some reason all the old code breaks with the new operator instances,
 -- so I have to go and replace zero with 0 wherever I used induction. How fix???
-theorem zz: zero = 0 := rfl
+@[simp] theorem zz: zero = 0 := rfl
 
+@[simp]
 theorem zero_add: 0 + m = m :=
 begin
     induction m,
@@ -72,6 +88,7 @@ begin
     rw [add_succ, m_ih],
 end
 
+@[simp]
 theorem succ_add: succ m + n = succ (m + n) :=
 begin
     induction n,
@@ -80,6 +97,7 @@ begin
     rw n_ih,
 end
 
+@[simp]
 theorem add_assoc: (m + n) + k = m + (n + k) :=
 begin
     induction k,
@@ -88,6 +106,7 @@ begin
     rw k_ih,
 end
 
+@[simp]
 theorem add_comm: m + n = n + m :=
 begin
     induction n,
@@ -96,15 +115,21 @@ begin
     rw [add_succ, succ_add, n_ih],
 end
 
+@[simp] theorem add_one_succ: m + 1 = succ m := rfl
+
 theorem succ_inj: succ m = succ n → m = n :=
 begin
     assume hmn,
     -- jeez this is some magic inductive type stuff
+    -- it seems that given a hypothesis of the form
+    -- cons₁ x = cons₂ y,
+    -- cases can use injectivity to check possible values of x, y
     cases hmn,
     refl,
 end
 
-theorem one_eq_succ_zero: 1 = succ 0 := rfl
+@[simp]
+theorem one_eq_succ_zero: succ 0 = 1 := rfl
 
 theorem add_cancel: m + n = m + k → n = k :=
 begin
@@ -140,12 +165,13 @@ begin
     from succ_ne_zero _ hsmnz,
 end
 
-theorem mul_zero: m * 0 = 0 := rfl
+@[simp] theorem mul_zero: m * 0 = 0 := rfl
 
-theorem mul_succ: m * (succ n) = m + (m * n) := rfl
+@[simp] theorem mul_succ: m * (succ n) = m + (m * n) := rfl
 
-theorem mul_one: m * 1 = m := rfl
+@[simp] theorem mul_one: m * 1 = m := rfl
 
+@[simp]
 theorem zero_mul: 0 * m = 0 :=
 begin
     induction m,
@@ -153,6 +179,7 @@ begin
     rw [mul_succ, m_ih, add_zero],
 end
 
+@[simp]
 theorem one_mul: 1 * m = m :=
 begin
     induction m,
@@ -164,6 +191,7 @@ begin
              ... = succ m_n       : by rw zero_add,
 end
 
+@[simp]
 theorem succ_mul: (succ m) * n = m * n + n :=
 begin
     induction n,
@@ -173,6 +201,7 @@ begin
     rw [add_succ, succ_add, add_assoc],
 end
 
+@[simp]
 theorem mul_distrib: m * (n + k) = m * n + m * k :=
 begin
     induction m,
@@ -187,6 +216,7 @@ begin
     rw add_assoc,
 end
 
+@[simp]
 theorem mul_assoc: (m * n) * k = m * (n * k) :=
 begin
     induction k,
@@ -196,6 +226,7 @@ begin
     rw k_ih,
 end
 
+@[simp]
 theorem mul_comm: m * n = n * m :=
 begin
     induction n,
@@ -215,9 +246,9 @@ begin
 end
 
 -- do I really have to spell out mynat like this? yuck
-theorem pow_zero: m ^ (0: mynat) = 1 := rfl
+@[simp] theorem pow_zero: m ^ (0: mynat) = 1 := rfl
 
-theorem pow_succ: m ^ (succ n) = m * (m ^ n) := rfl
+@[simp] theorem pow_succ: m ^ (succ n) = m * (m ^ n) := rfl
 
 theorem zero_pow: m ≠ 0 → (0: mynat) ^ m = 0 :=
 begin
@@ -227,6 +258,7 @@ begin
     rw [pow_succ, zero_mul],
 end
 
+@[simp]
 theorem pow_add: m ^ (n + k) = (m ^ n) * (m ^ k) :=
 begin
     induction k,
@@ -237,6 +269,7 @@ begin
     rw mul_assoc,
 end
 
+@[simp]
 theorem pow_mul: (m ^ n) ^ k = m ^ (n * k) :=
 begin
     induction k,
@@ -244,6 +277,7 @@ begin
     rw [pow_succ, mul_succ, pow_add, k_ih],
 end
 
+@[simp]
 theorem mul_pow: (m * n) ^ k = m ^ k * n ^ k :=
 begin
     induction k,
@@ -423,10 +457,36 @@ end
 theorem lt_impl_le: m < n → m ≤ n :=
 begin
     assume hmn,
-    apply or.elim (le_total_order m n),
-    assume hmltn, from hmltn,
-    assume hnm,
+    cases (le_total_order m n) with hmltn hnm,
+    from hmltn,
     exfalso, from hmn hnm,
+end
+
+theorem le_iff_lt_succ: m ≤ n ↔ m < succ n :=
+begin
+    split,
+    assume hmn,
+    cases hmn with d hd,
+    rw hd,
+    assume hmsd,
+    cases hmsd with d' hd',
+    rw [succ_add, add_assoc, ← add_succ, ← add_zero m, add_assoc] at hd',
+    have hzsucc := add_cancel _ _ _ hd',
+    rw zero_add at hzsucc,
+    from succ_ne_zero _ (eq.symm hzsucc),
+    assume hmsn,
+    -- this total ordering theorem is crazy powerful. It feels like you need
+    -- classical logic until you remember it exists
+    cases (le_total_order m n) with hmn hnm,
+    from hmn,
+    cases hnm with d hd,
+    cases d,
+    rw [hd, zz, add_zero],
+    from le_refl n,
+    have hsnm: succ n ≤ m,
+    existsi d,
+    rw [hd, add_succ, succ_add],
+    exfalso, from hmsn hsnm,
 end
 
 theorem dvd_trans: m ∣ n → n ∣ k → m ∣ k :=
@@ -436,6 +496,12 @@ begin
     cases hnk with b hb,
     existsi a * b,
     rw [hb, ha, ←mul_assoc, mul_comm b a],
+end
+
+theorem dvd_zero: m ∣ 0 :=
+begin
+    existsi (0: mynat),
+    rw zero_mul,
 end
 
 theorem one_dvd: 1 ∣ m :=
@@ -479,7 +545,7 @@ begin
     repeat {rw succ_mul},
     repeat {rw mul_succ},
     repeat {rw add_succ},
-    rw one_eq_succ_zero,
+    rw ←one_eq_succ_zero,
     assume hssssssss,
     exfalso, from succ_ne_zero _ (succ_inj _ _ hssssssss),
 end
@@ -506,6 +572,113 @@ begin
     rw [ha, ha1, one_mul],
 end
 
+theorem div_mul: k ∣ m → k ∣ m * n :=
+begin
+    assume hkm,
+    cases hkm with a ha,
+    existsi a * n,
+    rw ha,
+    repeat {rw mul_assoc},
+    rw mul_comm k n,
+end
+
+theorem zero_nprime: ¬ prime 0 :=
+begin
+    assume h0pm,
+    cases h0pm,
+    have h2d0 := dvd_zero 2,
+    have h2n2: 2 ≠ 2,
+    have h2eq01 := h0pm_right 2 h2d0,
+    cases h2eq01,
+    cases h2eq01,
+    cases h2eq01,
+    from h2n2 rfl,
+end
+
+theorem one_nprime: ¬ prime 1 :=
+begin
+    assume h1pm,
+    cases h1pm,
+    from h1pm_left rfl,
+end
+
+-- prove 2 is prime by a massive case-bash
+-- frankly this was just proved by going into a tactics red mist
+theorem two_prime: prime 2 :=
+begin
+    split,
+    assume h21,
+    cases h21,
+    intro k,
+    assume hk2,
+    cases hk2 with n hn,
+    cases k,
+    rw [zz, mul_zero] at hn,
+    cases hn,
+    cases k,
+    simp,
+    repeat {rw mul_succ at hn},
+    cases n,
+    rw zz at *,
+    simp at hn,
+    cases hn,
+    simp at hn,
+    cases n,
+    simp at hn,
+    cc,
+    have x := succ_inj _ _ hn,
+    simp at x,
+    have y := succ_inj _ _ x,
+    rw zz at y,
+    exfalso, from succ_ne_zero _ (eq.symm y),
+end
+
+theorem two_only_even_prime: prime m → 2 ∣ m → m = 2 :=
+begin
+    assume hmpm h2dm,
+    cases h2dm with n hn,
+    cases m,
+    rw zz at *,
+    exfalso, from zero_nprime hmpm,
+    sorry
+end
+
+-- let's work our way up to primes
+theorem even_square: 2 ∣ m * m → 2 ∣ m :=
+begin
+    sorry
+end
+
+-- what is the general tactical way to say to lean "just evaluate this constant
+-- sub-expression please"?
+@[simp] theorem fib_zero: fib 0 = 0 := rfl
+@[simp] theorem fib_one: fib 1 = 1 := rfl
+@[simp] theorem fib_succsucc: fib (succ (succ n)) = fib (n) + fib(succ n) := rfl
+
+theorem fib_k_formula:
+fib (m + k + 1) = fib k * fib m + fib (k + 1) * fib (m + 1) :=
+begin
+    induction k,
+    repeat {rw zz},
+    rw [add_zero, fib_zero, zero_mul],
+    repeat {rw zero_add},
+    rw [fib_one, one_mul],
+    repeat {rw add_succ},
+    repeat {rw succ_add},
+    -- double base case required (???)
+    induction k_n,
+    repeat {rw zz},
+    repeat {rw ←one_eq_succ_zero},
+    repeat {rw add_succ},
+    repeat {rw add_zero},
+    repeat {rw fib_succsucc},
+    simp,
+    rw add_one_succ at *,
+    rw add_one_succ at *,
+    rw add_succ at *,
+    sorry
+end
+
 -- this is pitched as a kind of long-term goal
 theorem euclids_lemma: prime p → p ∣ m * n → p ∣ m ∨ p ∣ n :=
 begin
@@ -516,7 +689,7 @@ end
 theorem sqrt_2_irrational: n ≠ 0 → ¬m * m = n * n + n * n :=
 begin
     assume hmnz hsq2q,
-    have h2divrhs: 2 ∣ n * n + n * n,
+    have h2dvdrhs: 2 ∣ n * n + n * n,
     existsi n * n,
     -- wow refl is OP
     refl,
