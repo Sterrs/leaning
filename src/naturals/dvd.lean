@@ -91,7 +91,7 @@ begin
     exfalso, from succ_ne_zero _ (succ_inj _ _ hssssssss),
 end
 
-theorem dvd_anticomm: m ∣ n → n ∣ m → m = n :=
+theorem dvd_antisymm: m ∣ n → n ∣ m → m = n :=
 begin
     assume hmn hnm,
     cases hmn with a ha,
@@ -210,7 +210,7 @@ end
 theorem dvd_one: m ∣ 1 → m = 1 :=
 begin
     assume hm1,
-    from dvd_anticomm _ _ hm1 (one_dvd m),
+    from dvd_antisymm _ _ hm1 (one_dvd m),
 end
 
 -- Reorder variables

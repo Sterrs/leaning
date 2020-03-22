@@ -65,7 +65,7 @@ begin
     cases (le_total_order a b),
     cases (le_total_order c d),
     have hacbd := le_comb a b c d h h_1,
-    have hacebd := le_anticomm _ _ hacbd hbdac,
+    have hacebd := le_antisymm _ _ hacbd hbdac,
     cases h with x hx,
     cases h_1 with y hy,
     rw [hx, hy, add_assoc] at hacebd,

@@ -197,7 +197,7 @@ begin
     from add_integral m k sum0,
 end
 
-theorem le_anticomm: m ≤ n → n ≤ m → m = n :=
+theorem le_antisymm: m ≤ n → n ≤ m → m = n :=
 begin
     assume hmn hnm,
     cases hmn with d hd,
