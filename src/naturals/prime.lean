@@ -97,6 +97,13 @@ end
 theorem succ_coprime: coprime (succ m) m :=
 coprime_symm (coprime_succ m)
 
+-- Requires strong induction
+theorem prime_divisor:
+m ≠ 1 → ∃ p : mynat, prime p ∧ p ∣ m :=
+begin
+    sorry,
+end
+
 theorem two_only_even_prime: prime m → 2 ∣ m → m = 2 :=
 begin
     assume hmpm h2dm,
