@@ -254,11 +254,4 @@ begin
     assumption,
 end
 
--- let's work our way up to primes
--- Should this be here?
-theorem even_square: 2 ∣ m * m → 2 ∣ m :=
-begin
-    sorry
-end
-
 end hidden

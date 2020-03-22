@@ -3,6 +3,7 @@
 -- TODO:
 -- shorten things using other better tactics
 -- work through the sporadic confused comments
+-- clean everything up a bit, re naming and formatting
 -- tidy up the order
 -- try to re-use theorems more
 -- implement more theorems about more sophisticated arithmetic
