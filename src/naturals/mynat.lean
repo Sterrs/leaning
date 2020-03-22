@@ -57,7 +57,8 @@ instance: has_dvd mynat := ⟨divides⟩
 -- take care that you must use "\mid"
 def even (m: mynat) := 2 ∣ m
 def prime (m: mynat) := m ≠ 1 ∧ ∀ k: mynat, k ∣ m → k = 1 ∨ k = m
-def coprime (m n : mynat) := ∀ k: mynat, (k ∣ m ∧ k ∣ n) → k = 1
+def square (m : mynat) := ∃ k : mynat, m = k*k
+def coprime (m n : mynat) := ∀ k: mynat, k ∣ m → k ∣ n → k = 1
 -- gosh, how do you define gcd?
 -- you can kind of define it using Euclid's algorithm and total ordering of ≤
 /- def gcd: mynat → mynat → mynat
@@ -923,6 +924,23 @@ begin
     exfalso, from succ_ne_zero _ (eq.symm y),
 end
 
+theorem coprime_succ: coprime m (succ m) :=
+begin
+    intro a,
+    assume hm hsucc,
+    cases hm with b hb,
+    cases hsucc with c hc,
+    rw [←add_one_succ, hb] at hc,
+    have : a ∣ 1,
+        apply @div_remainder (b*a) (c*a) 1 a,
+        rw mul_comm,
+        apply div_mul, refl,
+        rw mul_comm,
+        apply div_mul, refl,
+        assumption,
+    from div_one a this,
+end
+
 theorem two_only_even_prime: prime m → 2 ∣ m → m = 2 :=
 begin
     assume hmpm h2dm,
@@ -930,7 +948,7 @@ begin
     cases m,
     rw zz at *,
     exfalso, from zero_nprime hmpm,
-    sorry
+    sorry,
 end
 
 -- let's work our way up to primes
