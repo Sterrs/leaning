@@ -849,11 +849,13 @@ end
 theorem dvd_remainder (j : mynat):
 j ∣ m → j ∣ n → m + k = n → j ∣ k :=
 begin
-    assume hm hn heq,
-    cases hm with a ha,
-    cases hn with b hb,
-    rw [ha, hb] at heq,
-    sorry, -- Oof, case bash, or implement subtraction?
+    assume hjm hjn hmkn,
+    rw ←hmkn at hjn,
+    cases hjm with a ha,
+    rw ha at hjn,
+    rw add_comm at hjn,
+    rw mul_comm at hjn,
+    from dvd_cancel_lots _ _ _ hjn,
 end
 
 theorem not_dvd_succ: m ∣ succ m → m=1 :=
