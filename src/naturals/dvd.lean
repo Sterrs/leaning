@@ -207,6 +207,27 @@ begin
   from hmn hcontr,
 end
 
+theorem dvd_lt: n ≠ 0 → m ∣ n → m ≤ n :=
+begin
+  assume hnn0 hmdvdn,
+  cases (le_total_order m n),
+  assumption,
+  cases hmdvdn with k hk,
+  cases h with a ha,
+  rw ha at hk,
+  cases a,
+  existsi (0: mynat),
+  simp [ha],
+  simp at hk,
+  cases k,
+  simp at hk,
+  contradiction,
+  simp at hk,
+  rw [←add_assoc, add_comm k n, add_assoc, ←add_succ] at hk,
+  exfalso,
+  from succ_ne_zero _ (add_cancel_to_zero _ _ hk),
+end
+
 theorem dvd_one: m ∣ 1 → m = 1 :=
 begin
   assume hm1,

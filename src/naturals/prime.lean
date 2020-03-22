@@ -183,8 +183,7 @@ begin
   sorry,
 end
 
--- Requires strong induction, and perhaps classical
-#check lt_ndvd
+-- Requires strong induction
 theorem prime_divisor:
 m ≠ 1 → ∃ p : mynat, prime p ∧ p ∣ m :=
 begin
@@ -217,7 +216,27 @@ begin
         },
         have halen : a ≤ n, {
           apply (le_iff_lt_succ a n).mpr,
-          sorry,
+          have hasn := dvd_lt _ _ (succ_ne_zero _) hadvds,
+          have hansn: a ≠ succ n, {
+            -- the oldest trick in the book: just wear it down by cases
+            assume hasn,
+            have habsn := hab.right.right,
+            simp [hasn] at habsn,
+            cases b,
+            simp at habsn,
+            from succ_ne_zero _ (eq.symm habsn),
+            cases b,
+            simp at hab,
+            assumption,
+            simp at habsn,
+            rw [←add_assoc, add_comm b n, add_assoc, ←add_succ] at habsn,
+            have hcontr := add_cancel_to_zero _ _ (eq.symm habsn),
+            from succ_ne_zero _ hcontr,
+          },
+          rw le_iff_lt_or_eq _ _ at hasn,
+          cases hasn,
+          assumption,
+          contradiction,
         },
         have ha₂ := ha₁ halen hab.left,
         cases ha₂ with p hp,
