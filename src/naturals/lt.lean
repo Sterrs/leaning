@@ -180,11 +180,11 @@ end
 theorem lt_strict_order: m = n ∨ m < n ∨ n < m :=
 begin
   cases (le_total_order m n),
-  rw lt_iff_le_or_eq _ _ at h,
+  rw le_iff_lt_or_eq _ _ at h,
   cases h,
   cc,
   cc,
-  rw lt_iff_le_or_eq _ _ at h,
+  rw le_iff_lt_or_eq _ _ at h,
   cases h,
   cc,
   cc,
