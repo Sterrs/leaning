@@ -163,6 +163,22 @@ begin
     cc,
 end
 
+theorem le_one: m ≤ 1 → m = 0 ∨ m = 1 :=
+begin
+    assume h,
+    cases h with k hk,
+    cases k,
+        simp at hk,
+        right, symmetry,
+        assumption,
+    -- Have to manually show 1 = m + succ k → 1 = 1 + (m + k)
+    rw [←add_one_succ, ←add_assoc] at hk,
+    rw add_comm at hk,
+    have sum0 := (add_cancel_to_zero 1 (m+k)) hk,
+    left,
+    from add_integral m k sum0,
+end
+
 theorem le_anticomm: m ≤ n ∧ n ≤ m → m = n :=
 begin
     assume hmnnm,

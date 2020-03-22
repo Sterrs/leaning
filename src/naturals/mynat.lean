@@ -119,6 +119,14 @@ begin
     assume hmnmk,
     from m_ih (succ_inj _ _ hmnmk),
 end
+-- In the case where nothing is being added on LHS
+-- This is a bad way to do it
+theorem add_cancel_to_zero: m = m + k → k = 0 :=
+begin
+    assume h,
+    rw [←add_zero m, add_assoc, zero_add] at h,
+    rw add_cancel m 0 k, assumption,
+end
 
 -- no idea
 theorem succ_ne_zero: succ m ≠ 0 :=

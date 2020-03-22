@@ -68,7 +68,7 @@ begin
     cases hsucc with c hc,
     rw [←add_one_succ, hb] at hc,
     have : a ∣ 1,
-        apply @dvd_remainder (b*a) (c*a) 1 a,
+        apply dvd_remainder (b*a) 1 (c*a) a,
         rw mul_comm,
         apply dvd_mul, refl,
         rw mul_comm,
