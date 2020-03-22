@@ -6,7 +6,7 @@
 -- endgame: perhaps some of the N&S course, maybe an example sheet question?
 
 -- also, I haven't opened classical! Is it really true that none of this
--- requires classical?
+-- requires classical? Let's see how long we can keep it up for
 
 -- stops name conflicts
 namespace hidden
@@ -103,6 +103,8 @@ begin
     cases hmn,
     refl,
 end
+
+theorem one_eq_succ_zero: 1 = succ 0 := rfl
 
 theorem add_cancel: m + n = m + k → n = k :=
 begin
@@ -448,9 +450,38 @@ begin
     rw one_mul,
 end
 
+-- basically just a massive case bash to show that m and n can't be 0 or succ
+-- succ of something
 theorem one_unit: m * n = 1 → m = 1 :=
 begin
-    sorry
+    cases m,
+    repeat {rw zz},
+    rw zero_mul,
+    assume h01,
+    from h01,
+    cases n,
+    repeat {rw zz},
+    rw [succ_mul, mul_zero, add_zero],
+    assume h01,
+    cases h01,
+    cases m,
+    repeat {rw zz},
+    rw [mul_succ, succ_mul, zero_mul, zero_add],
+    assume _,
+    refl,
+    cases n,
+    repeat {rw zz},
+    rw [mul_succ, succ_mul, succ_mul, mul_zero],
+    repeat {rw add_zero},
+    assume hssm, from hssm,
+    -- this is the most contradictory thing I've ever seen in my life. surely
+    -- there's a less overkill way
+    repeat {rw succ_mul},
+    repeat {rw mul_succ},
+    repeat {rw add_succ},
+    rw one_eq_succ_zero,
+    assume hssssssss,
+    exfalso, from succ_ne_zero _ (succ_inj _ _ hssssssss),
 end
 
 theorem dvd_anticomm: m ∣ n → n ∣ m → m = n :=
@@ -458,7 +489,21 @@ begin
     assume hmn hnm,
     cases hmn with a ha,
     cases hnm with b hb,
-    sorry
+    cases n,
+    rw hb,
+    refl,
+    have hab1: a * b = 1,
+    rw hb at ha,
+    rw ← mul_assoc at ha,
+    -- arghh
+    rw ← mul_one (succ n) at ha,
+    rw mul_comm (a * b) _ at ha,
+    rw mul_assoc at ha,
+    have hab := mul_cancel _ _ _ (succ_ne_zero n) ha,
+    rw one_mul at hab,
+    from eq.symm hab,
+    have ha1 := one_unit _ _ hab1,
+    rw [ha, ha1, one_mul],
 end
 
 -- this is pitched as a kind of long-term goal
