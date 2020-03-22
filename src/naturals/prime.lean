@@ -133,7 +133,19 @@ begin
     cases m,
     rw zz at *,
     exfalso, from zero_nprime hmpm,
-    sorry,
+    have hndvds : n ∣ succ m,
+        rw hn,
+        apply dvd_mul, refl,
+    cases hmpm with hsneq1 hdiv,
+    have h₂ := hdiv n hndvds,
+    cases h₂,
+        rw [h₂, one_mul] at hn,
+        assumption,
+    exfalso,
+    rw h₂ at hn,
+    have hcancel :=
+      mul_cancel_to_one (succ m) 2 (succ_ne_zero m),
+    cases hcancel hn,
 end
 
 -- this is pitched as a kind of long-term goal
