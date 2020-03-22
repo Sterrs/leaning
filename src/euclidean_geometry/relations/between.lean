@@ -1,4 +1,8 @@
-import .basic .incidence .existence
+import ..basic ..existence
+
+-- Ternary relation for points
+axiom between (A B C : point) :  Prop
+notation A `∗` B `∗` C := between A B C
 
 -- AXIOMS
 
@@ -23,7 +27,6 @@ axiom point_between {A C : point} (h : A ≠ C) :
 -- C is not between A and B
 axiom unique_order {A B C : point} :
 (A∗B∗C) → ¬ (B∗A∗C) ∧ ¬ (A∗C∗B)
-
 
 -- THEOREMS
 
@@ -57,6 +60,7 @@ theorem between_non_refl13 {A B : point} :
 begin
   assume h,
   suffices : ∀ (ℓ : line), A ⊏ ℓ → B ⊏ ℓ,
+    -- Here point_eq is a very difficult thm to prove
     have heq := point_eq.mpr this,
     rw heq at h,
     exact between_non_refl12 h,

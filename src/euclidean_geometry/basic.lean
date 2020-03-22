@@ -1,13 +1,10 @@
+noncomputable theory
+
 -- A point is a basic object
 axiom point : Type
 
 -- Basic definitions & axioms
 -- See https://en.wikipedia.org/wiki/Hilbert's_axioms
--- TODO: Document the axioms properly in LaTeX
-
--- Ternary relation for points
-axiom between (A B C : point) :  Prop
-notation A `∗` B `∗` C := between A B C
 
 -- A line is a basic object
 axiom line : Type
@@ -20,20 +17,49 @@ infix `⊏`:50 := lies_on
 -- both lie on.
 axiom line_containing {A B : point} (distinct : A ≠ B) :
 ∃ (ℓ : line), A ⊏ ℓ ∧ B ⊏ ℓ
+-- The line between any two points is unique
+axiom line_unique {A B : point} {ℓ₁ ℓ₂ : line}:
+(A ⊏ ℓ₁ ∧ A ⊏ ℓ₂ ∧ B ⊏ ℓ₁ ∧ B ⊏ ℓ₂)
+→ (ℓ₁ = ℓ₂) ∨ (A = B)
 
--- Two lines are equal iff they share every point
-axiom line_eq {ℓ₁ ℓ₂ : line} :
-ℓ₁ = ℓ₂ ↔
-∀ (X : point) (h : X ⊏ ℓ₁), X ⊏ ℓ₂
+-- Use line_unique and distinctness of points
+-- to prove two lines are equal
+theorem lines_equal {A B : point} {ℓ₁ ℓ₂ : line}
+(distinct : A ≠ B)
+(h : A ⊏ ℓ₁ ∧ A ⊏ ℓ₂ ∧ B ⊏ ℓ₁ ∧ B ⊏ ℓ₂) :
+ℓ₁ = ℓ₂ :=
+begin
+  have := line_unique h,
+  cases this with hleq hpeq,
+    assumption,
+  contradiction,
+end
 
--- Angle
--- Lines need not be different
-structure angle := (ℓ₁ ℓ₂ : line)
+open classical
 
--- Line segment
-structure segment := (P₁ P₂ : point)
+section
+variables {A B : point} (distinct : A≠B)
+include A B distinct
+noncomputable def line_through : line :=
+some (line_containing distinct)
 
--- You lie on a segment iff you are between the endpoints
-def lies_on_seg (A : point) (s : segment) : Prop :=
-s.P₁∗A∗s.P₂
-infix `⊏`:50 := lies_on_seg
+theorem on_line_through1 :
+A⊏(line_through distinct)  :=
+begin
+  unfold line_through,
+  have he := some_spec (line_containing distinct),
+  exact he.left,
+end
+
+theorem on_line_through2 :
+B⊏(line_through distinct)  :=
+begin
+  unfold line_through,
+  have he := some_spec (line_containing distinct),
+  exact he.right,
+end
+end
+
+-- There exist two points on a line
+axiom two_points (ℓ : line) :
+∃ (X Y : point), X ≠ Y ∧ X ⊏ ℓ ∧ Y ⊏ ℓ

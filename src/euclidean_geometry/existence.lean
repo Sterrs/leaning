@@ -1,4 +1,4 @@
-import .basic .incidence
+import .relations.collinear
 
 -- Proving the existence of certain things
 open classical
@@ -38,8 +38,14 @@ end
 -- (h₁ : A ⊏ ℓ) (h₂ : ¬ (B ⊏ ℓ)) :
 -- A ≠ B := sorry
 
-theorem noncoll_imp_neq {A B C : point} (h : ¬ collinear A B C)
-: A ≠ C :=
+-- If three points are noncollinear then they are not equal
+section
+variables {A B C : point}
+(h : ¬collinear A B C)
+
+include A B C h
+
+theorem ncoll_imp_neq13 : A ≠ C :=
 begin
   assume h₁,
   rw h₁ at h,
@@ -55,37 +61,19 @@ begin
   existsi ℓ,
   exact ⟨hℓ.right, ⟨hℓ.left, hℓ.right⟩⟩,
 end
-
--- A useful property of collinear points
-@[simp]
-lemma collinear_trans {A B X Y Z : point}
-(distinct : A ≠ B) :
-collinear A B X → collinear A B Y → collinear A B Z
-→ collinear X Y Z :=
+-- And symmetrically:
+theorem ncoll_imp_neq12 : A ≠ B :=
 begin
-  cases line_containing distinct with ℓ hℓ,
-  assume hX hY hZ,
-  existsi ℓ,
-  -- TODO: So much repetition!
-  cases hX with ℓX hℓX,
-  cases hY with ℓY hℓY,
-  cases hZ with ℓZ hℓZ,
-  have h₁ : ℓX = ℓ,
-    have : A⊏ℓ ∧ A⊏ℓX ∧ B⊏ℓ ∧ B⊏ℓX,
-      cc,
-    have := line_unique this,
-    cc,
-  have h₂ : ℓY = ℓ,
-    have : A⊏ℓ ∧ A⊏ℓY ∧ B⊏ℓ ∧ B⊏ℓY,
-      cc,
-    have := line_unique this,
-    cc,
-  have h₃ : ℓZ = ℓ,
-    have : A⊏ℓ ∧ A⊏ℓZ ∧ B⊏ℓ ∧ B⊏ℓZ,
-      cc,
-    have := line_unique this,
-    cc,
-  cc,
+  have :=
+    ncoll_symm12 (ncoll_symm13 (ncoll_symm12 h)),
+  exact ncoll_imp_neq13 this,
+end
+
+theorem ncoll_imp_neq23 : B ≠ C :=
+begin
+  have := ncoll_symm12 h,
+  exact ncoll_imp_neq13 this,
+end
 end
 
 -- Given two points, there is a third which is
@@ -99,9 +87,7 @@ begin
   cases em (collinear A B X) with hX hnX,
     cases em (collinear A B Y) with hY hnY,
       cases em (collinear A B Z) with hZ hnZ,
-        suffices : collinear X Y Z,
-          have := hxyz.right.right.right,
-          contradiction,
+        suffices : collinear X Y Z, cc,
         exact collinear_trans distinct hX hY hZ,
       existsi Z, assumption,
     existsi Y, assumption,
@@ -116,7 +102,7 @@ begin
   have := different_third_noncoll distinct,
   cases this with C hC,
   have hnoncoll := hC,
-  have hACneq := noncoll_imp_neq hC,
+  have hACneq := ncoll_imp_neq13 hC,
   cases line_containing hACneq with ℓ hℓ,
   existsi ℓ,
   split,
@@ -150,4 +136,33 @@ begin
   have := hABℓ hAnBℓ.left,
   have := hAnBℓ.right,
   contradiction,
+end
+
+-- Two lines are equal iff they share every point
+theorem line_eq (ℓ₁ ℓ₂ : line) :
+ℓ₁ = ℓ₂ ↔
+∀ (X : point) (h : X ⊏ ℓ₁), X ⊏ ℓ₂
+:=
+begin
+  apply iff.intro,
+    assume h,
+    intro X,
+    assume hXonℓ₁,
+    rw h at hXonℓ₁,
+    assumption,
+  assume h,
+  have h₁ := two_points ℓ₁,
+  cases h₁ with X h₂,
+  cases h₂ with Y h₃,
+  have hneq := h₃.left,
+  have hXonℓ₁ := h₃.right.left,
+  have hYonℓ₁ := h₃.right.right,
+  have hXonℓ₂  := (h X) hXonℓ₁,
+  have hYonℓ₂  := (h Y) hYonℓ₁,
+  suffices : X⊏ℓ₁ ∧ X⊏ℓ₂ ∧ Y⊏ℓ₁ ∧ Y⊏ℓ₂,
+    have h₄ := line_unique this,
+    cases h₄ with hleq hpeq,
+      assumption,
+    contradiction,
+  cc,
 end
