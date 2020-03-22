@@ -3,7 +3,10 @@
 -- TODO:
 -- shorten things using other better tactics
 -- work through the sporadic confused comments
--- implement more theorems about more sophisticated arithmetic (divisibility?)
+-- tidy up the order
+-- try and re-use theorems more
+-- organise into multiple files
+-- implement more theorems about more sophisticated arithmetic
 -- endgame: perhaps some of the N&S course, maybe an example sheet question?
 
 -- also, I haven't opened classical! Is it really true that none of this
@@ -264,7 +267,7 @@ begin
     induction k,
     refl,
     rw [add_succ, pow_succ, pow_succ, k_ih],
-    rw ← mul_assoc m (m ^ n) (m ^ k_n),
+    rw ←mul_assoc m (m ^ n) (m ^ k_n),
     rw mul_comm m (m ^ n),
     rw mul_assoc,
 end
@@ -294,6 +297,12 @@ theorem zero_le: 0 ≤ m :=
 begin
     existsi m,
     rw zero_add,
+end
+
+theorem le_to_add: m ≤ m + n :=
+begin
+    existsi n,
+    refl,
 end
 
 -- aka Horn's Lemma
@@ -357,7 +366,7 @@ begin
     cases (le_total_order n k) with hnk hkn,
     cases hnk with d hd,
     -- why oh why does this rewrite BOTH the m * n
-    rw [hd, mul_distrib, ← add_zero (m * n), add_assoc] at hmnmk,
+    rw [hd, mul_distrib, ←add_zero (m * n), add_assoc] at hmnmk,
     have hdz' := add_cancel (m * n) 0 (0 + m * d) hmnmk,
     rw zero_add at hdz',
     have hdz := mul_integral _ _ hmnz (eq.symm hdz'),
@@ -365,7 +374,7 @@ begin
     -- this is basically copy-pasted (ie yanked-putted)
     cases hkn with d hd,
     -- why oh why does this rewrite BOTH the m * n
-    rw [hd, mul_distrib, ← add_zero (m * k), add_assoc] at hmnmk,
+    rw [hd, mul_distrib, ←add_zero (m * k), add_assoc] at hmnmk,
     have hdz' := add_cancel (m * k) (0 + m * d) 0 hmnmk,
     rw zero_add at hdz',
     have hdz := mul_integral _ _ hmnz hdz',
@@ -385,7 +394,7 @@ begin
     repeat {rw hd},
     existsi k_n * d + d,
     rw mul_distrib,
-    rw [add_assoc _ m _, ← add_assoc m _ _, add_comm m (k_n * d)],
+    rw [add_assoc _ m _, ←add_assoc m _ _, add_comm m (k_n * d)],
     repeat {rw add_assoc},
 end
 
@@ -411,6 +420,64 @@ begin
     from add_integral m d (eq.symm hd),
 end
 
+theorem le_succ_cancel: succ m ≤ succ n → m ≤ n :=
+begin
+    assume hsmsn,
+    cases hsmsn with d hd,
+    existsi d,
+    simp at hd,
+    from hd,
+end
+
+theorem le_cancel_strong: m + k ≤ n → m ≤ n :=
+begin
+    assume hmkn,
+    cases hmkn with d hd,
+    existsi k + d,
+    rw hd,
+    rw add_assoc,
+end
+
+theorem le_add_rhs: m ≤ n → m ≤ n + k :=
+begin
+    assume hmn,
+    apply le_cancel_strong _ _ k,
+    apply le_add _ _ k,
+    cc,
+end
+
+theorem lt_succ_cancel: succ m < succ n → m < n :=
+begin
+    assume hsmsn hmn,
+    apply hsmsn,
+    have h := le_add n m 1 hmn,
+    simp at h,
+    cc,
+end
+
+theorem lt_cancel: m + k < n + k → m < n :=
+begin
+    assume hmknk hmn,
+    apply hmknk,
+    from le_add _ _ _ hmn,
+end
+
+theorem lt_cancel_strong: m + k < n → m < n :=
+begin
+    assume hmkn hmn,
+    apply hmkn,
+    apply le_add_rhs,
+    cc,
+end
+
+theorem lt_add_rhs: m < n → m < n + k :=
+begin
+    assume hmn hmnk,
+    apply hmn,
+    apply le_cancel_strong _ _ k,
+    cc,
+end
+
 theorem le_anticomm: m ≤ n ∧ n ≤ m → m = n :=
 begin
     assume hmnnm,
@@ -421,7 +488,7 @@ begin
     cases hnm with d' hd',
     have hdz: d = 0,
     have hndd: n + 0 = n + d' + d,
-    rw [← hd', add_zero, hd],
+    rw [←hd', add_zero, hd],
     apply add_integral _ d',
     apply eq.symm,
     rw add_comm,
@@ -434,6 +501,16 @@ theorem zero_lt: m ≠ 0 → 0 < m :=
 begin
     assume hmnz hmlz,
     from hmnz (le_zero _ hmlz),
+end
+
+theorem lt_to_add_succ: m < m + succ n :=
+begin
+    assume hmmsn,
+    cases hmmsn with d hd,
+    rw [←add_zero m, add_assoc m _ _, add_assoc m _ _] at hd,
+    have hd' := add_cancel _ _ _ hd,
+    simp at hd',
+    from succ_ne_zero _ (eq.symm hd'),
 end
 
 theorem lt_nzero: ¬ m < 0 :=
@@ -470,7 +547,7 @@ begin
     rw hd,
     assume hmsd,
     cases hmsd with d' hd',
-    rw [succ_add, add_assoc, ← add_succ, ← add_zero m, add_assoc] at hd',
+    rw [succ_add, add_assoc, ←add_succ, ←add_zero m, add_assoc] at hd',
     have hzsucc := add_cancel _ _ _ hd',
     rw zero_add at hzsucc,
     from succ_ne_zero _ (eq.symm hzsucc),
@@ -487,6 +564,77 @@ begin
     existsi d,
     rw [hd, add_succ, succ_add],
     exfalso, from hmsn hsnm,
+end
+
+-- somehow this feels like it's not using le_iff_lt_succ enough
+theorem lt_iff_le_or_eq: m ≤ n ↔ m < n ∨ m = n :=
+begin
+    split,
+    assume hmn,
+    cases hmn with d hd,
+    cases d,
+    simp at hd,
+    right, rw hd,
+    left,
+    rw hd,
+    from lt_to_add_succ _ _ ,
+    assume hmnmn,
+    cases hmnmn,
+    from lt_impl_le _ _ hmnmn,
+    rw hmnmn,
+    from le_refl n,
+end
+
+-- it seems that inductive types give all sorts of classical-feeling results
+-- without any of the excluded middle
+theorem lt_dne: ¬ m < n → n ≤ m :=
+begin
+    assume hnmn,
+    cases (le_total_order m n),
+    cases h with d hd,
+    cases d,
+    simp at hd,
+    rw hd,
+    from le_refl m,
+    have hmln: m < n,
+    rw hd,
+    from lt_to_add_succ _ _,
+    exfalso, from hnmn hmln,
+    from h,
+end
+
+theorem lt_strict: ¬(m < n ∧ n < m) :=
+begin
+    assume hmnnm,
+    cases hmnnm,
+    from hmnnm_left (lt_impl_le _ _ hmnnm_right),
+end
+
+theorem lt_strict_order: m = n ∨ m < n ∨ n < m :=
+begin
+    cases (le_total_order m n),
+    rw lt_iff_le_or_eq _ _ at h,
+    cases h,
+    cc,
+    cc,
+    rw lt_iff_le_or_eq _ _ at h,
+    cases h,
+    cc,
+    cc,
+end
+
+theorem lt_trans: m < n → n < k → m < k :=
+begin
+    assume hmn hnk hkm,
+    cases hkm with d hd,
+    cases d,
+    simp at hd,
+    rw hd at hmn,
+    from lt_strict _ _ (and.intro hnk hmn),
+    rw hd at hmn,
+    have hkln: k ≤ n
+    := le_cancel_strong _ _ (succ d) (lt_impl_le _ _ hmn),
+    from hnk hkln,
 end
 
 theorem dvd_trans: m ∣ n → n ∣ k → m ∣ k :=
@@ -560,9 +708,9 @@ begin
     refl,
     have hab1: a * b = 1,
     rw hb at ha,
-    rw ← mul_assoc at ha,
+    rw ←mul_assoc at ha,
     -- arghh
-    rw ← mul_one (succ n) at ha,
+    rw ←mul_one (succ n) at ha,
     rw mul_comm (a * b) _ at ha,
     rw mul_assoc at ha,
     have hab := mul_cancel _ _ _ (succ_ne_zero n) ha,
@@ -572,7 +720,7 @@ begin
     rw [ha, ha1, one_mul],
 end
 
-theorem div_mul: k ∣ m → k ∣ m * n :=
+theorem dvd_mul: k ∣ m → k ∣ m * n :=
 begin
     assume hkm,
     cases hkm with a ha,
@@ -580,6 +728,91 @@ begin
     rw ha,
     repeat {rw mul_assoc},
     rw mul_comm k n,
+end
+
+theorem dvd_add: k ∣ m → k ∣ m + k :=
+begin
+    assume hkm,
+    cases hkm with n hn,
+    rw hn,
+    existsi n + 1,
+    simp,
+end
+
+theorem dvd_cancel: k ∣ m + k → k ∣ m :=
+begin
+    assume hkmk,
+    cases hkmk with n hn,
+    cases n,
+    cases k,
+    rw zz at *,
+    simp at hn,
+    rw hn,
+    from dvd_refl _,
+    rw zz at *,
+    rw [zero_mul, add_comm] at hn,
+    exfalso, from succ_ne_zero _ (add_integral _ _ hn),
+    existsi n,
+    rw succ_mul at hn,
+    repeat {rw add_comm _ k at hn},
+    from add_cancel _ _ _ hn,
+end
+
+theorem dvd_add_lots: k ∣ m → k ∣ m + k * n :=
+begin
+    induction n,
+    simp,
+    cc,
+    simp,
+    assume hkm,
+    rw [add_comm k _, ←add_assoc],
+    apply dvd_add _,
+    from n_ih hkm,
+end
+
+theorem dvd_cancel_lots: k ∣ m + k * n → k ∣ m :=
+begin
+    induction n,
+    simp,
+    cc,
+    simp,
+    rw [add_comm k _, ←add_assoc],
+    assume hkmksn,
+    apply n_ih,
+    from dvd_cancel _ _ hkmksn,
+end
+
+theorem lt_ndvd: m ≠ 0 → m < n → ¬ n ∣ m :=
+begin
+    assume hmnz hmn hndm,
+    cases (le_total_order m n),
+    cases h with d hd,
+    cases d,
+    rw [zz, add_zero] at hd,
+    rw hd at hmn,
+    from hmn (le_refl m),
+    rw hd at hndm,
+    cases hndm with a ha,
+    cases a,
+    simp at ha,
+    from hmnz ha,
+    simp at ha,
+    rw [←add_succ, ←add_zero m, add_assoc] at ha,
+    have hs0 := add_cancel _ _ _ ha,
+    simp at hs0,
+    from succ_ne_zero _ (eq.symm hs0),
+
+    cases h with d hd,
+    cases d,
+    simp at hd,
+    rw hd at hmn,
+    from hmn (le_refl n),
+    rw hd at hmn,
+    simp at hmn,
+    have hcontr: n ≤ succ (n + d),
+    existsi succ d,
+    simp,
+    from hmn hcontr,
 end
 
 theorem zero_nprime: ¬ prime 0 :=
@@ -653,7 +886,7 @@ end
 -- sub-expression please"?
 @[simp] theorem fib_zero: fib 0 = 0 := rfl
 @[simp] theorem fib_one: fib 1 = 1 := rfl
-@[simp] theorem fib_succsucc: fib (succ (succ n)) = fib (n) + fib(succ n) := rfl
+@[simp] theorem fib_succsucc: fib (succ (succ n)) = fib n + fib (succ n) := rfl
 
 theorem fib_k_formula:
 fib (m + k + 1) = fib k * fib m + fib (k + 1) * fib (m + 1) :=
