@@ -135,25 +135,6 @@ begin
     sorry
 end
 
--- This is in the wrong place
-theorem sqrt_2_not_nat: ¬ m*m = 2 :=
-begin
-    assume h,
-    have hm2 : m ∣ 2,
-        rw ←h,
-        apply dvd_mul,
-        refl,
-    cases two_prime with _ hdiv,
-    cases hdiv m hm2 with hm1 hm2,
-        rw [hm1, mul_one] at h,
-        cases h,
-    rw hm2 at h,
-    suffices : (2:mynat) = (1:mynat), cases this,
-    apply mul_cancel_to_one 2 2,
-        assume h20, cases h20,
-    symmetry, assumption,
-end
-
 -- framed in a natural-numbersy sort of way.
 theorem sqrt_2_irrational: n ≠ 0 → ¬m * m = n * n + n * n :=
 begin

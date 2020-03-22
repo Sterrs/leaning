@@ -21,7 +21,7 @@ begin
     simp,
 end
 
-theorem square_imp_not_prime:
+theorem square_imp_not_prime {m : mynat}:
 square m → ¬(prime m) :=
 begin
     assume hs hp,
@@ -45,6 +45,14 @@ begin
     have : m = 1,
         symmetry, assumption,
     contradiction,
+end
+
+theorem sqrt_2_not_nat: ¬ m*m = 2 :=
+begin
+    assume h,
+    have hs : square 2,
+        existsi m, symmetry, assumption,
+    from (square_imp_not_prime hs) two_prime,
 end
 
 end hidden
