@@ -44,8 +44,6 @@ def pow: mynat → mynat → mynat
 
 instance: has_pow mynat mynat := ⟨pow⟩
 
-def square (m : mynat) := ∃ k : mynat, m = k*k
-
 variables m n k p: mynat
 
 -- I'm simping liberally for future reasons

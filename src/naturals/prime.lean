@@ -5,6 +5,7 @@ namespace hidden
 open mynat
 
 def prime (m: mynat) := m ≠ 1 ∧ ∀ k: mynat, k ∣ m → k = 1 ∨ k = m
+def composite (m : mynat) := ∃ a b : mynat, a ≠ 1 ∧ b ≠ 1 ∧ a*b = m
 def coprime (m n : mynat) := ∀ k: mynat, k ∣ m → k ∣ n → k = 1
 
 variables m n p k : mynat
@@ -97,7 +98,21 @@ end
 theorem succ_coprime: coprime (succ m) m :=
 coprime_symm (coprime_succ m)
 
--- Requires strong induction
+theorem coprime_prime:
+prime p → ¬(coprime p n) → p ∣ n :=
+begin
+    assume hp hncp,
+    sorry, -- Is this classical?
+end
+
+-- Classical?
+theorem nprime_imp_composite:
+¬ prime m → composite m :=
+begin
+    sorry,
+end
+
+-- Requires strong induction, and perhaps classical
 theorem prime_divisor:
 m ≠ 1 → ∃ p : mynat, prime p ∧ p ∣ m :=
 begin

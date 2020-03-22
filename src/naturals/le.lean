@@ -179,14 +179,11 @@ begin
     from add_integral m k sum0,
 end
 
-theorem le_anticomm: m ≤ n ∧ n ≤ m → m = n :=
+theorem le_antisymm: m ≤ n ∧ n ≤ m → m = n :=
 begin
     assume hmnnm,
-    -- what's the nice tactical way to do this?
-    have hmn := and.elim_left hmnnm,
-    have hnm := and.elim_right hmnnm,
-    cases hmn with d hd,
-    cases hnm with d' hd',
+    cases hmnnm.left with d hd,
+    cases hmnnm.right with d' hd',
     have hdz: d = 0,
     have hndd: n + 0 = n + d' + d,
     rw [←hd', add_zero, hd],
