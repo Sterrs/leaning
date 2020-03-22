@@ -209,16 +209,10 @@ end
 
 theorem dvd_one: m ∣ 1 → m = 1 :=
 begin
-    assume h,
-    cases h with k hk,
-    rw mul_comm at hk,
-    have : m*k = 1,
-        symmetry, assumption,
-    have := one_unit m k this,
-        assumption,
+    assume hm1,
+    from dvd_anticomm _ _ hm1 (one_dvd m),
 end
 
-#check @dvd_cancel_lots
 theorem dvd_remainder (j : mynat):
 j ∣ m → j ∣ n → m + k = n → j ∣ k :=
 begin
