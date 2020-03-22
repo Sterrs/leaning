@@ -98,6 +98,14 @@ begin
     rw [hd, hdz, add_zero],
 end
 
+theorem mul_cancel_to_one: m ≠ 0 → m = m * k → k = 1 :=
+begin
+    assume h0 h,
+    rw [←mul_one m, mul_assoc, one_mul] at h,
+    rw mul_cancel m 1 k,
+    repeat {assumption},
+end
+
 theorem le_mul: m ≤ n → k * m ≤ k * n :=
 begin
     assume hmn,
