@@ -1,8 +1,14 @@
 -- Natural numbers
 
+-- TODO:
+-- shorten things using other better tactics
+-- implement more theorems about more sophisticated arithmetic (divisibility?)
 -- endgame: perhaps some of the N&S course, maybe an example sheet question?
 
--- stops name comflicts
+-- also, I haven't opened classical! Is it really true that none of this
+-- requires classical?
+
+-- stops name conflicts
 namespace hidden
 
 inductive mynat
@@ -33,6 +39,8 @@ def pow: mynat → mynat → mynat
 | m 0 := 1
 | m (succ n) := m * pow m n
 
+instance: has_pow mynat mynat := ⟨pow⟩
+
 def le (m n: mynat) :=  ∃ (k: mynat), n = m + k
 -- notation
 instance: has_le mynat := ⟨le⟩
@@ -42,8 +50,11 @@ instance: has_lt mynat := ⟨lt⟩
 
 def divides (m n: mynat) := ∃ (k: mynat), n = k * m
 instance: has_dvd mynat := ⟨divides⟩
+-- take care that you must use "\mid"
+def even (m: mynat) := 2 ∣ m
+def prime (m: mynat) := m ≠ 1 ∧ ∀ k: mynat, k ∣ m → k = 1 ∨ k = m
 
-variables m n k: mynat
+variables m n k p: mynat
 
 theorem add_zero: m + 0 = m := rfl
 
@@ -64,8 +75,7 @@ end
 theorem succ_add: succ m + n = succ (m + n) :=
 begin
     induction n,
-    repeat {rw zz},
-    repeat {rw add_zero},
+    refl,
     repeat {rw add_succ},
     rw n_ih,
 end
@@ -73,8 +83,7 @@ end
 theorem add_assoc: (m + n) + k = m + (n + k) :=
 begin
     induction k,
-    repeat {rw zz},
-    repeat {rw add_zero},
+    refl,
     repeat {rw add_succ},
     rw k_ih,
 end
@@ -138,16 +147,14 @@ theorem mul_one: m * 1 = m := rfl
 theorem zero_mul: 0 * m = 0 :=
 begin
     induction m,
-    repeat {rw zz},
-    rw mul_zero,
+    refl,
     rw [mul_succ, m_ih, add_zero],
 end
 
 theorem one_mul: 1 * m = m :=
 begin
     induction m,
-    repeat {rw zz},
-    rw mul_zero,
+    refl,
     rw [mul_succ, m_ih],
     -- try out calc to see how it works
     calc 1 + m_n = succ 0 + m_n   : rfl
@@ -158,9 +165,7 @@ end
 theorem succ_mul: (succ m) * n = m * n + n :=
 begin
     induction n,
-    repeat {rw zz},
-    repeat {rw mul_zero},
-    rw add_zero,
+    refl,
     repeat {rw mul_succ},
     rw n_ih,
     rw [add_succ, succ_add, add_assoc],
@@ -183,8 +188,7 @@ end
 theorem mul_assoc: (m * n) * k = m * (n * k) :=
 begin
     induction k,
-    repeat {rw zz},
-    repeat {rw mul_zero},
+    refl,
     repeat {rw mul_succ},
     rw mul_distrib,
     rw k_ih,
@@ -208,11 +212,12 @@ begin
     from hmnez (add_integral _ _ hmnz),
 end
 
-theorem pow_zero: pow m 0 = 1 := rfl
+-- do I really have to spell out mynat like this? yuck
+theorem pow_zero: m ^ (0: mynat) = 1 := rfl
 
-theorem pow_succ: pow m (succ n) = m * (pow m n) := rfl
+theorem pow_succ: m ^ (succ n) = m * (m ^ n) := rfl
 
-theorem zero_pow: m ≠ 0 → pow 0 m = 0 :=
+theorem zero_pow: m ≠ 0 → (0: mynat) ^ m = 0 :=
 begin
     assume hmnz,
     induction m,
@@ -220,37 +225,32 @@ begin
     rw [pow_succ, zero_mul],
 end
 
-theorem pow_add: pow m (n + k) = (pow m n) * (pow m k) :=
+theorem pow_add: m ^ (n + k) = (m ^ n) * (m ^ k) :=
 begin
     induction k,
-    repeat {rw zz},
-    rw [add_zero, pow_zero, mul_one],
+    refl,
     rw [add_succ, pow_succ, pow_succ, k_ih],
-    rw ← mul_assoc m (pow m n) (pow m k_n),
-    rw mul_comm m (pow m n),
+    rw ← mul_assoc m (m ^ n) (m ^ k_n),
+    rw mul_comm m (m ^ n),
     rw mul_assoc,
 end
 
-theorem pow_mul: pow (pow m n) k = pow m (n * k) :=
+theorem pow_mul: (m ^ n) ^ k = m ^ (n * k) :=
 begin
     induction k,
-    repeat {rw zz},
-    rw mul_zero,
-    repeat {rw pow_zero},
+    refl,
     rw [pow_succ, mul_succ, pow_add, k_ih],
 end
 
-theorem mul_pow: pow (m * n) k = pow m k * pow n k :=
+theorem mul_pow: (m * n) ^ k = m ^ k * n ^ k :=
 begin
     induction k,
-    repeat {rw zz},
-    repeat {rw pow_zero},
-    rw mul_one,
+    refl,
     repeat {rw pow_succ},
     rw k_ih,
     rw ←mul_assoc _ n _,
     rw mul_assoc m _ n,
-    rw mul_comm (pow m k_n) n,
+    rw mul_comm (m ^ k_n) n,
     repeat {rw mul_assoc},
 end
 
@@ -277,6 +277,16 @@ begin
     rw hd,
     repeat {rw add_assoc},
     rw add_comm d k,
+end
+
+theorem le_cancel: m + k ≤ n + k → m ≤ n :=
+begin
+    assume hmknk,
+    cases hmknk with d hd,
+    existsi d,
+    repeat {rw add_comm _ k at hd},
+    rw add_assoc at hd,
+    from add_cancel k _ _ hd,
 end
 
 theorem le_total_order: m ≤ n ∨ n ≤ m :=
@@ -324,6 +334,112 @@ begin
     rw zero_add at hdz',
     have hdz := mul_integral _ _ hmnz hdz',
     rw [hd, hdz, add_zero],
+end
+
+theorem le_mul: m ≤ n → k * m ≤ k * n :=
+begin
+    assume hmn,
+    cases hmn with d hd,
+    induction k,
+    repeat {rw zz},
+    existsi (0: mynat),
+    repeat {rw zero_mul},
+    refl,
+    repeat {rw succ_mul},
+    repeat {rw hd},
+    existsi k_n * d + d,
+    rw mul_distrib,
+    rw [add_assoc _ m _, ← add_assoc m _ _, add_comm m (k_n * d)],
+    repeat {rw add_assoc},
+end
+
+theorem le_trans: m ≤ n → n ≤ k → m ≤ k :=
+begin
+    assume hmn hnk,
+    cases hmn with d hd,
+    cases hnk with d' hd',
+    existsi d + d',
+    rw [hd', hd, add_assoc],
+end
+
+theorem le_refl: m ≤ m :=
+begin
+    existsi (0: mynat),
+    refl,
+end
+
+theorem le_zero: m ≤ 0 → m = 0 :=
+begin
+    assume hmlz,
+    cases hmlz with d hd,
+    from add_integral m d (eq.symm hd),
+end
+
+theorem le_anticomm: m ≤ n ∧ n ≤ m → m = n :=
+begin
+    assume hmnnm,
+    -- what's the nice tactical way to do this?
+    have hmn := and.elim_left hmnnm,
+    have hnm := and.elim_right hmnnm,
+    cases hmn with d hd,
+    cases hnm with d' hd',
+    have hdz: d = 0,
+    have hndd: n + 0 = n + d' + d,
+    rw [← hd', add_zero, hd],
+    apply add_integral _ d',
+    apply eq.symm,
+    rw add_comm,
+    rw add_assoc at hndd,
+    from add_cancel n _ _ hndd,
+    rw [hd, hdz, add_zero],
+end
+
+theorem zero_lt: m ≠ 0 → 0 < m :=
+begin
+    assume hmnz hmlz,
+    from hmnz (le_zero _ hmlz),
+end
+
+theorem lt_nzero: ¬ m < 0 :=
+begin
+    assume mlz,
+    from mlz (zero_le m),
+end
+
+theorem lt_add: m < n → m + k < n + k :=
+begin
+    assume hmn hmknk,
+    from hmn (le_cancel _ _ _ hmknk),
+end
+
+theorem lt_nrefl: ¬ m < m :=
+begin
+    assume hmm,
+    from hmm (le_refl m),
+end
+
+-- TODO: can this be proven classically?
+theorem lt_impl_le: m < n → m ≤ n :=
+begin
+    assume hmn,
+    sorry
+end
+
+-- this is pitched as a kind of long-term goal
+theorem euclids_lemma: prime p → p ∣ m * n → p ∣ m ∨ p ∣ n :=
+begin
+    sorry
+end
+
+-- framed in a natural-numbersy sort of way.
+theorem sqrt_2_irrational: n ≠ 0 → ¬m * m = n * n + n * n :=
+begin
+    assume hmnz hsq2q,
+    have h2divrhs: 2 ∣ n * n + n * n,
+    existsi n * n,
+    -- wow refl is OP
+    refl,
+    sorry
 end
 
 end hidden
