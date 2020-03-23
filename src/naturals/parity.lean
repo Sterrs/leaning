@@ -138,7 +138,7 @@ begin
   assumption,
 end
 
-theorem odd_or_even: even m ∨ odd m :=
+theorem even_or_odd: even m ∨ odd m :=
 begin
   induction m, {
     left, from even_zero,
@@ -235,16 +235,17 @@ begin
   from homn' heven,
 end
 
-open classical
-
-local attribute [instance] prop_decidable
-
-theorem even_square: 2 ∣ m * m → 2 ∣ m :=
+-- basically we can do excluded middle without any of the classical
+theorem even_square: even (m * m) → even m :=
 begin
-  assume h,
-  by_contradiction hndvd,
-  have := not_exists.mp hndvd,
-  sorry,
+  cases (even_or_odd m), {
+    assume _,
+    assumption,
+  }, {
+    assume hem2,
+    exfalso,
+    from (odd_mul_odd m m h h) hem2,
+  },
 end
 
 end hidden
