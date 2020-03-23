@@ -152,22 +152,26 @@ end
 theorem cancel_succ_even: even (succ m) → odd m :=
 begin
   assume hesm,
-  cases m,
-  exfalso,
-  from odd_one hesm,
-  apply succ_even_is_odd,
-  rw even_periodic,
-  assumption,
+  cases m, {
+    exfalso,
+    from odd_one hesm,
+  }, {
+    apply succ_even_is_odd,
+    rw even_periodic,
+    assumption,
+  },
 end
 
 theorem cancel_succ_odd: odd (succ m) → even m :=
 begin
   assume hosm,
-  cases m,
-  from even_zero,
-  apply succ_odd_is_even,
-  rw odd_periodic,
-  assumption,
+  cases m, {
+    from even_zero,
+  }, {
+    apply succ_odd_is_even,
+    rw odd_periodic,
+    assumption,
+  },
 end
 
 theorem odd_periodic_lots: even m → odd (n + m) → odd n :=
@@ -221,10 +225,11 @@ begin
   simp at hesmsn,
   have homn := cancel_succ_even _ hesmsn,
   rw ←add_assoc at homn,
-  have hemn: even (m + n),
-  have hesmpsn := even_add_even (succ m) (succ n) hesm hesn,
-  simp at hesmpsn,
-  from (even_periodic _).mpr hesmpsn,
+  have hemn: even (m + n), {
+    have hesmpsn := even_add_even (succ m) (succ n) hesm hesn,
+    simp at hesmpsn,
+    from (even_periodic _).mpr hesmpsn,
+  },
   rw [add_comm, add_comm n m] at homn,
   have homn' := odd_periodic_lots _ _ hemn homn,
   from homn' heven,
