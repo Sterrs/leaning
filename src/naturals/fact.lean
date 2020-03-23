@@ -10,14 +10,16 @@ def fact: mynat → mynat
 
 variables m n p k : mynat
 
+@[simp] theorem fact_zero: fact 0 = 1 := rfl
+@[simp] theorem fact_succ: fact (succ n) = (fact n) * (succ n) := rfl
+
 theorem fact_nzero:
 fact m ≠ 0 :=
 begin
   assume h,
   induction m with n hn,
     cases h, -- Magic?
-  unfold fact at h,
-  rw mul_comm at h,
+  rw [fact_succ, mul_comm] at h,
   have := mul_integral (succ n) (fact n),
   from hn (this (succ_ne_zero n) h),
 end
@@ -27,9 +29,8 @@ m ≠ 0 → m ∣ fact m :=
 begin
   assume hneq0,
   cases m, {
-    exfalso,
     simp at hneq0,
-    assumption,
+    contradiction,
   }, {
     existsi (fact m),
     refl,
@@ -47,34 +48,25 @@ end
 theorem fact_dvd_le {m n : mynat} :
 m ≤ n → fact m ∣ fact n :=
 begin
-  assume hlen,
-  apply strong_induction (λ k, ∀ j, j ≤ k → fact j ∣ fact k), {
-    assume j hjle0,
-    have := le_zero j hjle0,
-    rw this,
+  assume hmlen,
+  cases hmlen with k hk,
+  revert n,
+  induction k, {
+    intro n,
+    assume hmn,
+    simp [hmn],
   }, {
-    assume i hi j hjlesucci,
-    cases (le_iff_lt_or_eq j (succ i)).mp hjlesucci, {
-      have hilej : j ≤ i, {
-        apply (le_iff_lt_succ j i).mpr,
-        assumption,
-      },
-      have hilei : i ≤ i, {
-        apply (le_iff_lt_or_eq i i).mpr,
-        right, refl,
-      },
-      have h₁ := hi i hilei j hilej,
-      have := fact_dvd_succ i,
-      apply dvd_trans _ (fact i) _,
-      assumption, assumption,
-    },
-    rw h,
+    intro n,
+    assume hnmsk,
+    cases k_ih rfl with a ha,
+    existsi a * succ (m + k_n),
+    rw [hnmsk, add_succ, fact_succ, ha,
+        mul_assoc, mul_assoc, mul_comm (fact m)],
   },
-  assumption,
 end
 
 theorem fact_dvd_nlt {m n : mynat}:
-m≠0 → m ≤ n → m ∣ fact n :=
+m ≠ 0 → m ≤ n → m ∣ fact n :=
 begin
   assume hmne0,
   induction n with k hk, {
