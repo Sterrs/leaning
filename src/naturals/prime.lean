@@ -273,35 +273,6 @@ begin
   assumption,
 end
 
--- let's work our way up to primes
--- Should this be here?
-theorem even_square: 2 ∣ m * m → 2 ∣ m :=
-begin
-  sorry
-end
-
-theorem two_only_even_prime: prime m → 2 ∣ m → m = 2 :=
-begin
-  assume hmpm h2dm,
-  cases h2dm with n hn,
-  cases m,
-  rw zz at *,
-  exfalso, from zero_nprime hmpm,
-  have hndvds : n ∣ succ m,
-    rw hn,
-    apply dvd_mul, refl,
-  cases hmpm with hsneq1 hdiv,
-  have h₂ := hdiv n hndvds,
-  cases h₂,
-    rw [h₂, one_mul] at hn,
-    assumption,
-  exfalso,
-  rw h₂ at hn,
-  have hcancel :=
-    mul_cancel_to_one (succ m) 2 (succ_ne_zero m),
-  cases hcancel hn,
-end
-
 -- this is pitched as a kind of long-term goal
 theorem euclids_lemma: prime p → p ∣ m * n → p ∣ m ∨ p ∣ n :=
 begin
@@ -311,11 +282,11 @@ end
 -- framed in a natural-numbersy sort of way.
 theorem sqrt_2_irrational: n ≠ 0 → ¬m * m = n * n + n * n :=
 begin
-  assume hmnz hsq2q,
-  have h2dvdrhs: 2 ∣ n * n + n * n,
-  existsi n * n,
-  -- wow refl is OP
-  refl,
+  assume hnz hsq2q,
+  have h2dvdrhs: 2 ∣ n * n + n * n, {
+    existsi n * n,
+    refl,
+  },
   sorry
 end
 

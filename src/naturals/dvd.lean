@@ -7,9 +7,6 @@ open mynat
 def divides (m n: mynat) := ∃ k: mynat, n = k * m
 instance: has_dvd mynat := ⟨divides⟩
 
--- take care that you must use "\mid"
-def even (m: mynat) := 2 ∣ m
-
 -- gosh, how do you define gcd?
 -- you can kind of define it using Euclid's algorithm and total ordering of ≤
 /- def gcd: mynat → mynat → mynat
@@ -172,6 +169,15 @@ begin
   assume hkmksn,
   apply n_ih,
   from dvd_cancel _ _ hkmksn,
+end
+
+theorem dvd_sum: k ∣ m → k ∣ n → k ∣ m + n :=
+begin
+  assume hm hn,
+  cases hn with a ha,
+  rw [ha, mul_comm],
+  apply dvd_add_lots,
+  assumption,
 end
 
 theorem lt_ndvd: m ≠ 0 → m < n → ¬n ∣ m :=
