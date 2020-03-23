@@ -7,6 +7,11 @@ open mynat
 def lt (m n: mynat) := ¬n ≤ m
 instance: has_lt mynat := ⟨lt⟩
 
+-- Given a proposition, we can say that ifthere are arbitrarily large mynat
+-- satisfying it, then there are infinitely many satisfying it.
+def infinitely_many (statement : mynat → Prop) : Prop :=
+∀ n : mynat, ∃ m : mynat, n < m ∧ statement m
+
 variables m n p k : mynat
 
 theorem lt_succ_cancel: succ m < succ n → m < n :=

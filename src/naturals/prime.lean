@@ -273,6 +273,9 @@ begin
   assumption,
 end
 
+theorem infinitude_of_primes:
+infinitely_many prime := sorry
+
 -- this is pitched as a kind of long-term goal
 theorem euclids_lemma: prime p → p ∣ m * n → p ∣ m ∨ p ∣ n :=
 begin
