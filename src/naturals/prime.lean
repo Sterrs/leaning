@@ -275,7 +275,51 @@ begin
 end
 
 theorem infinitude_of_primes:
-infinitely_many prime := sorry
+infinitely_many prime :=
+begin
+  -- Famously, this is a proof by contradiction
+  by_contradiction h,
+  -- As there are only finitely many primes,
+  -- there exists an n than which there is no prime greater
+  cases not_forall.mp h with n hn,
+  -- So any x greater than n is not prime
+  have halln : ∀ x, n < x → ¬prime x, {
+    have := not_exists.mp hn,
+    assume x hnx hpx,
+    have hx := this x,
+    from hx ⟨hnx, hpx⟩,
+  },
+  -- We can form a contradiction if we can exhibit a k which is not 1, and
+  -- is not divisible by anything less than n except 1
+  suffices : ∃ k : mynat, k ≠ 1 ∧ ∀ x : mynat, x ≠ 1 → x ≤ n → ¬(x ∣ k), {
+    cases this with k h₁,
+    have hk := h₁.right,
+    -- and is not divisible by any prime
+    have hnoprimediv : ∀ p : mynat, prime p → ¬(p ∣ k), {
+      -- Since assume we have some prime divisor p
+      assume p hp,
+      -- If p were more than n, it wouldn't be prime
+      have := halln p,
+      -- TODO: Unnecessary use of classical
+      -- And it's either more than n
+      by_cases n < p, {
+        -- Which is a contradiction,
+        exfalso,
+        from this h hp,
+      }, {
+        -- Or less than or equal to n, so doesn't divide k!
+        from hk p hp.left (lt_dne n p h),
+      },
+    },
+    -- Which directly contradicts the fact that every natural >1 is
+    -- divisible by a prime
+    have hprimediv := prime_divisor k h₁.left,
+    cases hprimediv with p hp,
+    from hnoprimediv p hp.left hp.right,
+  },
+  -- Exhibit (fact n) + 1, and we are done.
+  sorry,
+end
 
 -- this is pitched as a kind of long-term goal
 theorem euclids_lemma: prime p → p ∣ m * n → p ∣ m ∨ p ∣ n :=
