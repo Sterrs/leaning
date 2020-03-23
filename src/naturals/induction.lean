@@ -1,5 +1,5 @@
-import naturals.mynat
-import naturals.le
+import naturals.lt
+import logic.basic
 
 namespace hidden
 
@@ -46,5 +46,55 @@ begin
   },
   from h_aux (succ k) k (le_to_add k 1),
 end
+
+open classical
+local attribute [instance] prop_decidable
+
+-- Should help prove Bezout
+theorem well_ordering
+(statement : mynat → Prop) :
+(∃ k : mynat, statement k) →
+∃ k : mynat, statement k ∧
+∀ j : mynat, (statement j) →  k ≤ j :=
+begin
+  assume hex,
+  by_contradiction h,
+  rw not_exists at h,
+  -- Prove by strong_induction that it's true for all
+  -- if there is no smallest for which it is false.
+  have hall : ∀ k : mynat, ¬(statement k), {
+    apply strong_induction (λ k, ¬statement k), {
+      assume hs0,
+      have h0 := h 0,
+      rw not_and at h0,
+      have hcontra := h0 hs0,
+      suffices : ∀ (j : mynat), statement j → 0 ≤ j,
+        contradiction,
+      intro j,
+      assume _,
+      from zero_le j,
+    }, {
+      assume n hn hsucc,
+      have hnall := (not_and.mp (h (succ n))) hsucc,
+      cases not_forall.mp hnall with x hnx,
+      cases not_imp.mp hnx with hx hnotsucclex,
+      have hxlen : x ≤ n, {
+        have hxltsucc : x < succ n, from hnotsucclex,
+        rw ←le_iff_lt_succ at hxltsucc, assumption,
+      },
+      have hcontra := hn x hxlen,
+      contradiction,
+    },
+  },
+  cases hex with k hk,
+  have hnk := hall k,
+  contradiction,
+end
+
+-- Likely follows from well-ordering
+theorem infinite_descent
+(statement : mynat → Prop) :
+∀ k : mynat, (statement k → ∃ j : mynat, statement j ∧ j < k)
+→ ∀ k : mynat, ¬(statement k) := sorry
 
 end hidden
