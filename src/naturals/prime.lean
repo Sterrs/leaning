@@ -1,4 +1,4 @@
-import naturals.dvd naturals.induction logic.basic
+import naturals.dvd naturals.induction naturals.fact logic.basic
 
 namespace hidden
 
@@ -311,15 +311,27 @@ begin
         from hk p hp.left (lt_dne n p h),
       },
     },
-    -- Which directly contradicts the fact that every natural >1 is
+    -- Which directly contradicts the fact that every natural > 1 is
     -- divisible by a prime
     have hprimediv := prime_divisor k h₁.left,
     cases hprimediv with p hp,
     from hnoprimediv p hp.left hp.right,
   },
   -- Exhibit (fact n) + 1, and we are done.
-  sorry,
+  existsi (fact n) + 1,
+  split, {
+    symmetry,
+    assume heq,
+    rw add_comm at heq,
+    suffices : fact n = 0,
+      from fact_nzero n this,
+    apply add_cancel_to_zero 1,
+    assumption,
+  },
+  from fact_ndvd_lt n,
 end
+
+#check add_cancel_to_zero
 
 -- this is pitched as a kind of long-term goal
 theorem euclids_lemma: prime p → p ∣ m * n → p ∣ m ∨ p ∣ n :=
