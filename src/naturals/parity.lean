@@ -5,7 +5,7 @@ namespace hidden
 open mynat
 
 def even (m: mynat) := 2 ∣ m
-def odd (m : mynat) := ¬even m
+def odd (m: mynat) := ¬even m
 
 variables m n k p: mynat
 
@@ -16,7 +16,7 @@ begin
   cases m,
   rw zz at *,
   exfalso, from zero_nprime hmpm,
-  have hndvds : n ∣ succ m,
+  have hndvds: n ∣ succ m,
     rw hn,
     apply dvd_mul, refl,
   cases hmpm with hsneq1 hdiv,
@@ -50,7 +50,7 @@ even m → odd n → odd (m + n) :=
 begin
   assume hm hn heven,
   have : even n, {
-    apply even_remainder m n (m+n) hm heven,
+    apply even_remainder m n (m + n) hm heven,
     refl,
   },
   contradiction,
@@ -61,7 +61,7 @@ even m → even (m * n) :=
 begin
   assume hm,
   cases hm with a ha,
-  existsi a*n,
+  existsi a * n,
   rw ha,
   simp,
 end

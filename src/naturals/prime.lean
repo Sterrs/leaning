@@ -115,11 +115,11 @@ begin
             simp at hn,
             cc,
           }, {
-            have x := succ_inj _ _ hn,
-            simp at x,
-            have y := succ_inj _ _ x,
-            simp at y,
-            exfalso, from succ_ne_zero _ (eq.symm y),
+            have hcontr' := succ_inj _ _ hn.symm,
+            simp at hcontr',
+            have hcontr := succ_inj _ _ hcontr',
+            simp at hcontr,
+            exfalso, from succ_ne_zero _ hcontr,
           }
         }
       }
@@ -162,6 +162,7 @@ begin
     assumption,
   from dvd_one a this,
 end
+
 theorem succ_coprime: coprime (succ m) m :=
 coprime_symm (coprime_succ m)
 
@@ -209,16 +210,16 @@ end
 
 -- Requires strong induction
 theorem prime_divisor:
-m ≠ 1 → ∃ p : mynat, prime p ∧ p ∣ m :=
+m ≠ 1 → ∃ p: mynat, prime p ∧ p ∣ m :=
 begin
   assume h,
   apply strong_induction
-    (λ m, m ≠ 1 → ∃ p : mynat, prime p ∧ p ∣ m), {
+    (λ m, m ≠ 1 → ∃ p: mynat, prime p ∧ p ∣ m), {
     assume h,
-    existsi (2:mynat),
+    existsi (2: mynat),
     split, from two_prime,
     from dvd_zero 2,
-  } , {
+  }, {
     intro n,
     assume hn hn0,
     cases em (prime (succ n)) with hp hnp, {
@@ -238,7 +239,7 @@ begin
           rw mul_comm,
           assumption,
         },
-        have halen : a ≤ n, {
+        have halen: a ≤ n, {
           apply (le_iff_lt_succ a n).mpr,
           have hasn := dvd_lt _ _ (succ_ne_zero _) hadvds,
           have hansn: a ≠ succ n, {
@@ -248,13 +249,13 @@ begin
             simp [hasn] at habsn,
             cases b,
             simp at habsn,
-            from succ_ne_zero _ (eq.symm habsn),
+            from succ_ne_zero _ habsn.symm,
             cases b,
             simp at hab,
             assumption,
             simp at habsn,
             rw [←add_assoc, add_comm b n, add_assoc, ←add_succ] at habsn,
-            have hcontr := add_cancel_to_zero _ _ (eq.symm habsn),
+            have hcontr := add_cancel_to_zero _ _ habsn.symm,
             from succ_ne_zero _ hcontr,
           },
           rw le_iff_lt_or_eq _ _ at hasn,

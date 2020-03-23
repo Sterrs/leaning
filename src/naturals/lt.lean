@@ -7,7 +7,7 @@ open mynat
 def lt (m n: mynat) := ¬n ≤ m
 instance: has_lt mynat := ⟨lt⟩
 
--- Given a proposition, we can say that ifthere are arbitrarily large mynat
+-- Given a proposition, we can say that if there are arbitrarily large mynat
 -- satisfying it, then there are infinitely many satisfying it.
 def infinitely_many (statement : mynat → Prop) : Prop :=
 ∀ n : mynat, ∃ m : mynat, n < m ∧ statement m
@@ -59,7 +59,7 @@ begin
   rw [←add_zero m, add_assoc m _ _, add_assoc m _ _] at hd,
   have hd' := add_cancel _ _ _ hd,
   simp at hd',
-  from succ_ne_zero _ (eq.symm hd'),
+  from succ_ne_zero _ hd'.symm,
 end
 
 -- this is far too long
@@ -77,7 +77,7 @@ begin
   have hcxcy := add_cancel _ _ _ hacebd,
   rw [add_comm, add_assoc, ←add_zero c] at hcxcy,
   have hxy := add_cancel _ _ _ hcxcy,
-  have hy0 := add_integral _ _ (eq.symm hxy),
+  have hy0 := add_integral _ _ hxy.symm,
   rw hy0 at hy,
   rw [hy, add_zero] at hcd,
   from hcd (le_refl c),
@@ -122,7 +122,7 @@ begin
   rw [succ_add, add_assoc, ←add_succ, ←add_zero m, add_assoc] at hd',
   have hzsucc := add_cancel _ _ _ hd',
   rw zero_add at hzsucc,
-  from succ_ne_zero _ (eq.symm hzsucc),
+  from succ_ne_zero _ hzsucc.symm,
   assume hmsn,
   -- this total ordering theorem is crazy powerful. It feels like you need
   -- classical logic until you remember it exists

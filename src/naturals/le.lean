@@ -103,7 +103,7 @@ begin
     -- this is basically copy-pasted (ie yank-putted)
     cases hkn with d hd,
     rw [hd, mul_add] at hmnmk,
-    have hdz' := add_cancel_to_zero _ _ (eq.symm hmnmk),
+    have hdz' := add_cancel_to_zero _ _ hmnmk.symm,
     have hdz := mul_integral _ _ hmnz hdz',
     simp [hd, hdz],
   },
@@ -149,7 +149,7 @@ theorem le_zero: m ≤ 0 → m = 0 :=
 begin
   assume hmlz,
   cases hmlz with d hd,
-  from add_integral m d (eq.symm hd),
+  from add_integral m d hd.symm,
 end
 
 theorem le_succ_cancel: succ m ≤ succ n → m ≤ n :=
@@ -190,7 +190,7 @@ begin
     left,
     simp at hk,
     have hmk0 := succ_inj _ _ hk,
-    from add_integral _ _ (eq.symm hmk0),
+    from add_integral _ _ hmk0.symm,
   },
 end
 

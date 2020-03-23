@@ -105,7 +105,7 @@ begin
   rw mul_assoc at ha,
   have hab := mul_cancel _ _ _ (succ_ne_zero n) ha,
   rw one_mul at hab,
-  from eq.symm hab,
+  symmetry, assumption,
   have ha1 := one_unit _ _ hab1,
   rw [ha, ha1, one_mul],
 end
@@ -198,7 +198,7 @@ begin
   rw [←add_succ, ←add_zero m, add_assoc] at ha,
   have hs0 := add_cancel _ _ _ ha,
   simp at hs0,
-  from succ_ne_zero _ (eq.symm hs0),
+  from succ_ne_zero _ hs0.symm,
 
   cases h with d hd,
   cases d,
