@@ -120,6 +120,13 @@ begin
   rw mul_comm k n,
 end
 
+theorem dvd_multiple: k ∣ n * k :=
+begin
+  rw mul_comm,
+  apply dvd_mul,
+  refl,
+end
+
 theorem dvd_add: k ∣ m → k ∣ m + k :=
 begin
   assume hkm,
