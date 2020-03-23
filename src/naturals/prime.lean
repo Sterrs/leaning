@@ -1,4 +1,4 @@
-import naturals.dvd naturals.induction
+import naturals.dvd naturals.induction logic.basic
 
 namespace hidden
 
@@ -172,15 +172,39 @@ begin
   sorry, -- Is this classical?
 end
 
--- Surely classical
-theorem em_prime:
-prime p ∨ ¬prime p := sorry
+open classical
 
--- Classical?
-theorem nprime_imp_ncomp_or_one:
+local attribute [instance] prop_decidable
+
+lemma nprime_imp_ncomp_or_one:
 ¬prime m → composite m ∨ m = 1 :=
 begin
-  sorry,
+  assume h,
+  cases not_and_distrib.mp h with heq hnall, {
+    right,
+    from not_not.mp heq,
+  }, {
+    left,
+    cases not_forall.mp hnall with k hk,
+    cases not_imp.mp hk with hkdvdm heq1m,
+    cases hkdvdm with a hak,
+    existsi a,
+    existsi k,
+    split, {
+      assume ha1,
+      rw [ha1, one_mul] at hak,
+      have : k = 1 ∨ k = m,
+        right, symmetry, assumption,
+      contradiction,
+    }, split, {
+      assume hk1,
+      have : k = 1 ∨ k = m,
+        left, assumption,
+      contradiction,
+    }, {
+      symmetry, assumption,
+    }
+  },
 end
 
 -- Requires strong induction
@@ -197,7 +221,7 @@ begin
   } , {
     intro n,
     assume hn hn0,
-    cases em_prime (succ n) with hp hnp, {
+    cases em (prime (succ n)) with hp hnp, {
       existsi succ n,
       split, assumption, refl,
     }, {
