@@ -283,7 +283,7 @@ begin
   -- there exists an n than which there is no prime greater
   cases not_forall.mp h with n hn,
   -- So any x greater than n is not prime
-  have halln : ∀ x, n < x → ¬prime x, {
+  have halln : ∀ x, n ≤ x → ¬prime x, {
     have := not_exists.mp hn,
     assume x hnx hpx,
     have hx := this x,
@@ -301,14 +301,14 @@ begin
       -- If p were more than n, it wouldn't be prime
       have := halln p,
       -- TODO: Unnecessary use of classical
-      -- And it's either more than n
-      by_cases n < p, {
+      -- And it's greater than or equal to n
+      cases (le_lem n p) with h h, {
         -- Which is a contradiction,
         exfalso,
         from this h hp,
       }, {
         -- Or less than or equal to n, so doesn't divide k!
-        from hk p hp.left (lt_dne n p h),
+        from hk p hp.left (lt_impl_le _ _ h),
       },
     },
     -- Which directly contradicts the fact that every natural > 1 is
@@ -330,8 +330,6 @@ begin
   },
   from fact_ndvd_lt n,
 end
-
-#check add_cancel_to_zero
 
 -- this is pitched as a kind of long-term goal
 theorem euclids_lemma: prime p → p ∣ m * n → p ∣ m ∨ p ∣ n :=

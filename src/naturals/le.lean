@@ -8,6 +8,11 @@ def le (m n: mynat) :=  ∃ k: mynat, n = m + k
 -- notation
 instance: has_le mynat := ⟨le⟩
 
+-- Given a proposition, we can say that if there are arbitrarily large mynat
+-- satisfying it, then there are infinitely many satisfying it.
+def infinitely_many (statement : mynat → Prop) : Prop :=
+∀ n : mynat, ∃ m : mynat, n ≤ m ∧ statement m
+
 variables m n p k : mynat
 
 theorem zero_le: 0 ≤ m :=
@@ -139,6 +144,7 @@ begin
   rw [hd', hd, add_assoc],
 end
 
+-- for some reason it breaks some other theorems if you add @[ref] here
 theorem le_refl: m ≤ m :=
 begin
   existsi (0: mynat),
