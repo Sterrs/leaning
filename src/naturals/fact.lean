@@ -1,4 +1,5 @@
-import naturals.dvd naturals.induction
+import naturals.dvd
+import naturals.induction
 
 namespace hidden
 

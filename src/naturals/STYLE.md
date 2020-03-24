@@ -25,3 +25,5 @@ Just a rough guide as to what style I'm trying to use
 - In weird ambiguous re-write situations, try to use `conv`.
 - Try to keep lines within 80 characters, fairly strictly
 - No parentheses after quantifiers
+- Put imports on separate lines, as per PEP8 `:)`
+- Try to line up the assignments in by-cases definitions

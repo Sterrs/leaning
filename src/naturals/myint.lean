@@ -11,7 +11,7 @@ namespace hidden
 -- - Define some quotient/remainder things
 
 inductive myint : Type
-| of_nat : mynat → myint
+| of_nat          : mynat → myint
 | neg_succ_of_nat : mynat → myint
 
 -- "has coercion" I think. Seems to introduce the notation
@@ -36,12 +36,12 @@ lemma of_nat_zero : of_nat 0 = 0 := rfl
 lemma of_nat_one : of_nat 1 = 1 := rfl
 
 def neg_of_nat: mynat → myint
-| 0              := 0
+| 0        := 0
 | (succ m) := -[1+ m]
 
 def aux_sub_nat_nat: mynat → mynat → mynat
-| m 0 := m
-| 0 n := 0
+| m 0               := m
+| 0 n               := 0
 | (succ m) (succ n) := aux_sub_nat_nat m n
 
 def sub_nat_nat (m n: mynat): myint :=
@@ -52,23 +52,23 @@ end
 
 def neg: myint → myint
 | (of_nat n) := neg_of_nat n
-| -[1+ n] := succ n
+| -[1+ n]    := succ n
 
 instance: has_neg myint := ⟨neg⟩
 
 def add: myint → myint → myint
 | (of_nat m) (of_nat n) := of_nat (m + n)
-| -[1+ m] (of_nat n) := sub_nat_nat n (succ m)
-| (of_nat m) -[1+ n] := sub_nat_nat m (succ n)
-| -[1+ m] -[1+ n] := -[1+ succ (m + n)]
+| -[1+ m] (of_nat n)    := sub_nat_nat n (succ m)
+| (of_nat m) -[1+ n]    := sub_nat_nat m (succ n)
+| -[1+ m] -[1+ n]       := -[1+ succ (m + n)]
 
 instance: has_add myint := ⟨add⟩
 
 def mul: myint → myint → myint
 | (of_nat m) (of_nat n) := of_nat (m * n)
-| -[1+ m] (of_nat n) := neg_of_nat (succ m * n)
-| (of_nat m) -[1+ n] := neg_of_nat (m * succ n)
-| -[1+ m] -[1+ n] := of_nat (succ m * succ n)
+| -[1+ m] (of_nat n)    := neg_of_nat (succ m * n)
+| (of_nat m) -[1+ n]    := neg_of_nat (m * succ n)
+| -[1+ m] -[1+ n]       := of_nat (succ m * succ n)
 
 instance: has_mul myint := ⟨mul⟩
 

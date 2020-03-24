@@ -7,8 +7,8 @@ open mynat
 -- it's kind of crazy that Lean just automatically proves this is well-defined
 -- (try changing fib succ to fib succ succ)
 def fib: mynat → mynat
-| 0 := 0
-| 1 := 1
+| 0               := 0
+| 1               := 1
 | (succ (succ n)) := fib n + fib (succ n)
 
 variables m n k p: mynat

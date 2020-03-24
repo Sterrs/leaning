@@ -27,20 +27,20 @@ instance: has_zero mynat := ⟨zero⟩
 instance: has_one mynat := ⟨succ zero⟩
 
 def add: mynat → mynat → mynat
-| m 0 := m
+| m 0        := m
 | m (succ n) := succ (add m n)
 
 instance: has_add mynat := ⟨add⟩
 
 def mul: mynat → mynat → mynat
-| m 0 := 0
+| m 0        := 0
 | m (succ n) := m + mul m n
 
 instance: has_mul mynat := ⟨mul⟩
 
 -- a ^ b should be number of functions from a b-set to an a-set. fight me
 def pow: mynat → mynat → mynat
-| m 0 := 1
+| m 0        := 1
 | m (succ n) := m * pow m n
 
 instance: has_pow mynat mynat := ⟨pow⟩

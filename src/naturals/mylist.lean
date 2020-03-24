@@ -1,5 +1,9 @@
 import naturals.mynat
 
+-- TODO:
+-- think of a nice way to do "maybe" operations like indexing,
+-- inserting, deleting
+
 namespace hidden
 
 universe u
@@ -32,7 +36,7 @@ notation `[`x`]` := singleton x
 -- tail. Also note that concat is defined by recursion on the first argument, so
 -- you should generally induct on the first argument.
 def concat: mylist T → mylist T → mylist T
-| [] lst := lst
+| [] lst        := lst
 | (x :: xs) lst := x :: (concat xs lst)
 
 notation lst1 ++ lst2 := concat lst1 lst2
@@ -64,7 +68,7 @@ begin
 end
 
 def len: mylist T → mynat
-| [] := 0
+| []        := 0
 | (_ :: xs) := succ (len xs)
 
 @[simp]
@@ -84,7 +88,7 @@ begin
 end
 
 def rev: mylist T → mylist T
-| [] := []
+| []        := []
 | (x :: xs) := (rev xs) ++ [x]
 
 @[simp] theorem rev_empty: rev ([]: mylist T) = [] := rfl
@@ -119,7 +123,7 @@ begin
     simp,
   }, {
     simp [lst_ih],
-  }
+  },
 end
 
 end hidden

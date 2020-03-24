@@ -1,4 +1,7 @@
-import naturals.dvd naturals.induction naturals.fact logic.basic
+import naturals.dvd
+import naturals.induction
+import naturals.fact
+import logic.basic
 
 namespace hidden
 
