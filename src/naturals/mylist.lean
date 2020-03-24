@@ -1,8 +1,5 @@
 import naturals.mynat
-
--- TODO:
--- think of a nice way to do "maybe" operations like indexing,
--- inserting, deleting
+import naturals.lt
 
 namespace hidden
 
@@ -32,6 +29,20 @@ notation `[`x`]` := singleton x
 
 @[simp] theorem singleton_cons_empty: [x] = x :: [] := rfl
 
+theorem cons_injective_1: x :: xs = y :: ys → x = y :=
+begin
+  assume h,
+  cases h,
+  refl,
+end
+
+theorem cons_injective_2: x :: xs = y :: ys → xs = ys :=
+begin
+  assume h,
+  cases h,
+  refl,
+end
+
 -- we don't define append explicitly, since lists are define by recursion on the
 -- tail. Also note that concat is defined by recursion on the first argument, so
 -- you should generally induct on the first argument.
@@ -58,6 +69,14 @@ end
 @[simp]
 theorem singleton_concat_cons: [x] ++ lst = x :: lst := rfl
 
+@[simp]
+theorem cons_not_empty: x :: xs ≠ [] :=
+begin
+  assume h,
+  cases h,
+end
+
+@[simp]
 theorem concat_assoc: (lst1 ++ lst2) ++ lst3 = lst1 ++ (lst2 ++ lst3) :=
 begin
   induction lst1, {
@@ -125,5 +144,115 @@ begin
     simp [lst_ih],
   },
 end
+
+theorem rev_len: len lst = len (rev lst) :=
+begin
+  induction lst, {
+    simp,
+  }, {
+    simp [lst_ih],
+  }
+end
+
+theorem nonempty_iff_len: lst ≠ [] ↔ len lst ≠ 0 :=
+begin
+  cases lst, {
+    simp,
+  }, {
+    simp,
+    from succ_ne_zero (len lst_tail),
+  }
+end
+
+theorem nonempty_iff_cons: lst ≠ [] ↔ ∃ x: T, ∃ xs: mylist T, lst = x :: xs :=
+begin
+  cases lst, {
+    simp,
+    assume h,
+    cases h with _ h,
+    cases h with _ h,
+    assumption,
+  }, {
+    simp,
+    existsi lst_head,
+    existsi lst_tail,
+    simp,
+  },
+end
+
+theorem rev_not_empty: lst ≠ [] → rev lst ≠ [] :=
+begin
+  repeat {rw nonempty_iff_len},
+  repeat {rw ←rev_len},
+  assume h, from h,
+end
+
+def first: ∀ lst: mylist T, lst ≠ [] → T
+| []        h := absurd rfl h
+| (x :: xs) _ := x
+
+def tail: ∀ lst: mylist T, lst ≠ [] → mylist T
+| []        h := absurd rfl h
+| (x :: xs) _ := xs
+
+def init: ∀ lst: mylist T, lst ≠ [] → mylist T
+| []             h := absurd rfl h
+| (x :: [])      _ := []
+| (x :: y :: xs) _ := x :: init (y :: xs) (cons_not_empty _ _ )
+
+@[simp]
+theorem init_singleton (h: [x] ≠ []): init [x] h = [] := rfl
+@[simp]
+theorem init_ccons (h: x :: y :: xs ≠ []):
+init (x :: y :: xs) h = x :: init (y :: xs) (cons_not_empty _ _) := rfl
+
+def last: ∀ lst: mylist T, lst ≠ [] → T
+| []             h := absurd rfl h
+| (x :: [])      _ := x
+| (x :: y :: xs) h := last (y :: xs) (cons_not_empty _ _)
+
+@[simp]
+theorem last_singleton (h: [x] ≠ []): last [x] h = x := rfl
+@[simp]
+theorem last_ccons (h: x :: y :: xs ≠ []):
+last (x :: y :: xs) h = last (y :: xs) (cons_not_empty _ _) := rfl
+
+def get: ∀ lst: mylist T, ∀ n: mynat, n < len lst → T
+| []        n        h := begin
+                            simp at h, exfalso, from lt_nzero _ h,
+                          end
+| (x :: xs) 0        h := x
+| (x :: xs) (succ n) h := get xs n begin
+                                     simp at h, from lt_succ_cancel _ _ h,
+                                   end
+
+theorem concat_init_last (h: lst ≠ []): init lst h ++ [last lst h] = lst :=
+begin
+  induction lst, {
+    from absurd rfl h,
+  }, {
+    cases lst_tail, {
+      have hi := init_singleton _ h,
+      simp at hi,
+      rw hi,
+      have hl := last_singleton _ h,
+      simp at hl,
+      rw hl,
+      simp,
+    }, {
+      rw init_ccons _ _ _ h,
+      rw last_ccons _ _ _ h,
+      simp,
+      apply lst_ih,
+    }
+  },
+end
+
+-- TODO: make this work
+-- def palindrome: mylist T → Prop
+-- | []             := true
+-- | (x :: [])      := true
+-- | (x :: y :: xs) := x = last (y :: xs) (cons_not_empty _ _)
+--                   ∧ palindrome (init (y :: xs) (cons_not_empty _ _))
 
 end hidden
