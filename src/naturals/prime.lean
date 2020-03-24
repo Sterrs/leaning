@@ -241,7 +241,7 @@ begin
         },
         have halen: a ≤ n, {
           apply (le_iff_lt_succ a n).mpr,
-          have hasn := dvd_lt _ _ (succ_ne_zero _) hadvds,
+          have hasn := dvd_le _ _ (succ_ne_zero _) hadvds,
           have hansn: a ≠ succ n, {
             -- the oldest trick in the book: just wear it down by cases
             assume hasn,
@@ -334,17 +334,6 @@ end
 -- this is pitched as a kind of long-term goal
 theorem euclids_lemma: prime p → p ∣ m * n → p ∣ m ∨ p ∣ n :=
 begin
-  sorry
-end
-
--- framed in a natural-numbersy sort of way.
-theorem sqrt_2_irrational: n ≠ 0 → ¬m * m = n * n + n * n :=
-begin
-  assume hnz hsq2q,
-  have h2dvdrhs: 2 ∣ n * n + n * n, {
-    existsi n * n,
-    refl,
-  },
   sorry
 end
 

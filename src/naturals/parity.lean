@@ -248,4 +248,87 @@ begin
   },
 end
 
+-- this is awful
+theorem sqrt_2_irrational: ¬(m ≠ 0 ∧ ∃ n, n * n = 2 * m * m) :=
+begin
+  -- for some reason this is a recurring lemma here
+  -- is there some way to just do this inline?
+  have h20: (2: mynat) ≠ 0, {
+    assume h, cases h,
+  },
+  apply infinite_descent (λ m, m ≠ 0 ∧ ∃ n, n * n = 2 * m * m),
+  intro k,
+  assume h_desc,
+  cases h_desc with hknz h_desc,
+  cases h_desc with n hn2k2,
+  -- this also comes up a lot
+  have hnn0: n ≠ 0, {
+    assume hn0,
+    simp [hn0] at hn2k2,
+    from h20 (mul_integral _ _ hknz (mul_integral _ _ hknz hn2k2.symm)),
+  },
+  have h2dvdn: 2 ∣ n, {
+    have h2dvdn2: 2 ∣ n * n, {
+      existsi k * k,
+      simp [hn2k2],
+    },
+    from even_square n h2dvdn2,
+  },
+  cases h2dvdn with k' hk',
+  existsi k',
+  split, split, {
+    assume hk'0,
+    simp [hk'0] at hk',
+    from hnn0 hk',
+  }, {
+    rw hk' at hn2k2,
+    existsi k,
+    apply mul_cancel 2 _ _ h20,
+    rw [←mul_assoc, ←hn2k2],
+    rw mul_comm 2 _,
+    conv {
+      to_rhs,
+      rw mul_assoc,
+      congr,
+      rw mul_comm,
+    },
+  }, {
+    rw hk' at hn2k2,
+    assume hklek',
+    cases hklek' with d hd,
+    rw hd at hn2k2,
+    simp at hn2k2,
+    cases k, contradiction,
+    simp at hn2k2,
+    -- current state of affairs is to show that this is absurd:
+    -- 2 * 2 +
+    -- (k * (2 * 2) +
+    --    (2 * (k * 2) +
+    --       (k * (2 * (k * 2)) +
+    --          (2 * (d * 2) +
+    --              (k * (2 * (d * 2))
+    --                  + (d * (2 * (d * 2))
+    --                      + (d * (2 * 2)
+    --                          + d * (2 * (k * 2)))))))))
+    -- = 2 + (k * 2 + (k * 2 + k * (k * 2)))
+    -- we can simplify to
+    -- 4 + 4k + 4k + 4k^2 + 4d + 4kd + 4d^2 + 4d + 4kd
+    -- = 2 + 2k + 2k + 2k^2
+    -- ⇔
+    -- 4 + 8k + 8d + 8kd + 4k^2 + 4d^2 = 2 + 4k + 2k^2
+    -- ⇔
+    -- 4(k + d + 1)^2 = 2(k + 1)^2
+    -- ⇔
+    -- 2(k + d + 1)^2 = (k + 1)^2
+    -- then since
+    -- k + d + 1 ≥ k + 1,
+    -- ⇒ (k + d + 1)^2 ≥ (k + 1)^2
+    -- ⇒ 2(k + d + 1)^2 ≥ (k + 1)^2
+    -- but this inequality can be made strict by also proving both sides are
+    -- ≥ 1
+    -- :((
+    sorry,
+  },
+end
+
 end hidden

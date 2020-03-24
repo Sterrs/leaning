@@ -220,7 +220,7 @@ begin
   from hmn hcontr,
 end
 
-theorem dvd_lt: n ≠ 0 → m ∣ n → m ≤ n :=
+theorem dvd_le: n ≠ 0 → m ∣ n → m ≤ n :=
 begin
   assume hnn0 hmdvdn,
   cases (le_total_order m n),
