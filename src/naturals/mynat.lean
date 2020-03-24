@@ -318,4 +318,10 @@ begin
   }
 end
 
+theorem lem_eq_zero: m = 0 ∨ m ≠ 0 :=
+begin
+  cases m, simp,
+  right, from succ_ne_zero m,
+end
+
 end hidden

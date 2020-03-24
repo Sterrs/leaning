@@ -9,6 +9,12 @@ instance: has_lt mynat := ⟨lt⟩
 
 variables m n p k : mynat
 
+theorem lt_nrefl: ¬m < m :=
+begin
+  assume hmm,
+  from hmm (le_refl m),
+end
+
 theorem lt_succ_cancel: succ m < succ n → m < n :=
 begin
   assume hsmsn hmn,
@@ -41,10 +47,17 @@ begin
   cc,
 end
 
-theorem zero_lt: m ≠ 0 → 0 < m :=
+theorem nzero_iff_zero_lt: m ≠ 0 ↔ 0 < m :=
 begin
-  assume hmnz hmlz,
-  from hmnz (le_zero _ hmlz),
+  split, {
+    assume hmnz hmlz,
+    from hmnz (le_zero _ hmlz),
+  }, {
+    assume hlt heq,
+    rw heq at hlt,
+    have := lt_nrefl 0,
+    contradiction,
+  },
 end
 
 theorem lt_to_add_succ: m < m + succ n :=
@@ -90,12 +103,6 @@ theorem lt_add: m < n → m + k < n + k :=
 begin
   assume hmn hmknk,
   from hmn (le_cancel _ _ _ hmknk),
-end
-
-theorem lt_nrefl: ¬m < m :=
-begin
-  assume hmm,
-  from hmm (le_refl m),
 end
 
 theorem lt_impl_le: m < n → m ≤ n :=
@@ -220,6 +227,75 @@ begin
   have hkln: k ≤ n
   := le_cancel_strong _ _ (succ d) (lt_impl_le _ _ hmn),
   from hnk hkln,
+end
+
+theorem lt_combine (a b : mynat): m < n → a < b → m + a < n + b :=
+begin
+  assume hmn hab,
+  have : m + a < n + a, {
+    apply lt_add _ _ _,
+    assumption,
+  },
+  have : n + a < n + b, {
+    rw [add_comm n, add_comm n],
+    apply lt_add _ _ _,
+    assumption,
+  },
+  apply lt_trans _ (n+a) _,
+  repeat { assumption },
+end
+
+theorem lt_mul: k ≠ 0 → m < n → k * m < k * n :=
+begin
+  assume hnz hmn,
+  induction k with k hk,
+    exfalso,
+    simp at hnz,
+    assumption,
+  cases lem_eq_zero k,
+    rw h,
+    simp,
+    assumption,
+  repeat { rw succ_mul },
+  have := hk h,
+  apply lt_combine _ _ _ _,
+  repeat {assumption},
+end
+
+theorem le_sqrt: m * m ≤ n * n → m ≤ n :=
+begin
+  assume hle,
+  cases le_lem m n, assumption, {
+    exfalso,
+    cases n, {
+      simp at hle,
+      simp at h,
+      have : m ≠ 0, {
+        rw nzero_iff_zero_lt,
+        assumption,
+      },
+      have h_1 := lt_mul 0 m m this h,
+      simp at h_1,
+      contradiction,
+    }, {
+      have hn2mn: (succ n) * (succ n) < m * (succ n), {
+        rw mul_comm m,
+        apply lt_mul _ _ _,
+          from succ_ne_zero n,
+        assumption,
+      },
+      have hmnm2: m * (succ n) < m * m, {
+        apply lt_mul _ _ _, {
+          assume h_1,
+          rw h_1 at h,
+          from lt_nzero (succ n) h,
+        },
+        assumption,
+      },
+      have hcontra := lt_trans _ _ _ hn2mn hmnm2,
+      contradiction,
+    }
+  },
 end
 
 end hidden

@@ -213,4 +213,16 @@ begin
   simp [hd, hdz],
 end
 
+theorem le_mul_cancel: k ≠ 0 → k * m ≤ k * n → m ≤ n :=
+begin
+  assume hk0 hle,
+  cases (le_total_order m n) with hmn hnm,
+    assumption,
+  have hknkm := le_mul n m k hnm,
+  have heq := le_antisymm (k*m) (k*n) hle hknkm,
+  have := mul_cancel k m n hk0 heq,
+  rw this,
+  from le_refl n,
+end
+
 end hidden
