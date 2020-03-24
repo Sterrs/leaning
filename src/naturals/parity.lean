@@ -293,40 +293,22 @@ begin
       rw mul_comm,
     },
   }, {
-    rw hk' at hn2k2,
-    assume hklek',
-    cases hklek' with d hd,
-    rw hd at hn2k2,
-    simp at hn2k2,
-    cases k, contradiction,
-    simp at hn2k2,
-    -- current state of affairs is to show that this is absurd:
-    -- 2 * 2 +
-    -- (k * (2 * 2) +
-    --    (2 * (k * 2) +
-    --       (k * (2 * (k * 2)) +
-    --          (2 * (d * 2) +
-    --              (k * (2 * (d * 2))
-    --                  + (d * (2 * (d * 2))
-    --                      + (d * (2 * 2)
-    --                          + d * (2 * (k * 2)))))))))
-    -- = 2 + (k * 2 + (k * 2 + k * (k * 2)))
-    -- we can simplify to
-    -- 4 + 4k + 4k + 4k^2 + 4d + 4kd + 4d^2 + 4d + 4kd
-    -- = 2 + 2k + 2k + 2k^2
-    -- ⇔
-    -- 4 + 8k + 8d + 8kd + 4k^2 + 4d^2 = 2 + 4k + 2k^2
-    -- ⇔
-    -- 4(k + d + 1)^2 = 2(k + 1)^2
-    -- ⇔
-    -- 2(k + d + 1)^2 = (k + 1)^2
-    -- then since
-    -- k + d + 1 ≥ k + 1,
-    -- ⇒ (k + d + 1)^2 ≥ (k + 1)^2
-    -- ⇒ 2(k + d + 1)^2 ≥ (k + 1)^2
-    -- but this inequality can be made strict by also proving both sides are
-    -- ≥ 1
-    -- :((
+    conv at hn2k2 {
+      rw hk',
+      congr,
+        rw mul_comm k',
+        rw mul_assoc,
+        skip,
+      rw mul_assoc,
+    },
+    have h₂:= mul_cancel 2 _ _ h20 hn2k2,
+    conv at h₂ {
+      to_lhs,
+      rw [mul_comm, mul_assoc],
+    },
+    suffices : k'*k' < k*k, {
+      apply lt_sqrt _ _ this,
+    },
     sorry,
   },
 end

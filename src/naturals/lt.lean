@@ -262,6 +262,16 @@ begin
   repeat {assumption},
 end
 
+theorem le_square: m ≤ n → m*m ≤ n*n :=
+begin
+  assume hle,
+  have h₁ := le_mul m n n hle,
+  have h₂ := le_mul m n m hle,
+  rw mul_comm at h₁,
+  from le_trans _ _ _ h₂ h₁,
+end
+
+-- I'm sure I completely overthought this
 theorem le_sqrt: m * m ≤ n * n → m ≤ n :=
 begin
   assume hle,
@@ -296,6 +306,13 @@ begin
       contradiction,
     }
   },
+end
+
+theorem lt_sqrt: m*m < n*n → m < n :=
+begin
+  assume hlt hnlem,
+  have := le_square _ _ hnlem,
+  contradiction,
 end
 
 end hidden
