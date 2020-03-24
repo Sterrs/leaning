@@ -91,10 +91,26 @@ begin
   contradiction,
 end
 
--- Likely follows from well-ordering
+-- Intuitionist given well-ordering
 theorem infinite_descent
 (statement : mynat → Prop) :
-∀ k : mynat, (statement k → ∃ j : mynat, statement j ∧ j < k)
-→ ∀ k : mynat, ¬(statement k) := sorry
+(∀ k : mynat, (statement k → ∃ j : mynat, statement j ∧ j < k))
+→ ∀ k : mynat, ¬(statement k) :=
+begin
+  assume h k hk,
+  have hex : ∃ k : mynat, statement k ∧
+             ∀ j : mynat, (statement j) →  k ≤ j, {
+    apply well_ordering,
+    existsi k,
+    assumption,
+  },
+  cases hex with i hi,
+  cases hi with hil hir,
+  have hallile := h i hil,
+  cases hallile with j hj,
+  cases hj with hjl hjr,
+  have := hir j hjl,
+  contradiction,
+end
 
 end hidden
