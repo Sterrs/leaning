@@ -1,5 +1,5 @@
-import naturals.mynat
-import naturals.lt
+import principia.mynat
+import principia.lt
 
 namespace hidden
 
@@ -18,6 +18,7 @@ variable {T: Type u}
 -- Haskell-like convention, use x::xs to pattern match head/tail
 variables x y z: T
 variables xs ys zs lst lst1 lst2 lst3: mylist T
+variables m n: mynat
 
 -- I'm really just sort of making this up as I go along
 -- It would be nice to have notation like [1, 2, 3]
@@ -47,7 +48,7 @@ end
 -- tail. Also note that concat is defined by recursion on the first argument, so
 -- you should generally induct on the first argument.
 def concat: mylist T → mylist T → mylist T
-| [] lst        := lst
+| []        lst := lst
 | (x :: xs) lst := x :: (concat xs lst)
 
 notation lst1 ++ lst2 := concat lst1 lst2
@@ -164,22 +165,6 @@ begin
   }
 end
 
-theorem nonempty_iff_cons: lst ≠ [] ↔ ∃ x: T, ∃ xs: mylist T, lst = x :: xs :=
-begin
-  cases lst, {
-    simp,
-    assume h,
-    cases h with _ h,
-    cases h with _ h,
-    assumption,
-  }, {
-    simp,
-    existsi lst_head,
-    existsi lst_tail,
-    simp,
-  },
-end
-
 theorem rev_not_empty: lst ≠ [] → rev lst ≠ [] :=
 begin
   repeat {rw nonempty_iff_len},
@@ -187,14 +172,26 @@ begin
   assume h, from h,
 end
 
-def first: ∀ lst: mylist T, lst ≠ [] → T
-| []        h := absurd rfl h
-| (x :: xs) _ := x
+-- These are some "maybe" operations, which are undefined on empty lists
+-- (or sometimes lists of a certain length), so they take as argument
+-- a proof that the input list is of the correct form,
+-- which is a dependent type thing. Maybe they're supposed to be Πs
 
+-- first element
+def head: ∀ lst: mylist T, lst ≠ [] → T
+| []       h := absurd rfl h
+| (x :: _) _ := x
+
+@[simp] theorem first_cons (h: x :: xs ≠ []): head (x :: xs) h = x := rfl
+
+-- everything except first element
 def tail: ∀ lst: mylist T, lst ≠ [] → mylist T
 | []        h := absurd rfl h
-| (x :: xs) _ := xs
+| (_ :: xs) _ := xs
 
+@[simp] theorem tail_cons (h: x :: xs ≠ []): tail (x :: xs) h = xs := rfl
+
+-- everything except last element
 def init: ∀ lst: mylist T, lst ≠ [] → mylist T
 | []             h := absurd rfl h
 | (x :: [])      _ := []
@@ -206,6 +203,7 @@ theorem init_singleton (h: [x] ≠ []): init [x] h = [] := rfl
 theorem init_ccons (h: x :: y :: xs ≠ []):
 init (x :: y :: xs) h = x :: init (y :: xs) (cons_not_empty _ _) := rfl
 
+-- last element
 def last: ∀ lst: mylist T, lst ≠ [] → T
 | []             h := absurd rfl h
 | (x :: [])      _ := x
@@ -217,16 +215,117 @@ theorem last_singleton (h: [x] ≠ []): last [x] h = x := rfl
 theorem last_ccons (h: x :: y :: xs ≠ []):
 last (x :: y :: xs) h = last (y :: xs) (cons_not_empty _ _) := rfl
 
-def get: ∀ lst: mylist T, ∀ n: mynat, n < len lst → T
-| []        n        h := begin
-                            simp at h, exfalso, from lt_nzero _ h,
-                          end
-| (x :: xs) 0        h := x
-| (x :: xs) (succ n) h := get xs n begin
-                                     simp at h, from lt_succ_cancel _ _ h,
-                                   end
+private theorem len_cons_succ_cancel1 (h: succ n ≤ len (x :: xs)): n ≤ len xs :=
+begin
+  simp at h,
+  from le_succ_cancel _ _ h,
+end
 
-theorem concat_init_last (h: lst ≠ []): init lst h ++ [last lst h] = lst :=
+private theorem absurd_succ_le_zero: ¬succ n ≤ 0 :=
+begin
+  assume h,
+  simp [le_iff_lt_succ] at h,
+  exfalso, from lt_nzero _ (lt_succ_cancel _ _ h),
+end
+
+-- the first n elements
+def take: ∀ n: mynat, ∀ lst: mylist T, n ≤ len lst → mylist T
+| 0        _        _ := []
+| (succ n) []        h := absurd h (absurd_succ_le_zero n)
+| (succ n) (x :: xs) h := x :: take n xs (len_cons_succ_cancel1 _ _ _ h)
+
+@[simp] theorem take_zero (h: 0 ≤ len lst): take 0 lst h = [] := rfl
+@[simp]
+theorem take_succ_cons
+(h: succ n ≤ len (x :: xs)):
+take (succ n) (x :: xs) h = x :: take n xs (len_cons_succ_cancel1 _ _ _ h) := rfl
+
+-- everything except the first n elements
+def drop: ∀ n: mynat, ∀ lst: mylist T, n ≤ len lst → mylist T
+| 0        lst       _ := lst
+| (succ n) []        h := absurd h (absurd_succ_le_zero n)
+| (succ n) (_ :: xs) h := drop n xs (len_cons_succ_cancel1 _ _ _ h)
+
+@[simp] theorem drop_zero (h: 0 ≤ len lst): drop 0 lst h = lst := rfl
+@[simp]
+theorem drop_succ_cons
+(h: succ n ≤ len (x :: xs)):
+drop (succ n) (x :: xs) h = drop n xs (len_cons_succ_cancel1 _ _ _ h) := rfl
+
+private theorem len_cons_succ_cancel2 (h: succ n < len (x :: xs)): n < len xs :=
+begin
+  simp at h,
+  from lt_succ_cancel _ _ h,
+end
+
+-- the nth element
+def get: ∀ n: mynat, ∀ lst: mylist T, n < len lst → T
+| n        []        h := absurd h (lt_nzero n)
+| 0        (x :: _)  _ := x
+| (succ n) (x :: xs) h := get n xs (len_cons_succ_cancel2 _ _ _ h)
+
+@[simp]
+theorem get_zero_cons
+(h: 0 < len (x :: xs)):
+get 0 (x :: xs) h = x := rfl
+
+@[simp]
+theorem get_succ_cons
+(h: succ n < len (x :: xs)):
+get (succ n) (x :: xs) h = get n xs (len_cons_succ_cancel2 _ _ _ h) := rfl
+
+-- TODO: state this without tactic mode
+@[simp] theorem get_zero_head (h: 0 < len lst):
+get 0 lst h = head lst
+              begin
+                assume h',
+                simp [h', lt_nrefl] at h,
+                assumption,
+              end :=
+begin
+  cases lst, {
+    refl,
+  }, {
+    simp,
+  }
+end
+
+theorem cons_head_tail (h: lst ≠ []): head lst h :: tail lst h = lst :=
+begin
+  cases lst, {
+    contradiction,
+  }, {
+    simp,
+  }
+end
+
+theorem len_tail (h: lst ≠ []): len lst = succ (len (tail lst h)) :=
+begin
+  cases lst, {
+    contradiction,
+  }, {
+    simp,
+  },
+end
+
+-- I didn't really think this one through
+theorem len_init (h: lst ≠ []): len lst = succ (len (init lst h)) :=
+begin
+  induction lst, {
+    contradiction,
+  }, {
+    simp,
+    cases lst_tail, {
+      have hi := init_singleton _ h,
+      simp at hi,
+      rw hi,
+    }, {
+      apply lst_ih,
+    }
+  }
+end
+
+theorem append_init_last (h: lst ≠ []): init lst h ++ [last lst h] = lst :=
 begin
   induction lst, {
     from absurd rfl h,
@@ -247,6 +346,92 @@ begin
     }
   },
 end
+
+-- TODO: get_n_head_drop, len_drop, len_take, concat_drop_take, concat_cancel, rev_take_drop
+
+private theorem succ_le_impl_le (h: succ n ≤ len lst): n ≤ len lst :=
+(le_cancel_strong n (len lst) 1 h)
+
+-- theorem drop_succ (h: succ n ≤ len lst) :=
+-- drop (succ n) lst h = init (drop n lst (succ_le_impl_le _ _ h))
+-- begin
+--   assume h',
+--   have: len lst = n,
+--   induction lst, {
+--     exfalso, from succ_ne_zero _ (le_zero _ h),
+--   }, {
+    
+--   }
+-- end
+
+theorem len_drop_succ (h: succ n ≤ len lst):
+succ (len (drop (succ n) lst h))
+  = len (drop n lst (succ_le_impl_le _ _ h)) :=
+begin
+  cases lst, {
+    exfalso, from succ_ne_zero _ (le_zero _ h),
+  }, {
+    rw drop_succ_cons,
+    induction n, {
+      simp,
+    }, {
+      simp,
+      sorry,
+    }
+  }
+end
+
+@[simp]
+theorem len_take_succ (h: succ n ≤ len lst):
+len (take (succ n) lst h)
+  = succ (len (take n lst (succ_le_impl_le _ _ h))) :=
+begin
+  induction n, {
+    simp,
+    cases lst, {
+      exfalso, from succ_ne_zero _ (le_zero _ h),
+    }, {
+      have x := take_succ_cons lst_head lst_tail 0 _,
+      simp at x,
+      rw x,
+      simp,
+      rw len_cons_succ,
+      apply succ_le_succ, -- /o/
+      from zero_le _,
+    },
+  }, {
+    cases lst, {
+      exfalso, from succ_ne_zero _ (le_zero _ h),
+    }, {
+      have x := take_succ_cons lst_head lst_tail (succ n_n),
+      rw x,
+      simp,
+      sorry,
+    }
+  }
+end
+
+theorem len_take (h: n ≤ len lst): len (take n lst h) = n :=
+begin
+  induction n, {
+    simp,
+  }, {
+    induction lst, {
+      exfalso, from succ_ne_zero _ (le_zero _ h),
+    }, {
+      sorry,
+    }
+  }
+end
+
+def contains: T → mylist T → Prop
+| _ []        := false
+| x (y :: ys) := x = y ∨ contains x ys
+
+instance: has_mem T (mylist T) := ⟨contains⟩
+
+theorem contains_cons: x ∈ (y :: ys) ↔ x = y ∨ x ∈ ys := iff.rfl
+theorem singleton_contains: x ∈ [x] := (contains_cons x x []).mpr (or.inl rfl)
 
 -- TODO: make this work
 -- def palindrome: mylist T → Prop
