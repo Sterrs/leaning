@@ -247,19 +247,19 @@ end
 
 theorem lt_mul: k ≠ 0 → m < n → k * m < k * n :=
 begin
-  assume hnz hmn,
-  induction k with k hk,
-    exfalso,
-    simp at hnz,
-    assumption,
-  cases lem_eq_zero k,
-    rw h,
-    simp,
-    assumption,
-  repeat { rw succ_mul },
-  have := hk h,
-  apply lt_combine _ _ _ _,
-  repeat {assumption},
+  assume hknz hmln hknkm,
+  cases hknkm with d hd,
+  cases n, {
+    from lt_nzero _ hmln,
+  }, {
+    rw ←le_iff_lt_succ at hmln,
+    cases hmln with d' hd',
+    simp [hd'] at hd,
+    rw [←add_assoc, add_comm, add_assoc] at hd,
+    have hcancel := add_cancel_to_zero _ _ hd,
+    rw [←add_assoc, add_comm] at hcancel,
+    from hknz (add_integral _ _ hcancel),
+  },
 end
 
 theorem le_square: m ≤ n → m*m ≤ n*n :=
@@ -271,40 +271,24 @@ begin
   from le_trans _ _ _ h₂ h₁,
 end
 
--- I'm sure I completely overthought this
 theorem le_sqrt: m * m ≤ n * n → m ≤ n :=
 begin
-  assume hle,
-  cases le_lem m n, assumption, {
-    exfalso,
-    cases n, {
-      simp at hle,
-      simp at h,
-      have : m ≠ 0, {
-        rw nzero_iff_zero_lt,
-        assumption,
-      },
-      have h_1 := lt_mul 0 m m this h,
-      simp at h_1,
-      contradiction,
+  assume hm2n2,
+  cases (le_total_order m n), {
+    assumption,
+  }, {
+    cases h with d hd,
+    cases d, {
+      simp [hd],
+      from le_refl _,
     }, {
-      have hn2mn: (succ n) * (succ n) < m * (succ n), {
-        rw mul_comm m,
-        apply lt_mul _ _ _,
-          from succ_ne_zero n,
-        assumption,
-      },
-      have hmnm2: m * (succ n) < m * m, {
-        apply lt_mul _ _ _, {
-          assume h_1,
-          rw h_1 at h,
-          from lt_nzero (succ n) h,
-        },
-        assumption,
-      },
-      have hcontra := lt_trans _ _ _ hn2mn hmnm2,
-      contradiction,
-    }
+      cases hm2n2 with d' hd',
+      simp [hd] at hd',
+      rw [add_comm, add_comm n, add_comm d, add_comm n] at hd',
+      repeat {rw add_assoc at hd'},
+      rw ←add_succ at hd',
+      exfalso, from succ_ne_zero _ (add_cancel_to_zero _ _ hd'),
+    },
   },
 end
 
