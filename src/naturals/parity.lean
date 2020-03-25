@@ -309,7 +309,18 @@ begin
     suffices : k'*k' < k*k, {
       apply lt_sqrt _ _ this,
     },
-    sorry,
+    -- TODO: write a separate theorem here
+    assume hk2k'2,
+    cases hk2k'2 with d hd,
+    rw hd at h₂,
+    have hk2e0: k * k = 0, {
+      have h211: (2: mynat) = 1 + 1, refl,
+      rw [h211, add_mul, one_mul, add_assoc] at h₂,
+      have h' := add_cancel_to_zero _ _ h₂.symm,
+      rw [add_comm, add_assoc] at h',
+      from add_integral _ _ h',
+    },
+    from hknz (mul_integral _ _ hknz hk2e0),
   },
 end
 
