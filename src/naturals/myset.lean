@@ -3,7 +3,7 @@ import logic.basic
 
 namespace hidden
 
-universes u v
+universes u v w
 
 -- A set of elements of type α is a function from elements of type α
 -- to propositions
@@ -209,6 +209,22 @@ theorem schroeder_bernstein_theorem
 card_le s t → card_ge s t → equinumerous s t := sorry
 
 end theorems
+
+-- Theorems about two functions between sets
+section function_composition
+
+parameters {α : Type u} {β : Type v} {γ : Type w}
+parameters (r : myset α) (s : myset β) (t : myset γ)
+parameters (f : α → β) (g : β → γ)
+
+-- If g ∘ f is wrong, use (λ a:α, g (f a))
+theorem composition_well_defined:
+well_defined r s f → well_defined s t g → well_defined r t (g ∘ f) :=
+begin
+  sorry,
+end
+
+end function_composition
 
 end myset
 
