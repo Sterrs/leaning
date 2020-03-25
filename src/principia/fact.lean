@@ -1,5 +1,5 @@
-import naturals.dvd
-import naturals.induction
+import principia.dvd
+import principia.induction
 
 namespace hidden
 

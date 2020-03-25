@@ -1,4 +1,4 @@
-import naturals.mynat
+import principia.mynat
 
 namespace hidden
 

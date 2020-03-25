@@ -1,4 +1,4 @@
-import naturals.le
+import principia.le
 
 namespace hidden
 

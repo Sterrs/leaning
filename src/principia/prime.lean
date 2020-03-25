@@ -1,6 +1,6 @@
-import naturals.dvd
-import naturals.induction
-import naturals.fact
+import principia.dvd
+import principia.induction
+import principia.fact
 import logic.basic
 
 namespace hidden

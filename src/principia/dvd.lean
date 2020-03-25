@@ -1,4 +1,4 @@
-import naturals.lt
+import principia.lt
 
 namespace hidden
 

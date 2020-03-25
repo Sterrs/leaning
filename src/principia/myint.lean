@@ -1,5 +1,5 @@
-import naturals.mynat
-import naturals.le
+import principia.mynat
+import principia.le
 
 namespace hidden
 

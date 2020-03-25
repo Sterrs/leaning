@@ -1,4 +1,4 @@
-import naturals.lt
+import principia.lt
 import logic.basic
 
 namespace hidden

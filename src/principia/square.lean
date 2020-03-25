@@ -1,4 +1,4 @@
-import naturals.prime
+import principia.prime
 
 namespace hidden
 

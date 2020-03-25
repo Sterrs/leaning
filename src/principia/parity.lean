@@ -1,5 +1,5 @@
-import naturals.prime
-import naturals.induction
+import principia.prime
+import principia.induction
 
 namespace hidden
 
