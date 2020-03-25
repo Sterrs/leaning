@@ -57,7 +57,7 @@ parameter (h : well_defined)
 include h
 
 def injective: Prop :=
-∀ a₁ a₂ : α, a₁ ∈ s → a₂ ∈ s → a₁ ≠ a₂ → f a₁ ≠ f a₂
+∀ a₁ a₂ : α, a₁ ∈ s → a₂ ∈ s → f a₁ = f a₂ → a₁ = a₂
 def surjective: Prop :=
 ∀ b : β, b ∈ t → ∃ a : α, a ∈ s ∧ f a = b
 
@@ -190,20 +190,6 @@ begin
   },
 end
 
-theorem uncountability_of_power_set_of_naturals :
-uncountable (power_set (all_of mynat)) :=
-begin
-  assume h,
-  cases h with hfinite hcountinf, {
-    -- Still need to prove the power set of the naturals is not
-    -- finite, which seems hard, could use transitivity theorem?
-    sorry,
-  }, {
-    have := card_ne_power_set (all_of mynat),
-    contradiction,
-  },
-end
-
 theorem schroeder_bernstein_theorem
 {s : myset α} {t : myset β}:
 card_le s t → card_ge s t → equinumerous s t := sorry
@@ -217,14 +203,88 @@ parameters {α : Type u} {β : Type v} {γ : Type w}
 parameters (r : myset α) (s : myset β) (t : myset γ)
 parameters (f : α → β) (g : β → γ)
 
--- If g ∘ f is wrong, use (λ a:α, g (f a))
 theorem composition_well_defined:
 well_defined r s f → well_defined s t g → well_defined r t (g ∘ f) :=
 begin
-  sorry,
+  assume hwf hwg,
+  intro a,
+  assume har,
+  apply hwg,
+  apply hwf,
+  assumption,
+end
+
+#check injective
+
+theorem inj_inj (hwf: well_defined r s f) (hwg: well_defined s t g):
+injective r s f hwf → injective s t g hwg
+  → injective r t (g ∘ f) (composition_well_defined hwf hwg) :=
+begin
+  assume hif hig,
+  intros a b,
+  assume har hbr hgfagfb,
+  apply hif _ _ har hbr,
+  apply hig _ _ (hwf a har) (hwf b hbr),
+  assumption,
+end
+
+-- not the prettiest
+theorem surj_surj (hwf: well_defined r s f) (hwg: well_defined s t g):
+surjective r s f hwf → surjective s t g hwg
+  → surjective r t (g ∘ f) (composition_well_defined hwf hwg) :=
+begin
+  assume hsf hsg,
+  intro a,
+  assume hat,
+  cases hsg a hat with a_g ha_g,
+  cases hsf a_g ha_g.left with a_f ha_f,
+  existsi a_f,
+  split, {
+    from ha_f.left,
+  }, {
+    rw [←ha_g.right, ←ha_f.right],
+  },
+end
+
+theorem bij_bij (hwf: well_defined r s f) (hwg: well_defined s t g):
+bijective r s f hwf → bijective s t g hwg
+  → bijective r t (g ∘ f) (composition_well_defined hwf hwg) :=
+begin
+  assume hbf hbg,
+  cases hbf with hif hsf,
+  cases hbg with hig hsg,
+  split, {
+    -- nice. wish I understood how all the fancy stuff works
+    from inj_inj _ _ _ _ _ _ _ hif hig,
+  }, {
+    from surj_surj _ _ _ _ _ _ _ hsf hsg,
+  }
 end
 
 end function_composition
+
+theorem naturals_infinite: infinite (all_of mynat) :=
+begin
+  assume hfinite,
+  cases hfinite with n hn,
+  cases hn with f hf,
+  cases hf with hwf h,
+  sorry,
+end
+
+theorem uncountability_of_power_set_of_naturals:
+uncountable (power_set (all_of mynat)) :=
+begin
+  assume h,
+  cases h with hfinite hcountinf, {
+    -- Still need to prove the power set of the naturals is not
+    -- finite, which seems hard, could use transitivity theorem?
+    sorry,
+  }, {
+    have := card_ne_power_set (all_of mynat),
+    contradiction,
+  },
+end
 
 end myset
 
