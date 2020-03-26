@@ -345,12 +345,6 @@ begin
   cases hn with f hf,
   cases hf with hwf h,
   sorry,
-    },
-  },
-  cases h with a h,
-  cases h with b h,
-  cases h with hanb hfafb,
-  from hanb (hif a b trivial trivial hfafb),
 end
 
 theorem uncountability_of_power_set_of_naturals:
