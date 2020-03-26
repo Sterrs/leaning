@@ -78,8 +78,10 @@ def equinumerous (s : myset α) (t : myset β) : Prop :=
 
 end definitions
 
+def of_size {α : Type u} (s : myset α) (m : mynat) : Prop :=
+equinumerous s (zero_to m)
 def finite {α : Type u} (s : myset α) : Prop :=
-∃ m : mynat, equinumerous s (zero_to m)
+∃ m : mynat, of_size s m
 def infinite {α : Type u} (s : myset α) : Prop := ¬finite s
 def countable {α : Type u} (s : myset α) : Prop :=
 finite s ∨ equinumerous (all_of mynat) s
