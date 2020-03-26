@@ -10,7 +10,7 @@ namespace hidden
 --   there
 -- - Define some quotient/remainder things
 
-inductive myint : Type
+inductive myint: Type
 | of_nat          : mynat → myint
 | neg_succ_of_nat : mynat → myint
 

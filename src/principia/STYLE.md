@@ -27,3 +27,4 @@ Just a rough guide as to what style I'm trying to use
 - No parentheses after quantifiers
 - Put imports on separate lines, as per PEP8 `:)`
 - Try to line up the assignments in by-cases definitions
+- Leave an empty line between most theorems

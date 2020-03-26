@@ -214,8 +214,6 @@ begin
   assumption,
 end
 
-#check injective
-
 theorem inj_inj (hwf: well_defined r s f) (hwg: well_defined s t g):
 injective r s f hwf → injective s t g hwg
   → injective r t (g ∘ f) (composition_well_defined hwf hwg) :=
@@ -263,6 +261,83 @@ end
 
 end function_composition
 
+section cardinality
+
+parameters {α : Type u} {β : Type v} {γ : Type w}
+parameters (r : myset α) (s : myset β) (t : myset γ)
+parameters (f : α → β) (g : β → γ)
+
+def restriction (hwf: well_defined r s f) (r': myset α):
+r' ⊆ r → (α → β) := (λ _ a, f a)
+
+theorem restriction_well_defined
+(hwf: well_defined r s f) (r': myset α) (hrss: r' ⊆ r):
+well_defined r' s (restriction hwf r' hrss) :=
+begin
+  intro a,
+  assume har',
+  apply hwf,
+  apply hrss,
+  from har',
+end
+
+-- this can probably be shorter but I keep getting confused
+-- by all the definitions
+theorem restriction_injective
+(hwf: well_defined r s f) (r': myset α) (hrss: r' ⊆ r)
+(hif: injective r s f hwf):
+injective r' s (restriction hwf r' hrss)
+  (restriction_well_defined hwf r' hrss) :=
+begin
+  intros a b,
+  assume har' hbr' hrarb,
+  apply hif _ _ _ _ _, {
+    from hrss _ har',
+  }, {
+    from hrss _ hbr',
+  }, {
+    from hrarb,
+  },
+end
+
+-- function swapping two naturals. Turns out this is harder
+-- to define than I thought
+def swap_naturals (a b x: mynat): mynat :=
+sorry
+
+open classical
+local attribute [instance] prop_decidable
+
+-- pigeonhole principle, basically
+-- have I overthought this?
+-- and can this be done without classical? probably..
+theorem no_injection_from_zero_to_succ
+(n: mynat) (f: mynat → mynat)
+(hwf: well_defined (zero_to (n + 1)) (zero_to n) f):
+¬injective (zero_to (n + 1)) (zero_to n) f hwf :=
+begin
+  revert f,
+  induction n, {
+    sorry,
+  }, {
+    -- we are trying to show that if
+    -- f: {0, ..., n + 1} → {0, ...,  n}
+    -- is well-defined then it is not injective.
+    -- Consider the pre-image of n. By injectivity,
+    -- this at most one number. If it's empty, skip to
+    -- the restriction. If not, call it x.
+    -- Define f': {0, ..., n + 1} → {0, ..., n}
+    -- by composing f with the function swapping n + 1 and x.
+    -- This function is still injective and has n + 1 ↦ n,
+    -- so we can restrict it to {0, ..., n} and its range will
+    -- restrict to {0, ..., n - 1}. Then we are done by induction.
+    intro f,
+    assume hwf hif,
+    let s: myset mynat := (λ k, f k = n_n),
+    sorry,
+  },
+end
+
 theorem naturals_infinite: infinite (all_of mynat) :=
 begin
   assume hfinite,
@@ -270,6 +345,12 @@ begin
   cases hn with f hf,
   cases hf with hwf h,
   sorry,
+    },
+  },
+  cases h with a h,
+  cases h with b h,
+  cases h with hanb hfafb,
+  from hanb (hif a b trivial trivial hfafb),
 end
 
 theorem uncountability_of_power_set_of_naturals:
@@ -285,6 +366,8 @@ begin
     contradiction,
   },
 end
+
+end cardinality
 
 end myset
 

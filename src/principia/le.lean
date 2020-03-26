@@ -225,4 +225,34 @@ begin
   from le_refl n,
 end
 
+-- I'm too lazy to prove this properly
+theorem lem_nat_eq: m = n ∨ m ≠ n :=
+begin
+  cases le_total_order m n with hmn hnm, {
+    cases hmn with d hd,
+    cases d, {
+      simp [hd],
+    }, {
+      right,
+      rw hd,
+      assume hmn,
+      from succ_ne_zero _ (add_cancel_to_zero _ _ hmn),
+    },
+  }, {
+    cases hnm with d hd,
+    cases d, {
+      simp [hd],
+    }, {
+      right,
+      rw hd,
+      assume hnm,
+      from succ_ne_zero _ (add_cancel_to_zero _ _ hnm.symm),
+    },
+  },
+end
+
+-- how does this work??
+-- instance: decidable_eq mynat
+
+
 end hidden
