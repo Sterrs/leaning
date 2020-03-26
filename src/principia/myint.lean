@@ -76,5 +76,12 @@ instance: has_mul myint := ⟨mul⟩
 def sub (m n: myint): myint := m + (-n)
 instance: has_sub myint := ⟨sub⟩
 
+variables m n k : myint
+
+def add_assoc : (m + n) + k = m + (n + k) :=
+begin
+  sorry,
+end
+
 end myint
 end hidden

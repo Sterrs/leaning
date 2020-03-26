@@ -33,11 +33,19 @@ def union (s : myset α) (t : myset α) : myset α :=
 λ a, s a ∨ t a
 instance: has_union (myset α) := ⟨union⟩
 
-def empty (α : Type u) : myset α := λ a, false
+def empty_of (α : Type u) : myset α := λ a, false
+def empty {α : Type u} (s : myset α) : Prop := ∀ a : α, ¬(a ∈ s)
 def all_of (α : Type u) : myset α := λ a, true
 
 -- Exclude the actual value so there are m elements
 def zero_to (m : mynat) : myset mynat := λ n, n < m
+
+theorem emp_zero_to_zero : empty (zero_to 0) :=
+begin
+  intro m,
+  assume hm,
+  from (lt_nzero m) hm,
+end
 
 section funcs
 -- In this section we will consider types α and β with sets s and t
@@ -205,6 +213,25 @@ parameters {α : Type u} {β : Type v} {γ : Type w}
 parameters (r : myset α) (s : myset β) (t : myset γ)
 parameters (f : α → β) (g : β → γ)
 
+open classical
+local attribute [instance] prop_decidable
+
+theorem no_wdefined_func_nemp_to_emp
+(s : myset α) (t : myset β) (f : α → β)
+{hemp : empty t} {hnemp : ¬empty s}:
+¬well_defined s t f
+:=
+begin
+  assume h,
+  unfold empty at hnemp,
+  rw not_forall at hnemp,
+  cases hnemp with x hx,
+  simp at hx,
+  have hfxin := h x hx,
+  have hfxnin := hemp (f x),
+  contradiction,
+end
+
 theorem composition_well_defined:
 well_defined r s f → well_defined s t g → well_defined r t (g ∘ f) :=
 begin
@@ -268,13 +295,16 @@ section cardinality
 parameters {α : Type u} {β : Type v} {γ : Type w}
 parameters (r : myset α) (s : myset β) (t : myset γ)
 parameters (f : α → β) (g : β → γ)
+parameter (hwf : well_defined r s f)
 
-def restriction (hwf: well_defined r s f) (r': myset α):
+include hwf
+
+def restriction (r': myset α):
 r' ⊆ r → (α → β) := (λ _ a, f a)
 
 theorem restriction_well_defined
-(hwf: well_defined r s f) (r': myset α) (hrss: r' ⊆ r):
-well_defined r' s (restriction hwf r' hrss) :=
+(r': myset α) (hrss: r' ⊆ r):
+well_defined r' s (restriction r' hrss) :=
 begin
   intro a,
   assume har',
@@ -286,10 +316,10 @@ end
 -- this can probably be shorter but I keep getting confused
 -- by all the definitions
 theorem restriction_injective
-(hwf: well_defined r s f) (r': myset α) (hrss: r' ⊆ r)
+(r': myset α) (hrss: r' ⊆ r)
 (hif: injective r s f hwf):
-injective r' s (restriction hwf r' hrss)
-  (restriction_well_defined hwf r' hrss) :=
+injective r' s (restriction r' hrss)
+  (restriction_well_defined _ _) :=
 begin
   intros a b,
   assume har' hbr' hrarb,
@@ -302,13 +332,12 @@ begin
   },
 end
 
+omit hwf
+
 -- function swapping two naturals. Turns out this is harder
 -- to define than I thought
 def swap_naturals (a b x: mynat): mynat :=
 sorry
-
-open classical
-local attribute [instance] prop_decidable
 
 -- pigeonhole principle, basically
 -- have I overthought this?
@@ -316,11 +345,21 @@ local attribute [instance] prop_decidable
 theorem no_injection_from_zero_to_succ
 (n: mynat) (f: mynat → mynat)
 (hwf: well_defined (zero_to (n + 1)) (zero_to n) f):
-¬injective (zero_to (n + 1)) (zero_to n) f hwf :=
+¬injective _ _ f hwf :=
 begin
-  revert f,
-  induction n, {
-    sorry,
+  assume h,
+  induction n with n hn, {
+    apply no_wdefined_func_nemp_to_emp (zero_to 1) (zero_to 0) f, {
+      from hwf,
+    }, {
+      from emp_zero_to_zero,
+    }, {
+      assume h,
+      have : (0 : mynat) ∈ zero_to 1, {
+        from zero_lt_one,
+      },
+      from h 0 this,
+    },
   }, {
     -- we are trying to show that if
     -- f: {0, ..., n + 1} → {0, ...,  n}
@@ -333,9 +372,7 @@ begin
     -- This function is still injective and has n + 1 ↦ n,
     -- so we can restrict it to {0, ..., n} and its range will
     -- restrict to {0, ..., n - 1}. Then we are done by induction.
-    intro f,
-    assume hwf hif,
-    let s: myset mynat := (λ k, f k = n_n),
+    let s: myset mynat := (λ k, f k = n),
     sorry,
   },
 end
@@ -349,14 +386,27 @@ begin
   sorry,
 end
 
+theorem inf_iff_powerset_inf (s : myset α):
+infinite s ↔ infinite (power_set s) :=
+begin
+  split; assume hinf, {
+    sorry,
+  }, {
+    sorry,
+  }
+end
+
 theorem uncountability_of_power_set_of_naturals:
 uncountable (power_set (all_of mynat)) :=
 begin
   assume h,
   cases h with hfinite hcountinf, {
-    -- Still need to prove the power set of the naturals is not
-    -- finite, which seems hard, could use transitivity theorem?
-    sorry,
+    -- Using revert here is quite nice
+    revert hfinite,
+    -- Although this line is stupid
+    suffices : infinite (power_set (all_of mynat)), from this,
+    rw ←inf_iff_powerset_inf (all_of mynat),
+    from naturals_infinite,
   }, {
     have := card_ne_power_set (all_of mynat),
     contradiction,

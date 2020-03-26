@@ -140,6 +140,12 @@ begin
   exfalso, from hmsn hsnm,
 end
 
+theorem zero_lt_one : (0 : mynat) < (1 : mynat) :=
+begin
+  rw [←one_eq_succ_zero, ←le_iff_lt_succ],
+  from le_refl 0,
+end
+
 -- somehow this feels like it's not using le_iff_lt_succ enough
 theorem le_iff_lt_or_eq: m ≤ n ↔ m < n ∨ m = n :=
 begin
