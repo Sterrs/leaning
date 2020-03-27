@@ -93,22 +93,36 @@ begin
   },
 end
 
+theorem wlog_le (p: mynat → mynat → Prop) (hsymm: ∀ m n: mynat, p m n → p n m):
+(∀ m n: mynat, m ≤ n → p m n) → (∀ m n: mynat, p m n) :=
+begin
+  assume hwlog,
+  intros m n,
+  cases le_total_order m n with hmn hnm, {
+    from hwlog m n hmn,
+  }, {
+    from hsymm _ _ (hwlog n m hnm),
+  }
+end
+
 -- the infamous theorem, proved intuitively via total ordering
--- can this be made wlog?
+-- can this be made tactically wlog?
 theorem mul_cancel: m ≠ 0 → m * n = m * k → n = k :=
 begin
-  assume hmnz hmnmk,
-  cases (le_total_order n k) with hnk hkn, {
+  assume hmnz,
+  revert n k,
+  apply wlog_le (λ n k, m * n = m * k → n = k), {
+    simp,
+    intros n k,
+    assume h hmkmn,
+    from (h hmkmn.symm).symm,
+  }, {
+    simp,
+    intros n k,
+    assume hnk hmnmk,
     cases hnk with d hd,
     rw [hd, mul_add] at hmnmk,
     have hdz' := add_cancel_to_zero _ _ hmnmk,
-    have hdz := mul_integral _ _ hmnz hdz',
-    simp [hd, hdz],
-  }, {
-    -- this is basically copy-pasted (ie yank-putted)
-    cases hkn with d hd,
-    rw [hd, mul_add] at hmnmk,
-    have hdz' := add_cancel_to_zero _ _ hmnmk.symm,
     have hdz := mul_integral _ _ hmnz hdz',
     simp [hd, hdz],
   },
@@ -228,7 +242,20 @@ end
 -- I'm too lazy to prove this properly
 theorem lem_nat_eq: m = n ∨ m ≠ n :=
 begin
-  cases le_total_order m n with hmn hnm, {
+  revert m n,
+  apply wlog_le, {
+    intros m n,
+    assume hmnmmn,
+    cases hmnmmn with hnm hnnm, {
+      left, from hnm.symm,
+    }, {
+      right,
+      assume hnm,
+      from hnnm hnm.symm,
+    },
+  }, {
+    intros m n,
+    assume hmn,
     cases hmn with d hd,
     cases d, {
       simp [hd],
@@ -237,16 +264,6 @@ begin
       rw hd,
       assume hmn,
       from succ_ne_zero _ (add_cancel_to_zero _ _ hmn),
-    },
-  }, {
-    cases hnm with d hd,
-    cases d, {
-      simp [hd],
-    }, {
-      right,
-      rw hd,
-      assume hnm,
-      from succ_ne_zero _ (add_cancel_to_zero _ _ hnm.symm),
     },
   },
 end
