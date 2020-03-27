@@ -11,8 +11,8 @@ namespace hidden
 -- - Define some quotient/remainder things
 
 inductive myint: Type
-| of_nat          : mynat → myint
-| neg_succ_of_nat : mynat → myint
+| of_nat         : mynat → myint
+| neg_succ_of_nat: mynat → myint
 
 -- "has coercion" I think. Seems to introduce the notation
 -- ↑n (\u n) for "coerce n"
@@ -39,6 +39,8 @@ def neg_of_nat: mynat → myint
 | 0        := 0
 | (succ m) := -[1+ m]
 
+-- this is probably best expanded into a full section
+-- defining a - operation on mynat
 def aux_sub_nat_nat: mynat → mynat → mynat
 | m 0               := m
 | 0 n               := 0
@@ -46,7 +48,7 @@ def aux_sub_nat_nat: mynat → mynat → mynat
 
 def sub_nat_nat (m n: mynat): myint :=
 match aux_sub_nat_nat m n with
-| 0 := of_nat (aux_sub_nat_nat n m)
+| 0 := neg_of_nat (aux_sub_nat_nat n m)
 | d := d
 end
 
@@ -76,9 +78,129 @@ instance: has_mul myint := ⟨mul⟩
 def sub (m n: myint): myint := m + (-n)
 instance: has_sub myint := ⟨sub⟩
 
-variables m n k : myint
+variables m n k: myint
+variables m' n' k': mynat
 
-def add_assoc : (m + n) + k = m + (n + k) :=
+-- problems I'm having: how do you refer to mynat theorems like add_comm explicitly?
+
+-- according to this link:
+-- https://leanprover.github.io/theorem_proving_in_lean/induction_and_recursion.html
+-- you should be able to to rw [add], but that doesn't seem to work
+@[simp] theorem nat_nat_add: (↑m': myint) + ↑n' = ↑(m' + n') := rfl
+@[simp] theorem neg_nat_add: -[1+ m'] + ↑n' = sub_nat_nat n' (succ m') := rfl
+@[simp] theorem nat_neg_add: ↑m' + -[1+ n'] = sub_nat_nat m' (succ n') := rfl
+@[simp] theorem neg_neg_add: -[1+ m'] + -[1+ n'] = -[1+ succ (m' + n')] := rfl
+
+-- °_° why doesn't this work the normal way
+@[simp] theorem aux_sub_zero: aux_sub_nat_nat m' 0 = m' :=
+begin
+  cases m',
+  refl,
+  refl,
+end
+
+@[simp] theorem aux_zero_sub: aux_sub_nat_nat 0 m' = 0 :=
+begin
+  cases m',
+  refl,
+  refl,
+end
+
+@[simp] theorem of_nat_coe: of_nat m' = ↑m' := rfl
+@[simp] theorem of_nat_inj: (↑m': myint) = ↑n' ↔ m' = n' :=
+begin
+  split,
+  assume h, cases h, refl,
+  assume h, rw h,
+end
+
+theorem zero_nat: (↑(0: mynat): myint) = 0 := rfl
+
+@[simp]
+theorem add_comm: m + n = n + m :=
+begin
+  cases m,
+  cases n,
+  simp,
+  simp,
+  cases n,
+  simp,
+  simp,
+end
+
+@[simp]
+theorem zero_sub_neg: sub_nat_nat 0 m' = neg_of_nat m' :=
+begin
+  cases m',
+  refl,
+  refl,
+end
+
+@[simp]
+theorem neg_succ: neg_of_nat (succ m') = -[1+ m'] := rfl
+
+@[simp]
+theorem zero_add: 0 + m = m :=
+begin
+  cases m,
+  rw ←zero_nat,
+  simp,
+  rw ←zero_nat,
+  simp,
+end
+
+@[simp]
+theorem nat_sub_zero: sub_nat_nat m' 0 = ↑m' :=
+begin
+  cases m',
+  refl,
+  refl,
+end
+
+@[simp] theorem aux_sub_succ_succ:
+aux_sub_nat_nat (succ m') (succ n') = aux_sub_nat_nat m' n' := rfl
+
+@[simp]
+theorem sub_succ_succ: sub_nat_nat (succ m') (succ n') = sub_nat_nat m' n' :=
+begin
+  unfold sub_nat_nat,
+  rw aux_sub_succ_succ,
+  cases (aux_sub_nat_nat m' n'),
+  refl,
+  refl,
+end
+
+@[simp]
+theorem succ_of_sub_succ: sub_nat_nat m' (succ n') + 1 = sub_nat_nat m' n' :=
+begin
+  sorry, -- ok I'm stuck on this one
+end
+
+@[simp]
+theorem sub_nat_succ: sub_nat_nat (succ m') n' = sub_nat_nat m' n' + 1 :=
+begin
+  induction n',
+  simp,
+  rw add_comm,
+  refl,
+  simp,
+end
+
+@[simp]
+theorem coe_succ: (↑(succ m'): myint) = ↑m' + 1 := rfl
+
+@[simp]
+theorem sub_nat_add: sub_nat_nat (m' + n') k' = m' + sub_nat_nat n' k' :=
+begin
+  induction m',
+  simp,
+  rw zero_nat,
+  simp,
+  rw [succ_add, sub_nat_succ, m'_ih],
+  sorry,
+end
+
+theorem add_assoc : (m + n) + k = m + (n + k) :=
 begin
   sorry,
 end
