@@ -230,7 +230,7 @@ end
 
 -- the first n elements
 def take: ∀ n: mynat, ∀ lst: mylist T, n ≤ len lst → mylist T
-| 0        _        _ := []
+| 0        _         _ := []
 | (succ n) []        h := absurd h (absurd_succ_le_zero n)
 | (succ n) (x :: xs) h := x :: take n xs (len_cons_succ_cancel1 _ _ _ h)
 
@@ -352,63 +352,73 @@ end
 private theorem succ_le_impl_le (h: succ n ≤ len lst): n ≤ len lst :=
 (le_cancel_strong n (len lst) 1 h)
 
--- theorem drop_succ (h: succ n ≤ len lst) :=
+-- theorem drop_init (h: succ n ≤ len lst) :=
 -- drop (succ n) lst h = init (drop n lst (succ_le_impl_le _ _ h))
 -- begin
---   assume h',
---   have: len lst = n,
---   induction lst, {
---     exfalso, from succ_ne_zero _ (le_zero _ h),
---   }, {
-    
---   }
+
+-- end :=
+-- begin
+  
 -- end
 
-theorem len_drop_succ (h: succ n ≤ len lst):
-succ (len (drop (succ n) lst h))
-  = len (drop n lst (succ_le_impl_le _ _ h)) :=
-begin
-  cases lst, {
-    exfalso, from succ_ne_zero _ (le_zero _ h),
-  }, {
-    rw drop_succ_cons,
-    induction n, {
-      simp,
-    }, {
-      simp,
-      sorry,
-    }
-  }
-end
+-- theorem len_drop_succ (h: succ n ≤ len lst):
+-- succ (len (drop (succ n) lst h))
+--   = len (drop n lst (succ_le_impl_le _ _ h)) :=
+-- begin
+--   cases lst, {
+--     exfalso, from succ_ne_zero _ (le_zero _ h),
+--   }, {
+--     rw drop_succ_cons,
+--     induction n, {
+--       simp,
+--     }, {
+--       simp,
+--       sorry,
+--     }
+--   }
+-- end
 
 @[simp]
 theorem len_take_succ (h: succ n ≤ len lst):
 len (take (succ n) lst h)
   = succ (len (take n lst (succ_le_impl_le _ _ h))) :=
 begin
+  revert lst,
   induction n, {
+    intro lst,
+    assume h,
     simp,
     cases lst, {
-      exfalso, from succ_ne_zero _ (le_zero _ h),
+      exfalso,
+      simp at h, -- clearly absurd. Is there a quicker way?
+      cases h with d hd,
+      from mynat.no_confusion (add_integral _ _ hd.symm),
     }, {
-      have x := take_succ_cons lst_head lst_tail 0 _,
-      simp at x,
-      rw x,
+      -- why on Earth is this SO DIFFICULT
+      -- I don't understand why I can't go straight to the rw
+      have h: (1: mynat) = succ 0 := rfl,
+      conv {
+        to_lhs,
+        congr,
+        congr,
+        rw h,
+      },
+      rw take_succ_cons lst_head lst_tail 0,
       simp,
-      rw len_cons_succ,
-      apply succ_le_succ, -- /o/
-      from zero_le _,
-    },
-  }, {
-    cases lst, {
-      exfalso, from succ_ne_zero _ (le_zero _ h),
-    }, {
-      have x := take_succ_cons lst_head lst_tail (succ n_n),
-      rw x,
-      simp,
-      sorry,
     }
-  }
+  }, {
+    intro lst,
+    assume h,
+    cases lst, {
+      exfalso,
+      cases h with d hd,
+      from mynat.no_confusion (add_integral _ _ hd.symm),
+    }, {
+      simp,
+      rw len_cons_succ at h,
+      from n_ih lst_tail (le_succ_cancel _ _ h),
+    },
+  },
 end
 
 theorem len_take (h: n ≤ len lst): len (take n lst h) = n :=
@@ -416,11 +426,9 @@ begin
   induction n, {
     simp,
   }, {
-    induction lst, {
-      exfalso, from succ_ne_zero _ (le_zero _ h),
-    }, {
-      sorry,
-    }
+    -- really all the hard work happens in len_take_succ
+    simp,
+    apply n_ih,
   }
 end
 
