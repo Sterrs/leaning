@@ -156,7 +156,7 @@ end
 
 theorem dvd_add_lots: k ∣ m → k ∣ m + k * n :=
 begin
-  induction n,
+  induction n with n_n n_ih,
   simp,
   cc,
   simp,
@@ -168,7 +168,7 @@ end
 
 theorem dvd_cancel_lots: k ∣ m + k * n → k ∣ m :=
 begin
-  induction n,
+  induction n with n_n n_ih,
   simp,
   cc,
   simp,

@@ -10,8 +10,8 @@ open myset
 variables {α : Type u} {β : Type v} {γ : Type w}
 
 section definitions
--- A function between two sets is well-defined so long as each element
--- of the first gets sent to an element of the latter
+-- A function between two sets is well-defined so long as each element of the
+-- first gets sent to an element of the latter
 def well_defined (r : myset α) (s : myset β) (f : α → β) : Prop :=
 ∀ a : α, a ∈ r → f a ∈ s
 
@@ -34,9 +34,9 @@ end definitions
 
 section theorems
 
--- All the following theorems need to be fed proofs of well-definedness,
--- so they are all capable of guessing which types, sets and functions you
--- are talking about. Hence all these arguments are implicit
+-- All the following theorems need to be fed proofs of well-definedness, so they
+-- are all capable of guessing which types, sets and functions you are talking
+-- about. Hence all these arguments are implicit
 variables {r : myset α} {s : myset β} {t : myset γ}
 variables {f : α → β} {g : β → γ}
 
@@ -44,8 +44,7 @@ section -- This is a section for classical logic
 open classical
 local attribute [instance] prop_decidable
 
--- Cannot have a well-defined function from an empty set to a non-empty
--- set
+-- Cannot have a well-defined function from an empty set to a non-empty set
 theorem no_wdefined_func_nemp_to_emp
 (hnemp : ¬empty r) (hemp : empty s) :
 ¬well_defined r s f :=

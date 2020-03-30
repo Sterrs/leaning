@@ -60,7 +60,7 @@ theorem cons_concat: (x :: xs) ++ lst = x :: (xs ++ lst) := rfl
 @[simp]
 theorem concat_empty: lst ++ ([]: mylist T) = lst :=
 begin
-  induction lst, {
+  induction lst with lst_head lst_tail lst_ih, {
     simp,
   }, {
     simp [lst_ih],
@@ -80,7 +80,7 @@ end
 @[simp]
 theorem concat_assoc: (lst1 ++ lst2) ++ lst3 = lst1 ++ (lst2 ++ lst3) :=
 begin
-  induction lst1, {
+  induction lst1 with lst1_head lst1_tail lst1_ih, {
     simp,
   }, {
    simp [lst1_ih],
@@ -100,7 +100,7 @@ theorem len_cons_succ: len (x :: xs) = succ (len xs) := rfl
 @[simp]
 theorem len_concat_add: len (lst1 ++ lst2) = len lst1 + len lst2 :=
 begin
-  induction lst1, {
+  induction lst1 with lst1_head lst1_tail lst1_ih, {
     simp,
   }, {
     simp [lst1_ih],
@@ -118,7 +118,7 @@ def rev: mylist T → mylist T
 @[simp]
 theorem rev_append: rev (lst ++ [x]) = x :: rev lst :=
 begin
-  induction lst, {
+  induction lst with lst_head lst_tail lst_ih, {
     simp,
   }, {
     rw [cons_concat, rev_cons, lst_ih],
@@ -129,7 +129,7 @@ end
 @[simp]
 theorem rev_concat: rev (lst1 ++ lst2) = rev lst2 ++ rev lst1 :=
 begin
-  induction lst1, {
+  induction lst1 with lst1_head lst1_tail lst1_ih, {
     simp,
   }, {
     rw [cons_concat, rev_cons, lst1_ih, rev_cons, concat_assoc],
@@ -139,7 +139,7 @@ end
 @[simp]
 theorem rev_rev: rev (rev lst) = lst :=
 begin
-  induction lst, {
+  induction lst with lst_head lst_tail lst_ih, {
     simp,
   }, {
     simp [lst_ih],
@@ -148,7 +148,7 @@ end
 
 theorem rev_len: len lst = len (rev lst) :=
 begin
-  induction lst, {
+  induction lst with lst_head lst_tail lst_ih, {
     simp,
   }, {
     simp [lst_ih],

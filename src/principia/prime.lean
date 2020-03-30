@@ -16,7 +16,7 @@ variables m n p k : mynat
 theorem zero_nprime: ¬prime 0 :=
 begin
   assume h0pm,
-  cases h0pm,
+  cases h0pm with h0pm_left h0pm_right,
   have h2d0 := dvd_zero 2,
   have h2n2: 2 ≠ 2,
   have h2eq01 := h0pm_right 2 h2d0,
@@ -282,8 +282,8 @@ infinitely_many prime :=
 begin
   -- Famously, this is a proof by contradiction
   by_contradiction h,
-  -- As there are only finitely many primes,
-  -- there exists an n than which there is no prime greater
+  -- As there are only finitely many primes, there exists an n than which there
+  -- is no prime greater
   cases not_forall.mp h with n hn,
   -- So any x greater than n is not prime
   have halln : ∀ x, n ≤ x → ¬prime x, {
@@ -292,8 +292,8 @@ begin
     have hx := this x,
     from hx ⟨hnx, hpx⟩,
   },
-  -- We can form a contradiction if we can exhibit a k which is not 1, and
-  -- is not divisible by anything less than n except 1
+  -- We can form a contradiction if we can exhibit a k which is not 1, and is
+  -- not divisible by anything less than n except 1
   suffices : ∃ k : mynat, k ≠ 1 ∧ ∀ x : mynat, x ≠ 1 → x ≤ n → ¬(x ∣ k), {
     cases this with k h₁,
     have hk := h₁.right,
@@ -314,8 +314,8 @@ begin
         from hk p hp.left (lt_impl_le _ _ h),
       },
     },
-    -- Which directly contradicts the fact that every natural > 1 is
-    -- divisible by a prime
+    -- Which directly contradicts the fact that every natural > 1 is divisible
+    -- by a prime
     have hprimediv := prime_divisor k h₁.left,
     cases hprimediv with p hp,
     from hnoprimediv p hp.left hp.right,

@@ -1,8 +1,8 @@
 import principia.parity
 
--- This file is specifically for statements of famous theorems
--- It is a useful and fun thing to state these, but they're better off
--- in a different file because they tend to use sorry
+-- This file is specifically for statements of famous theorems.
+-- It is a useful and fun thing to state these, but they're better off in a
+-- different file because they tend to use sorry
 
 namespace hidden
 

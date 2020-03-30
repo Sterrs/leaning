@@ -179,7 +179,7 @@ end
 @[simp]
 theorem sub_nat_succ: sub_nat_nat (succ m') n' = sub_nat_nat m' n' + 1 :=
 begin
-  induction n',
+  induction n' with n'_n n'_ih,
   simp,
   rw add_comm,
   refl,
@@ -192,7 +192,7 @@ theorem coe_succ: (↑(succ m'): myint) = ↑m' + 1 := rfl
 @[simp]
 theorem sub_nat_add: sub_nat_nat (m' + n') k' = m' + sub_nat_nat n' k' :=
 begin
-  induction m',
+  induction m' with m'_n m'_ih,
   simp,
   rw zero_nat,
   simp,

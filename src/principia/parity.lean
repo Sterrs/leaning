@@ -140,7 +140,7 @@ end
 
 theorem even_or_odd: even m ∨ odd m :=
 begin
-  induction m, {
+  induction m with m_n m_ih, {
     left, from even_zero,
   }, {
     cases m_ih with hem hom,

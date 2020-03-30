@@ -193,7 +193,7 @@ end
 theorem lt_strict: ¬(m < n ∧ n < m) :=
 begin
   assume hmnnm,
-  cases hmnnm,
+  cases hmnnm with hmnnm_left hmnnm_right,
   from hmnnm_left (lt_impl_le _ _ hmnnm_right),
 end
 

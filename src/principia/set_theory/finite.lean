@@ -60,14 +60,13 @@ begin
     -- we are trying to show that if
     -- f: {0, ..., n + 1} → {0, ...,  n}
     -- is well-defined then it is not injective.
-    -- Consider the pre-image of n. By injectivity,
-    -- this at most one number. If it's empty, skip to
-    -- the restriction. If not, call it x.
-    -- Define f': {0, ..., n + 1} → {0, ..., n}
-    -- by composing f with the function swapping n + 1 and x.
-    -- This function is still injective and has n + 1 ↦ n,
-    -- so we can restrict it to {0, ..., n} and its range will
-    -- restrict to {0, ..., n - 1}. Then we are done by induction.
+    -- Consider the pre-image of n. By injectivity, this at most one number. If
+    -- it's empty, skip to the restriction.
+    -- If not, call it x. Define f': {0, ..., n + 1} → {0, ..., n}
+    -- by composing f with the function swapping n + 1 and x. This function is
+    -- still injective and has n + 1 ↦ n, so we can restrict it to {0, ..., n}
+    -- and its range will restrict to {0, ..., n - 1}. Then we are done by
+    -- induction.
     let s: myset mynat := sorry,
     sorry,
   },

@@ -19,7 +19,7 @@ begin
   intro k,
   have h_aux: ∀ N: mynat, (∀ M: mynat, M ≤ N → statement M), {
     intro N,
-    induction N, {
+    induction N with N_n N_ih, {
       simp,
       intro M,
       assume hMl0,
@@ -50,18 +50,15 @@ end
 -- induction with n base cases.
 -- Note the case with n = 0 is basically a direct proof,
 -- the case with n = 1 is regular induction.
--- This is currently a bit of a pain to actually use,
--- particularly for proving bases cases,
--- hence the below special case. It would be really cool
--- to have a tactic to just split the base cases
--- into goals ^_^
+-- This is currently a bit of a pain to actually use, particularly for proving
+-- bases cases, hence the below special case. It would be really cool to have a
+-- tactic to just split the base cases into goals ^_^
 theorem multi_induction
 (n: mynat)
 (statement: mynat → Prop)
 -- statement is true for 0, ..., n - 1
 (base_cases: ∀ m: mynat, m < n → statement m)
--- given the statement for m, ..., m + n - 1, the statement holds
--- for m + n
+-- given the statement for m, ..., m + n - 1, the statement holds for m + n
 (inductive_step: ∀ m: mynat,
   (∀ d: mynat, d < n → statement (m + d)) → statement (m + n)):
 ∀ m: mynat, statement m :=
@@ -86,8 +83,7 @@ begin
       assume h_sih,
       rw add_comm,
       apply inductive_step,
-      -- at this point it just takes a bit of wrangling to
-      -- show the obvious
+      -- at this point it just takes a bit of wrangling to show the obvious
       intro d',
       assume hdn,
       apply h_sih,

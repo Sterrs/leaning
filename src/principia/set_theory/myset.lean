@@ -5,8 +5,8 @@ namespace hidden
 
 universes u v w
 
--- A set of elements of type α is a function from elements of type α
--- to propositions
+-- A set of elements of type α is a function from elements of type α to
+-- propositions
 def myset (α : Type u) := α → Prop
 
 namespace myset -- Not sure if we want this, but I don't think it hurts

@@ -68,7 +68,7 @@ end
 
 theorem le_total_order: m ≤ n ∨ n ≤ m :=
 begin
-  induction n, {
+  induction n with n_n n_ih, {
     repeat {rw zz},
     right,
     from zero_le m,
@@ -105,8 +105,8 @@ begin
   }
 end
 
--- the infamous theorem, proved intuitively via total ordering
--- can this be made tactically wlog?
+-- the infamous theorem, proved intuitively via total ordering can this be made
+-- tactically wlog?
 theorem mul_cancel: m ≠ 0 → m * n = m * k → n = k :=
 begin
   assume hmnz,
@@ -140,7 +140,7 @@ theorem le_mul: m ≤ n → k * m ≤ k * n :=
 begin
   assume hmn,
   cases hmn with d hd,
-  induction k, {
+  induction k with k_n k_ih, {
     existsi (0: mynat),
     simp,
   }, {

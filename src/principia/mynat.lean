@@ -59,7 +59,7 @@ variables m n k p: mynat
 @[simp]
 theorem zero_add: 0 + m = m :=
 begin
-  induction m, {
+  induction m with m_n m_ih, {
     refl
   }, {
     simp,
@@ -70,7 +70,7 @@ end
 @[simp]
 theorem succ_add: succ m + n = succ (m + n) :=
 begin
-  induction n, {
+  induction n with n_n n_ih, {
     refl
   }, {
     simp,
@@ -81,7 +81,7 @@ end
 @[simp]
 theorem add_assoc: (m + n) + k = m + (n + k) :=
 begin
-  induction k, {
+  induction k with k_n k_ih, {
     refl,
   }, {
     simp,
@@ -92,7 +92,7 @@ end
 @[simp]
 theorem add_comm: m + n = n + m :=
 begin
-  induction n, {
+  induction n with n_n n_ih, {
     simp,
   }, {
     simp,
@@ -118,7 +118,7 @@ theorem one_eq_succ_zero: succ 0 = 1 := rfl
 
 theorem add_cancel: m + n = m + k → n = k :=
 begin
-  induction m, {
+  induction m with m_n m_ih, {
     simp,
     cc,
   }, {
@@ -169,7 +169,7 @@ end
 @[simp]
 theorem zero_mul: 0 * m = 0 :=
 begin
-  induction m, {
+  induction m with m_n m_ih, {
     refl
   }, {
     simp,
@@ -180,7 +180,7 @@ end
 @[simp]
 theorem one_mul: 1 * m = m :=
 begin
-  induction m, {
+  induction m with m_n m_ih, {
     refl,
   }, {
     simp [m_ih],
@@ -190,7 +190,7 @@ end
 @[simp]
 theorem succ_mul: (succ m) * n = m * n + n :=
 begin
-  induction n, {
+  induction n with n_n n_ih, {
     simp,
   }, {
     simp [n_ih],
@@ -201,7 +201,7 @@ end
 @[simp]
 theorem mul_add: m * (n + k) = m * n + m * k :=
 begin
-  induction m, {
+  induction m with m_n m_ih, {
     simp,
   }, {
     simp [m_ih],
@@ -217,7 +217,7 @@ end
 @[simp]
 theorem mul_assoc: (m * n) * k = m * (n * k) :=
 begin
-  induction k, {
+  induction k with k_n k_ih, {
     simp,
   }, {
     simp [k_ih],
@@ -227,7 +227,7 @@ end
 @[simp]
 theorem mul_comm: m * n = n * m :=
 begin
-  induction n, {
+  induction n with n_n n_ih, {
     simp,
   }, {
     simp [n_ih],
@@ -266,7 +266,7 @@ end
 theorem zero_pow: m ≠ 0 → (0: mynat) ^ m = 0 :=
 begin
   assume hmn0,
-  induction m, {
+  induction m with m_n m_ih, {
     contradiction,
   }, {
     simp,
@@ -276,7 +276,7 @@ end
 @[simp]
 theorem pow_add: m ^ (n + k) = (m ^ n) * (m ^ k) :=
 begin
-  induction k, {
+  induction k with k_n k_ih, {
     simp,
   }, {
     simp [k_ih],
@@ -295,7 +295,7 @@ end
 @[simp]
 theorem pow_mul: (m ^ n) ^ k = m ^ (n * k) :=
 begin
-  induction k, {
+  induction k with k_n k_ih, {
     simp,
   }, {
     simp [k_ih],
@@ -305,7 +305,7 @@ end
 @[simp]
 theorem mul_pow: (m * n) ^ k = m ^ k * n ^ k :=
 begin
-  induction k, {
+  induction k with k_n k_ih, {
     simp,
   }, {
     simp [k_ih],

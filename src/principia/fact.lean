@@ -52,7 +52,7 @@ begin
   assume hmlen,
   cases hmlen with k hk,
   revert n,
-  induction k, {
+  induction k with k_n k_ih, {
     intro n,
     assume hmn,
     simp [hmn],
