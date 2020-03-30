@@ -99,6 +99,13 @@ begin
   from mlz (zero_le m),
 end
 
+theorem zero_lt_succ: 0 < succ m :=
+begin
+  assume h,
+  cases h with d hd,
+  from succ_ne_zero _ (add_integral _ _ hd.symm),
+end
+
 theorem lt_add: m < n → m + k < n + k :=
 begin
   assume hmn hmknk,

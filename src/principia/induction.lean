@@ -47,6 +47,94 @@ begin
   from h_aux (succ k) k (le_to_add k 1),
 end
 
+-- induction with n base cases.
+-- Note the case with n = 0 is basically a direct proof,
+-- the case with n = 1 is regular induction.
+-- This is currently a bit of a pain to actually use,
+-- particularly for proving bases cases,
+-- hence the below special case. It would be really cool
+-- to have a tactic to just split the base cases
+-- into goals ^_^
+theorem multi_induction
+(n: mynat)
+(statement: mynat → Prop)
+-- statement is true for 0, ..., n - 1
+(base_cases: ∀ m: mynat, m < n → statement m)
+-- given the statement for m, ..., m + n - 1, the statement holds
+-- for m + n
+(inductive_step: ∀ m: mynat,
+  (∀ d: mynat, d < n → statement (m + d)) → statement (m + n)):
+∀ m: mynat, statement m :=
+begin
+  -- I'm not sure if this proof is the nicest way to go
+  apply strong_induction, {
+    -- yuckily, the base case depends on if n is 0 or not
+    cases n, {
+      apply inductive_step,
+      intro d,
+      assume hd0,
+      from false.elim (lt_nzero _ hd0),
+    }, {
+      apply base_cases,
+      from zero_lt_succ _,
+    },
+  }, {
+    intro m,
+    cases (le_lem n (succ m)) with hnm hmn, {
+      cases hnm with d hd,
+      rw hd,
+      assume h_sih,
+      rw add_comm,
+      apply inductive_step,
+      -- at this point it just takes a bit of wrangling to
+      -- show the obvious
+      intro d',
+      assume hdn,
+      apply h_sih,
+      rw [le_iff_lt_succ, hd, add_comm],
+      from lt_add _ _ d hdn,
+    }, {
+      assume _,
+      from base_cases _ hmn,
+    },
+  },
+end
+
+-- theorem for convenience
+theorem duo_induction
+(statement: mynat → Prop)
+(h0: statement 0)
+(h1: statement 1)
+(inductive_step: ∀ m: mynat,
+  statement m → statement (m + 1) → statement (m + 2)):
+∀ m: mynat, statement m :=
+begin
+  apply multi_induction 2, {
+    -- grind out base cases
+    intro m,
+    cases m, {
+      assume _, assumption,
+    }, {
+      cases m, {
+        assume _, assumption,
+      }, {
+        assume hcontr,
+        exfalso, from lt_nzero _ (lt_cancel m 0 2 hcontr),
+      },
+    },
+  }, {
+    intro m,
+    intro hd,
+    apply inductive_step, {
+      apply hd 0,
+      from zero_lt_succ 1,
+    }, {
+      apply hd 1,
+      from lt_add _ _ 1 (zero_lt_succ 0),
+    },
+  },
+end
+
 open classical
 local attribute [instance] prop_decidable
 

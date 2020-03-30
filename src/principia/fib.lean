@@ -1,4 +1,5 @@
 import principia.mynat
+import principia.induction
 
 namespace hidden
 
@@ -22,25 +23,52 @@ variables m n k p: mynat
 theorem fib_k_formula:
 fib (m + k + 1) = fib k * fib m + fib (k + 1) * fib (m + 1) :=
 begin
-  induction k,
-  repeat {rw zz},
-  rw [add_zero, fib_zero, zero_mul],
-  repeat {rw zero_add},
-  rw [fib_one, one_mul],
-  repeat {rw add_succ},
-  repeat {rw succ_add},
-  -- double base case required (???)
-  induction k_n,
-  repeat {rw zz},
-  repeat {rw ←one_eq_succ_zero},
-  repeat {rw add_succ},
-  repeat {rw add_zero},
-  repeat {rw fib_succsucc},
-  simp,
-  rw add_one_succ at *,
-  rw add_one_succ at *,
-  rw add_succ at *,
-  sorry
+  revert k,
+  apply duo_induction, {
+    simp,
+  }, {
+    simp,
+    refl,
+  }, {
+    intro k,
+    assume h_ih1 h_ih2,
+    -- yucky algebra
+    have: (2: mynat) = 1 + 1 := rfl,
+    rw this,
+    repeat {rw ←add_assoc},
+    rw [add_one_succ, add_one_succ],
+    rw fib_succsucc,
+    rw ←add_one_succ,
+    rw ←add_assoc at h_ih2,
+    rw [h_ih1, h_ih2],
+    -- now we have to collect the terms in F_m and F_{m + 1}
+    conv {
+      to_lhs,
+      rw add_assoc,
+      rw add_comm,
+      congr, congr, skip,
+      rw add_comm,
+    },
+    rw ←add_assoc,
+    rw ←add_mul,
+    conv {
+      to_lhs,
+      congr, congr, congr, congr, skip,
+      rw add_one_succ,
+    },
+    rw ←fib_succsucc,
+    rw add_assoc,
+    rw ←add_mul,
+    conv {
+      to_lhs,
+      congr, skip, congr,
+      rw add_comm,
+      rw add_one_succ,
+    },
+    rw ←fib_succsucc,
+    rw add_comm,
+    refl,
+  },
 end
 
 end hidden
