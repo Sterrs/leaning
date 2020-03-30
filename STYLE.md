@@ -17,6 +17,8 @@ Just a rough guide as to what style I'm trying to use
 - Name hypotheses starting with h, except in exceptional circumstances, and then
   follow them with some meaningful initials referring to what the hypothesis is
   about.
+- Always name hypotheses explicitly (for example use `with` after cases or induction),
+  even if choosing to use the generated name.
 - The unary operators `¬`, `←` should *not* be followed by a space.
 - The binary operators `+`, `*`, `^`, `∣`, `→`, should be surrounded by a space
 - For colons, usually put no space before and one space after
