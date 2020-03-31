@@ -39,16 +39,9 @@ def neg_of_nat: mynat → myint
 | 0        := 0
 | (succ m) := -[1+ m]
 
--- this is probably best expanded into a full section
--- defining a - operation on mynat
-def aux_sub_nat_nat: mynat → mynat → mynat
-| m 0               := m
-| 0 n               := 0
-| (succ m) (succ n) := aux_sub_nat_nat m n
-
 def sub_nat_nat (m n: mynat): myint :=
 match aux_sub_nat_nat m n with
-| 0 := neg_of_nat (aux_sub_nat_nat n m)
+| 0 := neg_of_nat (n - m)
 | d := d
 end
 
@@ -91,20 +84,6 @@ variables m' n' k': mynat
 @[simp] theorem nat_neg_add: ↑m' + -[1+ n'] = sub_nat_nat m' (succ n') := rfl
 @[simp] theorem neg_neg_add: -[1+ m'] + -[1+ n'] = -[1+ succ (m' + n')] := rfl
 
--- °_° why doesn't this work the normal way
-@[simp] theorem aux_sub_zero: aux_sub_nat_nat m' 0 = m' :=
-begin
-  cases m',
-  refl,
-  refl,
-end
-
-@[simp] theorem aux_zero_sub: aux_sub_nat_nat 0 m' = 0 :=
-begin
-  cases m',
-  refl,
-  refl,
-end
 
 @[simp] theorem of_nat_coe: of_nat m' = ↑m' := rfl
 @[simp] theorem of_nat_inj: (↑m': myint) = ↑n' ↔ m' = n' :=
@@ -157,9 +136,6 @@ begin
   refl,
 end
 
-@[simp] theorem aux_sub_succ_succ:
-aux_sub_nat_nat (succ m') (succ n') = aux_sub_nat_nat m' n' := rfl
-
 @[simp]
 theorem sub_succ_succ: sub_nat_nat (succ m') (succ n') = sub_nat_nat m' n' :=
 begin
@@ -202,7 +178,7 @@ end
 
 theorem add_assoc : (m + n) + k = m + (n + k) :=
 begin
-  sorry,
+  sorry
 end
 
 end myint
