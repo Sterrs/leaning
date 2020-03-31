@@ -351,4 +351,31 @@ begin
   contradiction,
 end
 
+theorem lt_well_founded : well_founded lt :=
+begin
+  split,
+  intro m,
+  split,
+  induction m with m hm,
+    intro n,
+    assume h,
+    exfalso,
+    from lt_nzero h,
+  intro n,
+  assume hnsucc,
+  have hns : n < succ m,
+    exact hnsucc,
+  rw ←le_iff_lt_succ at hns,
+  rw le_iff_lt_or_eq at hns,
+  cases hns with hlt heq,
+    have hl : lt n m,
+      exact hlt,
+    from hm n hl,
+  split,
+  rw heq,
+  from hm,
+end
+
+instance: has_well_founded mynat := ⟨lt, lt_well_founded⟩
+
 end hidden
