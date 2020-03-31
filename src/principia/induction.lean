@@ -1,4 +1,4 @@
-import principia.lt
+import .lt
 import logic.basic
 
 namespace hidden
@@ -23,7 +23,7 @@ begin
       simp,
       intro M,
       assume hMl0,
-      have hM0 := le_zero _ hMl0,
+      have hM0 := le_zero hMl0,
       rw hM0,
       from base_case,
     }, {
@@ -44,7 +44,7 @@ begin
       },
     },
   },
-  from h_aux (succ k) k (le_to_add k 1),
+  from h_aux (succ k) k (le_to_add: k ≤ k + 1),
 end
 
 -- induction with n base cases.
@@ -70,10 +70,10 @@ begin
       apply inductive_step,
       intro d,
       assume hd0,
-      exfalso, from lt_nzero _ hd0,
+      exfalso, from lt_nzero hd0,
     }, {
       apply base_cases,
-      from zero_lt_succ _,
+      from zero_lt_succ,
     },
   }, {
     intro m,
@@ -88,7 +88,7 @@ begin
       assume hdn,
       apply h_sih,
       rw [le_iff_lt_succ, hd, add_comm],
-      from lt_add _ _ d hdn,
+      from lt_add hdn,
     }, {
       assume _,
       from base_cases _ hmn,
@@ -115,7 +115,7 @@ begin
         assume _, assumption,
       }, {
         assume hcontr,
-        exfalso, from lt_nzero _ (lt_cancel m 0 2 hcontr),
+        exfalso, from lt_nzero (lt_cancel m 0 2 hcontr),
       },
     },
   }, {
@@ -123,10 +123,10 @@ begin
     intro hd,
     apply inductive_step, {
       apply hd 0,
-      from zero_lt_succ 1,
+      from zero_lt_succ,
     }, {
       apply hd 1,
-      from lt_add _ _ 1 (zero_lt_succ 0),
+      from lt_add zero_lt_succ,
     },
   },
 end
@@ -156,7 +156,7 @@ begin
         contradiction,
       intro j,
       assume _,
-      from zero_le j,
+      from zero_le,
     }, {
       assume n hn hsucc,
       have hnall := (not_and.mp (h (succ n))) hsucc,

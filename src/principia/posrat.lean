@@ -1,4 +1,4 @@
-import principia.le
+import .le
 
 namespace hidden
 open mynat

@@ -1,6 +1,6 @@
-import principia.dvd
-import principia.induction
-import principia.fact
+import .dvd
+import .induction
+import .fact
 import logic.basic
 
 namespace hidden
@@ -11,13 +11,13 @@ def prime (m: mynat) := m ≠ 1 ∧ ∀ k: mynat, k ∣ m → k = 1 ∨ k = m
 def composite (m : mynat) := ∃ a b: mynat, a ≠ 1 ∧ b ≠ 1 ∧ a * b = m
 def coprime (m n : mynat) := ∀ k: mynat, k ∣ m → k ∣ n → k = 1
 
-variables m n p k : mynat
+variables {m n p k : mynat}
 
 theorem zero_nprime: ¬prime 0 :=
 begin
   assume h0pm,
   cases h0pm with h0pm_left h0pm_right,
-  have h2d0 := dvd_zero 2,
+  have h2d0: (2: mynat) ∣ 0 := dvd_zero,
   have h2n2: 2 ≠ 2,
   have h2eq01 := h0pm_right 2 h2d0,
   repeat { cases h2eq01 },
@@ -54,7 +54,7 @@ begin
   cases h with b h,
   cases h with han1 h,
   cases h with hbn1 hab1,
-  from han1 (one_unit _ _ hab1),
+  from han1 (one_unit hab1),
 end
 
 theorem two_ncomposite: ¬composite 2 :=
@@ -143,11 +143,11 @@ theorem coprime_one: coprime m 1 :=
 begin
   intro k,
   assume _ hk,
-  from dvd_one k hk,
+  from dvd_one hk,
 end
 
 theorem one_coprime: coprime 1 m :=
-coprime_symm (coprime_one m)
+coprime_symm coprime_one
 
 theorem coprime_succ: coprime m (succ m) :=
 begin
@@ -163,11 +163,11 @@ begin
     rw mul_comm,
     apply dvd_mul, refl,
     assumption,
-  from dvd_one a this,
+  from dvd_one this,
 end
 
 theorem succ_coprime: coprime (succ m) m :=
-coprime_symm (coprime_succ m)
+coprime_symm coprime_succ
 
 theorem coprime_prime:
 prime p → ¬(coprime p n) → p ∣ n :=
@@ -221,7 +221,7 @@ begin
     assume h,
     existsi (2: mynat),
     split, from two_prime,
-    from dvd_zero 2,
+    from dvd_zero,
   }, {
     intro n,
     assume hn hn0,
@@ -230,7 +230,7 @@ begin
       split, assumption, refl,
     }, {
       have hcomp_or_one :=
-        nprime_imp_ncomp_or_one (succ n) hnp,
+        nprime_imp_ncomp_or_one hnp,
       cases hcomp_or_one with hcomp h1, {
         cases hcomp with a h₁,
         cases h₁ with b hab,
@@ -243,8 +243,8 @@ begin
           assumption,
         },
         have halen: a ≤ n, {
-          apply (le_iff_lt_succ a n).mpr,
-          have hasn := dvd_le _ _ succ_ne_zero hadvds,
+          apply le_iff_lt_succ.mpr,
+          have hasn := dvd_le succ_ne_zero hadvds,
           have hansn: a ≠ succ n, {
             -- the oldest trick in the book: just wear it down by cases
             assume hasn,
@@ -261,7 +261,7 @@ begin
             have hcontr := add_cancel_to_zero habsn.symm,
             from succ_ne_zero hcontr,
           },
-          rw le_iff_lt_or_eq _ _ at hasn,
+          rw le_iff_lt_or_eq at hasn,
           cases hasn,
           assumption,
           contradiction,
@@ -270,7 +270,7 @@ begin
         cases ha₂ with p hp,
         existsi p,
         split, from hp.left,
-        from dvd_trans p a (succ n) hp.right hadvds,
+        from dvd_trans hp.right hadvds,
       }, contradiction,
     },
   },
@@ -311,12 +311,12 @@ begin
         from this h hp,
       }, {
         -- Or less than or equal to n, so doesn't divide k!
-        from hk p hp.left (lt_impl_le _ _ h),
+        from hk p hp.left (lt_impl_le h),
       },
     },
     -- Which directly contradicts the fact that every natural > 1 is divisible
     -- by a prime
-    have hprimediv := prime_divisor k h₁.left,
+    have hprimediv := prime_divisor h₁.left,
     cases hprimediv with p hp,
     from hnoprimediv p hp.left hp.right,
   },
@@ -327,11 +327,11 @@ begin
     assume heq,
     rw add_comm at heq,
     suffices : fact n = 0,
-      from fact_nzero n this,
+      from fact_nzero this,
     apply add_cancel_to_zero,
     assumption,
   },
-  from fact_ndvd_lt n,
+  from fact_ndvd_lt,
 end
 
 -- this is pitched as a kind of long-term goal
@@ -354,9 +354,9 @@ begin
   have hmb : m ∣ b,
     have hmprod : m ∣ b * n,
       rw [ha, mul_comm],
-      apply dvd_mul m a,
+      apply dvd_mul,
       refl,
-    apply dvd_coprime m n b,
+    apply dvd_coprime,
     repeat {assumption},
   cases hmb with c hc,
   rw [hc, mul_assoc] at hb,

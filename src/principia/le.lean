@@ -1,5 +1,5 @@
-import principia.mynat
-import principia.tactic
+import .mynat
+import .tactic
 
 namespace hidden
 
@@ -14,7 +14,7 @@ instance: has_le mynat := ⟨le⟩
 def infinitely_many (statement : mynat → Prop) : Prop :=
 ∀ n : mynat, ∃ m : mynat, n ≤ m ∧ statement m
 
-variables m n p k : mynat
+variables {m n p k : mynat}
 
 theorem zero_le: 0 ≤ m :=
 begin
@@ -28,7 +28,7 @@ begin
   refl,
 end
 
-theorem le_comb (a b c d: mynat): a ≤ b → c ≤ d → a + c ≤ b + d :=
+theorem le_comb {a b c d: mynat}: a ≤ b → c ≤ d → a + c ≤ b + d :=
 begin
   assume hab hcd,
   cases hab with x hx,
@@ -47,7 +47,7 @@ begin
   simp [hk],
 end
 
-theorem le_add: m ≤ n → m + k ≤ n + k :=
+theorem le_add (k: mynat): m ≤ n → m + k ≤ n + k :=
 begin
   assume hmn,
   cases hmn with d hd,
@@ -67,12 +67,12 @@ begin
   from add_cancel hd,
 end
 
-theorem le_total_order: m ≤ n ∨ n ≤ m :=
+theorem le_total_order (m n: mynat): m ≤ n ∨ n ≤ m :=
 begin
   induction n with n_n n_ih, {
     repeat {rw zz},
     right,
-    from zero_le m,
+    from zero_le,
   }, {
     cases n_ih with hmn hnm, {
       cases hmn with k hk,
@@ -152,7 +152,7 @@ end wlog_tactic
 namespace hidden
 
 open mynat
-variables m n k : mynat
+variables {m n k: mynat}
 
 -- the infamous theorem, proved intuitively via total ordering
 -- can this be made tactically wlog?
@@ -176,11 +176,10 @@ theorem mul_cancel_to_one: m ≠ 0 → m = m * k → k = 1 :=
 begin
   assume hmn0 hmmk,
   rw [←mul_one m, mul_assoc, one_mul] at hmmk,
-  rw mul_cancel m 1 k hmn0,
-  assumption,
+  rw mul_cancel hmn0 hmmk,
 end
 
-theorem le_mul: m ≤ n → k * m ≤ k * n :=
+theorem le_mul (k: mynat): m ≤ n → k * m ≤ k * n :=
 begin
   assume hmn,
   cases hmn with d hd,
@@ -225,7 +224,7 @@ begin
   assumption,
 end
 
-theorem le_cancel_strong: m + k ≤ n → m ≤ n :=
+theorem le_cancel_strong (k: mynat): m + k ≤ n → m ≤ n :=
 begin
   assume hmkn,
   cases hmkn with d hd,
@@ -236,8 +235,8 @@ end
 theorem le_add_rhs: m ≤ n → m ≤ n + k :=
 begin
   assume hmn,
-  apply le_cancel_strong _ _ k,
-  apply le_add _ _ k,
+  apply le_cancel_strong k,
+  apply le_add k,
   assumption,
 end
 
@@ -276,11 +275,11 @@ begin
   assume hk0 hle,
   cases (le_total_order m n) with hmn hnm,
     assumption,
-  have hknkm := le_mul n m k hnm,
-  have heq := le_antisymm (k*m) (k*n) hle hknkm,
-  have := mul_cancel k m n hk0 heq,
+  have hknkm := le_mul k hnm,
+  have heq := le_antisymm hle hknkm,
+  have := mul_cancel hk0 heq,
   rw this,
-  from le_refl n,
+  from le_refl,
 end
 
 theorem lem_nat_eq: m = n ∨ m ≠ n :=

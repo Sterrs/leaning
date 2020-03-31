@@ -1,4 +1,4 @@
-import principia.lt
+import .lt
 
 namespace hidden
 
@@ -14,7 +14,7 @@ instance: has_dvd mynat := ⟨divides⟩
 | m n := if m ≤ n then gcd m (n - m)
  -/
 
-variables m n k p: mynat
+variables {m n k p: mynat}
 
 @[trans]
 theorem dvd_trans: m ∣ n → n ∣ k → m ∣ k :=
@@ -103,14 +103,14 @@ begin
   rw ←mul_one (succ n) at ha,
   rw mul_comm (a * b) _ at ha,
   rw mul_assoc at ha,
-  have hab := mul_cancel _ _ _ succ_ne_zero ha,
+  have hab := mul_cancel succ_ne_zero ha,
   rw one_mul at hab,
   symmetry, assumption,
-  have ha1 := one_unit _ _ hab1,
+  have ha1 := one_unit hab1,
   rw [ha, ha1, one_mul],
 end
 
-theorem dvd_mul: k ∣ m → k ∣ m * n :=
+theorem dvd_mul (n: mynat): k ∣ m → k ∣ m * n :=
 begin
   assume hkm,
   cases hkm with a ha,
@@ -175,7 +175,7 @@ begin
   rw [add_comm k _, ←add_assoc],
   assume hkmksn,
   apply n_ih,
-  from dvd_cancel _ _ hkmksn,
+  from dvd_cancel hkmksn,
 end
 
 theorem dvd_sum: k ∣ m → k ∣ n → k ∣ m + n :=
@@ -195,7 +195,7 @@ begin
   cases d,
   rw [zz, add_zero] at hd,
   rw hd at hmn,
-  from hmn (le_refl m),
+  from hmn le_refl,
   rw hd at hndm,
   cases hndm with a ha,
   cases a,
@@ -211,7 +211,7 @@ begin
   cases d,
   simp at hd,
   rw hd at hmn,
-  from hmn (le_refl n),
+  from hmn le_refl,
   rw hd at hmn,
   simp at hmn,
   have hcontr: n ≤ succ (n + d),
@@ -244,10 +244,11 @@ end
 theorem dvd_one: m ∣ 1 → m = 1 :=
 begin
   assume hm1,
-  from dvd_antisymm _ _ hm1 (one_dvd m),
+  from dvd_antisymm hm1 one_dvd,
 end
 
 -- Reorder variables
+-- have decided not to make implicit because it's too much of a headache
 theorem dvd_remainder (m k n j : mynat):
 j ∣ m → j ∣ n → m + k = n → j ∣ k :=
 begin
@@ -257,7 +258,7 @@ begin
   rw ha at hjn,
   rw add_comm at hjn,
   rw mul_comm at hjn,
-  from dvd_cancel_lots _ _ _ hjn,
+  from dvd_cancel_lots hjn,
 end
 
 -- Useful for e.g. infinitude of primes
@@ -270,11 +271,11 @@ begin
   rw mul_comm a at hb,
   rw mul_comm b at hb,
   suffices : k ∣ 1,
-    exact dvd_one k this,
+    exact dvd_one this,
   apply dvd_remainder (k * a) 1 (k * b) k,
-    apply dvd_mul k a k,
+    apply dvd_mul a,
     refl,
-    apply dvd_mul k b k,
+    apply dvd_mul b,
     refl,
   assumption,
 end
@@ -283,7 +284,7 @@ theorem dvd_succ: m ∣ succ m → m=1 :=
 begin
   assume h,
   have : m ∣ m, refl,
-  apply dvd_succ_too m m,
+  apply dvd_succ_too,
     refl,
   assumption,
 end

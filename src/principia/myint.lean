@@ -1,6 +1,6 @@
-import principia.mynat
-import principia.le
-import principia.nat_sub
+import .mynat
+import .le
+import .nat_sub
 
 namespace hidden
 
@@ -72,8 +72,8 @@ instance: has_mul myint := ⟨mul⟩
 def sub (m n: myint): myint := m + (-n)
 instance: has_sub myint := ⟨sub⟩
 
-variables m n k: myint
-variables m' n' k': mynat
+variables {m n k: myint}
+variables {m' n' k': mynat}
 
 -- problems I'm having: how do you refer to mynat theorems like add_comm explicitly?
 

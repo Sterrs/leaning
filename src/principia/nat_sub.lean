@@ -1,13 +1,13 @@
-import principia.mynat
-import principia.le
-import principia.lt
-import principia.logic
+import .mynat
+import .le
+import .lt
+import .logic
 
 namespace hidden
 
 open mynat
 
-variables m n k: mynat
+variables {m n k: mynat}
 
 -- Subtraction
 
@@ -71,7 +71,7 @@ begin
   rwa [add_succ, sub_succ_succ],
 end
 -- Simple corollaries of the above
-@[simp] theorem add_sub_one: (m + 1) - 1 = m := add_sub m 1
+@[simp] theorem add_sub_one: (m + 1) - 1 = m := add_sub
 @[simp]
 theorem succ_sub_one: (succ m) - 1 = m := by rwa [←add_one_succ, add_sub]
 
@@ -92,7 +92,7 @@ begin
           exfalso,
           from succ_ne_zero (add_integral hd.symm),
         }, {
-          apply m_ih n (le_succ_cancel _ _ hmn2),
+          apply m_ih (le_succ_cancel hmn2),
           apply succ_inj,
           rwa succ_add at hd,
         },
@@ -105,12 +105,12 @@ begin
       rw [hd, add_comm, add_sub] at hmn,
       rw hmn at hd,
       rw [hd, add_zero],
-      from le_refl _,
+      from le_refl,
     }, {
       assume hmn,
-      have hmeqn := le_antisymm _ _ hnm hmn,
+      have hmeqn := le_antisymm hnm hmn,
       rw hmeqn,
-      from sub_self_eq_zero _,
+      from sub_self_eq_zero,
     }
   }
 end
@@ -118,7 +118,7 @@ end
 -- just the contrapositive. Useful later
 theorem sub_nzero_iff_gt: m - n ≠ 0 ↔ n < m :=
 begin
-  from iff_to_contrapositive _ _ (sub_zero_iff_le m n),
+  from iff_to_contrapositive sub_zero_iff_le,
 end
 
 theorem sub_succ_impl_le: m - n = succ k → n < m :=
@@ -133,7 +133,7 @@ theorem sub_succ_rearrange: m - n = succ k ↔ m = succ k + n :=
 begin
   split, {
     assume hmnsk,
-    have hnlm := sub_succ_impl_le _ _ _ hmnsk,
+    have hnlm := sub_succ_impl_le hmnsk,
     rw lt_iff_succ_le at hnlm,
     cases hnlm with d hd,
     rw [hd, add_comm, add_succ, ←succ_add, add_sub] at hmnsk,
@@ -154,13 +154,13 @@ end
 theorem sub_overkill: m - (m + k) = 0 :=
 begin
   rw sub_zero_iff_le,
-  from le_to_add m k,
+  from le_to_add,
 end
 
 theorem sub_le: m - n ≤ m :=
 begin
   cases hmn: m - n, {
-    from zero_le _,
+    from zero_le,
   }, {
     rw sub_succ_rearrange at hmn,
     existsi n,
@@ -171,7 +171,7 @@ end
 theorem sub_from_le: m ≤ n → m - k ≤ n :=
 begin
   assume hmn,
-  cases (sub_le m k) with d1 hd1,
+  cases (sub_le: m - k ≤ m) with d1 hd1,
   cases hmn with d2 hd2,
   existsi d1 + d2,
   rw hd2,
@@ -192,14 +192,14 @@ begin
     cases h with d hd,
     cases d, {
       simp at hd,
-      have hr := (sub_succ_rearrange _ _ _).mp hd.symm,
+      have hr := sub_succ_rearrange.mp hd.symm,
       have : succ 0 = 1 := rfl,
-      rw [hr, add_comm, zz, this, add_sub n 1],
-      from le_refl _,
+      rw [hr, add_comm, zz, this, add_sub],
+      from le_refl,
     }, {
       have hmn0 := add_integral (succ_inj hd.symm),
       rw sub_zero_iff_le at hmn0,
-      from sub_from_le _ _ _ hmn0,
+      from sub_from_le hmn0,
     },
   }, {
     symmetry,
@@ -232,7 +232,7 @@ begin
   induction k with k hk,
     repeat { rw zz <|> rw sub_zero },
   repeat { rw sub_succ },
-  rw [←sub_switch_one (m - k), hk],
+  rw [←sub_switch_one, hk],
 end
 
 @[simp] theorem mul_sub: m * (n - k) = m * n - m * k :=
@@ -297,18 +297,18 @@ begin
   intros m n,
   by_cases hmn: m ≤ n, {
     by_cases hnm: n ≤ m, {
-      from is_true (le_antisymm _ _ hmn hnm),
+      from is_true (le_antisymm hmn hnm),
     }, {
       apply is_false,
       assume h,
       rw h at hnm,
-      from hnm (le_refl _),
+      from hnm le_refl,
     },
   }, {
     apply is_false,
     assume h,
     rw h at hmn,
-    from hmn (le_refl _),
+    from hmn le_refl,
   }
 end
 

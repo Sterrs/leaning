@@ -1,4 +1,4 @@
-import principia.le
+import .le
 
 namespace hidden
 
@@ -7,28 +7,28 @@ open mynat
 def lt (m n: mynat) := ¬n ≤ m
 instance: has_lt mynat := ⟨lt⟩
 
-variables m n p k : mynat
+variables {m n p k : mynat}
 
 theorem lt_nrefl: ¬m < m :=
 begin
   assume hmm,
-  from hmm (le_refl m),
+  from hmm le_refl,
 end
 
 theorem lt_succ_cancel: succ m < succ n → m < n :=
 begin
   assume hsmsn hmn,
   apply hsmsn,
-  have h := le_add n m 1 hmn,
+  have h := le_add 1 hmn,
   simp at h,
   cc,
 end
 
-theorem lt_cancel: m + k < n + k → m < n :=
+theorem lt_cancel (m n k: mynat): m + k < n + k → m < n :=
 begin
   assume hmknk hmn,
   apply hmknk,
-  from le_add _ _ _ hmn,
+  from le_add _ hmn,
 end
 
 theorem lt_cancel_strong: m + k < n → m < n :=
@@ -43,7 +43,7 @@ theorem lt_add_rhs: m < n → m < n + k :=
 begin
   assume hmn hmnk,
   apply hmn,
-  apply le_cancel_strong _ _ k,
+  apply le_cancel_strong k,
   cc,
 end
 
@@ -51,12 +51,11 @@ theorem nzero_iff_zero_lt: m ≠ 0 ↔ 0 < m :=
 begin
   split, {
     assume hmnz hmlz,
-    from hmnz (le_zero _ hmlz),
+    from hmnz (le_zero hmlz),
   }, {
     assume hlt heq,
     rw heq at hlt,
-    have := lt_nrefl 0,
-    contradiction,
+    from lt_nrefl hlt,
   },
 end
 
@@ -77,8 +76,8 @@ begin
   assume hbdac,
   cases (le_total_order a b),
   cases (le_total_order c d),
-  have hacbd := le_comb a b c d h h_1,
-  have hacebd := le_antisymm _ _ hacbd hbdac,
+  have hacbd := le_comb h h_1,
+  have hacebd := le_antisymm hacbd hbdac,
   cases h with x hx,
   cases h_1 with y hy,
   rw [hx, hy, add_assoc] at hacebd,
@@ -88,7 +87,7 @@ begin
   have hy0 := add_integral hxy.symm,
   rw hy0 at hy,
   rw [hy, add_zero] at hcd,
-  from hcd (le_refl c),
+  from hcd le_refl,
   from hcd h_1,
   from hab h,
 end
@@ -96,7 +95,7 @@ end
 theorem lt_nzero: ¬m < 0 :=
 begin
   assume mlz,
-  from mlz (zero_le m),
+  from mlz zero_le,
 end
 
 theorem zero_lt_succ: 0 < succ m :=
@@ -109,7 +108,7 @@ end
 theorem lt_add: m < n → m + k < n + k :=
 begin
   assume hmn hmknk,
-  from hmn (le_cancel _ _ _ hmknk),
+  from hmn (le_cancel hmknk),
 end
 
 theorem lt_impl_le: m < n → m ≤ n :=
@@ -142,7 +141,7 @@ begin
     cases hnm with d hd,
     cases d, {
       rw [hd, zz, add_zero],
-      from le_refl n,
+      from le_refl,
     }, {
       have hsnm: succ n ≤ m,
       existsi d,
@@ -157,7 +156,7 @@ begin
   split, {
     cases n, {
       assume h,
-      exfalso, from lt_nzero _ h,
+      exfalso, from lt_nzero h,
     }, {
       assume h,
       apply succ_le_succ, -- /o/
@@ -171,7 +170,7 @@ begin
     }, {
       assume h,
       rw ←le_iff_lt_succ,
-      from le_succ_cancel _ _ h,
+      from le_succ_cancel h,
     },
   },
 end
@@ -179,7 +178,7 @@ end
 theorem zero_lt_one : (0 : mynat) < (1 : mynat) :=
 begin
   rw [←one_eq_succ_zero, ←le_iff_lt_succ],
-  from le_refl 0,
+  from le_refl,
 end
 
 -- somehow this feels like it's not using le_iff_lt_succ enough
@@ -194,15 +193,15 @@ begin
     }, {
       left,
       rw hd,
-      from lt_to_add_succ _ _ ,
+      from lt_to_add_succ,
     },
   }, {
     assume hmnmn,
     cases hmnmn, {
-     from lt_impl_le _ _ hmnmn,
+     from lt_impl_le hmnmn,
     }, {
       rw hmnmn,
-      from le_refl n,
+      from le_refl,
     },
   },
 end
@@ -217,10 +216,10 @@ begin
   cases d,
   simp at hd,
   rw hd,
-  from le_refl m,
+  from le_refl,
   have hmln: m < n,
   rw hd,
-  from lt_to_add_succ _ _,
+  from lt_to_add_succ,
   exfalso, from hnmn hmln,
   from h,
 end
@@ -229,20 +228,20 @@ theorem lt_strict: ¬(m < n ∧ n < m) :=
 begin
   assume hmnnm,
   cases hmnnm with hmnnm_left hmnnm_right,
-  from hmnnm_left (lt_impl_le _ _ hmnnm_right),
+  from hmnnm_left (lt_impl_le hmnnm_right),
 end
 
 theorem lt_trichotomy: m = n ∨ m < n ∨ n < m :=
 begin
   cases (le_total_order m n), {
-    rw le_iff_lt_or_eq _ _ at h,
+    rw le_iff_lt_or_eq at h,
     cases h, {
       right, left, assumption,
     }, {
       left, assumption,
     },
   }, {
-    rw le_iff_lt_or_eq _ _ at h,
+    rw le_iff_lt_or_eq at h,
     cases h, {
       right, right, assumption,
     }, {
@@ -251,7 +250,7 @@ begin
   },
 end
 
-theorem le_lem: m ≤ n ∨ n < m :=
+theorem le_lem (m n: mynat): m ≤ n ∨ n < m :=
 begin
   cases le_total_order m n with hmn hnm, {
     left, assumption,
@@ -260,11 +259,11 @@ begin
     cases d, {
       simp [hd],
       left,
-      from le_refl _,
+      from le_refl,
     }, {
       right,
       rw hd,
-      from lt_to_add_succ _ _,
+      from lt_to_add_succ,
     },
   },
 end
@@ -276,27 +275,26 @@ begin
   cases d,
   simp at hd,
   rw hd at hmn,
-  from lt_strict _ _ (and.intro hnk hmn),
+  from lt_strict (and.intro hnk hmn),
   rw hd at hmn,
   have hkln: k ≤ n
-  := le_cancel_strong _ _ (succ d) (lt_impl_le _ _ hmn),
+  := le_cancel_strong (succ d) (lt_impl_le hmn),
   from hnk hkln,
 end
 
 theorem lt_combine (a b : mynat): m < n → a < b → m + a < n + b :=
 begin
   assume hmn hab,
-  have : m + a < n + a, {
-    apply lt_add _ _ _,
+  have h1: m + a < n + a, {
+    apply lt_add,
     assumption,
   },
-  have : n + a < n + b, {
+  have h2: n + a < n + b, {
     rw [add_comm n, add_comm n],
-    apply lt_add _ _ _,
+    apply lt_add,
     assumption,
   },
-  apply lt_trans _ (n+a) _,
-  repeat { assumption },
+  from lt_trans h1 h2,
 end
 
 theorem lt_mul: k ≠ 0 → m < n → k * m < k * n :=
@@ -304,7 +302,7 @@ begin
   assume hknz hmln hknkm,
   cases hknkm with d hd,
   cases n, {
-    from lt_nzero _ hmln,
+    from lt_nzero hmln,
   }, {
     rw ←le_iff_lt_succ at hmln,
     cases hmln with d' hd',
@@ -319,10 +317,10 @@ end
 theorem le_square: m ≤ n → m*m ≤ n*n :=
 begin
   assume hle,
-  have h₁ := le_mul m n n hle,
-  have h₂ := le_mul m n m hle,
+  have h₁ := le_mul n hle,
+  have h₂ := le_mul m hle,
   rw mul_comm at h₁,
-  from le_trans _ _ _ h₂ h₁,
+  from le_trans h₂ h₁,
 end
 
 theorem le_sqrt: m * m ≤ n * n → m ≤ n :=
@@ -334,7 +332,7 @@ begin
     cases h with d hd,
     cases d, {
       simp [hd],
-      from le_refl _,
+      from le_refl,
     }, {
       cases hm2n2 with d' hd',
       simp [hd] at hd',
@@ -349,7 +347,7 @@ end
 theorem lt_sqrt: m*m < n*n → m < n :=
 begin
   assume hlt hnlem,
-  have := le_square _ _ hnlem,
+  have := le_square hnlem,
   contradiction,
 end
 

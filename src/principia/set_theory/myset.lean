@@ -1,4 +1,4 @@
-import principia.lt
+import ..lt
 import logic.basic
 
 namespace hidden

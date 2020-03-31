@@ -1,5 +1,5 @@
-import principia.dvd
-import principia.induction
+import .dvd
+import .induction
 
 namespace hidden
 
@@ -9,7 +9,7 @@ def fact: mynat → mynat
 | 0        := 1
 | (succ n) := (fact n) * (succ n)
 
-variables m n p k : mynat
+variables {m n p k : mynat}
 
 @[simp] theorem fact_zero: fact 0 = 1 := rfl
 @[simp] theorem fact_succ: fact (succ n) = (fact n) * (succ n) := rfl
@@ -25,7 +25,7 @@ begin
   from hn (this succ_ne_zero h),
 end
 
-theorem fact_dvd_self {m : mynat} :
+theorem fact_dvd_self {m : mynat}:
 m ≠ 0 → m ∣ fact m :=
 begin
   assume hneq0,
@@ -38,7 +38,7 @@ begin
   },
 end
 
-theorem fact_dvd_succ (m : mynat) :
+theorem fact_dvd_succ (m : mynat):
 fact m ∣ fact (succ m) :=
 begin
   existsi (succ m),
@@ -46,7 +46,7 @@ begin
   refl,
 end
 
-theorem fact_dvd_le {m n : mynat} :
+theorem fact_dvd_le {m n : mynat}:
 m ≤ n → fact m ∣ fact n :=
 begin
   assume hmlen,
@@ -73,13 +73,13 @@ begin
   induction n with k hk, {
     assume hmle0,
     simp at hmle0,
-    have hmeq0 := le_zero m hmle0,
+    have hmeq0 := le_zero hmle0,
     exfalso, contradiction,
   }, {
     assume hmlesucc,
     have hmself := fact_dvd_self hmne0,
     have hfmfsucc := fact_dvd_le hmlesucc,
-    from dvd_trans m (fact m) (fact (succ k)) hmself hfmfsucc,
+    from dvd_trans hmself hfmfsucc,
   },
 end
 
@@ -89,11 +89,11 @@ begin
   assume n hneq1 hleqm hdiv,
   cases hdiv with k hk,
   have : n ∣ 1, {
-    apply dvd_remainder (fact m) 1 (k*n) n, {
+    apply dvd_remainder (fact m) 1 (k * n) n, {
       have hnne0 : n ≠ 0, {
         assume hn0,
         rw [hn0, mul_zero, add_comm] at hk,
-        have : (1:mynat) = (0:mynat), {
+        have : (1: mynat) = (0: mynat), {
           apply add_integral hk,
         },
         cases this,
@@ -101,12 +101,12 @@ begin
       from fact_dvd_nlt hnne0 hleqm,
     }, {
       rw mul_comm,
-      apply dvd_mul n k,
+      apply dvd_mul k,
       refl,
     },
     assumption,
   },
-  from hneq1 (dvd_one n this),
+  from hneq1 (dvd_one this),
 end
 
 end hidden

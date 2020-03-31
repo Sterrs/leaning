@@ -1,5 +1,5 @@
-import principia.prime
-import principia.induction
+import .prime
+import .induction
 
 namespace hidden
 
@@ -8,7 +8,7 @@ open mynat
 def even (m: mynat) := 2 ∣ m
 def odd (m: mynat) := ¬even m
 
-variables m n k p: mynat
+variables {m n k p: mynat}
 
 theorem even_zero: even 0 :=
 begin
@@ -19,7 +19,7 @@ end
 theorem odd_one: odd 1 :=
 begin
   assume he1,
-  have h21 := dvd_one _ he1,
+  have h21 := dvd_one he1,
   cases h21,
 end
 
@@ -41,7 +41,7 @@ begin
   exfalso,
   rw h₂ at hn,
   have hcancel :=
-    mul_cancel_to_one (succ m) 2 succ_ne_zero,
+    mul_cancel_to_one succ_ne_zero,
   cases hcancel hn,
 end
 
@@ -49,7 +49,7 @@ theorem even_add_even:
 even m → even n → even (m + n) :=
 begin
   assume hm hn,
-  from dvd_sum _ _ _ hm hn,
+  from dvd_sum hm hn,
 end
 
 theorem even_remainder (m k n : mynat):
@@ -75,7 +75,7 @@ odd m → even n → odd (m + n) :=
 begin
   assume hom hen,
   rw add_comm,
-  from even_add_odd _ _ hen hom,
+  from even_add_odd hen hom,
 end
 
 theorem succ_even_is_odd: even m → odd (succ m) :=
@@ -85,8 +85,8 @@ begin
   cases hesm with b hb,
   rw ha at hb,
   have he1: even 1, {
-    have h2dvda2 := dvd_multiple a 2,
-    have h2dvdb2 := dvd_multiple b 2,
+    have h2dvda2: 2 ∣ a * 2 := dvd_multiple,
+    have h2dvdb2: 2 ∣ b * 2 := dvd_multiple,
     from dvd_remainder _ 1 _ _ h2dvda2 h2dvdb2 hb,
   },
   from odd_one he1,
@@ -96,10 +96,10 @@ theorem odd_periodic: odd m ↔ odd (m + 2) :=
 begin
   split, {
     assume hom hem2,
-    from hom (dvd_cancel _ _ hem2),
+    from hom (dvd_cancel hem2),
   }, {
     assume hom2 hem,
-    from hom2 (dvd_add _ _ hem),
+    from hom2 (dvd_add hem),
   },
 end
 
@@ -107,10 +107,10 @@ theorem even_periodic: even m ↔ even (m + 2) :=
 begin
   split, {
     assume hem,
-    from dvd_add _ _ hem,
+    from dvd_add hem,
   }, {
     assume hem2,
-    from dvd_cancel _ _ hem2,
+    from dvd_cancel hem2,
   },
 end
 
@@ -130,22 +130,22 @@ begin
       existsi (1: mynat),
       refl,
     }, {
-      have hon := (odd_periodic _).mpr hosn,
-      have hesn := h_ih n (le_to_add _ 1) hon,
-      from (even_periodic _).mp hesn,
+      have hon := odd_periodic.mpr hosn,
+      have hesn := h_ih n (le_to_add: n ≤ n + 1) hon,
+      from even_periodic.mp hesn,
     },
   },
   assumption,
 end
 
-theorem even_or_odd: even m ∨ odd m :=
+theorem even_or_odd (m: mynat): even m ∨ odd m :=
 begin
   induction m with m_n m_ih, {
     left, from even_zero,
   }, {
     cases m_ih with hem hom,
-    right, from succ_even_is_odd _ hem,
-    left, from succ_odd_is_even _ hom,
+    right, from succ_even_is_odd hem,
+    left, from succ_odd_is_even hom,
   },
 end
 
@@ -177,7 +177,7 @@ end
 theorem odd_periodic_lots: even m → odd (n + m) → odd n :=
 begin
   assume hem honm hen,
-  from honm (even_add_even _ _ hen hem),
+  from honm (even_add_even hen hem),
 end
 
 theorem even_periodic_lots: even m → even (n + m) → even n :=
@@ -186,15 +186,15 @@ begin
   cases hem with k hk,
   rw hk at honm,
   rw mul_comm at honm,
-  from dvd_cancel_lots _ _ _ honm,
+  from dvd_cancel_lots honm,
 end
 
 theorem odd_add_odd: odd m → odd n → even (m + n) :=
 begin
   assume hom hon,
-  have hesm := succ_odd_is_even _ hom,
-  have hesn := succ_odd_is_even _ hon,
-  have hesmsn := even_add_even _ _ hesm hesn,
+  have hesm := succ_odd_is_even hom,
+  have hesn := succ_odd_is_even hon,
+  have hesmsn := even_add_even hesm hesn,
   simp at hesmsn,
   rw even_periodic,
   from hesmsn,
@@ -212,26 +212,26 @@ end
 theorem even_mul_even: even m → even n → even (m * n) :=
 begin
   assume hem _,
-  from even_mul _ _ hem,
+  from even_mul hem,
 end
 
 theorem odd_mul_odd:
 odd m → odd n → odd (m*n) :=
 begin
   assume hom hon heven,
-  have hesm := succ_odd_is_even _ hom,
-  have hesn := succ_odd_is_even _ hon,
-  have hesmsn := even_mul_even _ _ hesm hesn,
+  have hesm := succ_odd_is_even hom,
+  have hesn := succ_odd_is_even hon,
+  have hesmsn := even_mul_even hesm hesn,
   simp at hesmsn,
-  have homn := cancel_succ_even _ hesmsn,
+  have homn := cancel_succ_even hesmsn,
   rw ←add_assoc at homn,
   have hemn: even (m + n), {
-    have hesmpsn := even_add_even (succ m) (succ n) hesm hesn,
+    have hesmpsn := even_add_even hesm hesn,
     simp at hesmpsn,
-    from (even_periodic _).mpr hesmpsn,
+    from even_periodic.mpr hesmpsn,
   },
   rw [add_comm, add_comm n m] at homn,
-  have homn' := odd_periodic_lots _ _ hemn homn,
+  have homn' := odd_periodic_lots hemn homn,
   from homn' heven,
 end
 
@@ -244,7 +244,7 @@ begin
   }, {
     assume hem2,
     exfalso,
-    from (odd_mul_odd m m h h) hem2,
+    from odd_mul_odd h h hem2,
   },
 end
 
@@ -272,7 +272,7 @@ begin
       existsi k * k,
       simp [hn2k2],
     },
-    from even_square n h2dvdn2,
+    from even_square h2dvdn2,
   },
   cases h2dvdn with k' hk',
   existsi k',
@@ -283,7 +283,7 @@ begin
   }, {
     rw hk' at hn2k2,
     existsi k,
-    apply mul_cancel 2 _ _ h20,
+    apply mul_cancel h20,
     rw [←mul_assoc, ←hn2k2],
     rw mul_comm 2 _,
     conv {
@@ -301,13 +301,13 @@ begin
         skip,
       rw mul_assoc,
     },
-    have h₂:= mul_cancel 2 _ _ h20 hn2k2,
+    have h₂ := mul_cancel h20 hn2k2,
     conv at h₂ {
       to_lhs,
       rw [mul_comm, mul_assoc],
     },
     suffices : k'*k' < k*k, {
-      apply lt_sqrt _ _ this,
+      apply lt_sqrt this,
     },
     -- TODO: write a separate theorem here
     assume hk2k'2,

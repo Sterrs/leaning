@@ -1,4 +1,4 @@
-import principia.prime
+import .prime
 
 namespace hidden
 
@@ -6,7 +6,7 @@ open mynat
 
 def square (m : mynat) := ∃ k : mynat, m = k * k
 
-variables m n p k : mynat
+variables {m n p k : mynat}
 
 theorem square_closed_mul:
 square m → square n → square (m * n) :=
@@ -29,7 +29,7 @@ begin
   cases hs with a ha,
   have ham : a ∣ m,
     rw ha,
-    apply dvd_mul a a, refl,
+    apply dvd_mul, refl,
   have hor := hp a ham,
   cases hor with hm1 hmeq,
     rw [hm1, mul_one] at ha,
@@ -39,9 +39,9 @@ begin
     assume hm0,
     have h2 := hp 2,
     rw hm0 at h2,
-    have := h2 (dvd_zero 2),
+    have := h2 dvd_zero,
     cases this, cases this, cases this,
-  have := mul_cancel m 1 m this ha,
+  have := mul_cancel this ha,
   have : m = 1,
     symmetry, assumption,
   contradiction,

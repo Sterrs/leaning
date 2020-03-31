@@ -1,4 +1,4 @@
-import principia.lt
+import ..lt
 import .equinumerous
 
 
@@ -20,7 +20,7 @@ theorem emp_zero_to_zero : empty (zero_to 0) :=
 begin
   intro m,
   assume hm,
-  from (lt_nzero m) hm,
+  from lt_nzero hm,
 end
 
 def of_size {α : Type u} (s : myset α) (m : mynat) : Prop :=

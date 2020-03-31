@@ -1,5 +1,5 @@
-import principia.mynat
-import principia.induction
+import .mynat
+import .induction
 
 namespace hidden
 
@@ -12,7 +12,7 @@ def fib: mynat → mynat
 | 1               := 1
 | (succ (succ n)) := fib n + fib (succ n)
 
-variables m n k p: mynat
+variables {m n k p: mynat}
 
 -- what is the general tactical way to say to lean "just evaluate this constant
 -- sub-expression please"?
@@ -20,7 +20,7 @@ variables m n k p: mynat
 @[simp] theorem fib_one: fib 1 = 1 := rfl
 @[simp] theorem fib_succsucc: fib (succ (succ n)) = fib n + fib (succ n) := rfl
 
-theorem fib_k_formula:
+theorem fib_k_formula (k: mynat):
 fib (m + k + 1) = fib k * fib m + fib (k + 1) * fib (m + 1) :=
 begin
   revert k,
