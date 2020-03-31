@@ -79,7 +79,8 @@ end
 open classical
 -- Use classical reasoning, to convert goal p ∨ q to just q, but
 -- assuming ¬p
-#check tactic.cases
+-- NOTE: If you don't call it `tactic.interactive.` then
+-- it doesn't accept arguments.
 meta def tactic.interactive.ornotfirst
 (h : parse (optional (tk "with" *> ident))) : tactic unit :=
 do

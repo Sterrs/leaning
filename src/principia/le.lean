@@ -1,4 +1,5 @@
 import principia.mynat
+import principia.tactic
 
 namespace hidden
 
@@ -93,7 +94,7 @@ begin
   },
 end
 
-theorem wlog_le (p: mynat → mynat → Prop) (hsymm: ∀ m n: mynat, p m n → p n m):
+theorem wlogle (p: mynat → mynat → Prop) (hsymm: ∀ m n: mynat, p m n → p n m):
 (∀ m n: mynat, m ≤ n → p m n) → (∀ m n: mynat, p m n) :=
 begin
   assume hwlog,
@@ -105,26 +106,69 @@ begin
   },
 end
 
--- the infamous theorem, proved intuitively via total ordering can this be made
--- tactically wlog?
+end hidden
+
+-- We have to leave `hidden` to keep tactic.interactive
+-- Section so that tactic stuff is not open everywhere
+section wlog_tactic
+
+open tactic
+open tactic.interactive
+open interactive (parse)
+open interactive.types (texpr)
+open lean.parser
+
+-- Convert a goal relating two variables into two goals
+-- One showing symmetry of the goal,
+-- One with hypothesis m ≤ n showing the original goal.
+meta def tactic.interactive.wlog_le
+(m n : parse ident)
+(hsymm : parse (optional (tk "with" *> ident)))
+(hle : parse (optional ident)): tactic unit :=
+do
+  em ← get_local m,
+  en ← get_local n,
+  symm_name ← get_unused_name `hsymm,
+  le_name ← get_unused_name `hle,
+  -- And use them or whatever the tactic was provided with as
+  -- optional arguments
+  let symm := hsymm.get_or_else symm_name,
+  let le := hle.get_or_else le_name,
+  -- Revert m and n so we can apply wlogle
+  revert_lst [en, em],
+  -- Get the lambda expression to feed to wlogle
+  la ← goal_to_lambda2,
+  -- Apply wlogle
+  tactic.apply `(hidden.wlogle %%la),
+  -- Put everything back into context
+  tactic.intro_lst [m, n, symm],
+  swap,
+  tactic.intro_lst [m, n, le],
+  swap
+
+end wlog_tactic
+
+-- Return to hidden
+namespace hidden
+
+open mynat
+variables m n k : mynat
+
+-- the infamous theorem, proved intuitively via total ordering
+-- can this be made tactically wlog?
 theorem mul_cancel: m ≠ 0 → m * n = m * k → n = k :=
 begin
   assume hmnz,
-  revert n k,
-  apply wlog_le (λ n k, m * n = m * k → n = k), {
-    simp,
-    intros n k,
-    assume h hmkmn,
-    from (h hmkmn.symm).symm,
+  wlog_le n k with hs hnk, {
+    assume h,
+    from (hs h.symm).symm,
   }, {
-    simp,
-    intros n k,
-    assume hnk hmnmk,
+    assume h,
     cases hnk with d hd,
-    rw [hd, mul_add] at hmnmk,
-    have hdz' := add_cancel_to_zero _ _ hmnmk,
+    rw [hd, mul_add] at h,
+    have hdz' := add_cancel_to_zero _ _ h.symm,
     have hdz := mul_integral _ _ hmnz hdz',
-    simp [hd, hdz],
+    rwa [hdz, add_zero] at hd,
   },
 end
 
@@ -239,37 +283,26 @@ begin
   from le_refl n,
 end
 
--- I'm too lazy to prove this properly
 theorem lem_nat_eq: m = n ∨ m ≠ n :=
 begin
-  revert m n,
-  apply wlog_le, {
-    intros m n,
-    assume hmnmmn,
-    cases hmnmmn with hnm hnnm, {
+  wlog_le m n with hs hmn, {
+    cases hs with hnm hnnm,
       left, from hnm.symm,
-    }, {
-      right,
-      assume hnm,
-      from hnnm hnm.symm,
-    },
+    right,
+    assume hnm,
+    from hnnm hnm.symm,
   }, {
-    intros m n,
-    assume hmn,
     cases hmn with d hd,
-    cases d, {
+    cases d,
       simp [hd],
-    }, {
-      right,
-      rw hd,
-      assume hmn,
-      from succ_ne_zero _ (add_cancel_to_zero _ _ hmn),
-    },
+    right,
+    rw hd,
+    assume hmn,
+    from succ_ne_zero _ (add_cancel_to_zero _ _ hmn.symm),
   },
 end
 
 -- how does this work??
 -- instance: decidable_eq mynat
-
 
 end hidden
