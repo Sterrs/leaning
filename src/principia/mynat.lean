@@ -185,7 +185,7 @@ theorem mul_comm: ∀ m n : mynat, m * n = n * m
 theorem add_mul (m n k : mynat) : (m + n) * k = m * k + n * k :=
 by rw [mul_comm (m + n), mul_comm m, mul_comm n, mul_add]
 
-theorem mul_integral: ∀ m n : mynat, m ≠ 0 → m * n = 0 → n = 0
+theorem mul_integral: ∀ {m n : mynat}, m ≠ 0 → m * n = 0 → n = 0
 | m zero     := by simp
 | m (succ n) :=
 begin

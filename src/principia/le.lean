@@ -64,7 +64,7 @@ begin
   existsi d,
   repeat {rw add_comm _ k at hd},
   rw add_assoc at hd,
-  from add_cancel k _ _ hd,
+  from add_cancel hd,
 end
 
 theorem le_total_order: m ≤ n ∨ n ≤ m :=
@@ -166,8 +166,8 @@ begin
     assume h,
     cases hnk with d hd,
     rw [hd, mul_add] at h,
-    have hdz' := add_cancel_to_zero _ _ h.symm,
-    have hdz := mul_integral _ _ hmnz hdz',
+    have hdz' := add_cancel_to_zero h.symm,
+    have hdz := mul_integral hmnz hdz',
     rwa [hdz, add_zero] at hd,
   },
 end
@@ -213,7 +213,7 @@ theorem le_zero: m ≤ 0 → m = 0 :=
 begin
   assume hmlz,
   cases hmlz with d hd,
-  from add_integral m d hd.symm,
+  from add_integral hd.symm,
 end
 
 theorem le_succ_cancel: succ m ≤ succ n → m ≤ n :=
@@ -253,8 +253,8 @@ begin
   }, {
     left,
     simp at hk,
-    have hmk0 := succ_inj _ _ hk,
-    from add_integral _ _ hmk0.symm,
+    have hmk0 := succ_inj hk,
+    from add_integral hmk0.symm,
   },
 end
 
@@ -265,8 +265,8 @@ begin
   cases hnm with d' hd',
   have hdz: d = 0, {
     rw [hd', add_assoc, add_comm _ d] at hd,
-    have hzdd := add_cancel_to_zero _ _ hd,
-    from add_integral _ _ hzdd,
+    have hzdd := add_cancel_to_zero hd,
+    from add_integral hzdd,
   },
   simp [hd, hdz],
 end
@@ -298,7 +298,7 @@ begin
     right,
     rw hd,
     assume hmn,
-    from succ_ne_zero _ (add_cancel_to_zero _ _ hmn.symm),
+    from succ_ne_zero _ (add_cancel_to_zero hmn.symm),
   },
 end
 

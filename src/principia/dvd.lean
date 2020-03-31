@@ -85,7 +85,7 @@ begin
   repeat {rw add_succ},
   rw ←one_eq_succ_zero,
   assume hssssssss,
-  exfalso, from succ_ne_zero _ (succ_inj _ _ hssssssss),
+  exfalso, from succ_ne_zero _ (succ_inj hssssssss),
 end
 
 theorem dvd_antisymm: m ∣ n → n ∣ m → m = n :=
@@ -147,11 +147,11 @@ begin
   rw hn,
   rw zz at *,
   rw [zero_mul, add_comm] at hn,
-  exfalso, from succ_ne_zero _ (add_integral _ _ hn),
+  exfalso, from succ_ne_zero _ (add_integral hn),
   existsi n,
   rw succ_mul at hn,
   repeat {rw add_comm _ k at hn},
-  from add_cancel _ _ _ hn,
+  from add_cancel hn,
 end
 
 theorem dvd_add_lots: k ∣ m → k ∣ m + k * n :=
@@ -203,7 +203,7 @@ begin
   from hmnz ha,
   simp at ha,
   rw [←add_succ, ←add_zero m, add_assoc] at ha,
-  have hs0 := add_cancel _ _ _ ha,
+  have hs0 := add_cancel ha,
   simp at hs0,
   from succ_ne_zero _ hs0.symm,
 
@@ -238,7 +238,7 @@ begin
   simp at hk,
   rw [←add_assoc, add_comm k n, add_assoc, ←add_succ] at hk,
   exfalso,
-  from succ_ne_zero _ (add_cancel_to_zero _ _ hk),
+  from succ_ne_zero _ (add_cancel_to_zero hk),
 end
 
 theorem dvd_one: m ∣ 1 → m = 1 :=

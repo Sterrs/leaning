@@ -392,7 +392,7 @@ begin
       exfalso,
       simp at h, -- clearly absurd. Is there a quicker way?
       cases h with d hd,
-      from mynat.no_confusion (add_integral _ _ hd.symm),
+      from mynat.no_confusion (add_integral hd.symm),
     }, {
       -- why on Earth is this SO DIFFICULT
       -- I don't understand why I can't go straight to the rw
@@ -412,7 +412,7 @@ begin
     cases lst, {
       exfalso,
       cases h with d hd,
-      from mynat.no_confusion (add_integral _ _ hd.symm),
+      from mynat.no_confusion (add_integral hd.symm),
     }, {
       simp,
       rw len_cons_succ at h,

@@ -21,7 +21,7 @@ begin
   induction m with n hn,
     cases h, -- Magic?
   rw [fact_succ, mul_comm] at h,
-  have := mul_integral (succ n) (fact n),
+  have := @mul_integral (succ n) (fact n),
   from hn (this (succ_ne_zero n) h),
 end
 
@@ -94,7 +94,7 @@ begin
         assume hn0,
         rw [hn0, mul_zero, add_comm] at hk,
         have : (1:mynat) = (0:mynat), {
-          apply add_integral _ _ hk,
+          apply add_integral hk,
         },
         cases this,
       },

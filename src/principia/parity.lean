@@ -89,7 +89,7 @@ begin
     have h2dvdb2 := dvd_multiple b 2,
     from dvd_remainder _ 1 _ _ h2dvda2 h2dvdb2 hb,
   },
-  from odd_one he1,  
+  from odd_one he1,
 end
 
 theorem odd_periodic: odd m ↔ odd (m + 2) :=
@@ -265,7 +265,7 @@ begin
   have hnn0: n ≠ 0, {
     assume hn0,
     simp [hn0] at hn2k2,
-    from h20 (mul_integral _ _ hknz (mul_integral _ _ hknz hn2k2.symm)),
+    from h20 (mul_integral hknz (mul_integral hknz hn2k2.symm)),
   },
   have h2dvdn: 2 ∣ n, {
     have h2dvdn2: 2 ∣ n * n, {
@@ -316,11 +316,11 @@ begin
     have hk2e0: k * k = 0, {
       have h211: (2: mynat) = 1 + 1, refl,
       rw [h211, add_mul, one_mul, add_assoc] at h₂,
-      have h' := add_cancel_to_zero _ _ h₂.symm,
+      have h' := add_cancel_to_zero h₂.symm,
       rw [add_comm, add_assoc] at h',
-      from add_integral _ _ h',
+      from add_integral h',
     },
-    from hknz (mul_integral _ _ hknz hk2e0),
+    from hknz (mul_integral hknz hk2e0),
   },
 end
 

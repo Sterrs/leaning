@@ -65,7 +65,7 @@ begin
   assume hmmsn,
   cases hmmsn with d hd,
   rw [←add_zero m, add_assoc m _ _, add_assoc m _ _] at hd,
-  have hd' := add_cancel _ _ _ hd,
+  have hd' := add_cancel hd,
   simp at hd',
   from succ_ne_zero _ hd'.symm,
 end
@@ -82,10 +82,10 @@ begin
   cases h with x hx,
   cases h_1 with y hy,
   rw [hx, hy, add_assoc] at hacebd,
-  have hcxcy := add_cancel _ _ _ hacebd,
+  have hcxcy := add_cancel hacebd,
   rw [add_comm, add_assoc, ←add_zero c] at hcxcy,
-  have hxy := add_cancel _ _ _ hcxcy,
-  have hy0 := add_integral _ _ hxy.symm,
+  have hxy := add_cancel hcxcy,
+  have hy0 := add_integral hxy.symm,
   rw hy0 at hy,
   rw [hy, add_zero] at hcd,
   from hcd (le_refl c),
@@ -103,7 +103,7 @@ theorem zero_lt_succ: 0 < succ m :=
 begin
   assume h,
   cases h with d hd,
-  from succ_ne_zero _ (add_integral _ _ hd.symm),
+  from succ_ne_zero _ (add_integral hd.symm),
 end
 
 theorem lt_add: m < n → m + k < n + k :=
@@ -130,7 +130,7 @@ begin
     assume hmsd,
     cases hmsd with d' hd',
     rw [succ_add, add_assoc, ←add_succ, ←add_zero m, add_assoc] at hd',
-    have hzsucc := add_cancel _ _ _ hd',
+    have hzsucc := add_cancel hd',
     rw zero_add at hzsucc,
     from succ_ne_zero _ hzsucc.symm,
   }, {
@@ -167,7 +167,7 @@ begin
     cases n, {
       assume h,
       cases h with d hd,
-      exfalso, from succ_ne_zero _ (add_integral _ _ hd.symm),
+      exfalso, from succ_ne_zero _ (add_integral hd.symm),
     }, {
       assume h,
       rw ←le_iff_lt_succ,
@@ -310,9 +310,9 @@ begin
     cases hmln with d' hd',
     simp [hd'] at hd,
     rw [←add_assoc, add_comm, add_assoc] at hd,
-    have hcancel := add_cancel_to_zero _ _ hd,
+    have hcancel := add_cancel_to_zero hd,
     rw [←add_assoc, add_comm] at hcancel,
-    from hknz (add_integral _ _ hcancel),
+    from hknz (add_integral hcancel),
   },
 end
 
@@ -341,7 +341,7 @@ begin
       rw [add_comm, add_comm n, add_comm d, add_comm n] at hd',
       repeat {rw add_assoc at hd'},
       rw ←add_succ at hd',
-      exfalso, from succ_ne_zero _ (add_cancel_to_zero _ _ hd'),
+      exfalso, from succ_ne_zero _ (add_cancel_to_zero hd'),
     },
   },
 end

@@ -90,7 +90,7 @@ begin
         rw [succ_add, sub_succ_succ],
         cases n, {
           exfalso,
-          from succ_ne_zero _ (add_integral _ _ hd.symm),
+          from succ_ne_zero _ (add_integral hd.symm),
         }, {
           apply m_ih n (le_succ_cancel _ _ hmn2),
           apply succ_inj,
@@ -148,7 +148,7 @@ theorem sub_succ_cancel: succ m - n = succ k → m - n = k :=
 begin
   rw [sub_succ_rearrange, succ_add],
   assume hmkn,
-  rw [succ_inj _ _ hmkn, add_sub],
+  rw [succ_inj hmkn, add_sub],
 end
 
 theorem sub_overkill: m - (m + k) = 0 :=
@@ -197,7 +197,7 @@ begin
       rw [hr, add_comm, zz, this, add_sub n 1],
       from le_refl _,
     }, {
-      have hmn0 := add_integral _ _ (succ_inj _ _ hd.symm),
+      have hmn0 := add_integral (succ_inj hd.symm),
       rw sub_zero_iff_le at hmn0,
       from sub_from_le _ _ _ hmn0,
     },
@@ -245,7 +245,7 @@ begin
       rw [zz, sub_zero_iff_le],
       apply le_mul,
       rw ←sub_zero_iff_le,
-      from mul_integral _ _ (succ_ne_zero _) hmnk,
+      from mul_integral (succ_ne_zero _) hmnk,
     }, {
       cases hnk: n - k, {
         rw hnk at hmnk,
