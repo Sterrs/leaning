@@ -1,6 +1,6 @@
 # Style
 
-Just a rough guide as to what style I'm trying to use
+Just a rough guide as to what style we're trying to use
 
 - Near everything to be done in tactic mode
 - Two spaces for indent, as was commanded by Sterrrs
@@ -9,9 +9,14 @@ Just a rough guide as to what style I'm trying to use
 - When multiple goals are introduced, wrap each in curly braces `{}`, with
   K&R C convention: the only curly brace to be on its own line should be the
   very last one
-- Use fancy tactics like `simp` and `cc` as much as possible.
+- Use semantic tactics like `contradiction` and `assumption` and fancy tactics
+  like `cc` as much as possible.
 
-  However, prefer `refl` over `simp`.
+  However, prefer `refl` over `simp`, and `assumption` over `cc`.
+
+  It is also fine (and perhaps encouraged) to replace invocations of `simp` with
+  `rw` at your discretion, as these are likely faster, and can make proofs more
+  legible.
 - Always put a trailing comma after the last command in a block, so that you can
   make lean evaluate that command by positioning yourself after the comma.
 - Name hypotheses starting with h, except in exceptional circumstances, and then
