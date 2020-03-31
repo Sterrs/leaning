@@ -84,10 +84,10 @@ begin
           have h := succ_inj _ _ hab2,
           have h' := succ_inj _ _ h,
           from succ_ne_zero _ h',
-        }
-      }
-    }
-  }
+        },
+      },
+    },
+  },
 end
 
 -- prove 2 is prime by a massive case-bash
@@ -123,11 +123,11 @@ begin
             have hcontr := succ_inj _ _ hcontr',
             simp at hcontr,
             exfalso, from succ_ne_zero _ hcontr,
-          }
-        }
-      }
-    }
-  }
+          },
+        },
+      },
+    },
+  },
 end
 
 @[symm]
@@ -207,7 +207,7 @@ begin
       contradiction,
     }, {
       symmetry, assumption,
-    }
+    },
   },
 end
 

@@ -80,7 +80,7 @@ begin
     have hmself := fact_dvd_self hmne0,
     have hfmfsucc := fact_dvd_le hmlesucc,
     from dvd_trans m (fact m) (fact (succ k)) hmself hfmfsucc,
-  }
+  },
 end
 
 theorem fact_ndvd_lt:

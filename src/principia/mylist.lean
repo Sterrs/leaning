@@ -104,7 +104,7 @@ begin
     simp,
   }, {
     simp [lst1_ih],
-  }
+  },
 end
 
 def rev: mylist T → mylist T
@@ -152,7 +152,7 @@ begin
     simp,
   }, {
     simp [lst_ih],
-  }
+  },
 end
 
 theorem nonempty_iff_len: lst ≠ [] ↔ len lst ≠ 0 :=
@@ -162,7 +162,7 @@ begin
   }, {
     simp,
     from succ_ne_zero (len lst_tail),
-  }
+  },
 end
 
 theorem rev_not_empty: lst ≠ [] → rev lst ≠ [] :=
@@ -287,7 +287,7 @@ begin
     refl,
   }, {
     simp,
-  }
+  },
 end
 
 theorem cons_head_tail (h: lst ≠ []): head lst h :: tail lst h = lst :=
@@ -296,7 +296,7 @@ begin
     contradiction,
   }, {
     simp,
-  }
+  },
 end
 
 theorem len_tail (h: lst ≠ []): len lst = succ (len (tail lst h)) :=
@@ -321,8 +321,8 @@ begin
       rw hi,
     }, {
       apply lst_ih,
-    }
-  }
+    },
+  },
 end
 
 theorem append_init_last (h: lst ≠ []): init lst h ++ [last lst h] = lst :=
@@ -343,7 +343,7 @@ begin
       rw last_ccons _ _ _ h,
       simp,
       apply lst_ih,
-    }
+    },
   },
 end
 
@@ -374,8 +374,8 @@ private theorem succ_le_impl_le (h: succ n ≤ len lst): n ≤ len lst :=
 --     }, {
 --       simp,
 --       sorry,
---     }
---   }
+--     },
+--   },
 -- end
 
 @[simp]
@@ -405,7 +405,7 @@ begin
       },
       rw take_succ_cons lst_head lst_tail 0,
       simp,
-    }
+    },
   }, {
     intro lst,
     assume h,
@@ -429,7 +429,7 @@ begin
     -- really all the hard work happens in len_take_succ
     simp,
     apply n_ih,
-  }
+  },
 end
 
 def contains: T → mylist T → Prop

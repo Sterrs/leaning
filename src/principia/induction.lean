@@ -42,7 +42,7 @@ begin
         },
         from N_ih M hMleN,
       },
-    }
+    },
   },
   from h_aux (succ k) k (le_to_add k 1),
 end

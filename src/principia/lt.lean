@@ -148,7 +148,7 @@ begin
       existsi d,
       rw [hd, add_succ, succ_add],
       exfalso, from hmsn hsnm,
-    }
+    },
   },
 end
 
@@ -162,7 +162,7 @@ begin
       assume h,
       apply succ_le_succ, -- /o/
       rw le_iff_lt_succ, assumption,
-    }
+    },
   }, {
     cases n, {
       assume h,
@@ -265,8 +265,8 @@ begin
       right,
       rw hd,
       from lt_to_add_succ _ _,
-    }
-  }
+    },
+  },
 end
 
 theorem lt_trans: m < n → n < k → m < k :=

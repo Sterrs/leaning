@@ -113,7 +113,7 @@ begin
     from inj_inj _ _ hif hig,
   }, {
     from surj_surj _ _ hsf hsg,
-  }
+  },
 end
 
 end theorems

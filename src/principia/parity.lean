@@ -111,7 +111,7 @@ begin
   }, {
     assume hem2,
     from dvd_cancel _ _ hem2,
-  }
+  },
 end
 
 -- is this overkill?
@@ -133,7 +133,7 @@ begin
       have hon := (odd_periodic _).mpr hosn,
       have hesn := h_ih n (le_to_add _ 1) hon,
       from (even_periodic _).mp hesn,
-    }
+    },
   },
   assumption,
 end

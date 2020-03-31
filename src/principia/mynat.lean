@@ -270,7 +270,7 @@ begin
     contradiction,
   }, {
     simp,
-  }
+  },
 end
 
 @[simp]
@@ -289,7 +289,7 @@ begin
       rw mul_comm,
     },
     rw mul_assoc,
-  }
+  },
 end
 
 @[simp]
@@ -299,7 +299,7 @@ begin
     simp,
   }, {
     simp [k_ih],
-  }
+  },
 end
 
 @[simp]
@@ -315,7 +315,7 @@ begin
         rw mul_comm,
     },
     rw mul_assoc,
-  }
+  },
 end
 
 end hidden

@@ -89,7 +89,7 @@ begin
         existsi k,
         simp [hk],
       },
-    }
+    },
   },
 end
 
@@ -102,7 +102,7 @@ begin
     from hwlog m n hmn,
   }, {
     from hsymm _ _ (hwlog n m hnm),
-  }
+  },
 end
 
 -- the infamous theorem, proved intuitively via total ordering can this be made
