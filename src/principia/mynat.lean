@@ -1,16 +1,10 @@
 -- Natural numbers
 
 -- TODO:
--- shorten things using other better tactics
+-- shorten the pow theorems
 -- work through the sporadic confused comments
 -- clean everything up a bit, re naming and formatting
--- tidy up the order
 -- try to re-use theorems more
--- implement more theorems about more sophisticated arithmetic
--- endgame: perhaps some of the N&S course, maybe an example sheet question?
-
--- also, I haven't opened classical! Is it really true that none of this
--- requires classical? Let's see how long we can keep it up for
 
 -- stops name conflicts
 namespace hidden
@@ -45,62 +39,38 @@ def pow: mynat → mynat → mynat
 
 instance: has_pow mynat mynat := ⟨pow⟩
 
-variables m n k p: mynat
+variables {m n k : mynat}
 
--- Addition
+-- ADDITION
 
 -- I'm simping liberally for future reasons
-@[simp] theorem add_zero: m + 0 = m := rfl
+@[simp] theorem add_zero (m : mynat): m + 0 = m := rfl
 
-@[simp] theorem add_succ: m + succ n = succ (m + n) := rfl
+@[simp] theorem add_succ (m n : mynat): m + succ n = succ (m + n) := rfl
 
 -- so for some reason all the old code breaks with the new operator instances,
 -- so I have to go and replace zero with 0 wherever I used induction. How fix???
 @[simp] theorem zz: zero = 0 := rfl
 
 @[simp]
-theorem zero_add: 0 + m = m :=
-begin
-  induction m with m_n m_ih, {
-    refl
-  }, {
-    simp,
-    assumption,
-  },
-end
+theorem zero_add: ∀ m : mynat, 0 + m = m
+| zero     := rfl
+| (succ m) := by rw [add_succ, zero_add]
 
 @[simp]
-theorem succ_add: succ m + n = succ (m + n) :=
-begin
-  induction n with n_n n_ih, {
-    refl
-  }, {
-    simp,
-    assumption,
-  },
-end
+theorem succ_add: ∀ m n : mynat, succ m + n = succ (m + n)
+| m zero     := rfl
+| m (succ n) := by rw [add_succ, add_succ, succ_add]
 
 @[simp]
-theorem add_assoc: (m + n) + k = m + (n + k) :=
-begin
-  induction k with k_n k_ih, {
-    refl,
-  }, {
-    simp,
-    assumption,
-  },
-end
+theorem add_assoc: ∀ m n k : mynat, (m + n) + k = m + (n + k)
+| m n zero     := rfl
+| m n (succ k) := by rw [add_succ, add_succ, add_succ, add_assoc]
 
 @[simp]
-theorem add_comm: m + n = n + m :=
-begin
-  induction n with n_n n_ih, {
-    simp,
-  }, {
-    simp,
-    assumption,
-  },
-end
+theorem add_comm: ∀ m n : mynat, m + n = n + m
+| m zero     := by rw [zz, add_zero, zero_add]
+| m (succ n) := by rw [add_succ, succ_add, add_comm]
 
 @[simp] theorem add_one_succ: m + 1 = succ m := rfl
 
@@ -140,134 +110,96 @@ begin
     rw ←add_zero m,
   },
   symmetry,
-  apply add_cancel _ _ _ hmmk,
+  apply add_cancel hmmk,
 end
 
 -- again, this is magical cases
-theorem succ_ne_zero: succ m ≠ 0 :=
+theorem succ_ne_zero (m : mynat): succ m ≠ 0 :=
 begin
-  assume hsm0,
-  cases hsm0,
+  assume h,
+  cases h,
 end
 
-theorem add_integral: m + n = 0 → m = 0 :=
+theorem add_integral: ∀ {m n : mynat}, m + n = 0 → m = 0
+| zero     _ := by simp
+| (succ m) n :=
 begin
-  cases m, {
-    simp,
-  }, {
-    simp,
-    assume hsmnz,
-    exfalso,
-    from succ_ne_zero _ hsmnz,
-  },
+  rw succ_add,
+  assume h,
+  from false.elim (succ_ne_zero _ h),
 end
 
--- Multiplication
+-- MULTIPLICATION
 
-@[simp] theorem mul_zero: m * 0 = 0 := rfl
+@[simp] theorem mul_zero (m : mynat): m * 0 = 0 := rfl
 
-@[simp] theorem mul_succ: m * (succ n) = m + (m * n) := rfl
+@[simp] theorem mul_succ (m n : mynat): m * (succ n) = m + (m * n) := rfl
 
-@[simp] theorem mul_one: m * 1 = m := rfl
+@[simp] theorem mul_one (m : mynat) : m * 1 = m := rfl
 
 @[simp]
-theorem zero_mul: 0 * m = 0 :=
-begin
-  induction m with m_n m_ih, {
-    refl
-  }, {
-    simp,
-    assumption,
-  },
-end
+theorem zero_mul: ∀ m : mynat, 0 * m = 0
+| zero     := by rw [zz, mul_zero]
+| (succ m) := by rw [mul_succ, zero_mul, add_zero]
+
 
 @[simp]
-theorem one_mul: 1 * m = m :=
-begin
-  induction m with m_n m_ih, {
-    refl,
-  }, {
-    simp [m_ih],
-  },
-end
+theorem one_mul: ∀ m : mynat, 1 * m = m
+| zero     := by rw [zz, mul_zero]
+| (succ m) := by rw [mul_succ, one_mul, add_comm, add_one_succ]
 
 @[simp]
-theorem succ_mul: (succ m) * n = m * n + n :=
-begin
-  induction n with n_n n_ih, {
-    simp,
-  }, {
-    simp [n_ih],
-    rw [←add_assoc, add_comm m n_n, add_assoc],
-  },
-end
+theorem succ_mul: ∀ m n : mynat, (succ m) * n = m * n + n
+| m zero     := by rw [zz, mul_zero, mul_zero, add_zero]
+| m (succ n) := by conv {
+  congr,
+    rw [mul_succ, succ_mul, ←add_assoc, ←add_comm (m*n), add_assoc],
+  skip,
+    rw [mul_succ, add_comm m, add_assoc, add_succ, ←succ_add],
+}
 
 @[simp]
-theorem mul_add: m * (n + k) = m * n + m * k :=
+theorem mul_add: ∀ m n k : mynat, m * (n + k) = m * n + m * k
+| zero     n k := by repeat { rw zz <|> rw zero_mul <|> rw zero_add }
+| (succ m) n k :=
 begin
-  induction m with m_n m_ih, {
-    simp,
-  }, {
-    simp [m_ih],
-    conv {
-      to_lhs,
-      congr,
-      skip,
-      rw [←add_assoc, add_comm k, add_assoc],
-    },
-  },
-end
-
-@[simp]
-theorem mul_assoc: (m * n) * k = m * (n * k) :=
-begin
-  induction k with k_n k_ih, {
-    simp,
-  }, {
-    simp [k_ih],
-  },
-end
-
-@[simp]
-theorem mul_comm: m * n = n * m :=
-begin
-  induction n with n_n n_ih, {
-    simp,
-  }, {
-    simp [n_ih],
-  },
-end
-
-@[simp]
-theorem add_mul: (m + n) * k = m * k + n * k :=
-begin
+  repeat { rw succ_mul },
   conv {
     to_lhs,
-    rw [mul_comm, mul_add],
-    congr,
-    rw mul_comm, skip,
-    rw mul_comm,
+    rw [mul_add, add_assoc, ←add_assoc (m*k), add_comm (m*k),
+        add_assoc n, ←add_assoc],
   },
 end
 
-theorem mul_integral: m ≠ 0 → m * n = 0 → n = 0 :=
+@[simp]
+theorem mul_assoc: ∀ m n k: mynat, (m * n) * k = m * (n * k)
+| m n zero     := by rw [zz, mul_zero, mul_zero, mul_zero]
+| m n (succ k) := by rw [mul_succ, mul_succ, mul_add, mul_assoc]
+
+@[simp]
+theorem mul_comm: ∀ m n : mynat, m * n = n * m
+| m zero     := by rw [zz, mul_zero, zero_mul]
+| m (succ n) := by rw [mul_succ, succ_mul, mul_comm, add_comm]
+
+@[simp]
+theorem add_mul (m n k : mynat) : (m + n) * k = m * k + n * k :=
+by rw [mul_comm (m + n), mul_comm m, mul_comm n, mul_add]
+
+theorem mul_integral: ∀ m n : mynat, m ≠ 0 → m * n = 0 → n = 0
+| m zero     := by simp
+| m (succ n) :=
 begin
   assume hmne0 hmn0,
-  cases n, {
-    simp,
-  }, {
-    simp at hmn0,
-    have hm0 := add_integral _ _ hmn0,
-    contradiction,
-  },
+  rw mul_succ at hmn0,
+  from false.elim (hmne0 (add_integral hmn0)),
 end
 
--- Powers
+-- POWERS
 
 -- do I really have to spell out mynat like this? yuck
-@[simp] theorem pow_zero: m ^ (0: mynat) = 1 := rfl
+@[simp] theorem pow_zero (m : mynat) : m ^ (0: mynat) = 1 := rfl
 
-@[simp] theorem pow_succ: m ^ (succ n) = m * (m ^ n) := rfl
+@[simp] theorem pow_succ (m n : mynat) : m ^ (succ n) = m * (m ^ n) := rfl
 
 theorem zero_pow: m ≠ 0 → (0: mynat) ^ m = 0 :=
 begin
@@ -280,7 +212,7 @@ begin
 end
 
 @[simp]
-theorem pow_add: m ^ (n + k) = (m ^ n) * (m ^ k) :=
+theorem pow_add (m n k : mynat) : m ^ (n + k) = (m ^ n) * (m ^ k) :=
 begin
   induction k with k_n k_ih, {
     simp,
@@ -299,7 +231,7 @@ begin
 end
 
 @[simp]
-theorem pow_mul: (m ^ n) ^ k = m ^ (n * k) :=
+theorem pow_mul (m n k : mynat): (m ^ n) ^ k = m ^ (n * k) :=
 begin
   induction k with k_n k_ih, {
     simp,
@@ -309,7 +241,7 @@ begin
 end
 
 @[simp]
-theorem mul_pow: (m * n) ^ k = m ^ k * n ^ k :=
+theorem mul_pow (m n k : mynat): (m * n) ^ k = m ^ k * n ^ k :=
 begin
   induction k with k_n k_ih, {
     simp,
