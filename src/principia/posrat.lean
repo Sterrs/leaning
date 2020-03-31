@@ -49,6 +49,6 @@ namespace rat_eq
   end
 end rat_eq
 
-def posrat := quot rat_eq
+-- def posrat := quot rat_eq
 
 end hidden

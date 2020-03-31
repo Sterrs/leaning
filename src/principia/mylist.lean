@@ -161,7 +161,7 @@ begin
     simp,
   }, {
     simp,
-    from succ_ne_zero (len lst_tail),
+    from succ_ne_zero,
   },
 end
 

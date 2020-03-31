@@ -114,7 +114,7 @@ begin
 end
 
 -- again, this is magical cases
-theorem succ_ne_zero (m : mynat): succ m ≠ 0 :=
+theorem succ_ne_zero: succ m ≠ 0 :=
 begin
   assume h,
   cases h,
@@ -126,7 +126,7 @@ theorem add_integral: ∀ {m n : mynat}, m + n = 0 → m = 0
 begin
   rw succ_add,
   assume h,
-  from false.elim (succ_ne_zero _ h),
+  from false.elim (succ_ne_zero h),
 end
 
 -- MULTIPLICATION

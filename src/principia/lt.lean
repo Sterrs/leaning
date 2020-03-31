@@ -67,7 +67,7 @@ begin
   rw [←add_zero m, add_assoc m _ _, add_assoc m _ _] at hd,
   have hd' := add_cancel hd,
   simp at hd',
-  from succ_ne_zero _ hd'.symm,
+  from succ_ne_zero hd'.symm,
 end
 
 -- this is far too long
@@ -103,7 +103,7 @@ theorem zero_lt_succ: 0 < succ m :=
 begin
   assume h,
   cases h with d hd,
-  from succ_ne_zero _ (add_integral hd.symm),
+  from succ_ne_zero (add_integral hd.symm),
 end
 
 theorem lt_add: m < n → m + k < n + k :=
@@ -132,7 +132,7 @@ begin
     rw [succ_add, add_assoc, ←add_succ, ←add_zero m, add_assoc] at hd',
     have hzsucc := add_cancel hd',
     rw zero_add at hzsucc,
-    from succ_ne_zero _ hzsucc.symm,
+    from succ_ne_zero hzsucc.symm,
   }, {
     assume hmsn,
     -- this total ordering theorem is crazy powerful. It feels like you need
@@ -167,7 +167,7 @@ begin
     cases n, {
       assume h,
       cases h with d hd,
-      exfalso, from succ_ne_zero _ (add_integral hd.symm),
+      exfalso, from succ_ne_zero (add_integral hd.symm),
     }, {
       assume h,
       rw ←le_iff_lt_succ,
@@ -341,7 +341,7 @@ begin
       rw [add_comm, add_comm n, add_comm d, add_comm n] at hd',
       repeat {rw add_assoc at hd'},
       rw ←add_succ at hd',
-      exfalso, from succ_ne_zero _ (add_cancel_to_zero hd'),
+      exfalso, from succ_ne_zero (add_cancel_to_zero hd'),
     },
   },
 end

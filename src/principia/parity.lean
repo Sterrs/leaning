@@ -41,7 +41,7 @@ begin
   exfalso,
   rw h₂ at hn,
   have hcancel :=
-    mul_cancel_to_one (succ m) 2 (succ_ne_zero m),
+    mul_cancel_to_one (succ m) 2 succ_ne_zero,
   cases hcancel hn,
 end
 

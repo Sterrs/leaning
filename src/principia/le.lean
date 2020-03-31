@@ -298,7 +298,7 @@ begin
     right,
     rw hd,
     assume hmn,
-    from succ_ne_zero _ (add_cancel_to_zero hmn.symm),
+    from succ_ne_zero (add_cancel_to_zero hmn.symm),
   },
 end
 

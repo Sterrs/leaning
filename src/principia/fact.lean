@@ -22,7 +22,7 @@ begin
     cases h, -- Magic?
   rw [fact_succ, mul_comm] at h,
   have := @mul_integral (succ n) (fact n),
-  from hn (this (succ_ne_zero n) h),
+  from hn (this succ_ne_zero h),
 end
 
 theorem fact_dvd_self {m : mynat} :

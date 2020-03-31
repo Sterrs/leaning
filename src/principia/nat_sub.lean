@@ -90,7 +90,7 @@ begin
         rw [succ_add, sub_succ_succ],
         cases n, {
           exfalso,
-          from succ_ne_zero _ (add_integral hd.symm),
+          from succ_ne_zero (add_integral hd.symm),
         }, {
           apply m_ih n (le_succ_cancel _ _ hmn2),
           apply succ_inj,
@@ -126,7 +126,7 @@ begin
   assume hmnsk,
   rw ←sub_nzero_iff_gt,
   rw hmnsk,
-  from succ_ne_zero _,
+  from succ_ne_zero,
 end
 
 theorem sub_succ_rearrange: m - n = succ k ↔ m = succ k + n :=
@@ -245,12 +245,12 @@ begin
       rw [zz, sub_zero_iff_le],
       apply le_mul,
       rw ←sub_zero_iff_le,
-      from mul_integral (succ_ne_zero _) hmnk,
+      from mul_integral succ_ne_zero hmnk,
     }, {
       cases hnk: n - k, {
         rw hnk at hmnk,
         simp at hmnk,
-        exfalso, from succ_ne_zero _ hmnk.symm,
+        exfalso, from succ_ne_zero hmnk.symm,
       },
       symmetry,
       rw sub_succ_rearrange,
@@ -284,14 +284,14 @@ begin
       apply is_false,
       rw [hnm, add_comm],
       assume h,
-      from succ_ne_zero _ (add_cancel_to_zero h),
+      from succ_ne_zero (add_cancel_to_zero h),
     }
   }, {
     rw sub_succ_rearrange at hmn,
     apply is_false,
     rw [hmn, add_comm],
     assume h,
-    from succ_ne_zero _ (add_cancel_to_zero h.symm),
+    from succ_ne_zero (add_cancel_to_zero h.symm),
   },
 end
 
