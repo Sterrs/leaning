@@ -269,4 +269,31 @@ by rw [mul_comm, mul_comm m, mul_comm n k, mul_sub]
 theorem difference_two_squares: m * m - n * n = (m - n) * (m + n) :=
 by rw [sub_mul, mul_add, mul_add, sub_distr, mul_comm m n, add_sub]
 
+
+instance: decidable_eq mynat :=
+begin
+  intros m n,
+  cases hmn: m - n, {
+    cases hnm: n - m, {
+      rw [zz, sub_zero_iff_le] at hmn,
+      rw [zz, sub_zero_iff_le] at hnm,
+      apply is_true,
+      from le_antisymm _ _ hmn hnm,
+    }, {
+      rw sub_succ_rearrange at hnm,
+      apply is_false,
+      rw [hnm, add_comm],
+      assume h,
+      from succ_ne_zero _ (add_cancel_to_zero h),
+    }
+  }, {
+    rw sub_succ_rearrange at hmn,
+    apply is_false,
+    rw [hmn, add_comm],
+    assume h,
+    from succ_ne_zero _ (add_cancel_to_zero h.symm),
+  },
+end
+
+
 end hidden

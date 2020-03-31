@@ -302,7 +302,4 @@ begin
   },
 end
 
--- how does this work??
--- instance: decidable_eq mynat
-
 end hidden
