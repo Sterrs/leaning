@@ -140,13 +140,15 @@ begin
     cases (le_total_order m n) with hmn hnm,
     from hmn,
     cases hnm with d hd,
-    cases d,
-    rw [hd, zz, add_zero],
-    from le_refl n,
-    have hsnm: succ n ≤ m,
-    existsi d,
-    rw [hd, add_succ, succ_add],
-    exfalso, from hmsn hsnm,
+    cases d, {
+      rw [hd, zz, add_zero],
+      from le_refl n,
+    }, {
+      have hsnm: succ n ≤ m,
+      existsi d,
+      rw [hd, add_succ, succ_add],
+      exfalso, from hmsn hsnm,
+    }
   },
 end
 
@@ -183,20 +185,26 @@ end
 -- somehow this feels like it's not using le_iff_lt_succ enough
 theorem le_iff_lt_or_eq: m ≤ n ↔ m < n ∨ m = n :=
 begin
-  split,
-  assume hmn,
-  cases hmn with d hd,
-  cases d,
-  simp at hd,
-  right, rw hd,
-  left,
-  rw hd,
-  from lt_to_add_succ _ _ ,
-  assume hmnmn,
-  cases hmnmn,
-  from lt_impl_le _ _ hmnmn,
-  rw hmnmn,
-  from le_refl n,
+  split, {
+    assume hmn,
+    cases hmn with d hd,
+    cases d, {
+      simp at hd,
+     right, rw hd,
+    }, {
+      left,
+      rw hd,
+      from lt_to_add_succ _ _ ,
+    },
+  }, {
+    assume hmnmn,
+    cases hmnmn, {
+     from lt_impl_le _ _ hmnmn,
+    }, {
+      rw hmnmn,
+      from le_refl n,
+    },
+  },
 end
 
 -- it seems that inductive types give all sorts of classical-feeling results
@@ -224,17 +232,23 @@ begin
   from hmnnm_left (lt_impl_le _ _ hmnnm_right),
 end
 
-theorem lt_strict_order: m = n ∨ m < n ∨ n < m :=
+theorem lt_trichotomy: m = n ∨ m < n ∨ n < m :=
 begin
-  cases (le_total_order m n),
-  rw le_iff_lt_or_eq _ _ at h,
-  cases h,
-  cc,
-  cc,
-  rw le_iff_lt_or_eq _ _ at h,
-  cases h,
-  cc,
-  cc,
+  cases (le_total_order m n), {
+    rw le_iff_lt_or_eq _ _ at h,
+    cases h, {
+      right, left, assumption,
+    }, {
+      left, assumption,
+    },
+  }, {
+    rw le_iff_lt_or_eq _ _ at h,
+    cases h, {
+      right, right, assumption,
+    }, {
+      left, symmetry, assumption,
+    },
+  },
 end
 
 theorem le_lem: m ≤ n ∨ n < m :=
