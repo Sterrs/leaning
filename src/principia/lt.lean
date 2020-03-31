@@ -157,7 +157,7 @@ begin
   split, {
     cases n, {
       assume h,
-      from false.elim (lt_nzero _ h),
+      exfalso, from lt_nzero _ h,
     }, {
       assume h,
       apply succ_le_succ, -- /o/
@@ -167,7 +167,7 @@ begin
     cases n, {
       assume h,
       cases h with d hd,
-      from false.elim (succ_ne_zero _ (add_integral _ _ hd.symm)),
+      exfalso, from succ_ne_zero _ (add_integral _ _ hd.symm),
     }, {
       assume h,
       rw ←le_iff_lt_succ,

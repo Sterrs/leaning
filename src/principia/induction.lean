@@ -70,7 +70,7 @@ begin
       apply inductive_step,
       intro d,
       assume hd0,
-      from false.elim (lt_nzero _ hd0),
+      exfalso, from lt_nzero _ hd0,
     }, {
       apply base_cases,
       from zero_lt_succ _,
