@@ -1,5 +1,6 @@
 import principia.mynat
 import principia.le
+import principia.nat_sub
 
 namespace hidden
 
@@ -40,7 +41,7 @@ def neg_of_nat: mynat → myint
 | (succ m) := -[1+ m]
 
 def sub_nat_nat (m n: mynat): myint :=
-match aux_sub_nat_nat m n with
+match m - n with
 | 0 := neg_of_nat (n - m)
 | d := d
 end
@@ -140,8 +141,8 @@ end
 theorem sub_succ_succ: sub_nat_nat (succ m') (succ n') = sub_nat_nat m' n' :=
 begin
   unfold sub_nat_nat,
-  rw aux_sub_succ_succ,
-  cases (aux_sub_nat_nat m' n'),
+  rw sub_succ_succ,
+  cases (m' - n'),
   refl,
   refl,
 end
