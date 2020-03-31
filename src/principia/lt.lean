@@ -120,31 +120,58 @@ begin
   exfalso, from hmn hnm,
 end
 
+-- pair of transformation theorems. Can be useful in a pinch
 theorem le_iff_lt_succ: m ≤ n ↔ m < succ n :=
 begin
-  split,
-  assume hmn,
-  cases hmn with d hd,
-  rw hd,
-  assume hmsd,
-  cases hmsd with d' hd',
-  rw [succ_add, add_assoc, ←add_succ, ←add_zero m, add_assoc] at hd',
-  have hzsucc := add_cancel _ _ _ hd',
-  rw zero_add at hzsucc,
-  from succ_ne_zero _ hzsucc.symm,
-  assume hmsn,
-  -- this total ordering theorem is crazy powerful. It feels like you need
-  -- classical logic until you remember it exists
-  cases (le_total_order m n) with hmn hnm,
-  from hmn,
-  cases hnm with d hd,
-  cases d,
-  rw [hd, zz, add_zero],
-  from le_refl n,
-  have hsnm: succ n ≤ m,
-  existsi d,
-  rw [hd, add_succ, succ_add],
-  exfalso, from hmsn hsnm,
+  split, {
+    assume hmn,
+    cases hmn with d hd,
+    rw hd,
+    assume hmsd,
+    cases hmsd with d' hd',
+    rw [succ_add, add_assoc, ←add_succ, ←add_zero m, add_assoc] at hd',
+    have hzsucc := add_cancel _ _ _ hd',
+    rw zero_add at hzsucc,
+    from succ_ne_zero _ hzsucc.symm,
+  }, {
+    assume hmsn,
+    -- this total ordering theorem is crazy powerful. It feels like you need
+    -- classical logic until you remember it exists
+    cases (le_total_order m n) with hmn hnm,
+    from hmn,
+    cases hnm with d hd,
+    cases d,
+    rw [hd, zz, add_zero],
+    from le_refl n,
+    have hsnm: succ n ≤ m,
+    existsi d,
+    rw [hd, add_succ, succ_add],
+    exfalso, from hmsn hsnm,
+  },
+end
+
+theorem lt_iff_succ_le: m < n ↔ succ m ≤ n :=
+begin
+  split, {
+    cases n, {
+      assume h,
+      from false.elim (lt_nzero _ h),
+    }, {
+      assume h,
+      apply succ_le_succ, -- /o/
+      rw le_iff_lt_succ, assumption,
+    }
+  }, {
+    cases n, {
+      assume h,
+      cases h with d hd,
+      from false.elim (succ_ne_zero _ (add_integral _ _ hd.symm)),
+    }, {
+      assume h,
+      rw ←le_iff_lt_succ,
+      from le_succ_cancel _ _ h,
+    },
+  },
 end
 
 theorem zero_lt_one : (0 : mynat) < (1 : mynat) :=
