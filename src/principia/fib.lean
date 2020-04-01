@@ -110,7 +110,10 @@ begin
   },
 end
 
--- TODO: coprime theorem
+-- TODO: adjacent are coprime,
+--       https://en.wikipedia.org/wiki/Fibonacci_number#Other_identities
+--       the squares one from
+--          https://en.wikipedia.org/wiki/Fibonacci_number#Combinatorial_identities
 
 -- induction, just to see if I could, really.
 -- the nice high-level way to prove this is using determinants

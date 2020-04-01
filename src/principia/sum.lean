@@ -161,6 +161,155 @@ theorem fibonacci_sum: ∀ n, (sum fib (n+1)) + 1 = (fib (n + 2))
       succ_add, fib_succsucc, ←add_one_succ, add_assoc n, ←two_one],
 }
 
+-- binomial coefficients, defined via Pascal's triangle,
+-- so's to avoid subtraction, or worse, division!
+def binom: mynat → mynat → mynat
+| _        0        := 1
+| 0        (succ _) := 0
+| (succ n) (succ k) := binom n k + binom n (succ k)
+
+@[simp]
+theorem binom_zero: binom n 0 = 1 :=
+begin
+  cases n,
+  refl,
+  refl,
+end
+
+@[simp] theorem binom_zero_succ: binom 0 (succ n) = 0 := rfl
+
+@[simp]
+theorem binom_succ_succ:
+binom (succ n) (succ k) = binom n k + binom n (succ k) := rfl
+
+@[simp]
+theorem binom_one:
+binom n 1 = n :=
+begin
+  induction n with n_n n_ih, {
+    refl,
+  }, {
+    have: 1 = succ 0 := rfl,
+    rw this,
+    rw binom_succ_succ,
+    rw ←this,
+    rw n_ih,
+    simp,
+  },
+end
+
+@[simp]
+theorem binom_overflow:
+binom n (n + succ k) = 0 :=
+begin
+  revert k,
+  induction n with n_n n_ih, {
+    intro k,
+    refl,
+  }, {
+    intro k,
+    rw [add_succ, binom_succ_succ],
+    conv {
+      congr, congr,
+      rw [succ_add, ←add_succ, n_ih],
+    },
+    rw succ_add,
+    repeat {rw ←add_succ},
+    rw n_ih,
+    refl,
+  },
+end
+
+@[simp]
+theorem binom_succ_kill:
+binom n (succ n) = 0 :=
+begin
+  have: 1 = succ 0 := rfl,
+  rw [←add_one_succ, this, binom_overflow],
+end
+
+@[simp]
+theorem binom_dupl:
+binom n n = 1 :=
+begin
+  induction n with n_n n_ih, {
+    refl,
+  }, {
+    rw binom_succ_succ,
+    rw n_ih,
+    rw binom_succ_kill,
+    refl,
+  },
+end
+
+@[simp]
+theorem binom_one_symm:
+binom (succ n) n = succ n :=
+begin
+  induction n with n_n n_ih, {
+    refl,
+  }, {
+    rw binom_succ_succ,
+    rw n_ih,
+    rw binom_succ_succ,
+    simp,
+  }
+end
+
+-- TODO: theorem binom_triangle, binom_symm
+
+theorem sum_tail:
+sum f (succ n) = sum (λ k, f (succ k)) n + f 0 :=
+begin
+  induction n, {
+    rw sum_succ,
+    simp,
+  }, {
+    rw sum_succ,
+    rw n_ih,
+    rw [add_assoc, add_comm (f 0), ←add_assoc,
+        ←sum_succ],
+  },
+end
+
+theorem binom_row_sum:
+sum (λ k, binom n k) (succ n) = 2 ^ n :=
+begin
+  induction n, {
+    refl,
+  }, {
+    rw sum_succ,
+    rw sum_tail,
+    -- gosh this is a pain
+    have: ∀ k,
+      (λ k, binom (succ n_n) (succ k)) k
+      = (λ k, binom n_n k + binom n_n (succ k)) k, {
+      simp,
+    },
+    rw (sum_cancel _ _).mpr this,
+    rw sum_distr,
+    -- clumsy
+    rw binom_succ_succ,
+    rw add_comm (binom n_n n_n),
+    repeat {rw ←add_assoc},
+    rw add_comm,
+    repeat {rw ←add_assoc},
+    rw add_comm (binom n_n n_n),
+    rw ←sum_succ,
+    rw n_ih,
+    rw [binom_succ_kill, add_zero],
+    conv in (binom (succ n_n) 0) {
+      rw [binom_zero, ←binom_zero n_n],
+    },
+    rw add_assoc,
+    rw ←sum_tail,
+    rw n_ih,
+    rw pow_succ,
+    rw mul_comm,
+    refl,
+  },
+end
+
 end naturals
 
 end hidden
