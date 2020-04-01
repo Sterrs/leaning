@@ -1,4 +1,5 @@
-import .mynat
+import .fib
+import .nat_sub
 
 namespace hidden
 
@@ -68,5 +69,17 @@ begin
     simp,
   },
 end
+
+private theorem two : (2 : mynat) = 1 + 1 := rfl
+
+theorem fibonacci_sum: ∀ n, (sum fib (n+1)) + 1 = (fib (n + 2))
+| zero     := rfl
+| (succ n) := by conv {
+  congr,
+  rw [succ_add, sum_succ, add_assoc, add_comm (fib (n+1)), ←add_assoc, fibonacci_sum, add_comm],
+  skip,
+  rw [succ_add, two, ←add_assoc n, @add_one_succ n,
+    succ_add, fib_succsucc, ←add_one_succ, add_assoc n, ←two],
+}
 
 end hidden
