@@ -272,6 +272,11 @@ begin
   },
 end
 
+private theorem sum_distr': sum (λ k, f k + g k) n = (sum f n) + (sum g n) :=
+begin
+  from sum_distr f g n,
+end
+
 theorem binom_row_sum:
 sum (λ k, binom n k) (succ n) = 2 ^ n :=
 begin
@@ -287,7 +292,7 @@ begin
       simp,
     },
     rw (sum_cancel _ _).mpr this,
-    rw sum_distr,
+    rw sum_distr',
     -- clumsy
     rw binom_succ_succ,
     rw add_comm (binom n_n n_n),
