@@ -19,7 +19,7 @@ def sum (term: mynat → mynat): mynat → mynat
 | (succ n) := sum n + term n
 
 variables a b c d m n k: mynat
-variables term: mynat → mynat
+variables term f g : mynat → mynat
 
 @[simp] theorem sum_zero: sum term 0 = 0 := rfl
 @[simp] theorem sum_succ: sum term (succ n) = sum term n + term n := rfl
@@ -27,6 +27,41 @@ variables term: mynat → mynat
 theorem constant_sum: ∀ n, sum (λ k, 1) n = n
 | zero := rfl
 | (succ n) := by simp [constant_sum n]
+
+theorem mul_sum: ∀ n, sum (λ k, m * f k) n = m * (sum f n)
+| zero := rfl
+| (succ n) := by rw [sum_succ, sum_succ, mul_add, mul_sum]
+
+theorem sum_distr: ∀ n, sum (λ k, f k + g k) n = (sum f n) + (sum g n)
+| zero     := rfl
+| (succ n) := by conv {
+  rw [sum_succ, sum_succ, sum_succ, sum_distr], to_rhs,
+  rw [←add_assoc, add_assoc (sum f n), add_comm (f n),
+      ←add_assoc (sum f n), add_assoc],
+}
+
+theorem sum_cancel: (∀ n, sum f n = sum g n) ↔ ∀ n, f n = g n :=
+begin
+  split, {
+    assume h n,
+    induction n with n hn, {
+      have := h (succ zero),
+      dsimp only [sum] at this,
+      simp at this,
+      from this,
+    }, {
+      have := h (succ (succ n)),
+      repeat { rw sum_succ at this },
+      rw [hn, h n] at this,
+      from add_cancel this,
+    },
+  }, {
+    assume h n,
+    induction n with n hn,
+      refl,
+    rw [sum_succ, sum_succ, hn, h n],
+  },
+end
 
 private def two : 2 = succ (succ 0) := rfl
 
