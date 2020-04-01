@@ -24,62 +24,50 @@ variables term: mynat → mynat
 @[simp] theorem sum_zero: sum term 0 = 0 := rfl
 @[simp] theorem sum_succ: sum term (succ n) = sum term n + term n := rfl
 
-theorem constant_sum:
-sum (λ k, 1) n = n :=
-begin
-  induction n with n_n n_ih, {
-    refl,
-  }, {
-    simp [n_ih],
-  },
-end
+theorem constant_sum: ∀ n, sum (λ k, 1) n = n
+| zero := rfl
+| (succ n) := by simp [constant_sum n]
+
+private def two : 2 = succ (succ 0) := rfl
 
 -- phrased in a way that avoids rationals and subtraction :)
-theorem triangular_numbers:
-sum (λ k, k) (succ n) * 2 = n * (n + 1) :=
+theorem triangular_numbers: ∀ n,
+sum (λ k, k) (succ n) * 2 = n * (n + 1)
+| zero     := rfl
+| (succ n) := by conv {
+  rw [sum_succ, add_mul, triangular_numbers, two],
+  simp,
+  rw [add_comm 1, add_one_succ],
+  simp,
+}
+
+theorem geometric_progression: ∀ n,
+sum (λ k, a * (succ b) ^ k) n * b + a = a * (succ b) ^ n
+| zero     := by simp
+| (succ n) :=
 begin
-  induction n with n_n n_ih, {
-    refl,
-  }, {
-    -- lots of very straightforward algebra, done in the
-    -- cheekiest most unstable way possible
-    rw [sum_succ, add_mul, n_ih],
-    have h2ss0: 2 = succ (succ 0) := rfl,
-    rw h2ss0,
-    simp,
-    rw [add_comm 1, add_one_succ],
-    simp,
+  conv {
+    rw [sum_succ, add_mul, add_assoc, add_comm _ a, ←add_assoc, geometric_progression,
+      mul_assoc, ←mul_add],
+    to_lhs,
+    congr, skip, congr,
+    rw ←mul_one (succ b ^ n),
   },
+  rw [←mul_add, add_comm, add_one_succ, mul_comm _ (succ b)],
+  simp,
 end
 
-theorem geometric_progression:
-sum (λ k, a * (succ b) ^ k) n * b + a = a * (succ b) ^ n :=
-begin
-  induction n with n_n n_ih, {
-    simp,
-  }, {
-    rw [sum_succ, add_mul, add_assoc, add_comm _ a, ←add_assoc, n_ih,
-        mul_assoc, ←mul_add],
-    conv {
-      to_lhs,
-      congr, skip, congr,
-      rw ←mul_one (succ b ^ n_n),
-    },
-    rw [←mul_add, add_comm, add_one_succ, mul_comm _ (succ b)],
-    simp,
-  },
-end
-
-private theorem two : (2 : mynat) = 1 + 1 := rfl
+private theorem two_one : (2 : mynat) = 1 + 1 := rfl
 
 theorem fibonacci_sum: ∀ n, (sum fib (n+1)) + 1 = (fib (n + 2))
 | zero     := rfl
 | (succ n) := by conv {
   congr,
-  rw [succ_add, sum_succ, add_assoc, add_comm (fib (n+1)), ←add_assoc, fibonacci_sum, add_comm],
+  rw [succ_add, sum_succ, add_assoc, add_comm (fib (n+1)), ←add_assoc,
+      fibonacci_sum, add_comm],
   skip,
-  rw [succ_add, two, ←add_assoc n, @add_one_succ n,
-    succ_add, fib_succsucc, ←add_one_succ, add_assoc n, ←two],
+  rw [succ_add, two_one, ←add_assoc n, @add_one_succ n,
+      succ_add, fib_succsucc, ←add_one_succ, add_assoc n, ←two_one],
 }
 
 end hidden
