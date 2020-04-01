@@ -11,10 +11,13 @@ open mynat
 -- define polynomials
 -- prove that the sums of a k-th degree polynomial are a k+1th degree polynomial
 
+def sequence (α : Type) := mynat → α
+
 -- sum from k = 0 to n - 1 of term(k)
 -- a bit unconventional, but this is the best way I could think of
 -- to not have to have weird special cases with 0
-def sum (term: mynat → mynat): mynat → mynat
+def sum {α : Type} [has_zero α] [has_add α]
+(term: sequence α): sequence α
 | 0        := 0
 | (succ n) := sum n + term n
 
@@ -24,7 +27,7 @@ variables term f g : mynat → mynat
 @[simp] theorem sum_zero: sum term 0 = 0 := rfl
 @[simp] theorem sum_succ: sum term (succ n) = sum term n + term n := rfl
 
-theorem constant_sum: ∀ n, sum (λ k, 1) n = n
+theorem constant_sum: ∀ n, sum (λ k, (1:mynat)) n = n
 | zero := rfl
 | (succ n) := by simp [constant_sum n]
 
