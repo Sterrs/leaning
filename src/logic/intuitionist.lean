@@ -258,7 +258,8 @@ theorem lem_impl_iff_assoc: lem_t → iff_assoc_t :=
 begin
   assume hlem,
   intros p q r,
-  apply iff.intro, {
+  have hright: ∀ p q r: Prop, (p ↔ q ↔ r) → (p ↔ (q ↔ r)), {
+    intros p q r,
     assume hpqr,
     apply iff.intro, {
       assume hp,
@@ -308,59 +309,32 @@ begin
         },
       },
     },
+  },
+  apply iff.intro, {
+    from hright p q r,
   }, {
     assume hpqr,
-    apply iff.intro, {
-      assume hpq,
-      apply or.elim (hlem p), {
-        assume hp,
-        from (hpqr.mp hp).mp (hpq.mp hp),
-      }, {
-        assume hnp,
-        have hnq: ¬q, {
-          assume hq,
-          from hnp (hpq.mpr hq),
-        },
-        have hnqr: ¬(q ↔ r), {
-          assume hqr,
-          from hnp (hpqr.mpr hqr),
-        },
-        apply or.elim (hlem r), {
-          assume hr, from hr,
-        }, {
-          assume hnr,
-          apply false.elim, apply hnqr,
-          apply iff.intro, {
-            assume hq,
-            apply false.elim, from hnq hq,
-          }, {
-            assume hr,
-            apply false.elim, from hnr hr,
-          },
-        },
-      },
-    }, {
-      assume hr,
-      apply iff.intro, {
-        assume hp,
-        from (hpqr.mp hp).mpr hr,
-      }, {
-        assume hq,
-        apply hpqr.mpr,
-        apply iff.intro, {
-          assume _, from hr,
-        }, {
-          assume _, from hq,
-        },
-      },
-    },
+    from (hright _ _ _ ((hright _ _ _ hpqr.symm).symm)).symm,
   },
 end
 
--- is this possible?????
--- theorem iff_assoc_impl_lem: iff_assoc_t → lem_t :=
--- begin
---   assume hiff,
---   intro p,
---   have hpp := hiff p p (¬p),
--- end
+theorem iff_assoc_impl_lem: iff_assoc_t → lem_t :=
+begin
+  assume hiff,
+  apply dne_impl_lem,
+  intros p hnnp,
+  -- this is exactly what we want to prove.
+  -- now it's just a bit of case work to show equivalence
+  have h := (hiff false false p).mpr,
+  suffices hr: (false ↔ false ↔ p), {
+    from hr.mp iff.rfl,
+  }, {
+    apply h,
+    apply iff.intro, {
+      from false.elim,
+    }, {
+      assume hnp,
+      from hnnp hnp.mpr,
+    },
+  },
+end
