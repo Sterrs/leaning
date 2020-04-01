@@ -13,32 +13,85 @@ open mynat
 
 def sequence (α : Type) := mynat → α
 
+namespace sequence
+
+variable {α : Type}
+
+-- Coerce a value into a sequence of that value.
+-- e.g. ↑0 = 0, 0, 0, 0, ... = λ k, 0
+-- This is probably bad so might remove this
+
+instance: has_coe α (sequence α) := ⟨λ a, (λ k, a)⟩
+@[simp] theorem coe_seq (a : α) : (↑a:sequence α) = (λ k : mynat, a) := rfl
+@[simp] theorem coe_triv (a : α) (n :mynat): (↑a:sequence α) n = a := rfl
+
+variables [has_add α] {β : Type} [has_mul β]
+
+def add (a b : sequence α): sequence α := λ k , a k + b k
+instance: has_add (sequence α) := ⟨add⟩
+-- Yuck...
+@[simp] theorem addition (a b : sequence α) (n : mynat) :
+(a + b) n = a n + b n := rfl
+@[simp] theorem coe_add (a : α) (s : sequence α) (n : mynat):
+(↑a + s) n = a + (s n) := rfl
+@[simp] theorem add_coe (s : sequence α) (a : α) (n : mynat):
+(s + ↑a) n = (s n) + a := rfl
+
+def mul (a b : sequence β): sequence β := λ k, a k * b k
+instance: has_mul (sequence β) := ⟨mul⟩
+@[simp] theorem multiplication (a b : sequence β) (n : mynat) :
+(a * b) n = a n * b n := rfl
+@[simp] theorem coe_mul (b : β) (s : sequence β) (n : mynat):
+(↑b * s) n = b * (s n) := rfl
+@[simp] theorem mul_coe (s : sequence β) (b : β) (n : mynat):
+(s * ↑b) n = (s n) * b := rfl
+
+variables [has_zero α] [has_one β]
+
+instance: has_zero (sequence α) := ⟨λ k, 0⟩
+instance: has_one (sequence β) := ⟨λ k, 1⟩
+
+end sequence
+
+open sequence
+
+section sum
+
 -- sum from k = 0 to n - 1 of term(k)
 -- a bit unconventional, but this is the best way I could think of
 -- to not have to have weird special cases with 0
-def sum {α : Type} [has_zero α] [has_add α]
-(term: sequence α): sequence α
+def sum {α : Type} [has_add α] [has_zero α]
+(seq: sequence α): sequence α
 | 0        := 0
-| (succ n) := sum n + term n
+| (succ n) := sum n + seq n
 
+def product {β : Type} [has_mul β] [has_one β]
+(term : sequence β) : sequence β
+| 0        := 1
+| (succ n) := product n * term n
+
+end sum
+
+section naturals
 variables a b c d m n k: mynat
-variables term f g : mynat → mynat
+variables term f g : sequence mynat
 
 @[simp] theorem sum_zero: sum term 0 = 0 := rfl
 @[simp] theorem sum_succ: sum term (succ n) = sum term n + term n := rfl
 
-theorem constant_sum: ∀ n, sum (λ k, (1:mynat)) n = n
+theorem constant_sum: ∀ n : mynat, sum ↑(1 :mynat) n = n
 | zero := rfl
-| (succ n) := by simp [constant_sum n]
+| (succ n) := by rw [sum_succ, constant_sum, coe_triv, add_one_succ]
 
-theorem mul_sum: ∀ n, sum (λ k, m * f k) n = m * (sum f n)
+theorem mul_sum: ∀ n, sum (↑m * f) n = m * (sum f n)
 | zero := rfl
-| (succ n) := by rw [sum_succ, sum_succ, mul_add, mul_sum]
+| (succ n) := by rw [sum_succ, sum_succ, mul_add, mul_sum, coe_mul]
 
-theorem sum_distr: ∀ n, sum (λ k, f k + g k) n = (sum f n) + (sum g n)
+theorem sum_distr: ∀ n, sum (f + g) n = (sum f n) + (sum g n)
 | zero     := rfl
 | (succ n) := by conv {
-  rw [sum_succ, sum_succ, sum_succ, sum_distr], to_rhs,
+  rw [sum_succ, sum_succ, sum_succ, sum_distr, addition],
+  to_rhs,
   rw [←add_assoc, add_assoc (sum f n), add_comm (f n),
       ←add_assoc (sum f n), add_assoc],
 }
@@ -107,5 +160,7 @@ theorem fibonacci_sum: ∀ n, (sum fib (n+1)) + 1 = (fib (n + 2))
   rw [succ_add, two_one, ←add_assoc n, @add_one_succ n,
       succ_add, fib_succsucc, ←add_one_succ, add_assoc n, ←two_one],
 }
+
+end naturals
 
 end hidden
