@@ -47,6 +47,50 @@ begin
   from h_aux (succ k) k (le_to_add: k ≤ k + 1),
 end
 
+-- very similar. Formulating it in terms of the strict ordering
+-- makes the prerequisites seem easier, but my hot take is that
+-- this one is secretly much less nice
+theorem strict_strong_induction
+(statement: mynat → Prop)
+(inductive_step: ∀ n: mynat,
+                  (∀ m: mynat, m < n → statement m)
+                    → statement n):
+∀ k: mynat, statement k :=
+begin
+  apply strong_induction, {
+    apply inductive_step,
+    intro m,
+    assume hm0,
+    exfalso,
+    from lt_nzero hm0,
+  }, {
+    intro n,
+    assume h_ih,
+    apply inductive_step,
+    intro m,
+    assume hmsn,
+    apply h_ih,
+    rw le_iff_lt_succ,
+    assumption,
+  },
+end
+
+-- can this be done in an even flashier one-term sort of way?
+-- it must be possible, right
+theorem lt_well_founded : well_founded lt :=
+begin
+  split,
+  intro a,
+  apply strict_strong_induction,
+  intro n,
+  assume h_ih,
+  split,
+  assumption,
+end
+
+instance: has_well_founded mynat := ⟨lt, lt_well_founded⟩
+
+
 -- induction with n base cases.
 -- Note the case with n = 0 is basically a direct proof,
 -- the case with n = 1 is regular induction.

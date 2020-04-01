@@ -351,29 +351,4 @@ begin
   contradiction,
 end
 
-theorem lt_well_founded : well_founded lt :=
-begin
-  -- this applies all the different constructors for the
-  -- inductive type that is the target.
-  split,
-  intro m,
-  split,
-  induction m with m hm,
-    intro n,
-    assume h,
-    exfalso,
-    from lt_nzero h,
-  intro n,
-  assume hnsucc,
-  have hns: n < succ m := hnsucc,
-  rw [←le_iff_lt_succ, le_iff_lt_or_eq] at hns,
-  cases hns with hlt heq,
-    from hm n hlt,
-  split,
-  rw heq,
-  from hm,
-end
-
-instance: has_well_founded mynat := ⟨lt, lt_well_founded⟩
-
 end hidden
