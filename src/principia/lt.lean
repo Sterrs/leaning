@@ -353,6 +353,8 @@ end
 
 theorem lt_well_founded : well_founded lt :=
 begin
+  -- this applies all the different constructors for the
+  -- inductive type that is the target.
   split,
   intro m,
   split,
@@ -363,14 +365,10 @@ begin
     from lt_nzero h,
   intro n,
   assume hnsucc,
-  have hns : n < succ m,
-    exact hnsucc,
-  rw ←le_iff_lt_succ at hns,
-  rw le_iff_lt_or_eq at hns,
+  have hns: n < succ m := hnsucc,
+  rw [←le_iff_lt_succ, le_iff_lt_or_eq] at hns,
   cases hns with hlt heq,
-    have hl : lt n m,
-      exact hlt,
-    from hm n hl,
+    from hm n hlt,
   split,
   rw heq,
   from hm,
