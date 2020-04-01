@@ -358,7 +358,7 @@ private theorem succ_le_impl_le (h: succ n ≤ len lst): n ≤ len lst :=
 
 -- end :=
 -- begin
-  
+
 -- end
 
 -- theorem len_drop_succ (h: succ n ≤ len lst):
