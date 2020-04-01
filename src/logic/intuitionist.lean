@@ -29,6 +29,8 @@ def disj_equiv_right_t := ∀ p q: Prop, (p → q) → q ∨ ¬p
 def disj_equiv_left_t := ∀ p q: Prop, q ∨ ¬p → (p → q)
 -- law of noncontradiction (intuitionistically valid)
 def noncontradiction_t := ∀ p: Prop, ¬(p ∧ ¬p)
+-- ridiculous classical theorem
+def iff_assoc_t := ∀ p q r: Prop, ((p ↔ q) ↔ r) ↔ (p ↔ (q ↔ r))
 
 -- Much of the reasoning here could be made more concise using tactics like
 -- contradiction or cases, but my, admittedly perhaps shortsighted, vision is to
@@ -48,7 +50,7 @@ begin
     intro p, from p,
   }, {
     intro hnp,
-    exfalso, from hnnp hnp,
+    apply false.elim, from hnnp hnp,
   },
 end
 
@@ -65,12 +67,12 @@ begin
       have hpnp: p ∨ ¬p, {
         apply or.inl, from hp,
       },
-      exfalso, from hnpnp hpnp,
+      apply false.elim, from hnpnp hpnp,
     },
     have hpnp: p ∨ ¬p, {
       apply or.inr, from hnp,
     },
-    exfalso, from hnpnp hpnp,
+    apply false.elim, from hnpnp hpnp,
   },
 end
 
@@ -84,7 +86,7 @@ begin
     from hq,
   }, {
     intros hnq hp,
-    exfalso,
+    apply false.elim,
     from hhnqnp hnq hp,
   },
 end
@@ -111,7 +113,7 @@ begin
     from hq,
   }, {
     assume hnq hp,
-    exfalso,
+    apply false.elim,
     from hnhpnq (and.intro hp hnq),
   },
 end
@@ -158,7 +160,7 @@ begin
     assume hq _, from hq,
   }, {
     assume hnp hp,
-    exfalso, from hnp hp,
+    apply false.elim, from hnp hp,
   },
 end
 
@@ -168,7 +170,7 @@ begin
   assume hpnp,
   have hp := hpnp.left,
   have hnp := hpnp.right,
-  exfalso, from hnp hp,
+  apply false.elim, from hnp hp,
 end
 
 theorem dml_nor_and_right: dml_nor_and_right_t :=
@@ -245,3 +247,120 @@ begin
   intro p,
   from (hdml p ¬p) (noncontradiction p),
 end
+
+-- this can probably be done better. Currently a very mechanical
+-- case-bash. In a sense it might be kind of inevitable if
+-- you want to prove it naturally, since there are necessarily
+-- a lot of constructors involved
+-- It's kind of fun that basically there are only two cases
+-- where the classical is needed
+theorem lem_impl_iff_assoc: lem_t → iff_assoc_t :=
+begin
+  assume hlem,
+  intros p q r,
+  apply iff.intro, {
+    assume hpqr,
+    apply iff.intro, {
+      assume hp,
+      apply iff.intro, {
+        assume hq,
+        apply hpqr.mp,
+        apply iff.intro, {
+          assume _,
+          from hq,
+        }, {
+          assume _,
+          from hp,
+        },
+      }, {
+        assume hr,
+        from (hpqr.mpr hr).mp hp,
+      },
+    }, {
+      assume hqr,
+      apply or.elim (hlem r), {
+        assume hr,
+        from (hpqr.mpr hr).mpr (hqr.mpr hr),
+      }, {
+        assume hnr,
+        apply or.elim (hlem p), {
+          assume hp,
+          from hp,
+        }, {
+          assume hnp,
+          -- forward contrapositives
+          have hnq: ¬q, {
+            assume hq,
+            from hnr (hqr.mp hq),
+          },
+          have hnpq: ¬(p ↔ q), {
+            assume hpq,
+            from hnr (hpqr.mp hpq),
+          },
+          apply false.elim, apply hnpq,
+          apply iff.intro, {
+            assume hp,
+            apply false.elim, from hnp hp,
+          }, {
+            assume hq,
+            apply false.elim, from hnq hq,
+          },
+        },
+      },
+    },
+  }, {
+    assume hpqr,
+    apply iff.intro, {
+      assume hpq,
+      apply or.elim (hlem p), {
+        assume hp,
+        from (hpqr.mp hp).mp (hpq.mp hp),
+      }, {
+        assume hnp,
+        have hnq: ¬q, {
+          assume hq,
+          from hnp (hpq.mpr hq),
+        },
+        have hnqr: ¬(q ↔ r), {
+          assume hqr,
+          from hnp (hpqr.mpr hqr),
+        },
+        apply or.elim (hlem r), {
+          assume hr, from hr,
+        }, {
+          assume hnr,
+          apply false.elim, apply hnqr,
+          apply iff.intro, {
+            assume hq,
+            apply false.elim, from hnq hq,
+          }, {
+            assume hr,
+            apply false.elim, from hnr hr,
+          },
+        },
+      },
+    }, {
+      assume hr,
+      apply iff.intro, {
+        assume hp,
+        from (hpqr.mp hp).mpr hr,
+      }, {
+        assume hq,
+        apply hpqr.mpr,
+        apply iff.intro, {
+          assume _, from hr,
+        }, {
+          assume _, from hq,
+        },
+      },
+    },
+  },
+end
+
+-- is this possible?????
+-- theorem iff_assoc_impl_lem: iff_assoc_t → lem_t :=
+-- begin
+--   assume hiff,
+--   intro p,
+--   have hpp := hiff p p (¬p),
+-- end

@@ -5,7 +5,7 @@ namespace hidden
 
 open mynat
 
--- proof of the princple of strong induction
+-- proof of the principle of strong induction
 -- conceptually quite nice: works by showing that for any N, the statement will
 -- hold for all M less than or equal to that N.
 theorem strong_induction

@@ -4,6 +4,19 @@ namespace hidden
 
 variables {p q: Prop}
 
+-- kind of cute little fact.
+-- Basically comes from equivalence of p → q → r and p ∧ q → r
+theorem implication_of_neg_commutative: (p → ¬q) ↔ (q → ¬p) :=
+begin
+  split, {
+    assume hpnq hq hp,
+    from hpnq hp hq,
+  }, {
+    assume hqnp hp hq,
+    from hqnp hq hp,
+  },
+end
+
 theorem mp_to_contrapositive: (p → q) → (¬q → ¬p) :=
 begin
   assume hpq hnq hp,
