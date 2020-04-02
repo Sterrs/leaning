@@ -380,36 +380,21 @@ begin
   },
 end
 
+private theorem restricted_mpr {m : mynat} {f g : sequence mynat}
+(h : ∀ n, n < m → f n = g n) : ∀ n, n ≤ m → sum f n = sum g n
+| zero := λ _, rfl
+| (succ n) := (assume hnm, by rw [sum_succ, sum_succ,
+  restricted_mpr n (@le_cancel_strong n m 1 hnm),
+  h n (lt_iff_succ_le.mpr hnm)])
+
 -- this might be necessary/useful when working with -, since it lets
 -- you basically assume k < n in order to rewrite the terms
-theorem sum_cancel_restricted:
-∀ m,
-  (∀ n, n ≤ m → sum f n = sum g n) ↔
-  (∀ n, n < m → f n = g n) :=
-begin
-  intro m,
-  split, {
-    assume h,
-    intro n,
-    assume hnm,
-    have hm := h n (lt_impl_le hnm),
-    have hsn := h (succ n) (lt_iff_succ_le.mp hnm),
-    repeat {rw sum_succ at hsn},
-    rw hm at hsn,
-    from add_cancel hsn,
-  }, {
-    assume h,
-    intro n,
-    assume hnm,
-    induction n, {
-      refl,
-    }, {
-      repeat {rw sum_succ},
-      rw [n_ih (@le_cancel_strong n_n m 1 hnm),
-          h n_n (lt_iff_succ_le.mpr hnm)],
-    },
-  },
-end
+theorem sum_cancel_restricted: (∀ n, n ≤ m → sum f n = sum g n) ↔
+(∀ n, n < m → f n = g n) := ⟨assume h n hnm,
+have hsn : _ := h (succ n) (lt_iff_succ_le.mp hnm),
+by {rw [sum_succ, sum_succ, h n (lt_impl_le hnm)] at hsn,
+    from add_cancel hsn},
+restricted_mpr⟩
 
 private theorem lambda_subs: (λ k, f k) k = f k := rfl
 private theorem add_two: ∀ k, k + 2 = succ (succ k) := (λ k, rfl)
