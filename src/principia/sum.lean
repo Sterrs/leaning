@@ -100,18 +100,12 @@ theorem sum_distr: ∀ n, sum (f + g) n = (sum f n) + (sum g n)
 theorem sum_cancel: (∀ n, sum f n = sum g n) ↔ ∀ n, f n = g n :=
 begin
   split, {
-    assume h n,
-    induction n with n hn, {
-      have := h (succ zero),
-      dsimp only [sum] at this,
-      simp at this,
-      from this,
-    }, {
-      have := h (succ (succ n)),
-      repeat { rw sum_succ at this },
-      rw [hn, h n] at this,
-      from add_cancel this,
-    },
+    assume h,
+    intro n,
+    have hsn := h (succ n),
+    repeat {rw sum_succ at hsn},
+    rw h n at hsn,
+    from add_cancel hsn,
   }, {
     assume h n,
     induction n with n hn,
@@ -405,6 +399,56 @@ begin
   },
 end
 
+-- this might be necessary/useful when working with -
+theorem sum_cancel_restricted:
+∀ m,
+  (∀ n, n ≤ m → sum f n = sum g n) ↔
+  (∀ n, n < m → f n = g n) :=
+begin
+  intro m,
+  split, {
+    assume h,
+    intro n,
+    assume hnm,
+    have hm := h n (lt_impl_le hnm),
+    have hsn := h (succ n) (lt_iff_succ_le.mp hnm),
+    repeat {rw sum_succ at hsn},
+    rw hm at hsn,
+    from add_cancel hsn,
+  }, {
+    assume h,
+    intro n,
+    assume hnm,
+    induction n, {
+      refl,
+    }, {
+      repeat {rw sum_succ},
+      rw n_ih (@le_cancel_strong n_n m 1 hnm),
+      rw h n_n (lt_iff_succ_le.mpr hnm),
+    },
+  },
+end
+
+-- the famous diagonal fibonacci sums in Pascal's triangle
+-- a bit annoying to actually state, as it turns out,
+-- but good practice for working with -
+theorem binom_fib_sum:
+sum (λ k, binom (2 * n - k) k) (succ n) = fib (2 * n + 1) ∧
+sum (λ k, binom (2 * n + 1 - k) k) (succ n) = fib (2 * n + 2) :=
+begin
+  induction n with n hn, {
+    from and.intro rfl rfl,
+  }, {
+    cases hn with odd_sum even_sum,
+    split, {
+      rw sum_succ,
+      sorry,
+    }, {
+      sorry,
+    },
+  },
+end
+
 private theorem mul_sum':
 a * sum f n = sum (λ k, a * f k) n :=
 begin
@@ -420,7 +464,7 @@ begin
   }, {
     rw [pow_succ, n_ih, add_mul],
     sorry,
-  }
+  },
 end
 
 end naturals
