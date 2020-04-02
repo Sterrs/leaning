@@ -399,7 +399,8 @@ begin
   },
 end
 
--- this might be necessary/useful when working with -
+-- this might be necessary/useful when working with -, since it lets
+-- you basically assume k < n in order to rewrite the terms
 theorem sum_cancel_restricted:
 ∀ m,
   (∀ n, n ≤ m → sum f n = sum g n) ↔
@@ -429,26 +430,108 @@ begin
   },
 end
 
+private theorem lambda_subs: (λ k, f k) k = f k := rfl
+
 -- the famous diagonal fibonacci sums in Pascal's triangle
 theorem binom_fib_sum:
 sum (λ k, binom (n + k) (2 * k)) (succ n) = fib (2 * n + 1) ∧
 sum (λ k, binom (n + succ k) (2 * k + 1)) (succ n) = fib (2 * n + 2) :=
 begin
-  cases n, {
+  revert n,
+  apply induction_conjunction, {
     from and.intro rfl rfl,
   }, {
-    cases n, {
-      from and.intro rfl rfl,
-    }, {
-      cases n, {
-        from and.intro rfl rfl,
-      }, {
-        cases n, {
-          from and.intro rfl rfl,
-        }, {
-          sorry,
-        },
+    intro n,
+    split, {
+      assume odd_sum even_sum,
+      rw sum_succ,
+      rw sum_tail,
+      have hrw:
+        ∀ k,
+          (λ k, binom (succ n + succ k) (2 * succ k)) k
+          = (λ k, binom (n + succ k) (2 * k + 1)) k
+            + (λ k, binom (n + succ k) (2 * succ k)) k, {
+        sorry,
       },
+      rw (sum_cancel _ _).mpr hrw, clear hrw,
+      rw sum_distr',
+      rw add_comm,
+      repeat {rw ←add_assoc},
+      have hrw:
+        binom (succ n + succ n) (2 * succ n)
+        = binom (n + succ n) (2 * n + 1), sorry,
+      conv {
+        to_lhs, congr, congr,
+        rw add_comm,
+        rw hrw,
+        rw ←sum_succ,
+        rw even_sum,
+      }, clear hrw,
+      have hrw:
+        binom (succ n + 0) (2 * 0)
+        = binom (n + 0) (2 * 0), sorry,
+      conv {
+        to_lhs,
+        rw add_assoc,
+        congr, skip,
+        rw hrw,
+        rw ←sum_tail n (λ k, binom (n + k) (2 * k)),
+        rw odd_sum,
+      }, clear hrw,
+      have hrw: ∀ k, k + 2 = succ (succ k) := (λ k, rfl),
+      conv {
+        congr,
+        rw add_comm, congr,
+        rw add_one_succ,
+        skip,
+        rw hrw,
+        skip,
+        rw mul_succ,
+        rw add_comm 2,
+        rw add_one_succ,
+        rw hrw,
+        rw fib_succsucc,
+      },
+    }, {
+      assume odd_sum_ even_sum odd_sum, clear odd_sum_,
+      have hrw:
+        ∀ k,
+          (λ k, binom (succ n + succ k) (2 * k + 1)) k
+          = (λ k, binom (succ n + k) (2 * k)) k
+            + (λ k, binom (n + succ k) (2 * k + 1)) k, sorry,
+      rw (sum_cancel _ _).mpr hrw, clear hrw,
+      rw sum_distr',
+      rw odd_sum,
+      rw sum_succ,
+      rw even_sum,
+      have hrw:
+        2 * succ n + 1 = succ (succ (succ (n + n))), sorry,
+      conv {
+        congr, congr, skip, congr, skip,
+        rw lambda_subs,
+        congr,
+        simp, skip,
+        rw hrw,
+      }, clear hrw,
+      rw binom_succ_kill,
+      rw add_zero,
+      have hrw: ∀ k, k + 2 = succ (succ k) := (λ k, rfl),
+      conv {
+        congr, congr,
+        rw mul_succ,
+        rw add_comm 2,
+        rw add_one_succ,
+        rw hrw,
+        skip,
+        rw hrw,
+        skip,
+        rw mul_succ,
+        rw hrw,
+        rw add_comm,
+        rw hrw,
+        rw fib_succsucc,
+      },
+      rw add_comm,
     },
   },
 end

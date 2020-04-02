@@ -175,6 +175,29 @@ begin
   },
 end
 
+-- oddly specific convenient way to prove conjunctive statements
+-- about mynat
+theorem induction_conjunction
+(p q: mynat → Prop)
+(base_case: p 0 ∧ q 0)
+(inductive_step:
+  ∀ n, (p n → q n → p (succ n)) ∧
+       (p n → q n → p (succ n) → q (succ n))):
+∀ n, p n ∧ q n :=
+begin
+  intro n,
+  induction n, {
+    from base_case,
+  }, {
+    have hpsn := (inductive_step n_n).left n_ih.left n_ih.right,
+    split, {
+      from hpsn,
+    }, {
+      from (inductive_step n_n).right n_ih.left n_ih.right hpsn,
+    },
+  },
+end
+
 open classical
 local attribute [instance] prop_decidable
 
