@@ -334,42 +334,18 @@ begin
 end
 
 theorem binom_symm:
-a + b = n → binom n a = binom n b :=
+binom (a + b) a = binom (a + b) b :=
 begin
-  revert a b,
-  induction n with n_n n_ih, {
-    intros a b,
-    assume hab0,
-    rw add_integral hab0,
-    rw add_comm at hab0,
-    rw add_integral hab0,
-  }, {
-    intros a b,
-    assume habsn,
-    cases a, {
-      simp at habsn,
-      rw habsn,
-      simp,
-    }, {
-      cases b, {
-        simp at habsn,
-        rw habsn,
-        simp,
-      }, {
-        simp,
-        rw n_ih a (succ b), {
-          rw n_ih (succ a) b, {
-            rw add_comm,
-          }, {
-            simp at habsn,
-            rw [←habsn, succ_add],
-          },
-        }, {
-          simp at habsn,
-          rw [←habsn, add_succ],
-        },
-      },
+  apply mul_cancel, {
+    have hfafb: fact a * fact b ≠ 0, {
+      assume h,
+      from fact_nzero (mul_integral fact_nzero h),
     },
+    from hfafb,
+  }, {
+    rw [mul_comm, ←mul_assoc, add_comm, binom_formula,
+        mul_comm, mul_comm (fact a), ←mul_assoc, add_comm,
+        binom_formula],
   },
 end
 
