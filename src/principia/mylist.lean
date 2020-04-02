@@ -2,6 +2,7 @@
 
 import .mynat
 import .lt
+import .induction
 
 namespace hidden
 
@@ -239,10 +240,12 @@ def take: ∀ n: mynat, ∀ lst: mylist T, n ≤ len lst → mylist T
 | (succ n) (x :: xs) h := x :: take n xs (len_cons_succ_cancel1 h)
 
 @[simp] theorem take_zero (h: 0 ≤ len lst): take 0 lst h = [] := rfl
+
 @[simp]
 theorem take_succ_cons
 (h: succ n ≤ len (x :: xs)):
-take (succ n) (x :: xs) h = x :: take n xs (len_cons_succ_cancel1 h) := rfl
+take (succ n) (x :: xs) h
+  = x :: take n xs (len_cons_succ_cancel1 h) := rfl
 
 -- everything except the first n elements
 def drop: ∀ n: mynat, ∀ lst: mylist T, n ≤ len lst → mylist T
@@ -256,7 +259,8 @@ theorem drop_succ_cons
 (h: succ n ≤ len (x :: xs)):
 drop (succ n) (x :: xs) h = drop n xs (len_cons_succ_cancel1 h) := rfl
 
-private theorem len_cons_succ_cancel2 (h: succ n < len (x :: xs)): n < len xs :=
+private theorem len_cons_succ_cancel2 (h: succ n < len (x :: xs)):
+n < len xs :=
 begin
   simp at h,
   from lt_succ_cancel h,
@@ -329,7 +333,8 @@ begin
   },
 end
 
-theorem append_init_last (h: lst ≠ []): init lst h ++ [last lst h] = lst :=
+theorem append_init_last (h: lst ≠ []):
+init lst h ++ [last lst h] = lst :=
 begin
   induction lst, {
     from absurd rfl h,
@@ -351,51 +356,26 @@ begin
   },
 end
 
--- TODO: get_n_head_drop, len_drop, len_take, concat_drop_take, concat_cancel, rev_take_drop
+-- TODO: rev_take_drop
 
 private theorem succ_le_impl_le (h: succ n ≤ len lst): n ≤ len lst :=
 (le_cancel_strong 1 h)
 
--- theorem drop_init (h: succ n ≤ len lst) :=
--- drop (succ n) lst h = init (drop n lst (succ_le_impl_le _ _ h))
--- begin
-
--- end :=
--- begin
-
--- end
-
--- theorem len_drop_succ (h: succ n ≤ len lst):
--- succ (len (drop (succ n) lst h))
---   = len (drop n lst (succ_le_impl_le _ _ h)) :=
--- begin
---   cases lst, {
---     exfalso, from succ_ne_zero _ (le_zero _ h),
---   }, {
---     rw drop_succ_cons,
---     induction n, {
---       simp,
---     }, {
---       simp,
---       sorry,
---     },
---   },
--- end
-
-@[simp]
-theorem len_take_succ (h: succ n ≤ len lst):
-len (take (succ n) lst h)
-  = succ (len (take n lst (succ_le_impl_le h))) :=
+-- we could of course deduce that n ≤ len lst from hsnl,
+-- but then this theorem would be less general. This way, we
+-- show this theorem holds for all proofs of n ≤ len lst.
+theorem len_take_succ
+(hsnl: succ n ≤ len lst)
+(hnl: n ≤ len lst):
+len (take (succ n) lst hsnl)
+  = succ (len (take n lst hnl)) :=
 begin
-  revert lst,
-  induction n, {
-    intro lst,
-    assume h,
+  induction n with n_n n_ih generalizing lst, {
     simp,
     cases lst, {
       exfalso,
-      simp at h, -- clearly absurd. Is there a quicker way?
-      cases h with d hd,
+      simp at hsnl, -- clearly absurd. Is there a quicker way?
+      cases hsnl with d hd,
       from mynat.no_confusion (add_integral hd.symm),
     }, {
       -- why on Earth is this SO DIFFICULT
@@ -411,29 +391,110 @@ begin
       simp,
     },
   }, {
-    intro lst,
-    assume h,
     cases lst, {
       exfalso,
-      cases h with d hd,
+      cases hsnl with d hd,
       from mynat.no_confusion (add_integral hd.symm),
     }, {
       simp,
-      rw len_cons_succ at h,
-      from n_ih (le_succ_cancel h),
+      rw len_cons_succ at hsnl,
+      rw len_cons_succ at hnl,
+      from n_ih (le_succ_cancel hsnl) (le_succ_cancel hnl),
     },
   },
 end
 
-theorem len_take (h: n ≤ len lst): len (take n lst h) = n :=
+@[simp]
+theorem len_take (hnl: n ≤ len lst):
+len (take n lst hnl) = n :=
 begin
   induction n, {
-    simp,
+    refl,
   }, {
     -- really all the hard work happens in len_take_succ
-    simp,
+    simp [len_take_succ _ (succ_le_impl_le hnl)],
     apply n_ih,
   },
+end
+
+theorem take_concat_drop (hnl_1 hnl_2: n ≤ len lst):
+take n lst hnl_1 ++ drop n lst hnl_2 = lst :=
+begin
+  induction n generalizing lst, {
+    refl,
+  }, {
+    cases lst, {
+      simp at hnl_1,
+      cases hnl_1 with d hd,
+      rw succ_add at hd,
+      cases hd,
+    }, {
+      simp,
+      apply n_ih,
+    },
+  },
+end
+
+theorem len_drop (hnl: n ≤ len lst):
+len (drop n lst hnl) + n = len lst :=
+begin
+  conv {
+    to_lhs, congr, skip,
+    rw ←len_take hnl,
+  },
+  rw [add_comm, ←len_concat_add, take_concat_drop],
+end
+
+theorem get_head_drop
+(hnld: n ≤ len lst)
+(hnlg: n < len lst)
+(hdne: drop n lst hnld ≠ []):
+get n lst hnlg = head (drop n lst hnld) hdne :=
+begin
+  induction n generalizing lst, {
+    simp,
+  }, {
+    cases lst, {
+      exfalso, from lt_nzero hnlg,
+    }, {
+      simp,
+      apply n_ih,
+    },
+  },
+end
+
+theorem concat_cancel_left: lst1 ++ lst2 = lst1 ++ lst3 → lst2 = lst3 :=
+begin
+  assume hl1l2l1l3,
+  induction lst1, {
+    simp at hl1l2l1l3,
+    assumption,
+  }, {
+    simp at hl1l2l1l3,
+    apply lst1_ih,
+    assumption,
+  },
+end
+
+theorem rev_injective: rev lst1 = rev lst2 → lst1 = lst2 :=
+begin
+  -- this is a bit silly. Is there a better way to apply
+  -- something to both sides in Lean?
+  assume hrl1rl2,
+  suffices hrr: rev (rev lst1) = rev (rev lst2), {
+    repeat {rw rev_rev at hrr},
+    assumption,
+  }, {
+    rw hrl1rl2,
+  },
+end
+
+theorem concat_cancel_right: lst2 ++ lst1 = lst3 ++ lst1 → lst2 = lst3 :=
+begin
+  assume hl1l2l1l3,
+  apply rev_injective,
+  apply @concat_cancel_left _ (rev lst1),
+  rw [←rev_concat, hl1l2l1l3, rev_concat],
 end
 
 def contains: T → mylist T → Prop
@@ -444,6 +505,68 @@ instance: has_mem T (mylist T) := ⟨contains⟩
 
 theorem contains_cons: x ∈ (y :: ys) ↔ x = y ∨ x ∈ ys := iff.rfl
 theorem singleton_contains: x ∈ [x] := contains_cons.mpr (or.inl rfl)
+
+-- the well-founded relation "is one strictly shorter than the other"
+def shorter (lst1 lst2: mylist T) := len lst1 < len lst2
+
+private theorem shorter_lt:
+shorter lst1 lst2 ↔ lt (len lst1) (len lst2) := iff.rfl
+
+private theorem shorter_partial:
+shorter lst1 = (λ lst2, lt (len lst1) (len lst2)) := rfl
+
+-- it should be easier than this, right? how on earth do I just say
+-- "because < is well-founded".
+theorem shorter_well_founded: well_founded (@shorter T) :=
+begin
+  split,
+  -- can't figure out how to use "generalizing"
+  suffices h:
+    ∀ a: mylist T,
+      ∀ n,
+        n = len a → acc shorter a, {
+    intro a,
+    from h a (len a) rfl,
+  }, {
+    intros a n, revert n a,
+    assume hnla,
+    apply strict_strong_induction
+        (λ n, ∀ a : mylist T, n = len a → acc shorter a), {
+      intro n,
+      assume h_ih,
+      intro a,
+      assume hnla,
+      split,
+      intro y,
+      assume hysa,
+      rw [shorter_lt, ←hnla] at hysa,
+      from h_ih (len y) hysa y rfl,
+    },
+  },
+end
+
+-- this made the red lines go away
+namespace lwf
+
+instance: has_well_founded (mylist T) :=
+  ⟨shorter, shorter_well_founded⟩
+
+end lwf
+
+-- attempts at defining things that recurse on the init
+
+-- private def lst_is_odd: mylist T → Prop
+-- | [] := false
+-- | (x :: xs) := have shorter (init (x :: xs) (cons_not_empty)) (x :: xs),
+--                from begin
+--                       rw shorter_lt,
+--                       have: ∀ x y, lt x y ↔ x < y := (λ x y, iff.rfl),
+--                       rw this,
+--                       rw lt_iff_succ_le,
+--                       rw ←len_init,
+--                       from le_refl,
+--                     end,
+--                ¬lst_is_odd (init (x :: xs) (cons_not_empty))
 
 -- TODO: make this work
 -- def palindrome: mylist T → Prop
