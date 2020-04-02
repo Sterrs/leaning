@@ -1,8 +1,10 @@
+-- vim: ts=2 sw=0 sts=-1 et ai tw=70
+
 import .parity
 
 -- This file is specifically for statements of famous theorems.
--- It is a useful and fun thing to state these, but they're better off in a
--- different file because they tend to use sorry
+-- It is a useful and fun thing to state these, but they're better off
+-- in a different file because they tend to use sorry
 
 open hidden.mynat
 open hidden

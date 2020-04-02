@@ -1,3 +1,5 @@
+-- vim: ts=2 sw=0 sts=-1 et ai tw=70
+
 import .lt
 import logic.basic
 
@@ -6,8 +8,8 @@ namespace hidden
 open mynat
 
 -- proof of the principle of strong induction
--- conceptually quite nice: works by showing that for any N, the statement will
--- hold for all M less than or equal to that N.
+-- conceptually quite nice: works by showing that for any N, the
+-- statement will hold for all M less than or equal to that N.
 theorem strong_induction
 (statement: mynat → Prop)
 (base_case: statement 0)
@@ -94,15 +96,17 @@ instance: has_well_founded mynat := ⟨lt, lt_well_founded⟩
 -- induction with n base cases.
 -- Note the case with n = 0 is basically a direct proof,
 -- the case with n = 1 is regular induction.
--- This is currently a bit of a pain to actually use, particularly for proving
--- bases cases, hence the below special case. It would be really cool to have a
--- tactic to just split the base cases into goals ^_^
+-- This is currently a bit of a pain to actually use, particularly for
+-- proving bases cases, hence the below special case. It would be
+-- really cool to have a tactic to just split the base cases into
+-- goals ^_^
 theorem multi_induction
 (n: mynat)
 (statement: mynat → Prop)
 -- statement is true for 0, ..., n - 1
 (base_cases: ∀ m: mynat, m < n → statement m)
--- given the statement for m, ..., m + n - 1, the statement holds for m + n
+-- given the statement for m, ..., m + n - 1, the statement holds for
+-- m + n
 (inductive_step: ∀ m: mynat,
   (∀ d: mynat, d < n → statement (m + d)) → statement (m + n)):
 ∀ m: mynat, statement m :=
@@ -127,7 +131,8 @@ begin
       assume h_sih,
       rw add_comm,
       apply inductive_step,
-      -- at this point it just takes a bit of wrangling to show the obvious
+      -- at this point it just takes a bit of wrangling to show the
+      -- obvious
       intro d',
       assume hdn,
       apply h_sih,

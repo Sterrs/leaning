@@ -1,3 +1,5 @@
+-- vim: ts=2 sw=0 sts=-1 et ai tw=70
+
 import .mynat
 import .lt
 
@@ -25,7 +27,8 @@ variables {m n: mynat}
 notation h :: t := cons h t
 notation `[]` := empty
 def singleton (x: T) := x :: ([]: mylist T)
--- is this bad practice? Am I overriding some important other notation??
+-- is this bad practice? Am I overriding some important other
+-- notation??
 notation `[`x`]` := singleton x
 
 @[simp] theorem singleton_cons_empty: [x] = x :: [] := rfl
@@ -44,9 +47,10 @@ begin
   refl,
 end
 
--- we don't define append explicitly, since lists are define by recursion on the
--- tail. Also note that concat is defined by recursion on the first argument, so
--- you should generally induct on the first argument.
+-- we don't define append explicitly, since lists are define by
+-- recursion on the tail. Also note that concat is defined by
+-- recursion on the first argument, so you should generally induct on
+-- the first argument.
 def concat: mylist T → mylist T → mylist T
 | []        lst := lst
 | (x :: xs) lst := x :: (concat xs lst)

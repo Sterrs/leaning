@@ -1,3 +1,5 @@
+-- vim: ts=2 sw=0 sts=-1 et ai tw=70
+
 import .lt
 
 namespace hidden
@@ -8,7 +10,8 @@ def divides (m n: mynat) := ∃ k: mynat, n = k * m
 instance: has_dvd mynat := ⟨divides⟩
 
 -- gosh, how do you define gcd?
--- you can kind of define it using Euclid's algorithm and total ordering of ≤
+-- you should be able to define it using Euclid's algorithm and total
+-- ordering of ≤
 /- def gcd: mynat → mynat → mynat
 | m 0 := m
 | m n := if m ≤ n then gcd m (n - m)

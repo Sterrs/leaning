@@ -1,3 +1,5 @@
+-- vim: ts=2 sw=0 sts=-1 et ai tw=70
+
 import .mynat
 import .le
 import .lt
@@ -72,8 +74,10 @@ begin
 end
 -- Simple corollaries of the above
 @[simp] theorem add_sub_one: (m + 1) - 1 = m := add_sub
+
 @[simp]
-theorem succ_sub_one: (succ m) - 1 = m := by rwa [←add_one_succ, add_sub]
+theorem succ_sub_one:
+(succ m) - 1 = m := by rwa [←add_one_succ, add_sub]
 
 theorem sub_zero_iff_le: m - n = 0 ↔ m ≤ n :=
 begin

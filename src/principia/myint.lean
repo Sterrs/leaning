@@ -1,3 +1,5 @@
+-- vim: ts=2 sw=0 sts=-1 et ai tw=70
+
 import .mynat
 import .le
 import .nat_sub
@@ -7,8 +9,6 @@ namespace hidden
 -- Basic definitions for integers
 -- TODO:
 -- - Prove basic theorems about arithmetic again
--- - Probably move aux_sub_nat_nat into mynat and prove some things about it
---   there
 -- - Define some quotient/remainder things
 
 inductive myint: Type
@@ -19,7 +19,8 @@ inductive myint: Type
 -- ↑n (\u n) for "coerce n"
 instance: has_coe mynat myint := ⟨myint.of_nat⟩
 
--- lets you write -[1+ n] for negative numbers. Note the spacing is unforgiving
+-- lets you write -[1+ n] for negative numbers. Note the spacing is
+-- unforgiving.
 notation `-[1+ ` n `]` := myint.neg_succ_of_nat n
 
 -- I don't really know how namespace work in lean tbh
@@ -75,15 +76,16 @@ instance: has_sub myint := ⟨sub⟩
 variables {m n k: myint}
 variables {m' n' k': mynat}
 
--- problems I'm having: how do you refer to mynat theorems like add_comm explicitly?
-
--- according to this link:
--- https://leanprover.github.io/theorem_proving_in_lean/induction_and_recursion.html
--- you should be able to to rw [add], but that doesn't seem to work
 @[simp] theorem nat_nat_add: (↑m': myint) + ↑n' = ↑(m' + n') := rfl
-@[simp] theorem neg_nat_add: -[1+ m'] + ↑n' = sub_nat_nat n' (succ m') := rfl
-@[simp] theorem nat_neg_add: ↑m' + -[1+ n'] = sub_nat_nat m' (succ n') := rfl
-@[simp] theorem neg_neg_add: -[1+ m'] + -[1+ n'] = -[1+ succ (m' + n')] := rfl
+
+@[simp]
+theorem neg_nat_add: -[1+ m'] + ↑n' = sub_nat_nat n' (succ m') := rfl
+
+@[simp]
+theorem nat_neg_add: ↑m' + -[1+ n'] = sub_nat_nat m' (succ n') := rfl
+
+@[simp]
+theorem neg_neg_add: -[1+ m'] + -[1+ n'] = -[1+ succ (m' + n')] := rfl
 
 
 @[simp] theorem of_nat_coe: of_nat m' = ↑m' := rfl
@@ -138,7 +140,8 @@ begin
 end
 
 @[simp]
-theorem sub_succ_succ: sub_nat_nat (succ m') (succ n') = sub_nat_nat m' n' :=
+theorem sub_succ_succ:
+sub_nat_nat (succ m') (succ n') = sub_nat_nat m' n' :=
 begin
   unfold sub_nat_nat,
   rw sub_succ_succ,
@@ -148,13 +151,15 @@ begin
 end
 
 @[simp]
-theorem succ_of_sub_succ: sub_nat_nat m' (succ n') + 1 = sub_nat_nat m' n' :=
+theorem succ_of_sub_succ:
+sub_nat_nat m' (succ n') + 1 = sub_nat_nat m' n' :=
 begin
   sorry, -- ok I'm stuck on this one
 end
 
 @[simp]
-theorem sub_nat_succ: sub_nat_nat (succ m') n' = sub_nat_nat m' n' + 1 :=
+theorem sub_nat_succ:
+sub_nat_nat (succ m') n' = sub_nat_nat m' n' + 1 :=
 begin
   induction n' with n'_n n'_ih,
   simp,
@@ -167,7 +172,8 @@ end
 theorem coe_succ: (↑(succ m'): myint) = ↑m' + 1 := rfl
 
 @[simp]
-theorem sub_nat_add: sub_nat_nat (m' + n') k' = m' + sub_nat_nat n' k' :=
+theorem sub_nat_add:
+sub_nat_nat (m' + n') k' = m' + sub_nat_nat n' k' :=
 begin
   induction m' with m'_n m'_ih,
   simp,

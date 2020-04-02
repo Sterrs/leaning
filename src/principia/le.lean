@@ -1,3 +1,5 @@
+-- vim: ts=2 sw=0 sts=-1 et ai tw=70
+
 import .mynat
 import .tactic
 
@@ -9,8 +11,8 @@ def le (m n: mynat) :=  ∃ k: mynat, n = m + k
 -- notation
 instance: has_le mynat := ⟨le⟩
 
--- Given a proposition, we can say that if there are arbitrarily large mynat
--- satisfying it, then there are infinitely many satisfying it.
+-- Given a proposition, we can say that if there are arbitrarily large
+-- mynat satisfying it, then there are infinitely many satisfying it.
 def infinitely_many (statement : mynat → Prop) : Prop :=
 ∀ n : mynat, ∃ m : mynat, n ≤ m ∧ statement m
 
@@ -94,7 +96,9 @@ begin
   },
 end
 
-theorem wlogle (p: mynat → mynat → Prop) (hsymm: ∀ m n: mynat, p m n → p n m):
+theorem wlogle
+(p: mynat → mynat → Prop)
+(hsymm: ∀ m n: mynat, p m n → p n m):
 (∀ m n: mynat, m ≤ n → p m n) → (∀ m n: mynat, p m n) :=
 begin
   assume hwlog,
@@ -201,7 +205,8 @@ begin
   rw [hd', hd, add_assoc],
 end
 
--- for some reason it breaks some other theorems if you add @[ref] here
+-- for some reason it breaks some other theorems if you add @[refl]
+-- here
 theorem le_refl: m ≤ m :=
 begin
   existsi (0: mynat),

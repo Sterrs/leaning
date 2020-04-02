@@ -1,3 +1,5 @@
+-- vim: ts=2 sw=0 sts=-1 et ai tw=70
+
 import .mynat
 import .dvd
 import .induction
@@ -6,8 +8,6 @@ namespace hidden
 
 open mynat
 
--- it's kind of crazy that Lean just automatically proves this is well-defined
--- (try changing fib succ to fib succ succ)
 def fib: mynat → mynat
 | 0               := 0
 | 1               := 1
@@ -15,17 +15,18 @@ def fib: mynat → mynat
 
 variables {m n k p: mynat}
 
--- what is the general tactical way to say to lean "just evaluate this constant
--- sub-expression please"?
 @[simp] theorem fib_zero: fib 0 = 0 := rfl
 @[simp] theorem fib_one: fib 1 = 1 := rfl
-@[simp] theorem fib_succsucc: fib (succ (succ n)) = fib n + fib (succ n) := rfl
+
+@[simp]
+theorem fib_succsucc:
+fib (succ (succ n)) = fib n + fib (succ n) := rfl
 
 theorem fib_k_formula (k: mynat):
 fib (m + (k + 1)) = fib k * fib m + fib (k + 1) * fib (m + 1) :=
 begin
-  -- this is here because I retroactively changed the theorem statement
-  -- and I'm lazy
+  -- this is here because I retroactively changed the theorem
+  -- statement and I'm lazy
   rw ←add_assoc,
   revert k,
   apply duo_induction, {
@@ -77,7 +78,8 @@ end
 
 -- this is a consequence of the big one we want to prove, which is
 -- F_gcd(m, n) = gcd(F_m, F_n), which actually needs only fairly basic
--- properties of gcd - but it does require that you've defined gcd, sadly.
+-- properties of gcd - but it does require that you've defined gcd,
+-- sadly.
 theorem f_preserves_multiples
 (k: mynat):
 n ∣ m → fib n ∣ fib m :=
@@ -143,9 +145,9 @@ begin
     repeat {rw ←add_one_succ}, -- legibility
     repeat {rw mul_add},
     repeat {rw add_mul},
-    -- laboriously cancel terms. This is likely very inefficient algebra,
-    -- but it's hard for me to keep track of things otherwise.
-    -- Lots of conv, for similar reasons
+    -- laboriously cancel terms. This is likely very inefficient
+    -- algebra, but it's hard for me to keep track of things
+    -- otherwise. Lots of conv, for similar reasons
     conv {
       to_lhs,
       congr,

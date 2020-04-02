@@ -1,3 +1,5 @@
+-- vim: ts=2 sw=0 sts=-1 et ai tw=70
+
 import .fib
 import .nat_sub
 import .fact
@@ -10,7 +12,8 @@ open mynat
 
 -- some ambitious things:
 -- define polynomials
--- prove that the sums of a k-th degree polynomial are a k+1th degree polynomial
+-- prove that the sums of a k-th degree polynomial are a k+1th degree
+-- polynomial
 
 def sequence (α : Type) := mynat → α
 
@@ -23,8 +26,12 @@ variable {α : Type}
 -- This is probably bad so might remove this
 
 instance: has_coe α (sequence α) := ⟨λ a, (λ k, a)⟩
-@[simp] theorem coe_seq (a : α) : (↑a:sequence α) = (λ k : mynat, a) := rfl
-@[simp] theorem coe_triv (a : α) (n :mynat): (↑a:sequence α) n = a := rfl
+
+@[simp]
+theorem coe_seq (a : α) : (↑a:sequence α) = (λ k : mynat, a) := rfl
+
+@[simp]
+theorem coe_triv (a : α) (n :mynat): (↑a:sequence α) n = a := rfl
 
 variables [has_add α] {β : Type} [has_mul β]
 
@@ -78,7 +85,9 @@ variables a b c d m n k: mynat
 variables term f g : sequence mynat
 
 @[simp] theorem sum_zero: sum term 0 = 0 := rfl
-@[simp] theorem sum_succ: sum term (succ n) = sum term n + term n := rfl
+
+@[simp]
+theorem sum_succ: sum term (succ n) = sum term n + term n := rfl
 
 theorem constant_sum: ∀ n : mynat, sum ↑(1 :mynat) n = n
 | zero := rfl
@@ -133,8 +142,8 @@ sum (λ k, a * (succ b) ^ k) n * b + a = a * (succ b) ^ n
 | (succ n) :=
 begin
   conv {
-    rw [sum_succ, add_mul, add_assoc, add_comm _ a, ←add_assoc, geometric_progression,
-      mul_assoc, ←mul_add],
+    rw [sum_succ, add_mul, add_assoc, add_comm _ a,
+        ←add_assoc, geometric_progression, mul_assoc, ←mul_add],
     to_lhs,
     congr, skip, congr,
     rw ←mul_one (succ b ^ n),
@@ -171,8 +180,6 @@ begin
   refl,
 end
 
--- TODO: go and clean up all the consecutive rws throughout
-
 @[simp] theorem binom_zero_succ: binom 0 (succ n) = 0 := rfl
 
 @[simp]
@@ -187,10 +194,7 @@ begin
     refl,
   }, {
     have: 1 = succ 0 := rfl,
-    rw this,
-    rw binom_succ_succ,
-    rw ←this,
-    rw n_ih,
+    rw [this, binom_succ_succ, ←this, n_ih],
     simp,
   },
 end
@@ -232,9 +236,7 @@ begin
   induction n with n_n n_ih, {
     refl,
   }, {
-    rw binom_succ_succ,
-    rw n_ih,
-    rw binom_succ_kill,
+    rw [binom_succ_succ, n_ih, binom_succ_kill],
     refl,
   },
 end
@@ -246,9 +248,7 @@ begin
   induction n with n_n n_ih, {
     refl,
   }, {
-    rw binom_succ_succ,
-    rw n_ih,
-    rw binom_succ_succ,
+    rw [binom_succ_succ, n_ih, binom_succ_succ],
     simp,
   }
 end
@@ -270,21 +270,15 @@ begin
         rw h,
         simp,
       }, {
-        have x := hm (succ n) k _,
-        have y := hm n (succ k) _,
+        have hm_1 := hm (succ n) k _,
+        have hm_2 := hm n (succ k) _,
         conv {
           congr,
-          rw binom_succ_succ,
-          rw add_mul,
-          rw x,
-          rw ←mul_add,
+          rw [binom_succ_succ, add_mul, hm_1, ←mul_add],
           congr, skip,
           simp,
           skip,
-          rw binom_succ_succ,
-          rw add_mul,
-          rw ←y,
-          rw ←mul_add,
+          rw [binom_succ_succ, add_mul, ←hm_2, ←mul_add],
           congr, skip,
           simp,
         }, {
@@ -305,25 +299,18 @@ begin
   induction k, {
     simp,
   }, {
-    rw add_succ,
-    rw binom_succ_succ,
-    rw fact_succ,
-    rw mul_assoc,
-    rw add_mul,
+    rw [add_succ, binom_succ_succ, fact_succ, mul_assoc, add_mul],
     conv {
       to_lhs,
       congr,
-      rw mul_assoc,
-      rw mul_comm (succ k_n),
-      rw [←mul_assoc, ←mul_assoc, k_ih],
+      rw [mul_assoc, mul_comm (succ k_n),
+          ←mul_assoc, ←mul_assoc, k_ih],
       skip,
-      rw mul_comm _ (succ k_n),
-      rw [←mul_assoc, ←mul_assoc, ←binom_multiplication],
-      rw [mul_assoc, mul_assoc, mul_comm n],
-      rw [←mul_assoc, ←mul_assoc, k_ih],
+      rw [mul_comm _ (succ k_n), ←mul_assoc, ←mul_assoc,
+          ←binom_multiplication, mul_assoc, mul_assoc,
+          mul_comm n, ←mul_assoc, ←mul_assoc, k_ih],
     },
-    rw ←mul_add,
-    rw [succ_add, fact_succ, add_comm k_n],
+    rw [←mul_add, succ_add, fact_succ, add_comm k_n],
   },
 end
 
@@ -350,14 +337,13 @@ begin
     rw sum_succ,
     simp,
   }, {
-    rw sum_succ,
-    rw n_ih,
-    rw [add_assoc, add_comm (f 0), ←add_assoc,
+    rw [sum_succ, n_ih, add_assoc, add_comm (f 0), ←add_assoc,
         ←sum_succ],
   },
 end
 
-private theorem sum_distr': sum (λ k, f k + g k) n = (sum f n) + (sum g n) :=
+private theorem sum_distr':
+sum (λ k, f k + g k) n = (sum f n) + (sum g n) :=
 sum_distr f g n
 
 theorem binom_row_sum:
@@ -367,26 +353,21 @@ begin
   induction n, {
     refl,
   }, {
-    rw sum_succ,
-    rw sum_tail,
+    rw [sum_succ, sum_tail],
     -- gosh this is a pain
     have: ∀ k,
       (λ k, binom (succ n_n) (succ k)) k
       = (λ k, binom n_n k + binom n_n (succ k)) k, {
       simp,
     },
-    rw (sum_cancel _ _).mpr this,
-    rw sum_distr',
+    rw [(sum_cancel _ _).mpr this, sum_distr',
     -- clumsy
-    rw binom_succ_succ,
-    rw add_comm (binom n_n n_n),
+        binom_succ_succ, add_comm (binom n_n n_n)],
     repeat {rw ←add_assoc},
     rw add_comm,
     repeat {rw ←add_assoc},
-    rw add_comm (binom n_n n_n),
-    rw ←sum_succ,
-    rw n_ih,
-    rw [binom_succ_kill, add_zero],
+    rw [add_comm (binom n_n n_n), ←sum_succ, n_ih,
+        binom_succ_kill, add_zero],
     conv in (binom (succ n_n) 0) {
       rw [binom_zero, ←binom_zero n_n],
     },
@@ -424,8 +405,8 @@ begin
       refl,
     }, {
       repeat {rw sum_succ},
-      rw n_ih (@le_cancel_strong n_n m 1 hnm),
-      rw h n_n (lt_iff_succ_le.mpr hnm),
+      rw [n_ih (@le_cancel_strong n_n m 1 hnm),
+          h n_n (lt_iff_succ_le.mpr hnm)],
     },
   },
 end
@@ -442,8 +423,10 @@ end
 
 -- the famous diagonal fibonacci sums in Pascal's triangle
 theorem binom_fib_sum:
-sum (λ k, binom (n + k) (2 * k)) (succ n) = fib (2 * n + 1) ∧
-sum (λ k, binom (n + succ k) (2 * k + 1)) (succ n) = fib (2 * n + 2) :=
+sum (λ k, binom (n + k) (2 * k)) (succ n)
+  = fib (2 * n + 1) ∧
+sum (λ k, binom (n + succ k) (2 * k + 1)) (succ n)
+  = fib (2 * n + 2) :=
 begin
   revert n,
   apply induction_conjunction, {
@@ -452,47 +435,35 @@ begin
     intro n,
     split, {
       assume odd_sum even_sum,
-      rw sum_succ,
-      rw sum_tail,
+      rw [sum_succ, sum_tail],
       have hrw:
-        ∀ k,
-          (λ k, binom (succ n + succ k) (2 * succ k)) k
-          = (λ k, binom (n + succ k) (2 * k + 1)) k
-            + (λ k, binom (n + succ k) (2 * succ k)) k, {
+          ∀ k,
+            (λ k, binom (succ n + succ k) (2 * succ k)) k
+            = (λ k, binom (n + succ k) (2 * k + 1)) k
+              + (λ k, binom (n + succ k) (2 * succ k)) k, {
         intro k,
         repeat {rw lambda_subs},
-        rw mul_succ,
-        rw add_comm 2,
-        rw add_two,
-        rw add_one_succ,
+        rw [mul_succ, add_comm 2, add_two, add_one_succ],
         simp,
       },
-      rw (sum_cancel _ _).mpr hrw, clear hrw,
-      rw sum_distr',
-      rw add_comm,
+      rw [(sum_cancel _ _).mpr hrw, sum_distr', add_comm],
+      clear hrw,
       repeat {rw ←add_assoc},
       have hrw:
-        binom (succ n + succ n) (2 * succ n)
-        = binom (n + succ n) (2 * n + 1), {
-        rw mul_succ,
-        rw add_comm 2,
-        rw add_two,
-        rw add_one_succ,
+          binom (succ n + succ n) (2 * succ n)
+          = binom (n + succ n) (2 * n + 1), {
+        rw [mul_succ, add_comm 2, add_two, add_one_succ],
         simp [add_dupl],
-        rw add_comm,
-        rw add_two,
+        rw [add_comm, add_two],
         from binom_dupl _,
       },
       conv {
         to_lhs, congr, congr,
-        rw add_comm,
-        rw hrw,
-        rw ←sum_succ,
-        rw even_sum,
+        rw [add_comm, hrw, ←sum_succ, even_sum],
       }, clear hrw,
       have hrw:
-        binom (succ n + 0) (2 * 0)
-        = binom (n + 0) (2 * 0), {
+          binom (succ n + 0) (2 * 0)
+          = binom (n + 0) (2 * 0), {
         simp,
       },
       conv {
@@ -500,8 +471,8 @@ begin
         rw add_assoc,
         congr, skip,
         rw hrw,
-        rw ←sum_tail n (λ k, binom (n + k) (2 * k)),
-        rw odd_sum,
+        rw [←sum_tail n (λ k, binom (n + k) (2 * k)),
+            odd_sum],
       }, clear hrw,
       conv {
         congr,
@@ -510,11 +481,8 @@ begin
         skip,
         rw add_two,
         skip,
-        rw mul_succ,
-        rw add_comm 2,
-        rw add_one_succ,
-        rw add_two,
-        rw fib_succsucc,
+        rw [mul_succ, add_comm 2, add_one_succ,
+            add_two, fib_succsucc],
       },
     }, {
       assume odd_sum_ even_sum odd_sum, clear odd_sum_,
@@ -527,17 +495,10 @@ begin
         simp,
       },
       rw (sum_cancel _ _).mpr hrw, clear hrw,
-      rw sum_distr',
-      rw odd_sum,
-      rw sum_succ,
-      rw even_sum,
+      rw [sum_distr', odd_sum, sum_succ, even_sum],
       have hrw:
         2 * succ n + 1 = succ (succ (succ (n + n))), {
-        rw mul_succ,
-        rw add_comm 2,
-        rw add_one_succ,
-        rw add_two,
-        rw mul_comm,
+        rw [mul_succ, add_comm 2, add_one_succ, add_two, mul_comm],
         refl,
       },
       conv {
@@ -547,22 +508,14 @@ begin
         simp, skip,
         rw hrw,
       }, clear hrw,
-      rw binom_succ_kill,
-      rw add_zero,
+      rw [binom_succ_kill, add_zero],
       conv {
         congr, congr,
-        rw mul_succ,
-        rw add_comm 2,
-        rw add_one_succ,
-        rw add_two,
+        rw [mul_succ, add_comm 2, add_one_succ, add_two],
         skip,
         rw add_two,
         skip,
-        rw mul_succ,
-        rw add_two,
-        rw add_comm,
-        rw add_two,
-        rw fib_succsucc,
+        rw [mul_succ, add_two, add_comm, add_two, fib_succsucc],
       },
       rw add_comm,
     },

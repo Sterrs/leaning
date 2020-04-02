@@ -30,8 +30,24 @@ Just a rough guide as to what style we're trying to use
   on either side.
 - Parenthesise as you see fit.
 - In weird ambiguous re-write situations, try to use `conv`.
-- Try to keep lines within 80 characters, fairly strictly
+- Try to keep lines within 70 characters. We'd like lines to not wrap in
+  VScode basically
 - No parentheses after quantifiers
 - Put imports on separate lines, as per PEP8 `:)`
 - Try to line up the assignments in by-cases definitions
 - Leave an empty line between most theorems
+- When doing consecutive rewrites, use the `rw [...]` notation.
+- If you find yourself doing one rewrite repeatedly, use
+  `repeat {rw ...}`.
+
+More general tips/useful things not to forget:
+
+- You can still explicitly supply implicit arguments to a function `f` by
+  writing `@f`.
+- If you want to revert a variable `x` before you induct on another variable,
+  you can write `induction ... generalizing x`.
+- If you want to induct on some complicated sub-expression (say `x + y`), you
+  can use `induction hxy: x + y`. (Note the `hxy: `).
+- The same thing works for cases.
+- You can clear hypotheses using the `clear` tactic, which can help to reduce
+  clutter.

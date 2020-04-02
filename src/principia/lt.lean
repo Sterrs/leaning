@@ -1,3 +1,5 @@
+-- vim: ts=2 sw=0 sts=-1 et ai tw=70
+
 import .le
 
 namespace hidden
@@ -128,14 +130,15 @@ begin
     rw hd,
     assume hmsd,
     cases hmsd with d' hd',
-    rw [succ_add, add_assoc, ←add_succ, ←add_zero m, add_assoc] at hd',
+    rw [succ_add, add_assoc, ←add_succ,
+        ←add_zero m, add_assoc] at hd',
     have hzsucc := add_cancel hd',
     rw zero_add at hzsucc,
     from succ_ne_zero hzsucc.symm,
   }, {
     assume hmsn,
-    -- this total ordering theorem is crazy powerful. It feels like you need
-    -- classical logic until you remember it exists
+    -- this total ordering theorem is crazy powerful. It feels like
+    -- you need classical logic until you remember it exists
     cases (le_total_order m n) with hmn hnm,
     from hmn,
     cases hnm with d hd,
@@ -206,8 +209,8 @@ begin
   },
 end
 
--- it seems that inductive types give all sorts of classical-feeling results
--- without any of the excluded middle
+-- it seems that inductive types give all sorts of classical-feeling
+-- results without any of the excluded middle
 theorem lt_dne: ¬m < n → n ≤ m :=
 begin
   assume hnmn,

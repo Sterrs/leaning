@@ -1,3 +1,5 @@
+-- vim: ts=2 sw=0 sts=-1 et ai tw=70
+
 -- Natural numbers
 
 -- TODO:
@@ -16,7 +18,8 @@ inductive mynat
 -- so I can use succ instead of mynat.succ
 open mynat
 
--- this instance stuff is pure voodoo but it seems to make the notation work
+-- this instance stuff is pure voodoo but it seems to make the
+-- notation work
 instance: has_zero mynat := ⟨zero⟩
 instance: has_one mynat := ⟨succ zero⟩
 
@@ -32,7 +35,8 @@ def mul: mynat → mynat → mynat
 
 instance: has_mul mynat := ⟨mul⟩
 
--- a ^ b should be number of functions from a b-set to an a-set. fight me
+-- a ^ b should be number of functions from a b-set to an a-set. fight
+-- me
 def pow: mynat → mynat → mynat
 | m 0        := 1
 | m (succ n) := m * pow m n
@@ -46,10 +50,12 @@ variables {m n k : mynat}
 -- I'm simping liberally for future reasons
 @[simp] theorem add_zero (m : mynat): m + 0 = m := rfl
 
-@[simp] theorem add_succ (m n : mynat): m + succ n = succ (m + n) := rfl
+@[simp]
+theorem add_succ (m n : mynat): m + succ n = succ (m + n) := rfl
 
--- so for some reason all the old code breaks with the new operator instances,
--- so I have to go and replace zero with 0 wherever I used induction. How fix???
+-- so for some reason all the old code breaks with the new operator
+-- instances, so I have to go and replace zero with 0 wherever I used
+-- induction. How fix???
 @[simp] theorem zz: zero = 0 := rfl
 
 @[simp]
@@ -133,7 +139,8 @@ end
 
 @[simp] theorem mul_zero (m : mynat): m * 0 = 0 := rfl
 
-@[simp] theorem mul_succ (m n : mynat): m * (succ n) = m + (m * n) := rfl
+@[simp]
+theorem mul_succ (m n : mynat): m * (succ n) = m + (m * n) := rfl
 
 @[simp] theorem mul_one (m : mynat) : m * 1 = m := rfl
 
@@ -199,7 +206,8 @@ end
 -- do I really have to spell out mynat like this? yuck
 @[simp] theorem pow_zero (m : mynat) : m ^ (0: mynat) = 1 := rfl
 
-@[simp] theorem pow_succ (m n : mynat) : m ^ (succ n) = m * (m ^ n) := rfl
+@[simp]
+theorem pow_succ (m n : mynat) : m ^ (succ n) = m * (m ^ n) := rfl
 
 theorem zero_pow: m ≠ 0 → (0: mynat) ^ m = 0 :=
 begin

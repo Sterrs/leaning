@@ -1,3 +1,5 @@
+-- vim: ts=2 sw=0 sts=-1 et ai tw=70
+
 import .dvd
 import .induction
 import .fact
@@ -246,7 +248,8 @@ begin
           apply le_iff_lt_succ.mpr,
           have hasn := dvd_le succ_ne_zero hadvds,
           have hansn: a ≠ succ n, {
-            -- the oldest trick in the book: just wear it down by cases
+            -- the oldest trick in the book: just wear it down by
+            -- cases
             assume hasn,
             have habsn := hab.right.right,
             simp [hasn] at habsn,
@@ -257,7 +260,8 @@ begin
             simp at hab,
             assumption,
             simp at habsn,
-            rw [←add_assoc, add_comm b n, add_assoc, ←add_succ] at habsn,
+            rw [←add_assoc, add_comm b n,
+                add_assoc, ←add_succ] at habsn,
             have hcontr := add_cancel_to_zero habsn.symm,
             from succ_ne_zero hcontr,
           },
@@ -282,8 +286,8 @@ infinitely_many prime :=
 begin
   -- Famously, this is a proof by contradiction
   by_contradiction h,
-  -- As there are only finitely many primes, there exists an n than which there
-  -- is no prime greater
+  -- As there are only finitely many primes, there exists an n than
+  -- which there is no prime greater
   cases not_forall.mp h with n hn,
   -- So any x greater than n is not prime
   have halln : ∀ x, n ≤ x → ¬prime x, {
@@ -292,9 +296,10 @@ begin
     have hx := this x,
     from hx ⟨hnx, hpx⟩,
   },
-  -- We can form a contradiction if we can exhibit a k which is not 1, and is
-  -- not divisible by anything less than n except 1
-  suffices : ∃ k : mynat, k ≠ 1 ∧ ∀ x : mynat, x ≠ 1 → x ≤ n → ¬(x ∣ k), {
+  -- We can form a contradiction if we can exhibit a k which is not 1,
+  -- and is not divisible by anything less than n except 1
+  suffices:
+      ∃ k : mynat, k ≠ 1 ∧ ∀ x : mynat, x ≠ 1 → x ≤ n → ¬(x ∣ k), {
     cases this with k h₁,
     have hk := h₁.right,
     -- and is not divisible by any prime
@@ -303,7 +308,6 @@ begin
       assume p hp,
       -- If p were more than n, it wouldn't be prime
       have := halln p,
-      -- TODO: Unnecessary use of classical
       -- And it's greater than or equal to n
       cases (le_lem n p) with h h, {
         -- Which is a contradiction,
@@ -314,8 +318,8 @@ begin
         from hk p hp.left (lt_impl_le h),
       },
     },
-    -- Which directly contradicts the fact that every natural > 1 is divisible
-    -- by a prime
+    -- Which directly contradicts the fact that every natural > 1 is
+    -- divisible by a prime
     have hprimediv := prime_divisor h₁.left,
     cases hprimediv with p hp,
     from hnoprimediv p hp.left hp.right,

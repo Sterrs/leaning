@@ -1,3 +1,5 @@
+-- vim: ts=2 sw=0 sts=-1 et ai tw=70
+
 import ..lt
 import logic.basic
 
@@ -5,11 +7,12 @@ namespace hidden
 
 universes u v w
 
--- A set of elements of type α is a function from elements of type α to
--- propositions
+-- A set of elements of type α is a function from elements of type α
+-- to propositions
 def myset (α : Type u) := α → Prop
 
-namespace myset -- Not sure if we want this, but I don't think it hurts
+ -- Not sure if we want this, but I don't think it hurts
+namespace myset
 
 -- Need u and v to be most general
 variables {α : Type u} {β : Type v}
