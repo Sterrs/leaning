@@ -1,5 +1,6 @@
 import .fib
 import .nat_sub
+import .fact
 
 namespace hidden
 
@@ -176,6 +177,8 @@ begin
   refl,
 end
 
+-- TODO: go and clean up all the consecutive rws throughout
+
 @[simp] theorem binom_zero_succ: binom 0 (succ n) = 0 := rfl
 
 @[simp]
@@ -256,7 +259,119 @@ begin
   }
 end
 
--- TODO: theorem binom_triangle, binom_symm
+theorem binom_multiplication:
+binom (n + k) k * n = binom (n + k) (succ k) * (succ k) :=
+begin
+  induction h: n + k with m hm generalizing n k, {
+    rw add_integral h,
+    simp,
+  }, {
+    cases k, {
+      simp,
+      simp at h,
+      assumption,
+    }, {
+      cases n, {
+        simp at h,
+        rw h,
+        simp,
+      }, {
+        have x := hm (succ n) k _,
+        have y := hm n (succ k) _,
+        conv {
+          congr,
+          rw binom_succ_succ,
+          rw add_mul,
+          rw x,
+          rw ←mul_add,
+          congr, skip,
+          simp,
+          skip,
+          rw binom_succ_succ,
+          rw add_mul,
+          rw ←y,
+          rw ←mul_add,
+          congr, skip,
+          simp,
+        }, {
+          simp at h,
+          simp [h],
+        }, {
+          simp at h,
+          simp [h],
+        },
+      },
+    },
+  },
+end
+
+theorem binom_formula:
+binom (n + k) k * fact k * fact n = fact (n + k) :=
+begin
+  induction k, {
+    simp,
+  }, {
+    rw add_succ,
+    rw binom_succ_succ,
+    rw fact_succ,
+    rw mul_assoc,
+    rw add_mul,
+    conv {
+      to_lhs,
+      congr,
+      rw mul_assoc,
+      rw mul_comm (succ k_n),
+      rw [←mul_assoc, ←mul_assoc, k_ih],
+      skip,
+      rw mul_comm _ (succ k_n),
+      rw [←mul_assoc, ←mul_assoc, ←binom_multiplication],
+      rw [mul_assoc, mul_assoc, mul_comm n],
+      rw [←mul_assoc, ←mul_assoc, k_ih],
+    },
+    rw ←mul_add,
+    rw [succ_add, fact_succ, add_comm k_n],
+  },
+end
+
+theorem binom_symm:
+a + b = n → binom n a = binom n b :=
+begin
+  revert a b,
+  induction n with n_n n_ih, {
+    intros a b,
+    assume hab0,
+    rw add_integral hab0,
+    rw add_comm at hab0,
+    rw add_integral hab0,
+  }, {
+    intros a b,
+    assume habsn,
+    cases a, {
+      simp at habsn,
+      rw habsn,
+      simp,
+    }, {
+      cases b, {
+        simp at habsn,
+        rw habsn,
+        simp,
+      }, {
+        simp,
+        rw n_ih a (succ b), {
+          rw n_ih (succ a) b, {
+            rw add_comm,
+          }, {
+            simp at habsn,
+            rw [←habsn, succ_add],
+          },
+        }, {
+          simp at habsn,
+          rw [←habsn, add_succ],
+        },
+      },
+    },
+  },
+end
 
 theorem sum_tail:
 sum f (succ n) = sum (λ k, f (succ k)) n + f 0 :=
@@ -273,12 +388,11 @@ begin
 end
 
 private theorem sum_distr': sum (λ k, f k + g k) n = (sum f n) + (sum g n) :=
-begin
-  from sum_distr f g n,
-end
+sum_distr f g n
 
 theorem binom_row_sum:
-sum (λ k, binom n k) (succ n) = 2 ^ n :=
+-- chad partial function notation
+sum (binom n) (succ n) = 2 ^ n :=
 begin
   induction n, {
     refl,
@@ -313,6 +427,24 @@ begin
     rw mul_comm,
     refl,
   },
+end
+
+private theorem mul_sum':
+a * sum f n = sum (λ k, a * f k) n :=
+begin
+  rw ←mul_sum,
+  sorry,
+end
+
+theorem binomial_theorem:
+(a + b)^n = sum (λ k, binom n k * a^k * b^(n - k)) (succ n) :=
+begin
+  induction n with n_n n_ih, {
+    refl,
+  }, {
+    rw [pow_succ, n_ih, add_mul],
+    sorry,
+  }
 end
 
 end naturals
