@@ -131,7 +131,6 @@ begin
   },
 end
 
-@[simp]
 theorem rev_concat: rev (lst1 ++ lst2) = rev lst2 ++ rev lst1 :=
 begin
   induction lst1 with lst1_head lst1_tail lst1_ih, {
@@ -147,11 +146,12 @@ begin
   induction lst with lst_head lst_tail lst_ih, {
     simp,
   }, {
-    simp [lst_ih],
+    simp [lst_ih, rev_concat],
   },
 end
 
-theorem rev_len: len lst = len (rev lst) :=
+@[simp]
+theorem rev_len: len (rev lst) = len lst :=
 begin
   induction lst with lst_head lst_tail lst_ih, {
     simp,
@@ -173,7 +173,7 @@ end
 theorem rev_not_empty: lst ≠ [] → rev lst ≠ [] :=
 begin
   repeat {rw nonempty_iff_len},
-  repeat {rw ←rev_len},
+  rw rev_len,
   assume h, from h,
 end
 
@@ -356,8 +356,6 @@ begin
   },
 end
 
--- TODO: rev_take_drop
-
 private theorem succ_le_impl_le (h: succ n ≤ len lst): n ≤ len lst :=
 (le_cancel_strong 1 h)
 
@@ -497,6 +495,204 @@ begin
   rw [←rev_concat, hl1l2l1l3, rev_concat],
 end
 
+-- the obvious facts that show that these operations don't depend
+-- on how you prove the list is long enough.
+theorem head_h_irrelev
+(hnl_1 hnl_2: lst ≠ []):
+head lst hnl_1 = head lst hnl_2 :=
+begin
+  cases lst, {
+    contradiction,
+  }, {
+    refl,
+  },
+end
+
+theorem tail_h_irrelev
+(hnl_1 hnl_2: lst ≠ []):
+tail lst hnl_1 = tail lst hnl_2 :=
+begin
+  cases lst, {
+    contradiction,
+  }, {
+    refl,
+  },
+end
+
+theorem last_h_irrelev
+(hnl_1 hnl_2: lst ≠ []):
+last lst hnl_1 = last lst hnl_2 :=
+begin
+  cases lst, {
+    contradiction,
+  }, {
+    refl,
+  },
+end
+
+theorem init_h_irrelev
+(hnl_1 hnl_2: lst ≠ []):
+init lst hnl_1 = init lst hnl_2 :=
+begin
+  cases lst, {
+    contradiction,
+  }, {
+    refl,
+  },
+end
+
+theorem take_h_irrelev
+(hnl_1 hnl_2: n ≤ len lst):
+take n lst hnl_1 = take n lst hnl_2 := rfl
+
+theorem drop_h_irrelev
+(hnl_1 hnl_2: n ≤ len lst):
+drop n lst hnl_1 = drop n lst hnl_2 := rfl
+
+theorem get_h_irrelev
+(hnl_1 hnl_2: n < len lst):
+get n lst hnl_1 = get n lst hnl_2 := rfl
+
+@[simp]
+theorem take_all (h: len lst ≤ len lst): take (len lst) lst h = lst :=
+begin
+  induction lst with lst_head lst_tail lst_ih, {
+    refl,
+  }, {
+    simp,
+    from lst_ih _,
+  },
+end
+
+@[simp]
+theorem drop_all (h: len lst ≤ len lst): drop (len lst) lst h = [] :=
+begin
+  induction lst with lst_head lst_tail lst_ih, {
+    refl,
+  }, {
+    simp,
+    from lst_ih _,
+  },
+end
+
+theorem take_idem
+(hml_1 hml_3: m ≤ len lst)
+(hml_2: m ≤ len (take m lst hml_1)):
+take m (take m lst hml_1) hml_2 = take m lst hml_3 :=
+begin
+  induction m with m hm generalizing lst, {
+    refl,
+  }, {
+    cases lst, {
+      exfalso,
+      from lt_nzero (lt_iff_succ_le.mpr hml_1),
+    }, {
+      simp,
+      apply hm,
+    },
+  },
+end
+
+-- theorem head_proof_irrelev
+
+theorem take_take
+(hml: m ≤ len lst)
+(hnl_1: n ≤ len (take m lst hml))
+(hnl_2: n ≤ len lst):
+take n (take m lst hml) hnl_1 = take n lst hnl_2 :=
+begin
+  induction n with n hn generalizing m lst, {
+    refl,
+  }, {
+    cases lst, {
+      exfalso,
+      from lt_nzero (lt_iff_succ_le.mpr hnl_2),
+    }, {
+      cases m, {
+        exfalso,
+        simp at hnl_1,
+        from lt_nzero (lt_iff_succ_le.mpr hnl_1),
+      }, {
+        simp,
+        apply hn,
+      },
+    },
+  },
+end
+
+theorem take_init
+(hnl: len xs ≤ len (xs ++ [x])):
+take (len xs) (xs ++ [x]) hnl = xs :=
+begin
+  induction xs, {
+    refl,
+  }, {
+    simp,
+    apply xs_ih,
+  },
+end
+
+theorem take_ignore
+(hnl_1: n ≤ len (xs ++ [x]))
+(hnl_2: n ≤ len xs):
+take n (xs ++ [x]) hnl_1 = take n xs hnl_2 :=
+begin
+  suffices h:
+      take n (take (len xs) (xs ++ [x]) _) _ = take n xs hnl_2, {
+    rw @take_take _ (xs ++ [x]) (len xs) n _ _ _ at h,
+    from h,
+  }, {
+    conv {
+      to_lhs,
+      congr, skip,
+      rw take_init,
+    },
+  }, {
+    simp,
+    from @le_to_add _ 1,
+  }, {
+    simp,
+    assumption,
+  },
+end
+
+theorem rev_drop_take
+(hml: m ≤ len lst)
+(hnlr: n ≤ len (rev lst))
+(hmn: m + n = len lst):
+drop m lst hml = rev (take n (rev lst) hnlr) :=
+begin
+  induction m with m hm generalizing lst, {
+    simp at hmn,
+    conv in n {rw hmn},
+    conv in (len lst) {rw ←rev_len},
+    rw take_all,
+    conv in zero {rw zz},
+    rw drop_zero,
+    rw rev_rev,
+  }, {
+    cases lst, {
+      exfalso, from lt_nzero (lt_iff_succ_le.mpr hml),
+    }, {
+      rw drop_succ_cons,
+      simp at hml,
+      have := hm (le_succ_cancel hml) _ _, {
+        rw this,
+        conv in (rev (lst_head :: lst_tail)) {rw rev_cons},
+        rw take_ignore,
+      }, {
+        existsi m,
+        rw rev_len,
+        simp at hmn,
+        rw [←hmn, add_comm],
+      }, {
+        simp at hmn,
+        rw [←hmn, add_comm],
+      },
+    },
+  },
+end
+
 def contains: T → mylist T → Prop
 | _ []        := false
 | x (y :: ys) := x = y ∨ contains x ys
@@ -511,9 +707,6 @@ def shorter (lst1 lst2: mylist T) := len lst1 < len lst2
 
 private theorem shorter_lt:
 shorter lst1 lst2 ↔ lt (len lst1) (len lst2) := iff.rfl
-
-private theorem shorter_partial:
-shorter lst1 = (λ lst2, lt (len lst1) (len lst2)) := rfl
 
 -- it should be easier than this, right? how on earth do I just say
 -- "because < is well-founded".
