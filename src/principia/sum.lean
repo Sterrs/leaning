@@ -431,6 +431,14 @@ begin
 end
 
 private theorem lambda_subs: (λ k, f k) k = f k := rfl
+private theorem add_two: ∀ k, k + 2 = succ (succ k) := (λ k, rfl)
+
+private theorem add_dupl: ∀ k: mynat, k + k = 2 * k :=
+begin
+  intro k,
+  rw mul_comm,
+  refl,
+end
 
 -- the famous diagonal fibonacci sums in Pascal's triangle
 theorem binom_fib_sum:
@@ -451,7 +459,13 @@ begin
           (λ k, binom (succ n + succ k) (2 * succ k)) k
           = (λ k, binom (n + succ k) (2 * k + 1)) k
             + (λ k, binom (n + succ k) (2 * succ k)) k, {
-        sorry,
+        intro k,
+        repeat {rw lambda_subs},
+        rw mul_succ,
+        rw add_comm 2,
+        rw add_two,
+        rw add_one_succ,
+        simp,
       },
       rw (sum_cancel _ _).mpr hrw, clear hrw,
       rw sum_distr',
@@ -459,7 +473,16 @@ begin
       repeat {rw ←add_assoc},
       have hrw:
         binom (succ n + succ n) (2 * succ n)
-        = binom (n + succ n) (2 * n + 1), sorry,
+        = binom (n + succ n) (2 * n + 1), {
+        rw mul_succ,
+        rw add_comm 2,
+        rw add_two,
+        rw add_one_succ,
+        simp [add_dupl],
+        rw add_comm,
+        rw add_two,
+        from binom_dupl _,
+      },
       conv {
         to_lhs, congr, congr,
         rw add_comm,
@@ -469,7 +492,9 @@ begin
       }, clear hrw,
       have hrw:
         binom (succ n + 0) (2 * 0)
-        = binom (n + 0) (2 * 0), sorry,
+        = binom (n + 0) (2 * 0), {
+        simp,
+      },
       conv {
         to_lhs,
         rw add_assoc,
@@ -478,18 +503,17 @@ begin
         rw ←sum_tail n (λ k, binom (n + k) (2 * k)),
         rw odd_sum,
       }, clear hrw,
-      have hrw: ∀ k, k + 2 = succ (succ k) := (λ k, rfl),
       conv {
         congr,
         rw add_comm, congr,
         rw add_one_succ,
         skip,
-        rw hrw,
+        rw add_two,
         skip,
         rw mul_succ,
         rw add_comm 2,
         rw add_one_succ,
-        rw hrw,
+        rw add_two,
         rw fib_succsucc,
       },
     }, {
@@ -498,14 +522,24 @@ begin
         ∀ k,
           (λ k, binom (succ n + succ k) (2 * k + 1)) k
           = (λ k, binom (succ n + k) (2 * k)) k
-            + (λ k, binom (n + succ k) (2 * k + 1)) k, sorry,
+            + (λ k, binom (n + succ k) (2 * k + 1)) k, {
+        intro k,
+        simp,
+      },
       rw (sum_cancel _ _).mpr hrw, clear hrw,
       rw sum_distr',
       rw odd_sum,
       rw sum_succ,
       rw even_sum,
       have hrw:
-        2 * succ n + 1 = succ (succ (succ (n + n))), sorry,
+        2 * succ n + 1 = succ (succ (succ (n + n))), {
+        rw mul_succ,
+        rw add_comm 2,
+        rw add_one_succ,
+        rw add_two,
+        rw mul_comm,
+        refl,
+      },
       conv {
         congr, congr, skip, congr, skip,
         rw lambda_subs,
@@ -515,20 +549,19 @@ begin
       }, clear hrw,
       rw binom_succ_kill,
       rw add_zero,
-      have hrw: ∀ k, k + 2 = succ (succ k) := (λ k, rfl),
       conv {
         congr, congr,
         rw mul_succ,
         rw add_comm 2,
         rw add_one_succ,
-        rw hrw,
+        rw add_two,
         skip,
-        rw hrw,
+        rw add_two,
         skip,
         rw mul_succ,
-        rw hrw,
+        rw add_two,
         rw add_comm,
-        rw hrw,
+        rw add_two,
         rw fib_succsucc,
       },
       rw add_comm,
