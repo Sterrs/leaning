@@ -429,6 +429,9 @@ begin
   },
 end
 
+private theorem lambda_subs:
+(λ k, f k) k = f k := rfl
+
 -- the famous diagonal fibonacci sums in Pascal's triangle
 -- a bit annoying to actually state, as it turns out,
 -- but good practice for working with -
@@ -442,7 +445,65 @@ begin
     cases hn with odd_sum even_sum,
     split, {
       rw sum_succ,
-      sorry,
+      rw sum_tail,
+      have h:
+        ∀ k,
+          (k < n →
+           (λ k, binom (2 * succ n - succ k) (succ k)) k
+           = (λ k, binom (2 * n - k) k) k
+             + (λ k, binom (2 * n - k) (succ k)) k), {
+        sorry,
+      },
+      rw
+        (sum_cancel_restricted _ _ n).mpr h
+          n le_refl,
+      rw sum_distr',
+      rw binom_zero,
+      conv in (binom (2 * succ n - succ n) (succ n)) {
+        rw [two, succ_mul, add_sub, one_eq_succ_zero, one_mul,
+            binom_dupl],
+      },
+      have: 1 = binom (2 * n - n) n, {
+        sorry,
+      },
+      conv {
+        to_lhs,
+        rw [add_comm, ←add_assoc, ←add_assoc, add_comm 1],
+        congr, congr, congr, skip,
+        rw this,
+      },
+      rw ←sum_succ,
+      rw odd_sum,
+      rw add_assoc,
+      have h2:
+        ∀ k,
+          (k < n →
+            (λ k, (λ k, binom (2 * n - k) (succ k)) k) k
+            = (λ k, binom (2 * n + 1 - succ k) (succ k)) k), {
+        sorry,
+      },
+      have x := (sum_cancel_restricted _ _ n).mpr h2 n le_refl,
+      conv {
+        to_lhs,
+        congr, skip,
+        rw (sum_cancel_restricted _ _ n).mpr h2 n le_refl,
+        congr, skip,
+        rw ←binom_zero (2 * n + 1),
+        rw ←@sub_zero (2 * n + 1),
+      },
+      rw ←sum_tail n (λ k, binom (2 * n + 1 - k) k),
+      rw even_sum,
+      have: 2 * n + 2 = succ (succ (2 * n)) := rfl,
+      conv {
+        congr, congr,
+        rw add_one_succ, skip,
+        rw this, skip,
+        rw mul_succ,
+        rw add_comm 2,
+        rw this,
+      },
+      rw ←fib_succsucc,
+      refl,
     }, {
       sorry,
     },
