@@ -94,29 +94,20 @@ end
 @[simp]
 theorem one_eq_succ_zero: succ 0 = 1 := rfl
 
-theorem add_cancel: m + n = m + k → n = k :=
-begin
-  induction m with m_n m_ih, {
-    simp,
-    cc,
-  }, {
-    simp,
-    repeat {rw add_comm _ m_n},
-    assumption,
-  },
-end
+theorem add_cancel: ∀ {m}, m + n = m + k → n = k
+| zero     := by simp; cc
+| (succ m) := assume h, by {
+  rw [succ_add, succ_add] at h,
+  from @add_cancel m (succ_inj h)
+}
 
 -- In the case where nothing is being added on LHS
 theorem add_cancel_to_zero: m = m + k → k = 0 :=
 begin
   assume hmmk,
   -- use conv to just add zero to the left m
-  conv at hmmk {
-    to_lhs,
-    rw ←add_zero m,
-  },
-  symmetry,
-  apply add_cancel hmmk,
+  conv at hmmk { to_lhs, rw ←add_zero m, },
+  from add_cancel hmmk.symm,
 end
 
 -- again, this is magical cases
@@ -168,15 +159,14 @@ theorem succ_mul: ∀ m n : mynat, (succ m) * n = m * n + n
 @[simp]
 theorem mul_add: ∀ m n k : mynat, m * (n + k) = m * n + m * k
 | zero     n k := by repeat { rw zz <|> rw zero_mul <|> rw zero_add }
-| (succ m) n k :=
-begin
+| (succ m) n k := by {
   repeat { rw succ_mul },
   conv {
     to_lhs,
     rw [mul_add, add_assoc, ←add_assoc (m*k), add_comm (m*k),
         add_assoc n, ←add_assoc],
   },
-end
+}
 
 @[simp]
 theorem mul_assoc: ∀ m n k: mynat, (m * n) * k = m * (n * k)
