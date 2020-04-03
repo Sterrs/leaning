@@ -1,6 +1,6 @@
 -- vim: ts=2 sw=0 sts=-1 et ai tw=70
 
-import .parity
+import .mynat.parity
 
 -- This file is specifically for statements of famous theorems.
 -- It is a useful and fun thing to state these, but they're better off
@@ -22,3 +22,6 @@ theorem legendres_conjecture {m : mynat} :
 
 theorem landau4:
 infinitely_many (λ n, prime (n*n + 1)) := sorry
+
+theorem fermats_last_theorem (a b c n : mynat) :
+a^n + b^n = c^n → n = 2 := sorry
