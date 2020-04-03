@@ -1,6 +1,6 @@
 -- vim: ts=2 sw=0 sts=-1 et ai tw=70
 
-import .mynat
+import .basic
 import .dvd
 import .induction
 

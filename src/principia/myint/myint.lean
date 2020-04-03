@@ -1,8 +1,8 @@
 -- vim: ts=2 sw=0 sts=-1 et ai tw=70
 
-import .mynat
-import .le
-import .nat_sub
+import ..mynat.basic
+import ..mynat.le
+import ..mynat.nat_sub
 
 namespace hidden
 
@@ -26,7 +26,7 @@ notation `-[1+ ` n `]` := myint.neg_succ_of_nat n
 -- I don't really know how namespace work in lean tbh
 namespace myint
 open myint
-open mynat (succ)
+open mynat
 
 theorem coe_nat_eq (n: mynat): ↑n = of_nat n := rfl
 
@@ -76,6 +76,8 @@ instance: has_sub myint := ⟨sub⟩
 variables {m n k: myint}
 variables {m' n' k': mynat}
 
+-- ADDITION
+
 @[simp] theorem nat_nat_add: (↑m': myint) + ↑n' = ↑(m' + n') := rfl
 
 @[simp]
@@ -97,6 +99,8 @@ begin
 end
 
 theorem zero_nat: (↑(0: mynat): myint) = 0 := rfl
+
+theorem of_nat_succ_add_one: of_nat (succ m') = of_nat m' + 1 := rfl
 
 @[simp]
 theorem add_comm: m + n = n + m :=
@@ -132,6 +136,13 @@ begin
 end
 
 @[simp]
+theorem add_zero: m + 0 = m :=
+begin
+  have := @zero_add m,
+  rwa add_comm,
+end
+
+@[simp]
 theorem nat_sub_zero: sub_nat_nat m' 0 = ↑m' :=
 begin
   cases m',
@@ -154,7 +165,11 @@ end
 theorem succ_of_sub_succ:
 sub_nat_nat m' (succ n') + 1 = sub_nat_nat m' n' :=
 begin
-  sorry, -- ok I'm stuck on this one
+  cases m',
+    simp,
+    sorry,
+  rw sub_succ_succ,
+  sorry,
 end
 
 @[simp]
@@ -183,9 +198,12 @@ begin
   sorry,
 end
 
-theorem add_assoc : (m + n) + k = m + (n + k) :=
+theorem mul_one : m * 1 = m :=
 begin
-  sorry
+  cases m,
+    dsimp [mul],
+    sorry,
+  sorry,
 end
 
 end myint

@@ -15,7 +15,6 @@ inductive mynat
 | zero : mynat
 | succ (n : mynat) : mynat
 
--- so I can use succ instead of mynat.succ
 open mynat
 
 -- this instance stuff is pure voodoo but it seems to make the

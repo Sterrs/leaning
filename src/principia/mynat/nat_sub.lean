@@ -1,9 +1,9 @@
 -- vim: ts=2 sw=0 sts=-1 et ai tw=70
 
-import .mynat
+import .basic
 import .le
 import .lt
-import .logic
+import ..logic
 
 namespace hidden
 
@@ -20,7 +20,8 @@ def sub: mynat → mynat → mynat
 
 instance: has_sub mynat := ⟨sub⟩
 
-@[simp] theorem sub_succ_succ : succ m - succ n = m - n := rfl
+@[simp]
+theorem sub_succ_succ : succ m - succ n = m - n := rfl
 
 -- Reverse implication does NOT hold
 -- Is there any point having this as a theorem

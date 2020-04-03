@@ -1,7 +1,7 @@
 -- vim: ts=2 sw=0 sts=-1 et ai tw=70
 
-import .mynat
-import .tactic
+import .basic
+import ..tactic
 
 namespace hidden
 
@@ -28,6 +28,12 @@ theorem le_to_add: m ≤ m + n :=
 begin
   existsi n,
   refl,
+end
+
+theorem le_succ: m ≤ succ m :=
+begin
+  rw ←add_one_succ,
+  from le_to_add,
 end
 
 theorem le_comb {a b c d: mynat}: a ≤ b → c ≤ d → a + c ≤ b + d :=
