@@ -1,8 +1,8 @@
 -- vim: ts=2 sw=0 sts=-1 et ai tw=70
 
-import .mynat
-import .lt
-import .induction
+import .mynat.basic
+import .mynat.lt
+import .mynat.induction
 
 namespace hidden
 
