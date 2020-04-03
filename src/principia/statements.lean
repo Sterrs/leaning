@@ -23,5 +23,14 @@ theorem legendres_conjecture {m : mynat} :
 theorem landau4:
 infinitely_many (λ n, prime (n*n + 1)) := sorry
 
-theorem fermats_last_theorem (a b c n : mynat) :
-a^n + b^n = c^n → n = 2 := sorry
+-- instructive exercise in disproof by counterexample
+theorem fermats_penultimate_theorem:
+¬ ∀ a b c n: mynat, a^n + b^n = c^n → n = 2 :=
+begin
+  assume hflt,
+  have h := hflt 1 1 2 1 rfl,
+  cases h,
+end
+
+theorem fermats_last_theorem (a b c n: mynat):
+a ≠ 0 → b ≠ 0 → a^n + b^n = c^n → n = 1 ∨ n = 2 := sorry
