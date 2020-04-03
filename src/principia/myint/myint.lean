@@ -73,6 +73,10 @@ instance: has_mul myint := ⟨mul⟩
 def sub (m n: myint): myint := m + (-n)
 instance: has_sub myint := ⟨sub⟩
 
+def abs : myint → mynat
+| (of_nat m) := m
+| -[1+ m] := succ m
+
 variables {m n k: myint}
 variables {m' n' k': mynat}
 
@@ -198,6 +202,22 @@ begin
   sorry,
 end
 
+theorem add_congr (k : myint) : m = n → m + k = n + k := sorry
+
+theorem add_cancel (k : myint) : m + k = n + k → m = n := sorry
+
+theorem add_self_neg : m + (-m) = 0 := sorry
+
+theorem add_neg_self : -m + m = 0 := sorry
+
+theorem add_assoc : m + n + k = m + (n + k) := sorry
+
+-- MULTIPLICATION
+
+theorem mul_zero : m * 0 = 0 := sorry
+
+theorem zero_mul : 0 * m = 0 := sorry
+
 theorem mul_one : m * 1 = m :=
 begin
   cases m,
@@ -205,6 +225,16 @@ begin
     sorry,
   sorry,
 end
+
+theorem one_mul : 1 * m = m := sorry
+
+theorem mul_neg : m * (-n) = - (m * n) := sorry
+
+theorem neg_mul : (-m) * n = - (m * n) := sorry
+
+theorem mul_add : m * (n + k) = m * n + m * k := sorry
+
+theorem add_mul : (m + n) * k = m * k + n * k := sorry
 
 end myint
 end hidden
