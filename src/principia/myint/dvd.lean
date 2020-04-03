@@ -1,5 +1,5 @@
 import ..mynat.dvd
-import .myint
+import .basic
 
 namespace hidden
 namespace myint
