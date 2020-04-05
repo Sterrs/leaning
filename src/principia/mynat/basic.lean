@@ -190,6 +190,44 @@ begin
   from false.elim (hmne0 (add_integral hmn0)),
 end
 
+theorem mul_integral_symmetric: m * n = 0 → m = 0 ∨ n = 0 :=
+begin
+  cases m, {
+    assume _, left, from rfl,
+  }, {
+    assume hsmn0,
+    right,
+    from mul_integral succ_ne_zero hsmn0,
+  },
+end
+
+theorem mul_cancel: m ≠ 0 → m * n = m * k → n = k :=
+begin
+  induction n with n hn generalizing m k, {
+    assume hmn0 hmk0,
+    simp at hmk0,
+    symmetry,
+    from mul_integral hmn0 hmk0.symm,
+  }, {
+    assume hmn0 heq,
+    cases k, {
+      exfalso,
+      rw [zz, mul_zero] at heq,
+      from succ_ne_zero (mul_integral hmn0 heq),
+    }, {
+      rw [mul_succ, mul_succ] at heq,
+      rw hn hmn0 (add_cancel heq),
+    },
+  },
+end
+
+theorem mul_cancel_to_one: m ≠ 0 → m = m * k → k = 1 :=
+begin
+  assume hmn0 hmmk,
+  rw [←mul_one m, mul_assoc, one_mul] at hmmk,
+  rw mul_cancel hmn0 hmmk,
+end
+
 -- POWERS
 
 -- do I really have to spell out mynat like this? yuck

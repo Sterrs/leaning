@@ -317,7 +317,7 @@ begin
   },
 end
 
-theorem le_square: m ≤ n → m*m ≤ n*n :=
+theorem le_square: m ≤ n → m * m ≤ n * n :=
 begin
   assume hle,
   have h₁ := le_mul n hle,
@@ -347,7 +347,7 @@ begin
   },
 end
 
-theorem lt_sqrt: m*m < n*n → m < n :=
+theorem lt_sqrt: m * m < n * n → m < n :=
 begin
   assume hlt hnlem,
   have := le_square hnlem,

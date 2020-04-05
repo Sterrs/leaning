@@ -508,14 +508,10 @@ begin
 end
 
 private theorem mul_sum':
-a * sum f n = sum (λ k, a * f k) n :=
-begin
-  rw ←mul_sum,
-  sorry,
-end
+sum (λ k, a * f k) n = a * sum f n := mul_sum _ _ _
 
 theorem binomial_theorem:
-(a + b)^n = sum (λ k, binom n k * a^k * b^(n - k)) (succ n) :=
+(a + b) ^ n = sum (λ k, binom n k * a ^ k * b ^ (n - k)) (succ n) :=
 begin
   induction n with n_n n_ih, {
     refl,

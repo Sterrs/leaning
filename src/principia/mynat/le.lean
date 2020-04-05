@@ -65,6 +65,15 @@ begin
   rw add_comm d k,
 end
 
+theorem le_trans: m ≤ n → n ≤ k → m ≤ k :=
+begin
+  assume hmn hnk,
+  cases hmn with d hd,
+  cases hnk with d' hd',
+  existsi d + d',
+  rw [hd', hd, add_assoc],
+end
+
 theorem le_cancel: m + k ≤ n + k → m ≤ n :=
 begin
   assume hmknk,
@@ -164,31 +173,6 @@ namespace hidden
 open mynat
 variables {m n k: mynat}
 
--- the infamous theorem, proved intuitively via total ordering
--- can this be made tactically wlog?
-theorem mul_cancel: m ≠ 0 → m * n = m * k → n = k :=
-begin
-  assume hmnz,
-  wlog_le n k with hs hnk, {
-    assume h,
-    from (hs h.symm).symm,
-  }, {
-    assume h,
-    cases hnk with d hd,
-    rw [hd, mul_add] at h,
-    have hdz' := add_cancel_to_zero h.symm,
-    have hdz := mul_integral hmnz hdz',
-    rwa [hdz, add_zero] at hd,
-  },
-end
-
-theorem mul_cancel_to_one: m ≠ 0 → m = m * k → k = 1 :=
-begin
-  assume hmn0 hmmk,
-  rw [←mul_one m, mul_assoc, one_mul] at hmmk,
-  rw mul_cancel hmn0 hmmk,
-end
-
 theorem le_mul (k: mynat): m ≤ n → k * m ≤ k * n :=
 begin
   assume hmn,
@@ -202,13 +186,22 @@ begin
   },
 end
 
-theorem le_trans: m ≤ n → n ≤ k → m ≤ k :=
+theorem le_to_mul (k: mynat): k ≠ 0 → m ≤ k * m :=
 begin
-  assume hmn hnk,
-  cases hmn with d hd,
-  cases hnk with d' hd',
-  existsi d + d',
-  rw [hd', hd, add_assoc],
+  assume hkn0,
+  cases k, {
+    exfalso,
+    from hkn0 rfl,
+  }, {
+    existsi k * m,
+    simp,
+  },
+end
+
+theorem le_rhs_mul (k: mynat): k ≠ 0 → m ≤ n → m ≤ k * n :=
+begin
+  assume hkn0 hmn,
+  from le_trans hmn (le_to_mul k hkn0),
 end
 
 -- for some reason it breaks some other theorems if you add @[refl]
