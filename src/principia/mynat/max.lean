@@ -13,12 +13,17 @@ variables {a b c : mynat}
 
 theorem le_imp_max2 (h : a ≤ b) : max a b = b :=
 begin
-  unfold max,
-
+  from if_pos h,
 end
+
 theorem le_imp_max1 (h : a ≤ b) : max b a = b :=
 begin
-  sorry
+  cases (le_iff_lt_or_eq.mp h) with hlt heq, {
+    from if_neg hlt,
+  }, {
+    rw heq,
+    from if_t_t _ _,
+  },
 end
 
 @[simp]
