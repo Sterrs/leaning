@@ -55,13 +55,17 @@ variables {a b c: mynat}
 
 -- Basic
 
-theorem coe_nat_eq (n: mynat): ↑n = of_nat n := rfl
-
 lemma of_nat_zero : of_nat 0 = 0 := rfl
 
 lemma of_nat_one : of_nat 1 = 1 := rfl
 
 theorem zero_nat: (↑(0: mynat): myint) = 0 := rfl
+
+theorem of_nat_ne_neg_succ: of_nat a ≠ -[1+ b] := by
+  apply myint.no_confusion
+
+theorem zero_ne_neg_succ (a : mynat): 0 ≠ -[1+ a] := by
+  apply of_nat_ne_neg_succ
 
 @[simp]
 theorem of_nat_inj: (↑a: myint) = ↑b ↔ a = b :=
@@ -81,10 +85,38 @@ end
 
 -- Coercion
 
+theorem coe_nat_eq (n: mynat): ↑n = of_nat n := rfl
+
 -- Neg of nat
 
 @[simp]
+theorem neg_of_nat_zero: neg_of_nat 0 = 0 := rfl
+
+@[simp]
 theorem neg_succ: neg_of_nat (succ a) = -[1+ a] := rfl
+
+-- Massive cash bash, for very basic theorem
+@[simp]
+theorem neg_of_nat_inj: ∀ {a b}, neg_of_nat a = neg_of_nat b ↔ a = b :=
+begin
+  assume a b,
+  split; assume h,
+    cases a,
+      cases b, refl,
+      rw zz,
+      rw [zz, neg_of_nat_zero, neg_succ] at h,
+      exfalso,
+      from zero_ne_neg_succ b h,
+    cases b,
+      rw [zz, neg_succ, neg_of_nat_zero] at h,
+      exfalso, from zero_ne_neg_succ a h.symm,
+    congr,
+    rw [neg_succ, neg_succ] at h,
+    rw ←neg_succ_of_nat_inj,
+    assumption,
+  congr,
+  assumption,
+end
 
 -- Sub nat nat
 
@@ -116,6 +148,45 @@ begin
 end
 
 -- Neg
+
+lemma neg_eq_minus: neg m = -m := rfl
+
+private theorem neg_coe_eq_neg_of_nat: -(↑a) = neg_of_nat a := rfl
+
+private theorem neg_neg_of_nat: ∀ {a}, -neg_of_nat a = ↑a
+| zero     := rfl
+| (succ a) := rfl
+
+theorem neg_neg_succ: -(-[1+ a]) = ↑(succ a) := by
+rw ←neg_eq_minus; refl
+
+-- theorem neg_coe_succ: -(↑(succ a)) = -[1+ a] := rfl
+
+theorem neg_neg: ∀ {m : myint}, -(-m) = m
+| (of_nat a) := by rw [←coe_nat_eq, neg_coe_eq_neg_of_nat];
+                   from neg_neg_of_nat
+| -[1+ a]    := by rw neg_neg_succ; refl
+
+theorem neg_switch: -m = n → m = -n :=
+begin
+  assume h,
+  -- To "do the same to both sides"
+  have h₁ := congr_arg (λ m, -m) h,
+  simp at h₁, -- To simp lambdas
+  rwa neg_neg at h₁,
+end
+
+theorem neg_inj: -m = -n ↔ m = n :=
+begin
+  repeat {rw ←neg_eq_minus},
+  split; assume h,
+    repeat {rw neg_eq_minus at h},
+    have h₁ := congr_arg (λ m, -m) h,
+    simp at h₁,
+    repeat {rw neg_neg at h₁},
+    assumption,
+  congr, assumption,
+end
 
 -- Abs
 
