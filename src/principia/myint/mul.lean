@@ -124,9 +124,30 @@ by rw [mul_comm, @mul_comm m, mul_neg]
 
 theorem mul_add : m * (n + k) = m * n + m * k := sorry
 
-theorem add_mul : (m + n) * k = m * k + n * k :=
+theorem add_mul: (m + n) * k = m * k + n * k :=
 by rw [mul_comm, @mul_comm m, @mul_comm n, mul_add]
 
+private lemma neg_succ_distr: -[1+ a] * m = -m + -(↑a * m) := sorry
+
+--∀ {m n : myint},
+theorem mul_integral: m ≠ 0 → m * n = 0 → n = 0 :=
+begin
+  assume hmne0 h,
+  cases m, {
+    sorry,
+  }, {
+    rw [←neg_coe_succ, neg_mul, ←neg_zero, neg_cancel] at h,
+    sorry,
+  },
+end
+
+theorem mul_cancel: m ≠ 0 → m * n = m * k → n = k :=
+begin
+  assume hmne0 h,
+  cases m,
+    sorry,
+  rw [←neg_coe_succ] at h,
+end
 
 end myint
 end hidden
