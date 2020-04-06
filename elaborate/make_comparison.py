@@ -12,10 +12,10 @@ ELABORATE_DIR = pathlib.Path(__file__).parent
 
 # unconventional way to maximise width while obeying PEP8
 print("""\
-*File*                                    | *Lines* | *Bytes* | *Stripped bytes*
+| *File*                                | *Lines* | *Bytes* | *Stripped bytes* |
 """, end="")
 print("""\
-:----------------------------------------:| -------:| -------:| ---------------:
+|:-------------------------------------:| -------:| -------:| ---------------: |
 """, end="")
 
 def main():
@@ -30,7 +30,7 @@ def main():
         line_count = len(lean_file_lines)
         byte_count = sum(map(len, lean_file_lines))
         stripped_byte_count = len(stripped_lean_file_text)
-        print("{:^41} | {:>7} | {:>7} | {:>15}"
+        print("| {:^37} | {:>7} | {:>7} | {:>16} |"
                 .format("`{}`".format(lean_file_path.name[:-len(".lean")]),
                         line_count,
                         byte_count,
