@@ -61,6 +61,8 @@ lemma of_nat_one : of_nat 1 = 1 := rfl
 
 theorem zero_nat: (↑(0: mynat): myint) = 0 := rfl
 
+theorem one_nat: (↑(1:mynat):myint) = 1 := rfl
+
 theorem of_nat_ne_neg_succ: of_nat a ≠ -[1+ b] := by
   apply myint.no_confusion
 
@@ -68,7 +70,7 @@ theorem zero_ne_neg_succ (a : mynat): 0 ≠ -[1+ a] := by
   apply of_nat_ne_neg_succ
 
 @[simp]
-theorem of_nat_inj: (↑a: myint) = ↑b ↔ a = b :=
+theorem of_nat_cancel: (↑a: myint) = ↑b ↔ a = b :=
 begin
   split; assume h,
     cases h, refl,
@@ -76,7 +78,7 @@ begin
 end
 
 @[simp]
-theorem neg_succ_of_nat_inj: -[1+ a] = -[1+ b] ↔ a = b :=
+theorem neg_succ_of_nat_cancel: -[1+ a] = -[1+ b] ↔ a = b :=
 begin
   split; assume h,
     cases h, refl,
@@ -85,6 +87,7 @@ end
 
 -- Coercion
 
+@[simp]
 theorem coe_nat_eq (n: mynat): ↑n = of_nat n := rfl
 
 -- Neg of nat
@@ -97,7 +100,7 @@ theorem neg_succ: neg_of_nat (succ a) = -[1+ a] := rfl
 
 -- Massive cash bash, for very basic theorem
 @[simp]
-theorem neg_of_nat_inj: ∀ {a b}, neg_of_nat a = neg_of_nat b ↔ a = b :=
+theorem neg_of_nat_cancel: ∀ {a b}, neg_of_nat a = neg_of_nat b ↔ a = b :=
 begin
   assume a b,
   split; assume h,
@@ -112,7 +115,7 @@ begin
       exfalso, from zero_ne_neg_succ a h.symm,
     congr,
     rw [neg_succ, neg_succ] at h,
-    rw ←neg_succ_of_nat_inj,
+    rw ←neg_succ_of_nat_cancel,
     assumption,
   congr,
   assumption,
@@ -157,6 +160,8 @@ private theorem neg_neg_of_nat: ∀ {a}, -neg_of_nat a = ↑a
 | zero     := rfl
 | (succ a) := rfl
 
+theorem neg_zero: -(0:myint) = 0 := rfl
+
 theorem neg_neg_succ: -(-[1+ a]) = ↑(succ a) := by
 rw ←neg_eq_minus; refl
 
@@ -176,7 +181,7 @@ begin
   rwa neg_neg at h₁,
 end
 
-theorem neg_inj: -m = -n ↔ m = n :=
+theorem neg_cancel: -m = -n ↔ m = n :=
 begin
   repeat {rw ←neg_eq_minus},
   split; assume h,
@@ -189,6 +194,8 @@ begin
 end
 
 -- Abs
+
+theorem abs_of_nat: abs ↑a = a := rfl
 
 end myint
 end hidden
