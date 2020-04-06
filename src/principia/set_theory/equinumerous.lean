@@ -1,3 +1,5 @@
+-- vim: ts=2 sw=0 sts=-1 et ai tw=70
+
 import logic.basic
 import .functions
 
@@ -158,8 +160,8 @@ begin
   from har',
 end
 
--- this can probably be shorter but I keep getting confused
--- by all the definitions
+-- this can probably be shorter but I keep getting confused by all the
+-- definitions
 theorem restriction_injective
 (r': myset α) (hrss: r' ⊆ r)
 (hif: injective hwf):

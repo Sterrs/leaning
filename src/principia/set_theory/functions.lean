@@ -1,3 +1,5 @@
+-- vim: ts=2 sw=0 sts=-1 et ai tw=70
+
 import logic.basic
 import .myset
 
@@ -20,7 +22,8 @@ variable (h : well_defined r s f)
 
 include h
 
--- These only need to be fed a proof of well-definedness now, which is cleaner
+-- These only need to be fed a proof of well-definedness now, which is
+-- cleaner
 def injective: Prop :=
 ∀ a₁ a₂ : α, a₁ ∈ r → a₂ ∈ r → f a₁ = f a₂ → a₁ = a₂
 def surjective: Prop :=
@@ -34,9 +37,10 @@ end definitions
 
 section theorems
 
--- All the following theorems need to be fed proofs of well-definedness,
--- so they are all capable of guessing which types, sets and functions you
--- are talking about. Hence all these arguments are implicit
+-- All the following theorems need to be fed proofs of
+-- well-definedness, so they are all capable of guessing which types,
+-- sets and functions you are talking about. Hence all these arguments
+-- are implicit
 variables {r : myset α} {s : myset β} {t : myset γ}
 variables {f : α → β} {g : β → γ}
 
@@ -44,8 +48,8 @@ section -- This is a section for classical logic
 open classical
 local attribute [instance] prop_decidable
 
--- Cannot have a well-defined function from an empty set to a non-empty
--- set
+-- Cannot have a well-defined function from an empty set to a
+-- non-empty set
 theorem no_wdefined_func_nemp_to_emp
 (hnemp : ¬empty r) (hemp : empty s) :
 ¬well_defined r s f :=
@@ -114,7 +118,7 @@ begin
     from inj_inj _ _ hif hig,
   }, {
     from surj_surj _ _ hsf hsg,
-  }
+  },
 end
 
 end theorems

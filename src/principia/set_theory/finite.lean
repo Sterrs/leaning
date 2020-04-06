@@ -1,4 +1,6 @@
-import principia.lt
+-- vim: ts=2 sw=0 sts=-1 et ai tw=70
+
+import ..mynat.lt
 import .equinumerous
 
 
@@ -20,7 +22,7 @@ theorem emp_zero_to_zero : empty (zero_to 0) :=
 begin
   intro m,
   assume hm,
-  from (lt_nzero m) hm,
+  from lt_nzero hm,
 end
 
 def of_size {α : Type u} (s : myset α) (m : mynat) : Prop :=
@@ -47,7 +49,8 @@ begin
   induction n with n hn, {
     intro f, assume hwf,
     exfalso, revert hwf,
-    apply @no_wdefined_func_nemp_to_emp _ _ (zero_to 1) (zero_to 0) f, {
+    apply @no_wdefined_func_nemp_to_emp
+            _ _ (zero_to 1) (zero_to 0) f, {
       assume h,
       have : (0 : mynat) ∈ zero_to 1, {
         from zero_lt_one,
@@ -60,14 +63,13 @@ begin
     -- we are trying to show that if
     -- f: {0, ..., n + 1} → {0, ...,  n}
     -- is well-defined then it is not injective.
-    -- Consider the pre-image of n. By injectivity,
-    -- this at most one number. If it's empty, skip to
-    -- the restriction. If not, call it x.
-    -- Define f': {0, ..., n + 1} → {0, ..., n}
-    -- by composing f with the function swapping n + 1 and x.
-    -- This function is still injective and has n + 1 ↦ n,
-    -- so we can restrict it to {0, ..., n} and its range will
-    -- restrict to {0, ..., n - 1}. Then we are done by induction.
+    -- Consider the pre-image of n. By injectivity, this at most one
+    -- number. If it's empty, skip to the restriction.
+    -- If not, call it x. Define f': {0, ..., n + 1} → {0, ..., n}
+    -- by composing f with the function swapping n + 1 and x. This
+    -- function is still injective and has n + 1 ↦ n, so we can
+    -- restrict it to {0, ..., n} and its range will restrict to
+    -- {0, ..., n - 1}. Then we are done by induction.
     let s: myset mynat := sorry,
     sorry,
   },
@@ -103,7 +105,7 @@ begin
     sorry,
   }, {
     sorry,
-  }
+  },
 end
 
 end hidden
