@@ -127,7 +127,7 @@ private def two : 2 = succ (succ 0) := rfl
 
 -- phrased in a way that avoids rationals and subtraction :)
 theorem triangular_numbers: ∀ n,
-sum (λ k, k) (succ n) * 2 = n * (n + 1)
+sum (λ k, succ k) n * 2 = n * (n + 1)
 | zero     := rfl
 | (succ n) := by conv {
   rw [sum_succ, add_mul, triangular_numbers, two],
@@ -135,6 +135,65 @@ sum (λ k, k) (succ n) * 2 = n * (n + 1)
   rw [add_comm 1, add_one_succ],
   simp,
 }
+
+-- this one's here because it's so nice to state,
+-- abeit ugly to prove
+theorem cube_sum:
+sum (λ k, (succ k) ^ (3: mynat)) n =
+sum (λ k, succ k) n ^ (2: mynat) :=
+begin
+  have cancel:
+    ∀ a b c: mynat,
+      a = b → c + a = c + b, {
+    intros a b c,
+    assume hab,
+    rw hab,
+  },
+  induction n with n hn, {
+    refl,
+  }, {
+    rw sum_succ,
+    rw sum_succ,
+    rw hn,
+    have hrw: (2: mynat) = succ (succ 0) := rfl,
+    conv {
+      congr,
+      rw hrw,
+      rw pow_succ,
+      rw pow_succ,
+      rw pow_zero,
+      rw mul_one,
+      skip,
+      rw hrw,
+      rw pow_succ,
+      rw pow_succ,
+      rw pow_zero,
+      rw mul_one,
+      rw mul_add,
+      rw add_mul,
+      rw add_mul,
+    }, clear hrw,
+    repeat {rw add_assoc},
+    apply cancel,
+    have hrw: ∀ a: mynat, a + a = a * 2 := (λ a, rfl),
+    conv {
+      to_rhs,
+      rw ←add_assoc,
+      congr,
+      rw mul_comm,
+      rw ←add_mul,
+      rw hrw,
+      rw triangular_numbers,
+    },
+    rw add_one_succ,
+    conv in (succ n * succ n) {
+      rw ←one_mul (succ n * succ n),
+    },
+    rw mul_assoc,
+    rw ←add_mul,
+    refl,
+  },
+end
 
 theorem geometric_progression: ∀ n,
 sum (λ k, a * (succ b) ^ k) n * b + a = a * (succ b) ^ n
