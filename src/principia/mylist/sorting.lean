@@ -16,6 +16,7 @@ universe u
 variable {T: Sort u}
 variables {a b c d m n k x y z: mynat}
 variables {lst lst1 lst2 lst3 xs ys zs: mylist mynat}
+variables {alg: mylist mynat → mylist mynat}
 
 def is_sorted (lst: mylist mynat): Prop :=
 ∀ a b: mynat,
@@ -357,5 +358,19 @@ sort_alg_correct insertion_sort :=
   and.intro
     (insertion_sort_is_sorted lst)
     (insertion_sort_is_perm lst))
+
+theorem perm_len:
+is_perm lst1 lst2 → len lst1 = len lst2 :=
+begin
+  sorry,
+end
+
+theorem is_perm_sorted_eq:
+sort_alg_correct alg
+  → is_perm lst1 lst2
+    → alg lst1 = alg lst2 :=
+begin
+  sorry,
+end
 
 end hidden
