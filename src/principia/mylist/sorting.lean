@@ -83,8 +83,7 @@ begin
   assume hbl hab,
   exfalso,
   dsimp [len] at hbl,
-  rw ←one_eq_succ_zero at hbl,
-  rw ←le_iff_lt_succ at hbl,
+  rw [←one_eq_succ_zero, ←le_iff_lt_succ] at hbl,
   rw le_zero hbl at hab,
   from lt_nzero hab,
 end
@@ -197,8 +196,7 @@ begin
     dsimp [count],
     cases (@lem_nat_eq m x) with hmx hmnx, {
       repeat {rw if_pos hmx},
-      rw h_ih,
-      rw succ_add,
+      rw [h_ih, succ_add],
     }, {
       repeat {rw if_neg hmnx},
       from h_ih,
@@ -212,10 +210,7 @@ is_perm xs ys → is_perm lst1 lst2
 begin
   assume hpxsys hp12,
   intro m,
-  rw count_concat,
-  rw count_concat,
-  rw hpxsys m,
-  rw hp12 m,
+  rw [count_concat, count_concat, hpxsys m, hp12 m],
 end
 
 theorem duo_perm:
@@ -309,9 +304,8 @@ begin
 end
 
 theorem insertion_sort_is_sorted:
-∀ lst: mylist mynat, is_sorted (insertion_sort lst) :=
+is_sorted (insertion_sort lst) :=
 begin
-  intro lst,
   induction lst with head tail h_ih, {
     dsimp [insertion_sort],
     from empty_sorted,
@@ -340,9 +334,8 @@ begin
 end
 
 theorem insertion_sort_is_perm:
-∀ lst: mylist mynat, is_perm lst (insertion_sort lst) :=
+is_perm lst (insertion_sort lst) :=
 begin
-  intro lst,
   induction lst with head tail h_ih, {
     from empty_perm,
   }, {
@@ -356,8 +349,7 @@ theorem insertion_sort_correct:
 sort_alg_correct insertion_sort :=
 (λ lst,
   and.intro
-    (insertion_sort_is_sorted lst)
-    (insertion_sort_is_perm lst))
+    insertion_sort_is_sorted insertion_sort_is_perm)
 
 theorem perm_len:
 is_perm lst1 lst2 → len lst1 = len lst2 :=

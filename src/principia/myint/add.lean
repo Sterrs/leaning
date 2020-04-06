@@ -9,9 +9,9 @@ open myint
 
 def add: myint → myint → myint
 | (of_nat m) (of_nat n) := of_nat (m + n)
-| -[1+ m] (of_nat n)    := sub_nat_nat n (succ m)
+| -[1+ m]    (of_nat n) := sub_nat_nat n (succ m)
 | (of_nat m) -[1+ n]    := sub_nat_nat m (succ n)
-| -[1+ m] -[1+ n]       := -[1+ succ (m + n)]
+| -[1+ m]    -[1+ n]    := -[1+ succ (m + n)]
 
 instance: has_add myint := ⟨add⟩
 
@@ -41,17 +41,21 @@ theorem of_nat_succ_add_one: of_nat (succ a) = of_nat a + 1 := rfl
 
 @[simp]
 theorem add_comm: ∀ {m n : myint}, m + n = n + m
-| (of_nat a) (of_nat b) := by rw [←coe_nat_eq, ←coe_nat_eq,
-nat_nat_add, nat_nat_add, of_nat_cancel, hidden.add_comm]
-| (of_nat a) -[1+ b]    := by rw [←coe_nat_eq, nat_neg_add,
-neg_nat_add]
-| -[1+ a]    (of_nat b) := by rw [←coe_nat_eq, neg_nat_add, nat_neg_add]
-| -[1+ a]    -[1+ b] := by rw [neg_neg_add, neg_neg_add, hidden.add_comm]
+| (of_nat a) (of_nat b) :=
+by rw [←coe_nat_eq, ←coe_nat_eq, nat_nat_add,
+       nat_nat_add, of_nat_cancel, hidden.add_comm]
+| (of_nat a) -[1+ b]    :=
+by rw [←coe_nat_eq, nat_neg_add, neg_nat_add]
+| -[1+ a]    (of_nat b) :=
+by rw [←coe_nat_eq, neg_nat_add, nat_neg_add]
+| -[1+ a]    -[1+ b]    :=
+by rw [neg_neg_add, neg_neg_add, hidden.add_comm]
 
 @[simp]
 theorem zero_add: ∀ m : myint, 0 + m = m
-| (of_nat m) := by rw [←zero_nat, ←coe_nat_eq, nat_nat_add, hidden.zero_add]
-| -[1+ n] := by rw [←zero_nat, nat_neg_add]; refl
+| (of_nat m) := by rw [←zero_nat, ←coe_nat_eq,
+                       nat_nat_add, hidden.zero_add]
+| -[1+ n]    := by rw [←zero_nat, nat_neg_add]; refl
 
 @[simp]
 theorem add_zero: m + 0 = m :=
@@ -73,7 +77,7 @@ begin
 end
 
 -- Stupid but useful
-private theorem one: (1:mynat) = succ 0 := rfl
+private theorem one: 1 = succ 0 := one_eq_succ_zero.symm
 
 @[simp]
 theorem succ_of_sub_succ: ∀ {a b : mynat},
@@ -81,8 +85,8 @@ sub_nat_nat a (succ b) + 1 = sub_nat_nat a b
 | zero zero := rfl
 | zero (succ b) :=
 by rw [zz, zero_sub_neg, zero_sub_neg, neg_succ, neg_succ,
-  ←one_nat, neg_nat_add, one, sub_succ_succ, zero_sub_neg,
-  neg_succ]
+       ←one_nat, neg_nat_add, one, sub_succ_succ, zero_sub_neg,
+       neg_succ]
 | (succ a) zero :=
 by rw [zz, sub_succ_succ, nat_sub_zero, nat_sub_zero, ←one_nat,
   nat_nat_add, add_one_succ]
@@ -97,7 +101,6 @@ theorem sub_nat_succ:
 | zero     := by rw [←succ_of_sub_succ, sub_succ_succ]
 | (succ b) := by rw [succ_of_sub_succ, sub_succ_succ]
 
--- TODO: $@!*?%#
 private lemma add_one_switch: ∀ {m n : myint},
 (m + n) + 1 = (m + 1) + n
 | (of_nat a) (of_nat b) :=

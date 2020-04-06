@@ -1,5 +1,6 @@
 import ..mynat.dvd
 import .basic
+import .mul
 
 namespace hidden
 namespace myint

@@ -1,4 +1,5 @@
 import .dvd
+import .mul
 
 namespace hidden
 open myint
@@ -30,7 +31,7 @@ begin
   cases h with k hk,
   existsi -k,
   rw mul_neg,
-  apply myint.add_cancel (n*k),
+  apply (myint.add_cancel (n*k)).mp,
   rw [myint.add_assoc, myint.add_neg_self, myint.add_zero],
   symmetry,
   assumption,

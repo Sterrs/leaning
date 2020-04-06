@@ -25,9 +25,8 @@ theorem zero_mul : 0 * m = 0 := sorry
 theorem mul_one : m * 1 = m :=
 begin
   cases m,
-    dsimp [mul],
-    sorry,
-  sorry,
+    refl,
+  refl,
 end
 
 theorem one_mul : 1 * m = m := sorry
