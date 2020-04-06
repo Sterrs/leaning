@@ -213,5 +213,7 @@ by rw [sub_succ_succ, sub_succ_succ, sub_nat_nat_switch]
 
 theorem abs_of_nat: abs ↑a = a := rfl
 
+theorem abs_neg_succ: abs -[1+ a] = succ a := rfl
+
 end myint
 end hidden

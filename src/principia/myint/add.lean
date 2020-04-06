@@ -189,6 +189,7 @@ by rw [←add_one_succ, ←nat_nat_add, one_nat, neg_distr_coe_one,
   add_comm, ←add_neg_one_switch, @add_comm (-↑c), sub_add_neg,
   sub_add_neg_one, add_one_succ, add_succ]
 
+-- Bad naming is bad :/
 theorem sub_neg_add:
 sub_nat_nat a (b + succ c) = -[1+ c] + sub_nat_nat a b
 := by rw [←neg_coe_succ, add_comm, sub_add_neg]
@@ -305,6 +306,7 @@ begin
   rwa [neg_of_nat_cancel] at h,
 end
 
+-- Thankfully we can prove this quickly using add_cancel_one
 private lemma add_cancel_neg_one: m + -1 = n + -1 → m = n :=
 begin
   rw [←neg_cancel, neg_distr, neg_distr, neg_neg],
@@ -340,6 +342,7 @@ begin
   from ha h₁,
 end
 
+-- It's more useful as an iff
 theorem add_cancel : m + k = n + k ↔ m = n :=
 ⟨add_cancel_mp k, assume h, by congr; assumption⟩
 
