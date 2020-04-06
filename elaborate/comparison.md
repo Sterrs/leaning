@@ -1,8 +1,9 @@
 | *File*                                | *Lines* | *Bytes* | *Stripped bytes* |
 |:-------------------------------------:| -------:| -------:| ---------------: |
-|               `mul_pow`               |    1859 |  218449 |            15723 |
-|              `mul_comm`               |     937 |   87895 |            16600 |
 |              `add_comm`               |      58 |    3637 |             2005 |
-|          `strong_induction`           |     764 |   75997 |            11187 |
+|             `add_comm_2`              |      47 |    2288 |             1453 |
 |        `mul_cancel_induction`         |     950 |   87451 |            18040 |
 |  `mul_cancel_total_order_no_tactic`   |    1611 |  181609 |            17062 |
+|              `mul_comm`               |     937 |   87895 |            16600 |
+|               `mul_pow`               |    1859 |  218449 |            15723 |
+|          `strong_induction`           |     764 |   75997 |            11187 |

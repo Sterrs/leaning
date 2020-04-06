@@ -19,7 +19,8 @@ print("""\
 """, end="")
 
 def main():
-    for stripped_lean_file_path in ELABORATE_DIR.glob("*.stripped.lean"):
+    for stripped_lean_file_path in (
+            sorted(list(ELABORATE_DIR.glob("*.stripped.lean")))):
         lean_file_path = ELABORATE_DIR / (
                             "{}.lean".format(stripped_lean_file_path.name
                                              [:-len(".stripped.lean")]))
