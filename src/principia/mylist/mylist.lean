@@ -1,15 +1,15 @@
 -- vim: ts=2 sw=0 sts=-1 et ai tw=70
 
-import .mynat.basic
-import .mynat.lt
-import .mynat.induction
+import ..mynat.basic
+import ..mynat.lt
+import ..mynat.induction
 
 namespace hidden
 
 universe u
 
 -- list of elements of type T
-inductive mylist (T: Type u)
+inductive mylist (T: Sort u)
 -- allow empty to infer its type. It doesn't seem to work very often
 | empty {}: mylist
 | cons (head: T) (tail: mylist): mylist
@@ -17,7 +17,7 @@ inductive mylist (T: Type u)
 open mylist
 open mynat
 
-variable {T: Type u}
+variable {T: Sort u}
 -- Haskell-like convention, use x::xs to pattern match head/tail
 variables {x y z: T}
 variables {xs ys zs lst lst1 lst2 lst3: mylist T}
@@ -693,14 +693,20 @@ begin
   },
 end
 
-def contains: T → mylist T → Prop
-| _ []        := false
-| x (y :: ys) := x = y ∨ contains x ys
+-- for some reason this has to be a Type ???
+-- otherwise has_mem complains
+variable {T': Type u}
+variables {x' y' z': T'}
+variables {xs' ys' zs': mylist T'}
 
-instance: has_mem T (mylist T) := ⟨contains⟩
+def contains: T' → mylist T' → Prop
+| _ []           := false
+| x' (y' :: ys') := x' = y' ∨ contains x' ys'
 
-theorem contains_cons: x ∈ (y :: ys) ↔ x = y ∨ x ∈ ys := iff.rfl
-theorem singleton_contains: x ∈ [x] := contains_cons.mpr (or.inl rfl)
+instance: has_mem T' (mylist T') := ⟨contains⟩
+
+theorem contains_cons: x' ∈ (cons y' ys') ↔ x' = y' ∨ x' ∈ ys' := iff.rfl
+theorem singleton_contains: x' ∈ [x'] := contains_cons.mpr (or.inl rfl)
 
 -- the well-founded relation "is one strictly shorter than the other"
 def shorter (lst1 lst2: mylist T) := len lst1 < len lst2
