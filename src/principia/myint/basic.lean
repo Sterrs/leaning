@@ -63,6 +63,8 @@ theorem zero_nat: (↑(0: mynat): myint) = 0 := rfl
 
 theorem one_nat: (↑(1:mynat):myint) = 1 := rfl
 
+theorem neg_one: -(1:myint) = -[1+ 0] := rfl
+
 theorem of_nat_ne_neg_succ: of_nat a ≠ -[1+ b] := by
   apply myint.no_confusion
 
@@ -139,6 +141,7 @@ begin
   refl,
 end
 
+-- Extremely useful
 @[simp]
 theorem sub_succ_succ:
 sub_nat_nat (succ a) (succ b) = sub_nat_nat a b :=
@@ -165,7 +168,7 @@ theorem neg_zero: -(0:myint) = 0 := rfl
 theorem neg_neg_succ: -(-[1+ a]) = ↑(succ a) := by
 rw ←neg_eq_minus; refl
 
--- theorem neg_coe_succ: -(↑(succ a)) = -[1+ a] := rfl
+theorem neg_coe_succ: -(↑(succ a)) = -[1+ a] := rfl
 
 theorem neg_neg: ∀ {m : myint}, -(-m) = m
 | (of_nat a) := by rw [←coe_nat_eq, neg_coe_eq_neg_of_nat];

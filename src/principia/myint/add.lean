@@ -60,6 +60,18 @@ begin
   rwa add_comm,
 end
 
+private theorem negative_one: -(1 : myint) = -↑(1 : mynat) := rfl
+
+theorem neg_distr_coe_one: -(↑a + (1 : myint)) = -(↑a) + -1 :=
+begin
+  rw [←one_nat, nat_nat_add, add_one_succ,
+  neg_coe_succ],
+  cases a,
+    rw [zz, ←neg_one, ←negative_one, zero_nat, neg_zero, zero_add],
+  rw [neg_coe_succ, ←negative_one, neg_one, neg_neg_add,
+  hidden.add_zero],
+end
+
 -- Stupid but useful
 private theorem one: (1:mynat) = succ 0 := rfl
 
@@ -129,19 +141,57 @@ sub_nat_nat (a + b) c = ↑a + sub_nat_nat b c
 | (succ a) := by rw [succ_add, sub_nat_succ, sub_nat_add,
 add_one_switch, ←one_nat, nat_nat_add, add_one_succ]
 
-theorem sub_neg_add: ∀ {c},
-sub_nat_nat a (b + succ c) = -[1+ c] + sub_nat_nat a b
-| zero     :=
+private lemma sub_add_neg_one: ∀ {a b : mynat},
+sub_nat_nat a b + -1 = sub_nat_nat a (succ b)
+| zero zero :=
+by rw [zz, nat_sub_zero, zero_sub_neg, zero_nat, zero_add,
+  neg_one, neg_succ]
+| zero (succ b) :=
+by rw [zz, zero_sub_neg, zero_sub_neg, neg_succ, neg_succ,
+  neg_one, neg_neg_add, hidden.add_zero]
+| (succ a) zero :=
+by rw [zz, sub_succ_succ, nat_sub_zero, nat_sub_zero, neg_one,
+  nat_neg_add, sub_succ_succ, nat_sub_zero]
+| (succ a) (succ b) :=
+by rw [sub_succ_succ, sub_succ_succ, sub_add_neg_one]
+
+private lemma add_neg_one_switch: ∀ {m n : myint},
+(m + n) + -1 = (m + -1) + n
+| (of_nat a) (of_nat b) :=
+by rw [←coe_nat_eq, ←coe_nat_eq, neg_one, nat_nat_add, nat_neg_add,
+  nat_neg_add, add_comm, ←sub_nat_add, hidden.add_comm]
+| (of_nat a) -[1+ b] :=
 begin
-  rw [zz, add_succ, hidden.add_zero],
-  sorry,
+  rw [←coe_nat_eq, neg_one, nat_neg_add, nat_neg_add],
+  cases a,
+    rw [zz, zero_sub_neg, neg_succ, add_comm],
+    refl,
+  rw [sub_succ_succ, sub_succ_succ, nat_sub_zero, ←neg_one,
+  nat_neg_add, sub_add_neg_one],
 end
-| (succ c) :=
+| -[1+ a] (of_nat b) :=
+by rw [←coe_nat_eq, neg_one, neg_nat_add, neg_neg_add, ←neg_one,
+  neg_nat_add, sub_add_neg_one, hidden.add_zero]
+| -[1+ a] -[1+ b] :=
 begin
-  sorry,
+  rw neg_one,
+  repeat {rw neg_neg_add},
+  rw [hidden.add_zero, hidden.add_zero, succ_add],
 end
 
--- 8 cases...
+private lemma sub_add_neg: ∀ {c : mynat},
+sub_nat_nat a b + -↑c = sub_nat_nat a (b + c)
+| zero := by rw [zz, zero_nat, neg_zero, add_zero, hidden.add_zero]
+| (succ c) :=
+by rw [←add_one_succ, ←nat_nat_add, one_nat, neg_distr_coe_one,
+  add_comm, ←add_neg_one_switch, @add_comm (-↑c), sub_add_neg,
+  sub_add_neg_one, add_one_succ, add_succ]
+
+theorem sub_neg_add:
+sub_nat_nat a (b + succ c) = -[1+ c] + sub_nat_nat a b
+:= by rw [←neg_coe_succ, add_comm, sub_add_neg]
+
+-- She's a beauty
 theorem add_assoc : ∀ {m n k : myint}, m + n + k = m + (n + k)
 | (of_nat a) (of_nat b) (of_nat c) :=
 by repeat {rw ←coe_nat_eq <|> rw nat_nat_add}; rw hidden.add_assoc
@@ -207,6 +257,8 @@ end
 
 theorem add_neg_self : -m + m = 0 := by
 rw add_comm; apply add_self_neg
+
+theorem neg_distr: -(m + n) = -m + -n := sorry
 
 end myint
 end hidden
