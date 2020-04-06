@@ -47,6 +47,8 @@ Just a rough guide as to what style we're trying to use
   `repeat {rw ...}`.
 - If a theorem holds both ways, it's probably worth making it
   an if and only if, as this allows `rw` to work with it
+- Use `intro(s)` to introduce conventional mathematical objects (like numbers
+  or lists) and `assume` to introduce hypotheses (instances of propositions).
 
 More general tips/useful things not to forget:
 
