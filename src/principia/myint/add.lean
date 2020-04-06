@@ -1,6 +1,5 @@
 import .basic
 
-
 namespace hidden
 namespace myint
 
@@ -223,6 +222,97 @@ end
 by repeat {rw neg_neg_add};
   rw [neg_succ_of_nat_cancel, succ_add, add_succ, hidden.add_assoc]
 
+theorem neg_distr: ∀ {m n : myint}, -(m + n) = -m + -n
+| (of_nat a) (of_nat b) :=
+begin
+  rw [←coe_nat_eq, ←coe_nat_eq],
+  cases a,
+    rw [zz, zero_nat, neg_zero, zero_add, zero_add],
+  rw [neg_coe_succ],
+  cases b,
+    rw [zz, zero_nat, neg_zero, add_zero, add_zero, neg_coe_succ],
+  rw [neg_coe_succ, neg_neg_add, nat_nat_add, succ_add, neg_coe_succ,
+  neg_succ_of_nat_cancel, add_succ],
+end
+| (of_nat a) -[1+ b] :=
+begin
+  rw [←coe_nat_eq, nat_neg_add, neg_neg_succ],
+  cases a,
+    rw [zz, zero_sub_neg, neg_succ, neg_neg_succ, zero_nat,
+        neg_zero, zero_add],
+  rw [sub_succ_succ, neg_coe_succ, neg_nat_add, sub_succ_succ,
+      sub_nat_nat_switch],
+end
+| -[1+ a] (of_nat b) :=
+begin
+  rw [←coe_nat_eq, neg_neg_succ, neg_nat_add],
+  cases b,
+    rw [zz, zero_sub_neg, neg_succ, neg_neg_succ, zero_nat, neg_zero,
+        add_zero],
+  rw [sub_succ_succ, neg_coe_succ, nat_neg_add, sub_succ_succ,
+      sub_nat_nat_switch],
+end
+| -[1+ a] -[1+ b] :=
+by rw [neg_neg_add, neg_neg_succ, neg_neg_succ, neg_neg_succ,
+      nat_nat_add, of_nat_cancel, succ_add, add_succ]
+
+-- Existence is pain
+private lemma add_cancel_one: ∀ {m n : myint},
+m + 1 = n + 1 → m = n
+| (of_nat a) (of_nat b) :=
+begin
+  rw [←coe_nat_eq, ←coe_nat_eq, ←one_nat, nat_nat_add, nat_nat_add,
+      of_nat_cancel, of_nat_cancel],
+  assume h,
+  apply @add_cancel a b 1,
+  rwa [hidden.add_comm, hidden.add_comm 1],
+end
+| (of_nat a) -[1+ b] :=
+begin
+  assume h,
+  exfalso,
+  rw [←coe_nat_eq, ←one_nat, neg_nat_add, one,
+      sub_succ_succ, zero_sub_neg, ←one, nat_nat_add] at h,
+  cases b,
+    rw [zz, neg_of_nat_zero, ←zero_nat, of_nat_cancel,
+    hidden.add_comm] at h,
+    suffices h1ne0 : 1 ≠ (0:mynat),
+      from h1ne0 (add_integral h),
+    apply mynat.no_confusion,
+  rw [neg_succ] at h,
+  from of_nat_ne_neg_succ h,
+end
+| -[1+ a] (of_nat b) :=
+begin
+  assume h,
+  exfalso,
+  rw [←coe_nat_eq, ←one_nat, nat_nat_add, neg_nat_add,
+  one, sub_succ_succ, zero_sub_neg, ←one, add_one_succ] at h,
+  cases a,
+    rw [zz, neg_of_nat_zero, ←zero_nat, of_nat_cancel] at h,
+    have : 0 ≠ succ b,
+      apply mynat.no_confusion,
+    contradiction,
+  rw [neg_succ] at h,
+  from of_nat_ne_neg_succ h.symm,
+end
+| -[1+ a] -[1+ b] :=
+begin
+  rw [←one_nat, neg_nat_add, neg_nat_add, one, sub_succ_succ,
+      sub_succ_succ, zero_sub_neg, zero_sub_neg],
+  assume h,
+  congr,
+  rwa [neg_of_nat_cancel] at h,
+end
+
+private lemma add_cancel_neg_one: m + -1 = n + -1 → m = n :=
+begin
+  rw [←neg_cancel, neg_distr, neg_distr, neg_neg],
+  assume h,
+  have := add_cancel_one h,
+  rwa neg_cancel at this,
+end
+
 private lemma add_cancel_mp: ∀ k : myint, m + k = n + k → m = n
 | (of_nat a) :=
 begin
@@ -230,38 +320,46 @@ begin
   induction a with a ha,
     rwa [zz, of_nat_zero, add_zero, add_zero] at h,
   {
-    rw [of_nat_succ_add_one] at h,
-    sorry,
+    rw [of_nat_succ_add_one, ←add_assoc, ←add_assoc] at h,
+    have h₁ := add_cancel_one h,
+    from ha h₁,
   },
 end
 | -[1+ a] :=
 begin
   assume h,
   induction a with a ha,
-  sorry,
-  sorry,
+    rw [zz, ←neg_one] at h,
+    from add_cancel_neg_one h,
+  rw [←neg_coe_succ, ←add_one_succ, ←add_one_succ,
+  ←nat_nat_add, one_nat, neg_distr_coe_one, ←nat_nat_add,
+  one_nat, neg_distr_coe_one, ←@add_assoc m, ←@add_assoc n] at h,
+  have h₁ := add_cancel_neg_one h,
+  rw [←neg_distr_coe_one, ←one_nat, nat_nat_add, add_one_succ,
+  neg_coe_succ] at h₁,
+  from ha h₁,
 end
 
-theorem add_cancel (k : myint) : m + k = n + k ↔ m = n :=
-begin
-  sorry,
-end
+theorem add_cancel : m + k = n + k ↔ m = n :=
+⟨add_cancel_mp k, assume h, by congr; assumption⟩
+
+private lemma add_one_neg_one: (1:myint) + -1 = 0 := rfl
 
 theorem add_self_neg: ∀ m : myint, m + (-m) = 0
-| (of_nat a) := match a with
-| zero := by rw [zz, of_nat_zero, zero_add, neg_zero]
-| (succ a) :=
+| (of_nat a) :=
 begin
-  rw [←coe_nat_eq, coe_succ],
-  sorry,
+  induction a with a ha,
+    rw [zz, of_nat_zero, zero_add, neg_zero],
+  rw ←coe_nat_eq at ha,
+  rw [←coe_nat_eq, coe_succ, neg_distr_coe_one, add_assoc,
+  ←@add_assoc 1, @add_comm 1, @add_assoc (-↑a) 1, add_one_neg_one,
+  add_zero, ha],
 end
-end
-| -[1+ a] := sorry
+| -[1+ a] :=
+by rw [neg_neg_succ, neg_nat_add, sub_succ_succ, sub_self]
 
 theorem add_neg_self : -m + m = 0 := by
 rw add_comm; apply add_self_neg
-
-theorem neg_distr: -(m + n) = -m + -n := sorry
 
 end myint
 end hidden

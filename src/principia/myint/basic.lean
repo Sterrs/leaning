@@ -129,7 +129,7 @@ end
 theorem zero_sub_neg: sub_nat_nat 0 a = neg_of_nat a :=
 begin
   cases a,
-  refl,
+    refl,
   refl,
 end
 
@@ -152,6 +152,11 @@ begin
   refl,
   refl,
 end
+
+@[simp]
+theorem sub_self: ∀ a, sub_nat_nat a a = 0
+| zero := rfl
+| (succ a) := by rw [sub_succ_succ, sub_self]
 
 -- Neg
 
@@ -195,6 +200,14 @@ begin
     assumption,
   congr, assumption,
 end
+
+theorem sub_nat_nat_switch: ∀ {a b : mynat},
+-(sub_nat_nat a b) = sub_nat_nat b a
+| zero zero := rfl
+| zero (succ b) := rfl
+| (succ a) zero := rfl
+| (succ a) (succ b) :=
+by rw [sub_succ_succ, sub_succ_succ, sub_nat_nat_switch]
 
 -- Abs
 
