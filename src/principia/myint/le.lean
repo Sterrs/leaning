@@ -258,6 +258,10 @@ begin
   assumption,
 end
 
-end myint
+theorem square_non_neg: ∀ {m : myint}, 0 ≤ m * m
+| (of_nat a) := by rw [←coe_nat_eq, nat_nat_mul, ←zero_nat,
+                      nat_nat_le]; from zero_le
+| -[1+ a] := by rw [neg_neg_mul, ←zero_nat, nat_nat_le]; from zero_le
 
+end myint
 end hidden
