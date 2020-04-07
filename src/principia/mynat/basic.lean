@@ -100,6 +100,12 @@ theorem add_cancel: ∀ {m}, m + n = m + k → n = k
   from @add_cancel m (succ_inj h)
 }
 
+theorem add_cancel_right: m + n = k + n → m = k :=
+begin
+  repeat {rw add_comm _ n},
+  from add_cancel,
+end
+
 -- In the case where nothing is being added on LHS
 theorem add_cancel_to_zero: m = m + k → k = 0 :=
 begin
@@ -123,6 +129,33 @@ begin
   rw succ_add,
   assume h,
   from false.elim (succ_ne_zero h),
+end
+
+-- DECIDABILITY
+
+instance: decidable_eq mynat :=
+begin
+  intros m n,
+  induction m with m hm generalizing n, {
+    cases n, {
+      from is_true rfl,
+    }, {
+      from is_false succ_ne_zero.symm,
+    },
+  }, {
+    induction n with n hn generalizing m, {
+      from is_false succ_ne_zero,
+    }, {
+      cases (hm n) with hmnen hmeqn, {
+        apply is_false,
+        assume hsmsn,
+        from hmnen (succ_inj hsmsn),
+      }, {
+        rw hmeqn,
+        from is_true rfl,
+      },
+    },
+  },
 end
 
 -- MULTIPLICATION

@@ -152,13 +152,7 @@ begin
   assume hpxsys,
   intro m,
   dsimp [count],
-  cases (@lem_nat_eq m x) with hmx hmnx, {
-    repeat {rw if_pos hmx},
-    rw hpxsys m,
-  }, {
-    repeat {rw if_neg hmnx},
-    from hpxsys m,
-  },
+  rw hpxsys m,
 end
 
 theorem perm_trans:
@@ -194,11 +188,11 @@ begin
     rw [count_empty, zero_add, empty_concat],
   }, {
     dsimp [count],
-    cases (@lem_nat_eq m x) with hmx hmnx, {
-      repeat {rw if_pos hmx},
+    by_cases (m = x), {
+      repeat {rw if_pos h},
       rw [h_ih, succ_add],
     }, {
-      repeat {rw if_neg hmnx},
+      repeat {rw if_neg h},
       from h_ih,
     },
   },
@@ -218,21 +212,21 @@ is_perm (x :: y :: []) (y :: x :: []) :=
 begin
   intro m,
   dsimp [count],
-  cases (@lem_nat_eq m x) with hmx hmnx, {
+  by_cases hmx: m = x, {
     repeat {rw if_pos hmx},
-    cases (@lem_nat_eq m y) with hmy hmny, {
+    by_cases hmy:m = y, {
       repeat {rw if_pos hmy},
     }, {
-      repeat {rw if_neg hmny},
+      repeat {rw if_neg hmy},
       refl,
     },
   }, {
-    repeat {rw if_neg hmnx},
-    cases (@lem_nat_eq m y) with hmy hmny, {
+    repeat {rw if_neg hmx},
+    by_cases hmy: m = y, {
       repeat {rw if_pos hmy},
       refl,
     }, {
-      repeat {rw if_neg hmny},
+      repeat {rw if_neg hmy},
     },
   },
 end
@@ -259,11 +253,11 @@ begin
   }, {
     assume h,
     dsimp [insert_aux],
-    cases le_lem x y with hxy hnxy, {
+    by_cases hxy: x ≤ y, {
       rw if_pos hxy,
       from cons_sorted hxy h,
     }, {
-      rw if_neg hnxy,
+      rw if_neg hxy,
       cases hz: insert_aux x ys with z zs, {
         from singleton_sorted,
       }, {
@@ -274,15 +268,15 @@ begin
               from cons_injective_1 hz,
             },
             rw ←this,
-            from lt_impl_le hnxy,
+            from lt_impl_le hxy,
           }, {
             dsimp [insert_aux] at hz,
-            cases (le_lem x y') with hxy' hnxy', {
+            by_cases hxy': x ≤ y', {
               rw if_pos hxy' at hz,
               rw ←(cons_injective_1 hz),
-              from lt_impl_le hnxy,
+              from lt_impl_le hxy,
             }, {
-              rw if_neg hnxy' at hz,
+              rw if_neg hxy' at hz,
               rw ←(cons_injective_1 hz),
               apply h 0 1 _ _, {
                 dsimp [len],
@@ -322,11 +316,11 @@ begin
     from singleton_perm,
   }, {
     dsimp [insert_aux],
-    cases (le_lem x x') with hxx' hnxx', {
+    by_cases hxx': x ≤ x', {
       rw if_pos hxx',
       from perm_refl,
     }, {
-      rw if_neg hnxx',
+      rw if_neg hxx',
       apply perm_trans _ (cons_perm h_ih),
       from perm_concat duo_perm perm_refl,
     },
@@ -358,9 +352,8 @@ begin
 end
 
 theorem is_perm_sorted_eq:
-sort_alg_correct alg
-  → is_perm lst1 lst2
-    → alg lst1 = alg lst2 :=
+is_perm lst1 lst2 → is_sorted lst1 → is_sorted lst2
+  → lst1 = lst2 :=
 begin
   sorry,
 end
