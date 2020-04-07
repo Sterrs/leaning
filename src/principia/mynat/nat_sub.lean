@@ -110,7 +110,6 @@ begin
       rw [hd, add_comm, add_sub] at hmn,
       rw hmn at hd,
       rw [hd, add_zero],
-      from le_refl,
     }, {
       assume hmn,
       have hmeqn := le_antisymm hnm hmn,
@@ -200,7 +199,6 @@ begin
       have hr := sub_succ_rearrange.mp hd.symm,
       have : succ 0 = 1 := rfl,
       rw [hr, add_comm, zz, this, add_sub],
-      from le_refl,
     }, {
       have hmn0 := add_integral (succ_inj hd.symm),
       rw sub_zero_iff_le at hmn0,

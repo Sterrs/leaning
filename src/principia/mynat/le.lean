@@ -37,6 +37,7 @@ begin
   refl,
 end
 
+@[refl]
 theorem le_refl: m ≤ m := @le_to_add _ 0
 
 theorem le_eq_refl: m = n → m ≤ n := (λ h, h ▸ le_refl)
@@ -98,6 +99,7 @@ begin
   },
 end
 
+@[trans]
 theorem le_trans: m ≤ n → n ≤ k → m ≤ k :=
 begin
   assume hmn hnk,
@@ -311,7 +313,6 @@ begin
   have heq := le_antisymm hle hknkm,
   have := mul_cancel hk0 heq,
   rw this,
-  from le_refl,
 end
 
 end hidden

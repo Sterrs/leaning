@@ -104,7 +104,6 @@ begin
     cases hnm with d hd,
     cases d, {
       rw [hd, zz, add_zero],
-      from le_refl,
     }, {
       have hsnm: succ n ≤ m,
       existsi d,
@@ -139,10 +138,7 @@ begin
 end
 
 theorem zero_lt_one: (0 : mynat) < (1 : mynat) :=
-begin
-  rw [←one_eq_succ_zero, ←le_iff_lt_succ],
-  from le_refl,
-end
+by rw [←one_eq_succ_zero, ←le_iff_lt_succ]
 
 -- somehow this feels like it's not using le_iff_lt_succ enough
 theorem le_iff_lt_or_eq: m ≤ n ↔ m < n ∨ m = n :=
@@ -164,7 +160,6 @@ begin
      from lt_impl_le hmnmn,
     }, {
       rw hmnmn,
-      from le_refl,
     },
   },
 end
@@ -206,6 +201,7 @@ begin
   },
 end
 
+@[trans]
 theorem lt_trans: m < n → n < k → m < k :=
 begin
   assume hmn hnk hkm,
@@ -270,7 +266,6 @@ begin
     cases h with d hd,
     cases d, {
       simp [hd],
-      from le_refl,
     }, {
       cases hm2n2 with d' hd',
       simp [hd] at hd',
