@@ -147,6 +147,7 @@ begin
   cases m,
     sorry,
   rw [←neg_coe_succ] at h,
+  sorry,
 end
 
 end myint

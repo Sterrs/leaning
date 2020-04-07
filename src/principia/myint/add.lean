@@ -343,12 +343,12 @@ begin
 end
 
 -- It's more useful as an iff
-theorem add_cancel : m + k = n + k ↔ m = n :=
+theorem add_cancel (k : myint): m + k = n + k ↔ m = n :=
 ⟨add_cancel_mp k, assume h, by congr; assumption⟩
 
 private lemma add_one_neg_one: (1:myint) + -1 = 0 := rfl
 
-theorem add_self_neg: ∀ m : myint, m + (-m) = 0
+theorem self_neg_add: ∀ m : myint, m + (-m) = 0
 | (of_nat a) :=
 begin
   induction a with a ha,
@@ -361,8 +361,8 @@ end
 | -[1+ a] :=
 by rw [neg_neg_succ, neg_nat_add, sub_succ_succ, sub_self]
 
-theorem add_neg_self : -m + m = 0 := by
-rw add_comm; apply add_self_neg
+theorem neg_self_add : -m + m = 0 := by
+rw add_comm; apply self_neg_add
 
 end myint
 end hidden
