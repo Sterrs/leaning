@@ -1,6 +1,7 @@
 | *File*                                | *Lines* | *Bytes* | *Stripped bytes* |
 |:-------------------------------------:| -------:| -------:| ---------------: |
 |              `add_comm`               |      58 |    3637 |             2005 |
+|             `add_comm_0`              |      25 |    1307 |              982 |
 |             `add_comm_2`              |      47 |    2288 |             1453 |
 |        `mul_cancel_induction`         |     950 |   87451 |            18040 |
 |  `mul_cancel_total_order_no_tactic`   |    1611 |  181609 |            17062 |
