@@ -346,6 +346,9 @@ end
 theorem add_cancel (k : myint): m + k = n + k ↔ m = n :=
 ⟨add_cancel_mp k, assume h, by congr; assumption⟩
 
+theorem add_cancel_to_zero: n + m = m ↔ n = 0 :=
+by rw [←zero_add m, ←add_assoc, add_cancel, add_zero]
+
 private lemma add_one_neg_one: (1:myint) + -1 = 0 := rfl
 
 theorem self_neg_add: ∀ m : myint, m + (-m) = 0

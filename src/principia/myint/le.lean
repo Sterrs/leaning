@@ -1,5 +1,5 @@
 import .basic
-import .add
+import .mul
 
 namespace hidden
 
@@ -132,6 +132,15 @@ begin
   },
 end
 
+theorem le_cancel_to_zero_lhs: m ≤ m + n ↔ 0 ≤ n :=
+by rw [←@zero_add m, add_assoc, @add_comm m, ←add_assoc,
+       ←le_cancel, zero_add]
+
+-- Exact same proof works :o
+theorem le_cancel_to_zero_rhs: m + n ≤ m ↔ n ≤ 0 :=
+by rw [←@zero_add m, add_assoc, @add_comm m, ←add_assoc,
+       ←le_cancel, zero_add]
+
 theorem le_neg_switch: m ≤ n ↔ -n ≤ -m :=
 begin
   split; assume h,{
@@ -205,6 +214,48 @@ begin
     rwa neg_neg_le,
   left,
   rwa neg_neg_le,
+end
+
+theorem le_mul_pos: 0 ≤ k → m ≤ n → k * m ≤ k * n :=
+begin
+  assume h0lek hmn,
+  rw zero_le_iff_coe at h0lek,
+  cases h0lek with a ha,
+  rw le_iff_exists_nat at hmn,
+  cases hmn with b hb,
+  rw [ha, hb, mul_add, le_cancel_to_zero_lhs, nat_nat_mul],
+  apply zero_le_iff_coe.mpr,
+  existsi (a*b),
+  refl,
+end
+
+theorem le_mul_neg: k ≤ 0 → m ≤ n → k * n ≤ k * m :=
+begin
+  assume hkle0 hmn,
+  rw le_zero_iff_neg_coe at hkle0,
+  cases hkle0 with a ha,
+  rw [ha, neg_mul, neg_mul, le_neg_switch, neg_neg, neg_neg],
+  have : 0 ≤ (↑a : myint), {
+    rw zero_le_iff_coe,
+    existsi a,
+    refl,
+  },
+  from le_mul_pos this hmn,
+end
+
+theorem le_antisymm: m ≤ n → n ≤ m → m = n :=
+begin
+  assume hmn hnm,
+  rw le_iff_exists_nat at hmn hnm,
+  cases hmn with a ha,
+  cases hnm with b hb,
+  have hb₁ := hb.symm,
+  rw [ha, add_assoc, add_comm, add_cancel_to_zero, nat_nat_add,
+      ←zero_nat, of_nat_cancel] at hb₁,
+  have := add_integral hb₁,
+  rw [this, zero_nat, add_zero] at ha,
+  symmetry,
+  assumption,
 end
 
 end myint
