@@ -280,6 +280,20 @@ begin
 end
 
 @[simp]
+theorem pow_one: n ^ (1: mynat) = n := rfl
+
+@[simp]
+theorem one_pow:
+(1: mynat) ^ n = 1 :=
+begin
+  induction n with n hn, {
+    refl,
+  }, {
+    simp [hn],
+  },
+end
+
+@[simp]
 theorem pow_add (m n k : mynat) : m ^ (n + k) = (m ^ n) * (m ^ k) :=
 begin
   induction k with k_n k_ih, {

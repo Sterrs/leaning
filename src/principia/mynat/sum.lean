@@ -455,6 +455,7 @@ by {rw [sum_succ, sum_succ, h n (lt_impl_le hnm)] at hsn,
     from add_cancel hsn},
 restricted_mpr⟩
 
+-- β-reduction, basically
 private theorem lambda_subs: (λ k, f k) k = f k := rfl
 private theorem add_two: ∀ k, k + 2 = succ (succ k) := (λ k, rfl)
 
@@ -572,13 +573,224 @@ sum (λ k, a * f k) n = a * sum f n := mul_sum _ _ _
 theorem binomial_theorem:
 (a + b) ^ n = sum (λ k, binom n k * a ^ k * b ^ (n - k)) (succ n) :=
 begin
-  induction n with n_n n_ih, {
+  -- ok what's the one line way to do these because
+  -- this is ridic
+  have cancel_f:
+    ∀ n k: mynat, ∀ f: mynat → mynat,
+      n = k → f n = f k, {
+    intros n k f,
+    assume h,
+    rw h,
+  },
+  induction n with n hn, {
     refl,
   }, {
-    rw [pow_succ, n_ih, add_mul],
-    sorry,
+    rw [pow_succ, hn, add_mul],
+    rw ←mul_sum',
+    rw ←mul_sum',
+    have hrw:
+      ∀ k,
+        (λ k,
+          a * (binom n k * a ^ k * b ^ (n - k))
+        ) k =
+        (λ k,
+          binom n k * a ^ succ k * b ^ (n - k)
+        ) k, {
+      intro k,
+      repeat {rw lambda_subs},
+      conv {
+        to_lhs,
+        rw ←mul_assoc,
+        rw mul_comm _ (a ^ k),
+        congr,
+        rw ←mul_assoc,
+        rw ←pow_succ,
+        rw mul_comm,
+      },
+    },
+    rw (sum_cancel _ _).mpr hrw, clear hrw,
+    have hrw:
+      -- ??? why is it being weird about "a"
+      ∀ a k, k < succ n →
+        (λ k,
+          b * (binom n k * a ^ k * b ^ (n - k))
+        ) k =
+        (λ k,
+          binom n k * a ^ k * b ^ (succ n - k)
+        ) k, {
+      intros a k,
+      assume hksn,
+      repeat {rw lambda_subs},
+      conv {
+        to_lhs,
+        rw ←mul_assoc,
+        congr,
+        rw mul_comm,
+      },
+      repeat {rw mul_assoc},
+      apply cancel_f,
+      apply cancel_f,
+      rw ←pow_succ,
+      apply cancel_f,
+      cases sub_succ_converse hksn with m hm,
+      have := sub_succ_cancel hm,
+      rw this,
+      rw hm,
+    },
+    rw (sum_cancel_restricted _ _ _).mpr
+       (hrw a) (succ n) le_refl, clear hrw,
+    have hrw:
+      ∀ a k, k < succ n →
+        (λ k,
+          binom n k * a ^ succ k * b ^ (n - k)
+        ) k =
+        (λ k,
+          binom n k * a ^ succ k * b ^ (succ n - succ k)
+        ) k, {
+      intros a k,
+      assume hksn,
+      repeat {rw lambda_subs},
+      rw sub_succ_succ,
+    },
+    rw (sum_cancel_restricted _ _ _).mpr
+       (hrw a) (succ n) le_refl, clear hrw,
+    rw sum_succ,
+    rw sum_tail,
+    rw sum_succ,
+    rw sum_tail,
+    -- convs rearranging
+    conv {
+      congr,
+      congr,
+      rw add_comm,
+      skip,
+      rw add_comm,
+      skip,
+      rw add_assoc,
+      rw add_comm,
+      congr,
+      rw add_comm,
+    },
+    conv {
+      to_lhs,
+      rw ←add_assoc,
+      congr,
+      rw add_assoc,
+      congr,
+      skip,
+      rw add_comm,
+    },
+    repeat {rw add_assoc},
+    -- convs actually rewriting
+    conv {
+      congr,
+      congr,
+      rw lambda_subs,
+      rw binom_dupl,
+      rw one_mul,
+      rw sub_self_eq_zero,
+      rw pow_zero,
+      rw mul_one,
+      skip,
+      congr,
+      rw lambda_subs,
+      rw binom_zero,
+      rw one_mul,
+      rw pow_zero,
+      rw one_mul,
+      rw sub_zero,
+      skip,
+      skip,
+      congr,
+      rw binom_dupl,
+      rw sub_self_eq_zero,
+      rw pow_zero,
+      rw one_mul,
+      rw mul_one,
+      skip,
+      rw binom_zero,
+      rw pow_zero,
+      rw sub_zero,
+      rw one_mul,
+      rw one_mul,
+    },
+    apply cancel_f,
+    apply cancel_f,
+    rw ←sum_distr',
+    apply (sum_cancel _ _).mpr,
+    intro k,
+    repeat {rw lambda_subs},
+    rw sub_succ_succ,
+    rw binom_succ_succ,
+    rw ←add_mul,
+    rw ←add_mul,
   },
 end
+
+theorem sum_reverse:
+sum f n = sum (λ k, f (n - succ k)) n :=
+begin
+  have cancel_f:
+    ∀ n k: mynat, ∀ f: mynat → mynat,
+      n = k → f n = f k, {
+    intros n k f,
+    assume h,
+    rw h,
+  },
+  revert n f,
+  -- easy way to access the n - 2 case of IH
+  apply duo_induction
+    (λ n, ∀ f, sum f n =
+      sum (λ k, f (n - succ k)) n), {
+    intro f,
+    refl,
+  }, {
+    intro f,
+    refl,
+  }, {
+    intro n,
+    assume h_ih _,
+    intro f,
+    rw add_two,
+    rw sum_succ,
+    rw sum_tail,
+    rw h_ih,
+    rw sum_succ,
+    rw sum_tail,
+    rw sub_succ_succ,
+    rw sub_zero,
+    rw sub_self_eq_zero,
+    conv {
+      congr,
+      rw add_assoc,
+      rw add_comm,
+      skip,
+      rw add_assoc,
+      rw add_comm,
+      congr,
+      rw add_comm,
+    },
+    apply cancel_f,
+    -- help lean with type inference a bit
+    have h_aesthetic := @le_refl n,
+    revert h_aesthetic,
+    apply (sum_cancel_restricted _ _ _).mpr,
+    intro m,
+    assume hmn,
+    apply cancel_f,
+    rw sub_succ_succ,
+    rw sub_succ_succ,
+    cases sub_succ_converse hmn with d hd,
+    symmetry,
+    rw sub_succ_rearrange,
+    rw sub_succ,
+    rw hd,
+    rw succ_sub_one,
+    from sub_succ_rearrange.mp hd,
+  },
+end
+
+-- TODO: some sort of cross-over episode with bijections
 
 end naturals
 

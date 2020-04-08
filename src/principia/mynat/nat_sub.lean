@@ -121,9 +121,7 @@ end
 
 -- just the contrapositive. Useful later
 theorem sub_nzero_iff_gt: m - n ≠ 0 ↔ n < m :=
-begin
-  from iff_to_contrapositive sub_zero_iff_le,
-end
+iff_to_contrapositive sub_zero_iff_le
 
 theorem sub_succ_impl_le: m - n = succ k → n < m :=
 begin
@@ -146,6 +144,14 @@ begin
     assume hmskn,
     rw [hmskn, add_sub],
   },
+end
+
+theorem sub_succ_converse: n < m → ∃ k, m - n = succ k :=
+begin
+  assume hnm,
+  cases lt_iff_succ_le.mp hnm with d hd,
+  existsi d,
+  rw [hd, succ_add, ←add_succ, add_comm, add_sub],
 end
 
 theorem sub_succ_cancel: succ m - n = succ k → m - n = k :=
