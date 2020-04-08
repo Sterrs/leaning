@@ -19,10 +19,7 @@ def infinitely_many (statement : mynat → Prop) : Prop :=
 variables {m n p k : mynat}
 
 theorem zero_le: 0 ≤ m :=
-begin
-  existsi m,
-  simp,
-end
+exists.intro m (zero_add m).symm
 
 theorem succ_nle_zero: ¬(succ m ≤ 0) :=
 begin
@@ -32,10 +29,7 @@ begin
 end
 
 theorem le_to_add: m ≤ m + n :=
-begin
-  existsi n,
-  refl,
-end
+exists.intro n rfl
 
 @[refl]
 theorem le_refl: m ≤ m := @le_to_add _ 0
