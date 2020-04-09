@@ -778,7 +778,7 @@ begin
                 (index_valid _)
                 begin
                   unfold index,
-                  have : ¬y = x, {
+                  have: ¬y = x, {
                     assume h,
                     from hxy' h.symm,
                   },
@@ -802,9 +802,9 @@ begin
           rw hxy at hp12,
           from perm_head_cancel hp12,
         },
-      }
-    }
-  }
+      },
+    },
+  },
 end
 
 end hidden

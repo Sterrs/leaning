@@ -191,7 +191,7 @@ iff_to_contrapositive empty_iff_len_zero
 
 theorem rev_not_empty: lst ≠ [] → rev lst ≠ [] :=
 begin
-  repeat {rw nonempty_iff_len},
+  repeat {rw nonempty_iff_len_nonzero},
   rw rev_len,
   assume h, from h,
 end
