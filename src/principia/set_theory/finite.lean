@@ -2,7 +2,7 @@
 
 import ..mynat.lt
 import .equinumerous
-
+import ..mylist.map
 
 -- Definitions and theorems relating to finite sets
 
@@ -25,11 +25,11 @@ begin
   from lt_nzero hm,
 end
 
-def of_size {α : Type u} (s : myset α) (m : mynat) : Prop :=
+def of_size (s : myset α) (m : mynat) : Prop :=
 equinumerous s (zero_to m)
-def finite {α : Type u} (s : myset α) : Prop :=
+def finite (s : myset α) : Prop :=
 ∃ m : mynat, of_size s m
-def infinite {α : Type u} (s : myset α) : Prop := ¬finite s
+def infinite (s : myset α) : Prop := ¬finite s
 
 theorem zero_to_le_subset (m n: mynat) (h: m ≤ n):
 (zero_to m) ⊆ (zero_to n) :=

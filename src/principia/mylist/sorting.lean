@@ -1,7 +1,7 @@
 import .mylist
 import ..mynat.nat_sub
 
--- Sorting algorithms on lists of naturals
+-- Sorting algorithms and permutations on lists of naturals
 -- can probably be generalised to some type class thing
 
 -- TODO: encode/state criterion for a sorting algorithm to
