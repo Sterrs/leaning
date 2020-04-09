@@ -415,7 +415,8 @@ private theorem sum_distr':
 sum (λ k, f k + g k) n = (sum f n) + (sum g n) :=
 sum_distr f g n
 
-theorem binom_row_sum:
+-- nicer proof from binomial theorem later
+example:
 -- chad partial function notation
 sum (binom n) (succ n) = 2 ^ n :=
 begin
@@ -710,9 +711,9 @@ end
 
 -- Lovely corollary
 theorem binom_sum:
-sum (λ k, binom n k) (succ n) = 2^n :=
+sum (binom n) (succ n) = 2 ^ n :=
 begin
-  have hbithm := @binomial_theorem (1:mynat) 1 n,
+  have hbithm := @binomial_theorem 1 1 n,
   rw ←two_one at hbithm,
   rw hbithm,
   apply apply_sum,
@@ -780,17 +781,9 @@ theorem difference_of_powers:
 a ^ succ n - b ^ succ n
   = (a - b) * sum (λ k, a ^ k * b ^ (n - k)) (succ n) :=
 begin
-  rw sub_mul,
-  rw ←mul_sum',
-  rw ←mul_sum',
-  rw sum_succ,
-  rw sum_tail,
-  rw sub_self_eq_zero,
-  rw pow_zero,
-  rw mul_one,
-  rw pow_zero,
-  rw one_mul,
-  rw sub_zero,
+  rw [sub_mul, ←mul_sum', ←mul_sum', sum_succ,
+      sum_tail, sub_self_eq_zero, pow_zero, mul_one,
+      pow_zero, one_mul, sub_zero],
   have hrw:
     ∀ a k, k < n →
       (λ k,
@@ -802,27 +795,19 @@ begin
     intros a k,
     assume hkn,
     repeat {rw lambda_subs},
-    rw ←mul_assoc,
-    rw mul_comm b,
-    rw mul_assoc,
-    rw ←pow_succ,
-    rw pow_succ a,
-    rw mul_assoc,
+    rw [←mul_assoc, mul_comm b, mul_assoc,
+        ←pow_succ, pow_succ a, mul_assoc],
     suffices h: n - k = succ (n - succ k), {
       rw h,
     }, {
-      rw sub_succ_rearrange,
-      rw succ_add,
-      rw ←add_succ,
+      rw [sub_succ_rearrange, succ_add, ←add_succ],
       symmetry,
       from sub_add_condition.mpr (lt_iff_succ_le.mp hkn),
     },
   },
   rw (sum_cancel_restricted _ _ _).mpr (hrw a) _ le_refl,
   clear hrw,
-  rw sub_distr,
-  rw add_comm,
-  rw add_sub,
+  rw [sub_distr, add_comm, add_sub],
   repeat {rw pow_succ},
 end
 

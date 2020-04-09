@@ -97,9 +97,7 @@ begin
   }, {
     assume h,
     cases h with d hd,
-    rw hd,
-    rw add_comm n d,
-    rw add_sub,
+    rw [hd, add_comm n d, add_sub],
   },
 end
 
