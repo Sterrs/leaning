@@ -31,10 +31,96 @@ def finite {α : Type u} (s : myset α) : Prop :=
 ∃ m : mynat, of_size s m
 def infinite {α : Type u} (s : myset α) : Prop := ¬finite s
 
--- function swapping two naturals. Turns out this is harder
--- to define than I thought
-def swap_naturals (a b x: mynat): mynat :=
-sorry
+-- function swapping two naturals. Useful in proving things
+-- by induction on finite sets
+def swap_naturals (a b x: mynat): mynat
+:= if x = a then b else if x = b then a else x
+
+theorem swap_well_defined
+(n a b: mynat) (ha: a < n) (hb: b < n):
+well_defined (zero_to n) (zero_to n) (swap_naturals a b) :=
+begin
+  intro x,
+  assume hx,
+  unfold swap_naturals,
+  by_cases hxa: x = a, {
+    rw if_pos hxa,
+    from hb,
+  }, {
+    rw if_neg hxa,
+    by_cases hxb: x = b, {
+      rw if_pos hxb,
+      from ha,
+    }, {
+      rw if_neg hxb,
+      from hx,
+    },
+  },
+end
+
+-- candidate for wlog_le? It's not clear because
+-- we can have a = b
+theorem swap_injective
+(n a b: mynat) (ha: a < n) (hb: b < n):
+injective (swap_well_defined n a b ha hb) :=
+begin
+  intros x y,
+  assume hx hy,
+  unfold swap_naturals,
+  assume hswap_xy,
+  by_cases hxy: x = y, {
+    assumption,
+  }, {
+    exfalso,
+    by_cases hxa: x = a, {
+      rw if_pos hxa at hswap_xy,
+      by_cases hya: y = a, {
+        from hxy (eq.trans hxa hya.symm),
+      }, {
+        rw if_neg hya at hswap_xy,
+        by_cases hyb: y = b, {
+          rw if_pos hyb at hswap_xy,
+          from hya (hswap_xy ▸ hyb),
+        }, {
+          rw if_neg hyb at hswap_xy,
+          from hyb hswap_xy.symm,
+        },
+      },
+    }, {
+      rw if_neg hxa at hswap_xy,
+      by_cases hxb: x = b, {
+        rw if_pos hxb at hswap_xy,
+        by_cases hya: y = a, {
+          rw if_pos hya at hswap_xy,
+          from (hswap_xy ▸ hxa) hxb,
+        }, {
+          rw if_neg hya at hswap_xy,
+          by_cases hyb: y = b, {
+            from (hyb ▸ hxy) hxb,
+          }, {
+            rw if_neg hyb at hswap_xy,
+            from hya hswap_xy.symm,
+          },
+        },
+      }, {
+        rw if_neg hxb at hswap_xy,
+        by_cases hya: y = a, {
+          rw if_pos hya at hswap_xy,
+          from hxb hswap_xy,
+        }, {
+          rw if_neg hya at hswap_xy,
+          by_cases hyb: y = b, {
+            rw if_pos hyb at hswap_xy,
+            from hxa hswap_xy,
+          }, {
+            rw if_neg hyb at hswap_xy,
+            from hxy hswap_xy,
+          },
+        },
+      },
+    },
+  },
+end
 
 -- pigeonhole principle, basically
 -- have I overthought this?
@@ -70,7 +156,6 @@ begin
     -- function is still injective and has n + 1 ↦ n, so we can
     -- restrict it to {0, ..., n} and its range will restrict to
     -- {0, ..., n - 1}. Then we are done by induction.
-    let s: myset mynat := sorry,
     sorry,
   },
 end
