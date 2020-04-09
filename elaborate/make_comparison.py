@@ -10,6 +10,9 @@ import pathlib
 # robust against calling from another directory
 ELABORATE_DIR = pathlib.Path(__file__).parent
 
+
+print("\n## Some data presented for your amusement\n")
+
 # unconventional way to maximise width while obeying PEP8
 print("""\
 | *File*                                | *Lines* | *Bytes* | *Stripped bytes* |

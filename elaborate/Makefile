@@ -2,10 +2,13 @@ ALL_STRIPPED_LEAN = $(patsubst %.lean, %.stripped.lean, $(filter-out $(wildcard 
 
 .PHONY: default
 
-default: comparison.md
+default: comparison.md ../README.md
 
 %.stripped.lean: %.lean
 	python3 strip.py < $< > $@
 
 comparison.md: $(ALL_STRIPPED_LEAN) make_comparison.py
 	python3 make_comparison.py > $@
+
+../README.md: comparison.md
+	{ git show lean-3.4.2:README.md && cat $<; } > $@
