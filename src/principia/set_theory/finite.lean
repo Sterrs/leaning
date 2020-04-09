@@ -31,6 +31,10 @@ def finite {α : Type u} (s : myset α) : Prop :=
 ∃ m : mynat, of_size s m
 def infinite {α : Type u} (s : myset α) : Prop := ¬finite s
 
+theorem zero_to_le_subset (m n: mynat) (h: m ≤ n):
+(zero_to m) ⊆ (zero_to n) :=
+(λ k h', @lt_le_chain k n m h' h)
+
 -- function swapping two naturals. Useful in proving things
 -- by induction on finite sets
 def swap_naturals (a b x: mynat): mynat
@@ -157,6 +161,25 @@ begin
     -- restrict it to {0, ..., n} and its range will restrict to
     -- {0, ..., n - 1}. Then we are done by induction.
     sorry,
+  },
+end
+
+theorem no_injection_if_gt
+(m n: mynat) (f: mynat → mynat)
+(hmn: n < m)
+(hwf: well_defined (zero_to m) (zero_to n) f):
+¬injective hwf :=
+begin
+  assume hif,
+  cases m, {
+    from lt_nzero hmn,
+  }, {
+    have hwf': well_defined (zero_to (succ m)) (zero_to m) f, {
+      apply wf_by_inclusion (zero_to (succ m)) (zero_to n) (zero_to m) hwf,
+      from zero_to_le_subset _ _ (le_iff_lt_succ.mpr hmn),
+    },
+    have hif': injective hwf' := hif,
+    from no_injection_from_zero_to_succ _ _ _ hif',
   },
 end
 

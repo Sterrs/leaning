@@ -121,6 +121,25 @@ begin
   },
 end
 
+-- hmmm. better to define exclusion map separately?
+theorem wf_by_inclusion (r: myset α) (s t: myset β)
+(hwf: well_defined r s f) (hst: s ⊆ t):
+well_defined r t f :=
+begin
+  intro a,
+  assume har,
+  apply hst,
+  apply hwf,
+  from har,
+end
+
+-- -- hmmmmmmmm
+-- theorem inj_by_inclusion (r: myset α) (s t: myset β)
+-- (hwf: well_defined r s f)
+-- (hif: injective hwf) (hst: s ⊆ t):
+-- injective (wf_by_inclusion r s t hwf hst) :=
+-- hif
+
 end theorems
 
 end hidden

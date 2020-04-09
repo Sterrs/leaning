@@ -89,8 +89,17 @@ equinumerous s t → equinumerous t s := sorry
 
 @[trans]
 theorem equinumerous_trans (r : myset α) (s : myset β) (t : myset γ) :
-equinumerous r s → equinumerous s t → equinumerous r t := sorry
-
+equinumerous r s → equinumerous s t → equinumerous r t :=
+begin
+  assume hrs hst,
+  cases hrs with f hf,
+  cases hf with hwf hf,
+  cases hst with g hg,
+  cases hg with hwg hg,
+  existsi g ∘ f,
+  existsi composition_well_defined hwf hwg,
+  from bij_bij hwf hwg hf hg,
+end
 
 section -- for classical logic
 open classical
