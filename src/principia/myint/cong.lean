@@ -31,8 +31,8 @@ begin
   cases h with k hk,
   existsi -k,
   rw mul_neg,
-  apply (myint.add_cancel (n*k)).mp,
-  rw [myint.add_assoc, myint.add_neg_self, myint.add_zero],
+  rw ←(@myint.add_cancel _ _ (n * k)),
+  rw [myint.add_assoc, myint.neg_self_add, myint.add_zero],
   symmetry,
   assumption,
 end

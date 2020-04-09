@@ -41,7 +41,6 @@ begin
   cases le_total_order a b,
     rwa le_imp_max2 h,
   rw [max_comm, le_imp_max2 h],
-  from le_refl,
 end
 
 theorem max_assoc : max a (max b c) = max (max a b) c :=

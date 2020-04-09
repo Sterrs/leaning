@@ -125,8 +125,8 @@ begin
     },
   }, {
     intro m,
-    cases (le_lem n (succ m)) with hnm hmn, {
-      cases hnm with d hd,
+    by_cases (n ≤ (succ m)), {
+      cases h with d hd,
       rw hd,
       assume h_sih,
       rw add_comm,
@@ -140,7 +140,7 @@ begin
       from lt_add hdn,
     }, {
       assume _,
-      from base_cases _ hmn,
+      from base_cases _ h,
     },
   },
 end
@@ -164,7 +164,7 @@ begin
         assume _, assumption,
       }, {
         assume hcontr,
-        exfalso, from lt_nzero (lt_cancel m 0 2 hcontr),
+        exfalso, from lt_nzero (lt_cancel 2 hcontr),
       },
     },
   }, {

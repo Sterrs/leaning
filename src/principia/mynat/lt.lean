@@ -1,6 +1,7 @@
 -- vim: ts=2 sw=0 sts=-1 et ai tw=70
 
 import .le
+import ..logic
 
 namespace hidden
 
@@ -9,57 +10,28 @@ open mynat
 def lt (m n: mynat) := ¬n ≤ m
 instance: has_lt mynat := ⟨lt⟩
 
+instance decidable_lt: ∀ m n: mynat, decidable (m < n) :=
+(λ m n, not.decidable)
+
 variables {m n p k : mynat}
 
 theorem lt_nrefl: ¬m < m :=
-begin
-  assume hmm,
-  from hmm le_refl,
-end
+(λ h, h le_refl)
 
 theorem lt_succ_cancel: succ m < succ n → m < n :=
-begin
-  assume hsmsn hmn,
-  apply hsmsn,
-  have h := le_add 1 hmn,
-  simp at h,
-  cc,
-end
+mp_to_contrapositive succ_le_succ
 
-theorem lt_cancel (m n k: mynat): m + k < n + k → m < n :=
-begin
-  assume hmknk hmn,
-  apply hmknk,
-  from le_add _ hmn,
-end
+theorem lt_cancel (k: mynat): m + k < n + k → m < n :=
+mp_to_contrapositive (le_add k)
 
 theorem lt_cancel_strong: m + k < n → m < n :=
-begin
-  assume hmkn hmn,
-  apply hmkn,
-  apply le_add_rhs,
-  cc,
-end
+mp_to_contrapositive le_add_rhs
 
 theorem lt_add_rhs: m < n → m < n + k :=
-begin
-  assume hmn hmnk,
-  apply hmn,
-  apply le_cancel_strong k,
-  cc,
-end
+mp_to_contrapositive (le_cancel_strong k)
 
 theorem nzero_iff_zero_lt: m ≠ 0 ↔ 0 < m :=
-begin
-  split, {
-    assume hmnz hmlz,
-    from hmnz (le_zero hmlz),
-  }, {
-    assume hlt heq,
-    rw heq at hlt,
-    from lt_nrefl hlt,
-  },
-end
+iff_to_contrapositive le_zero_iff.symm
 
 theorem lt_to_add_succ: m < m + succ n :=
 begin
@@ -94,24 +66,12 @@ begin
   from hab h,
 end
 
-theorem lt_nzero: ¬m < 0 :=
-begin
-  assume mlz,
-  from mlz zero_le,
-end
+theorem lt_nzero: ¬m < 0 := (λ h, h zero_le)
 
-theorem zero_lt_succ: 0 < succ m :=
-begin
-  assume h,
-  cases h with d hd,
-  from succ_ne_zero (add_integral hd.symm),
-end
+theorem zero_lt_succ: 0 < succ m := succ_nle_zero
 
 theorem lt_add: m < n → m + k < n + k :=
-begin
-  assume hmn hmknk,
-  from hmn (le_cancel hmknk),
-end
+mp_to_contrapositive le_cancel
 
 theorem lt_impl_le: m < n → m ≤ n :=
 begin
@@ -144,7 +104,6 @@ begin
     cases hnm with d hd,
     cases d, {
       rw [hd, zz, add_zero],
-      from le_refl,
     }, {
       have hsnm: succ n ≤ m,
       existsi d,
@@ -178,11 +137,8 @@ begin
   },
 end
 
-theorem zero_lt_one : (0 : mynat) < (1 : mynat) :=
-begin
-  rw [←one_eq_succ_zero, ←le_iff_lt_succ],
-  from le_refl,
-end
+theorem zero_lt_one: (0 : mynat) < (1 : mynat) :=
+by rw [←one_eq_succ_zero, ←le_iff_lt_succ]
 
 -- somehow this feels like it's not using le_iff_lt_succ enough
 theorem le_iff_lt_or_eq: m ≤ n ↔ m < n ∨ m = n :=
@@ -204,27 +160,19 @@ begin
      from lt_impl_le hmnmn,
     }, {
       rw hmnmn,
-      from le_refl,
     },
   },
 end
 
--- it seems that inductive types give all sorts of classical-feeling
--- results without any of the excluded middle
+-- surely this is a library function somewhere
 theorem lt_dne: ¬m < n → n ≤ m :=
 begin
-  assume hnmn,
-  cases (le_total_order m n),
-  cases h with d hd,
-  cases d,
-  simp at hd,
-  rw hd,
-  from le_refl,
-  have hmln: m < n,
-  rw hd,
-  from lt_to_add_succ,
-  exfalso, from hnmn hmln,
-  from h,
+  by_cases (n ≤ m), {
+    from (λ _, h),
+  }, {
+    assume h2,
+    contradiction,
+  },
 end
 
 theorem lt_strict: ¬(m < n ∧ n < m) :=
@@ -253,24 +201,7 @@ begin
   },
 end
 
-theorem le_lem (m n: mynat): m ≤ n ∨ n < m :=
-begin
-  cases le_total_order m n with hmn hnm, {
-    left, assumption,
-  }, {
-    cases hnm with d hd,
-    cases d, {
-      simp [hd],
-      left,
-      from le_refl,
-    }, {
-      right,
-      rw hd,
-      from lt_to_add_succ,
-    },
-  },
-end
-
+@[trans]
 theorem lt_trans: m < n → n < k → m < k :=
 begin
   assume hmn hnk hkm,
@@ -335,7 +266,6 @@ begin
     cases h with d hd,
     cases d, {
       simp [hd],
-      from le_refl,
     }, {
       cases hm2n2 with d' hd',
       simp [hd] at hd',

@@ -309,7 +309,7 @@ begin
       -- If p were more than n, it wouldn't be prime
       have := halln p,
       -- And it's greater than or equal to n
-      cases (le_lem n p) with h h, {
+      by_cases (n ≤ p), {
         -- Which is a contradiction,
         exfalso,
         from this h hp,

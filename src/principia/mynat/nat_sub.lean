@@ -110,7 +110,6 @@ begin
       rw [hd, add_comm, add_sub] at hmn,
       rw hmn at hd,
       rw [hd, add_zero],
-      from le_refl,
     }, {
       assume hmn,
       have hmeqn := le_antisymm hnm hmn,
@@ -122,9 +121,7 @@ end
 
 -- just the contrapositive. Useful later
 theorem sub_nzero_iff_gt: m - n ≠ 0 ↔ n < m :=
-begin
-  from iff_to_contrapositive sub_zero_iff_le,
-end
+iff_to_contrapositive sub_zero_iff_le
 
 theorem sub_succ_impl_le: m - n = succ k → n < m :=
 begin
@@ -147,6 +144,14 @@ begin
     assume hmskn,
     rw [hmskn, add_sub],
   },
+end
+
+theorem sub_succ_converse: n < m → ∃ k, m - n = succ k :=
+begin
+  assume hnm,
+  cases lt_iff_succ_le.mp hnm with d hd,
+  existsi d,
+  rw [hd, succ_add, ←add_succ, add_comm, add_sub],
 end
 
 theorem sub_succ_cancel: succ m - n = succ k → m - n = k :=
@@ -200,7 +205,6 @@ begin
       have hr := sub_succ_rearrange.mp hd.symm,
       have : succ 0 = 1 := rfl,
       rw [hr, add_comm, zz, this, add_sub],
-      from le_refl,
     }, {
       have hmn0 := add_integral (succ_inj hd.symm),
       rw sub_zero_iff_le at hmn0,
@@ -273,48 +277,5 @@ by rw [mul_comm, mul_comm m, mul_comm n k, mul_sub]
 @[simp]
 theorem difference_two_squares: m * m - n * n = (m - n) * (m + n) :=
 by rw [sub_mul, mul_add, mul_add, sub_distr, mul_comm m n, add_sub]
-
-instance decidable_le: ∀ m n: mynat, decidable (m ≤ n) :=
-begin
-  intros m n,
-  rw ←sub_zero_iff_le,
-  cases hmn: m - n, {
-    from is_true rfl,
-  }, {
-    from is_false succ_ne_zero,
-  },
-end
-
-instance decidable_lt: ∀ m n: mynat, decidable (m < n) :=
-begin
-  intros m n,
-  by_cases n ≤ m, {
-    apply is_false,
-    assume h, contradiction,
-  }, {
-    apply is_true,
-    assumption,
-  }
-end
-
-instance: decidable_eq mynat :=
-begin
-  intros m n,
-  by_cases hmn: m ≤ n, {
-    by_cases hnm: n ≤ m, {
-      from is_true (le_antisymm hmn hnm),
-    }, {
-      apply is_false,
-      assume h,
-      rw h at hnm,
-      from hnm le_refl,
-    },
-  }, {
-    apply is_false,
-    assume h,
-    rw h at hmn,
-    from hmn le_refl,
-  }
-end
 
 end hidden

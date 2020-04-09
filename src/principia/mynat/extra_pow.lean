@@ -61,17 +61,6 @@ begin
   },
 end
 
-@[simp]
-theorem one_pow:
-(1: mynat) ^ n = 1 :=
-begin
-  induction n with n hn, {
-    refl,
-  }, {
-    simp [hn],
-  },
-end
-
 -- maybe should be done better than this
 theorem pow_gt_1_converse:
 1 < a ^ succ n → 1 < a :=

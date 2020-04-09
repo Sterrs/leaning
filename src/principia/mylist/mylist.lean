@@ -103,6 +103,9 @@ theorem empty_len: len ([]: mylist T) = 0 := rfl
 theorem len_cons_succ: len (x :: xs) = succ (len xs) := rfl
 
 @[simp]
+theorem len_singleton: len [x] = 1 := len_cons_succ
+
+@[simp]
 theorem len_concat_add: len (lst1 ++ lst2) = len lst1 + len lst2 :=
 begin
   induction lst1 with lst1_head lst1_tail lst1_ih, {
@@ -183,21 +186,21 @@ end
 -- which is a dependent type thing. Maybe they're supposed to be Πs
 
 -- first element
-def head: ∀ lst: mylist T, lst ≠ [] → T
+def head: Π lst: mylist T, lst ≠ [] → T
 | []       h := absurd rfl h
 | (x :: _) _ := x
 
 @[simp] theorem first_cons (h: x :: xs ≠ []): head (x :: xs) h = x := rfl
 
 -- everything except first element
-def tail: ∀ lst: mylist T, lst ≠ [] → mylist T
+def tail: Π lst: mylist T, lst ≠ [] → mylist T
 | []        h := absurd rfl h
 | (_ :: xs) _ := xs
 
 @[simp] theorem tail_cons (h: x :: xs ≠ []): tail (x :: xs) h = xs := rfl
 
 -- everything except last element
-def init: ∀ lst: mylist T, lst ≠ [] → mylist T
+def init: Π lst: mylist T, lst ≠ [] → mylist T
 | []             h := absurd rfl h
 | (x :: [])      _ := []
 | (x :: y :: xs) _ := x :: init (y :: xs) cons_not_empty
@@ -209,7 +212,7 @@ theorem init_ccons (h: x :: y :: xs ≠ []):
 init (x :: y :: xs) h = x :: init (y :: xs) cons_not_empty := rfl
 
 -- last element
-def last: ∀ lst: mylist T, lst ≠ [] → T
+def last: Π lst: mylist T, lst ≠ [] → T
 | []             h := absurd rfl h
 | (x :: [])      _ := x
 | (x :: y :: xs) h := last (y :: xs) cons_not_empty
@@ -234,7 +237,7 @@ begin
 end
 
 -- the first n elements
-def take: ∀ n: mynat, ∀ lst: mylist T, n ≤ len lst → mylist T
+def take: Π n: mynat, Π lst: mylist T, n ≤ len lst → mylist T
 | 0        _         _ := []
 | (succ n) []        h := absurd h absurd_succ_le_zero
 | (succ n) (x :: xs) h := x :: take n xs (len_cons_succ_cancel1 h)
@@ -248,7 +251,7 @@ take (succ n) (x :: xs) h
   = x :: take n xs (len_cons_succ_cancel1 h) := rfl
 
 -- everything except the first n elements
-def drop: ∀ n: mynat, ∀ lst: mylist T, n ≤ len lst → mylist T
+def drop: Π n: mynat, Π lst: mylist T, n ≤ len lst → mylist T
 | 0        lst       _ := lst
 | (succ n) []        h := absurd h absurd_succ_le_zero
 | (succ n) (_ :: xs) h := drop n xs (len_cons_succ_cancel1 h)
@@ -267,7 +270,7 @@ begin
 end
 
 -- the nth element
-def get: ∀ n: mynat, ∀ lst: mylist T, n < len lst → T
+def get: Π n: mynat, Π lst: mylist T, n < len lst → T
 | n        []        h := absurd h lt_nzero
 | 0        (x :: _)  _ := x
 | (succ n) (x :: xs) h := get n xs (len_cons_succ_cancel2 h)
@@ -593,8 +596,6 @@ begin
   },
 end
 
--- theorem head_proof_irrelev
-
 theorem take_take
 (hml: m ≤ len lst)
 (hnl_1: n ≤ len (take m lst hml))
@@ -617,6 +618,37 @@ begin
         apply hn,
       },
     },
+  },
+end
+
+theorem drop_drop
+(hml: m ≤ len lst)
+(hnl: n ≤ len (drop m lst hml))
+(hmnl: m + n ≤ len lst):
+drop n (drop m lst hml) hnl = drop (m + n) lst hmnl :=
+begin
+  induction m with m hm generalizing n lst, {
+    simp,
+  }, {
+    cases lst, {
+      exfalso,
+      from succ_ne_zero (le_zero hml),
+    }, {
+      simp,
+      apply hm,
+    },
+  },
+end
+
+theorem drop_one_tail
+(h1l: 1 ≤ len lst)
+(hne: lst ≠ []):
+drop 1 lst h1l = tail lst hne :=
+begin
+  cases lst, {
+    refl,
+  }, {
+    refl,
   },
 end
 

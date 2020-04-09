@@ -19,22 +19,24 @@ def infinitely_many (statement : mynat → Prop) : Prop :=
 variables {m n p k : mynat}
 
 theorem zero_le: 0 ≤ m :=
+exists.intro m (zero_add m).symm
+
+theorem succ_nle_zero: ¬(succ m ≤ 0) :=
 begin
-  existsi m,
-  simp,
+  assume hsm0,
+  cases hsm0 with d hd,
+  from succ_ne_zero (add_integral hd.symm),
 end
 
 theorem le_to_add: m ≤ m + n :=
-begin
-  existsi n,
-  refl,
-end
+exists.intro n rfl
 
-theorem le_succ: m ≤ succ m :=
-begin
-  rw ←add_one_succ,
-  from le_to_add,
-end
+@[refl]
+theorem le_refl: m ≤ m := @le_to_add _ 0
+
+theorem le_eq_refl: m = n → m ≤ n := (λ h, h ▸ le_refl)
+
+theorem le_succ: m ≤ succ m := @le_to_add _ 1
 
 theorem le_comb {a b c d: mynat}: a ≤ b → c ≤ d → a + c ≤ b + d :=
 begin
@@ -44,15 +46,6 @@ begin
   existsi x + y,
   rw [hx, hy, ←add_assoc, add_assoc a x c, add_comm x c],
   repeat {rw add_assoc},
-end
-
--- aka Horn's Lemma
-theorem succ_le_succ: m ≤ n → succ m ≤ succ n :=
-begin
-  assume hmn,
-  cases hmn with k hk,
-  existsi k,
-  simp [hk],
 end
 
 theorem le_add (k: mynat): m ≤ n → m + k ≤ n + k :=
@@ -65,6 +58,42 @@ begin
   rw add_comm d k,
 end
 
+theorem le_add_converse (k: mynat): ¬(m ≤ n) → ¬(m + k ≤ n + k) :=
+begin
+  assume hnot hmknk,
+  apply hnot,
+  cases hmknk with d hd,
+  existsi d,
+  rw [add_assoc, add_comm k, ←add_assoc] at hd,
+  from add_cancel_right hd,
+end
+
+-- aka Horn's Lemma
+theorem succ_le_succ: m ≤ n → succ m ≤ succ n :=
+le_add 1
+
+theorem sls_converse: ¬(m ≤ n) → ¬(succ m ≤ succ n) :=
+le_add_converse 1
+
+instance decidable_le: ∀ m n: mynat, decidable (m ≤ n) :=
+begin
+  intros m n,
+  induction m with m hm generalizing n, {
+    from is_true zero_le,
+  }, {
+    induction n with n hn generalizing m, {
+      from is_false succ_nle_zero,
+    }, {
+      cases (hm n) with hnot h, {
+        from is_false (sls_converse hnot),
+      }, {
+        from is_true (succ_le_succ h),
+      },
+    },
+  },
+end
+
+@[trans]
 theorem le_trans: m ≤ n → n ≤ k → m ≤ k :=
 begin
   assume hmn hnk,
@@ -204,20 +233,15 @@ begin
   from le_trans hmn (le_to_mul k hkn0),
 end
 
--- for some reason it breaks some other theorems if you add @[refl]
--- here
-theorem le_refl: m ≤ m :=
-begin
-  existsi (0: mynat),
-  refl,
-end
-
 theorem le_zero: m ≤ 0 → m = 0 :=
 begin
   assume hmlz,
   cases hmlz with d hd,
   from add_integral hd.symm,
 end
+
+theorem le_zero_iff: m ≤ 0 ↔ m = 0 :=
+iff.intro le_zero le_eq_refl
 
 theorem le_succ_cancel: succ m ≤ succ n → m ≤ n :=
 begin
@@ -283,26 +307,6 @@ begin
   have heq := le_antisymm hle hknkm,
   have := mul_cancel hk0 heq,
   rw this,
-  from le_refl,
-end
-
-theorem lem_nat_eq: m = n ∨ m ≠ n :=
-begin
-  wlog_le m n with hs hmn, {
-    cases hs with hnm hnnm,
-      left, from hnm.symm,
-    right,
-    assume hnm,
-    from hnnm hnm.symm,
-  }, {
-    cases hmn with d hd,
-    cases d,
-      simp [hd],
-    right,
-    rw hd,
-    assume hmn,
-    from succ_ne_zero (add_cancel_to_zero hmn.symm),
-  },
 end
 
 end hidden

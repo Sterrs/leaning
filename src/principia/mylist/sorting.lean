@@ -119,32 +119,15 @@ begin
   from this, -- too lazy to change indentation
 end
 
-theorem empty_perm: is_perm [] [] :=
-begin
-  intro m,
-  refl,
-end
+theorem empty_perm: is_perm [] [] := (λ _, rfl)
 
-theorem singleton_perm: is_perm [x] [x] :=
-begin
-  intro m,
-  refl,
-end
+theorem singleton_perm: is_perm [x] [x] := (λ _, rfl)
 
-theorem perm_refl: is_perm lst lst :=
-begin
-  intro m,
-  refl,
-end
+theorem perm_refl: is_perm lst lst := (λ _, rfl)
 
 theorem perm_symm:
 is_perm lst1 lst2 → is_perm lst2 lst1 :=
-begin
-  assume hp12,
-  intro m,
-  symmetry,
-  from hp12 m,
-end
+(λ hp12 m, (hp12 m).symm)
 
 theorem cons_perm:
 is_perm xs ys → is_perm (x :: xs) (x :: ys) :=
@@ -152,13 +135,7 @@ begin
   assume hpxsys,
   intro m,
   dsimp [count],
-  cases (@lem_nat_eq m x) with hmx hmnx, {
-    repeat {rw if_pos hmx},
-    rw hpxsys m,
-  }, {
-    repeat {rw if_neg hmnx},
-    from hpxsys m,
-  },
+  rw hpxsys m,
 end
 
 theorem perm_trans:
@@ -194,11 +171,11 @@ begin
     rw [count_empty, zero_add, empty_concat],
   }, {
     dsimp [count],
-    cases (@lem_nat_eq m x) with hmx hmnx, {
-      repeat {rw if_pos hmx},
+    by_cases (m = x), {
+      repeat {rw if_pos h},
       rw [h_ih, succ_add],
     }, {
-      repeat {rw if_neg hmnx},
+      repeat {rw if_neg h},
       from h_ih,
     },
   },
@@ -218,21 +195,21 @@ is_perm (x :: y :: []) (y :: x :: []) :=
 begin
   intro m,
   dsimp [count],
-  cases (@lem_nat_eq m x) with hmx hmnx, {
+  by_cases hmx: m = x, {
     repeat {rw if_pos hmx},
-    cases (@lem_nat_eq m y) with hmy hmny, {
+    by_cases hmy:m = y, {
       repeat {rw if_pos hmy},
     }, {
-      repeat {rw if_neg hmny},
+      repeat {rw if_neg hmy},
       refl,
     },
   }, {
-    repeat {rw if_neg hmnx},
-    cases (@lem_nat_eq m y) with hmy hmny, {
+    repeat {rw if_neg hmx},
+    by_cases hmy: m = y, {
       repeat {rw if_pos hmy},
       refl,
     }, {
-      repeat {rw if_neg hmny},
+      repeat {rw if_neg hmy},
     },
   },
 end
@@ -259,11 +236,11 @@ begin
   }, {
     assume h,
     dsimp [insert_aux],
-    cases le_lem x y with hxy hnxy, {
+    by_cases hxy: x ≤ y, {
       rw if_pos hxy,
       from cons_sorted hxy h,
     }, {
-      rw if_neg hnxy,
+      rw if_neg hxy,
       cases hz: insert_aux x ys with z zs, {
         from singleton_sorted,
       }, {
@@ -274,15 +251,15 @@ begin
               from cons_injective_1 hz,
             },
             rw ←this,
-            from lt_impl_le hnxy,
+            from lt_impl_le hxy,
           }, {
             dsimp [insert_aux] at hz,
-            cases (le_lem x y') with hxy' hnxy', {
+            by_cases hxy': x ≤ y', {
               rw if_pos hxy' at hz,
               rw ←(cons_injective_1 hz),
-              from lt_impl_le hnxy,
+              from lt_impl_le hxy,
             }, {
-              rw if_neg hnxy' at hz,
+              rw if_neg hxy' at hz,
               rw ←(cons_injective_1 hz),
               apply h 0 1 _ _, {
                 dsimp [len],
@@ -322,11 +299,11 @@ begin
     from singleton_perm,
   }, {
     dsimp [insert_aux],
-    cases (le_lem x x') with hxx' hnxx', {
+    by_cases hxx': x ≤ x', {
       rw if_pos hxx',
       from perm_refl,
     }, {
-      rw if_neg hnxx',
+      rw if_neg hxx',
       apply perm_trans _ (cons_perm h_ih),
       from perm_concat duo_perm perm_refl,
     },
@@ -351,6 +328,228 @@ sort_alg_correct insertion_sort :=
   and.intro
     insertion_sort_is_sorted insertion_sort_is_perm)
 
+-- more theory about permutations/sorted lists
+
+theorem perm_concat_swap:
+is_perm (xs ++ ys) (ys ++ xs) :=
+begin
+  intro m,
+  rw count_concat,
+  rw count_concat,
+  rw add_comm,
+end
+
+theorem rev_perm: is_perm lst (rev lst) :=
+begin
+  induction lst with head tail h_ih, {
+    from empty_perm,
+  }, {
+    from perm_trans
+          (cons_perm h_ih)
+          (@perm_concat_swap [head] (rev tail)),
+  },
+end
+
+-- is switching away from recursive definitions a good idea? who knows
+
+def slice:
+  Π m n: mynat,
+    Π lst: mylist T,
+      m ≤ n →
+        n ≤ len lst → mylist T :=
+(λ m n lst hmn hnl,
+  -- really I just want to use the witness to m ≤ n here
+  take (n - m)
+    (drop m lst (le_trans hmn hnl))
+    begin
+      cases hmn with d hd,
+      conv in n {rw hd},
+      rw add_comm,
+      rw add_sub,
+      apply @le_cancel _ _ m,
+      rw len_drop,
+      rw add_comm,
+      rw ←hd,
+      from hnl,
+    end)
+
+-- swap elements at two indices (m and n resp.) in a list.
+-- Cannot be the same index.
+-- Require one index less than the other for convenience.
+-- maybe define wrapper function?? but makes proofs harder
+def swap_elems:
+Π (m n: mynat) (lst: mylist T), m < n → n < len lst → mylist T
+:= (λ m n lst hmn hnl,
+    take m lst (lt_impl_le (lt_trans hmn hnl))
+    ++ [get n lst hnl]
+    ++ slice (succ m) n lst (lt_iff_succ_le.mp hmn)
+                            (lt_impl_le hnl)
+    ++ [get m lst (lt_trans hmn hnl)]
+    ++ drop (succ n) lst (lt_iff_succ_le.mp hnl))
+
+theorem len_slice
+(hmn: m ≤ n)
+(hnl: n ≤ len lst):
+len (slice m n lst hmn hnl) + m = n :=
+begin
+  unfold slice,
+  rw len_take,
+  cases hmn with d hd,
+  rw hd,
+  rw add_comm m d,
+  rw add_sub,
+end
+
+theorem len_swap
+(hmn: m < n)
+(hnl: n < len lst):
+len (swap_elems m n lst hmn hnl) = len lst :=
+begin
+  unfold swap_elems,
+  repeat {rw len_concat_add},
+  rw len_take,
+  rw len_singleton,
+  rw len_singleton,
+  conv {
+    congr,
+    congr,
+    congr,
+    rw add_one_succ,
+    rw add_comm,
+    rw len_slice,
+  },
+  rw add_one_succ,
+  rw add_comm,
+  rw len_drop,
+end
+
+-- good god working with equivalence relations is a pain
+theorem swap_perm
+(hmn: m < n)
+(hnl: n < len lst):
+is_perm lst (swap_elems m n lst hmn hnl) :=
+begin
+  have hml := lt_trans hmn hnl,
+  have hml_ns := lt_impl_le hml,
+  have hnl_ns := lt_impl_le hnl,
+  unfold swap_elems,
+  conv {
+    congr,
+    rw ←take_concat_drop hml_ns hml_ns,
+  },
+  repeat {rw concat_assoc},
+  apply perm_concat perm_refl,
+  have hdmlne: drop m lst hml_ns ≠ [], {
+    assume h,
+    have h2: len lst = m, {
+      rw ←@len_drop _ _ m,
+      rw h,
+      from zero_add m,
+    },
+    rw h2 at hml,
+    from lt_nrefl hml,
+  },
+  have hrw := @cons_head_tail _ (drop m lst hml_ns) hdmlne,
+  have hrw2 := get_head_drop hml_ns hml hdmlne,
+  conv {
+    congr,
+    rw ←hrw,
+    rw ←hrw2,
+  }, clear hrw hrw2,
+  apply perm_trans _ perm_concat_swap,
+  apply
+    @perm_trans _
+      (tail (drop m lst hml_ns) hdmlne ++ [get m lst hml])
+      _ perm_concat_swap,
+  unfold slice,
+  rw ←@drop_one_tail _ (drop m lst hml_ns)
+    begin
+      cases drop m lst hml_ns, {
+        contradiction,
+      }, {
+        apply succ_le_succ,
+        from zero_le,
+      },
+    end,
+  rw @drop_drop _ _ m 1 _ _ (lt_iff_succ_le.mp hml),
+  conv in (m + 1) {rw add_one_succ},
+  have hdl:
+    ∀ hsml: succ m ≤ len lst,
+      n - succ m ≤ len (drop (succ m) lst hsml), {
+    assume _,
+    cases (lt_iff_succ_le.mp hmn) with k hk,
+    rw hk,
+    rw add_comm,
+    rw add_sub,
+    apply @le_cancel _ _ (succ m),
+    rw len_drop,
+    rw add_comm,
+    rw ←hk,
+    from lt_impl_le hnl,
+  },
+  conv {
+    congr,
+    congr,
+    rw ←@take_concat_drop _ (drop (succ m) lst _) (n - succ m) (hdl _) (hdl _),
+  },
+  rw concat_assoc,
+  rw concat_assoc,
+  apply perm_concat perm_refl,
+  have hrw:
+      succ m + (n - succ m) = n, {
+    cases (lt_iff_succ_le.mp hmn) with k hk,
+    rw hk,
+    rw add_comm _ k,
+    rw add_sub,
+    rw add_comm,
+  },
+  rw @drop_drop _ lst (succ m) (n - succ m)
+                (lt_iff_succ_le.mp hml) (hdl _)
+                (hrw.symm ▸ lt_impl_le hnl),
+  conv {
+    congr,
+    congr,
+    congr,
+    rw hrw,
+  },
+  have hdnlne: drop n lst hnl_ns ≠ [], {
+    assume h,
+    have h2: len lst = n, {
+      rw ←@len_drop _ _ n,
+      rw h,
+      from zero_add n,
+    },
+    rw h2 at hnl,
+    from lt_nrefl hnl,
+  },
+  have hrw2 := @cons_head_tail _ (drop n lst hnl_ns) hdnlne,
+  have hrw3 := @get_head_drop _ lst n hnl_ns hnl hdnlne,
+  conv {
+    congr,
+    congr,
+    rw ←hrw2,
+    rw ←hrw3,
+  },
+  apply perm_trans perm_concat_swap,
+  rw concat_assoc,
+  apply perm_concat perm_refl,
+  apply perm_trans _ perm_concat_swap,
+  apply @perm_concat _ _ [get n lst hnl] _ perm_refl,
+  rw ←@drop_one_tail _ (drop n lst hnl_ns)
+    begin
+      cases drop n lst hnl_ns, {
+        contradiction,
+      }, {
+        apply succ_le_succ,
+        from zero_le,
+      },
+    end,
+  rw @drop_drop _ _ n 1 _ _ (lt_iff_succ_le.mp hnl),
+  from perm_refl,
+end
+
+-- TODO: all this hypothesis-slinging is getting a bit ugly
+
 theorem perm_len:
 is_perm lst1 lst2 → len lst1 = len lst2 :=
 begin
@@ -358,9 +557,8 @@ begin
 end
 
 theorem is_perm_sorted_eq:
-sort_alg_correct alg
-  → is_perm lst1 lst2
-    → alg lst1 = alg lst2 :=
+is_perm lst1 lst2 → is_sorted lst1 → is_sorted lst2
+  → lst1 = lst2 :=
 begin
   sorry,
 end
