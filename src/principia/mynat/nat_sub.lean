@@ -66,6 +66,7 @@ begin
 end
 
 -- Watch out, similar things do not hold, e.g. (5 - 6) + 6 ≠ 5
+-- see also sub_add_condition
 @[simp]
 theorem add_sub: (m + n) - n = m :=
 begin
@@ -79,6 +80,28 @@ end
 @[simp]
 theorem succ_sub_one:
 (succ m) - 1 = m := by rwa [←add_one_succ, add_sub]
+
+-- the exact condition for cancellation to occur in subtraction-addition.
+-- Mechanically, this proof is not so interesting, but this formulation
+-- can be quite fruitful to keep in mind, and this theorem can save some
+-- time
+theorem sub_add_condition:
+(m - n) + n = m ↔ n ≤ m :=
+begin
+  split, {
+    assume h,
+    existsi m - n,
+    rw add_comm,
+    symmetry,
+    assumption,
+  }, {
+    assume h,
+    cases h with d hd,
+    rw hd,
+    rw add_comm n d,
+    rw add_sub,
+  },
+end
 
 theorem sub_zero_iff_le: m - n = 0 ↔ m ≤ n :=
 begin

@@ -771,6 +771,61 @@ begin
   },
 end
 
+-- this has some things in common with both the binomial theorem
+-- and the sum of a GP. Particularly, it's more or less a consequence
+-- of the sum of a GP with common ratio in ℚ.
+-- However it admits this (superficially) inductionless proof.
+-- Note also that this subtraction is not what it may seem
+theorem difference_of_powers:
+a ^ succ n - b ^ succ n
+  = (a - b) * sum (λ k, a ^ k * b ^ (n - k)) (succ n) :=
+begin
+  rw sub_mul,
+  rw ←mul_sum',
+  rw ←mul_sum',
+  rw sum_succ,
+  rw sum_tail,
+  rw sub_self_eq_zero,
+  rw pow_zero,
+  rw mul_one,
+  rw pow_zero,
+  rw one_mul,
+  rw sub_zero,
+  have hrw:
+    ∀ a k, k < n →
+      (λ k,
+        b * (a ^ succ k * b ^ (n - succ k))
+      ) k =
+      (λ k,
+        a * (a ^ k * b ^ (n - k))
+      ) k, {
+    intros a k,
+    assume hkn,
+    repeat {rw lambda_subs},
+    rw ←mul_assoc,
+    rw mul_comm b,
+    rw mul_assoc,
+    rw ←pow_succ,
+    rw pow_succ a,
+    rw mul_assoc,
+    suffices h: n - k = succ (n - succ k), {
+      rw h,
+    }, {
+      rw sub_succ_rearrange,
+      rw succ_add,
+      rw ←add_succ,
+      symmetry,
+      from sub_add_condition.mpr (lt_iff_succ_le.mp hkn),
+    },
+  },
+  rw (sum_cancel_restricted _ _ _).mpr (hrw a) _ le_refl,
+  clear hrw,
+  rw sub_distr,
+  rw add_comm,
+  rw add_sub,
+  repeat {rw pow_succ},
+end
+
 -- TODO: some sort of cross-over episode with bijections
 
 end naturals
