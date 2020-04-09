@@ -38,6 +38,8 @@ theorem neg_neg_add: -[1+ a] + -[1+ b] = -[1+ succ (a + b)] := rfl
 
 theorem of_nat_succ_add_one: of_nat (succ a) = of_nat a + 1 := rfl
 
+theorem sub_add_neg: m - n = m + (-n) := rfl
+
 @[simp]
 theorem add_comm: ∀ {m n : myint}, m + n = n + m
 | (of_nat a) (of_nat b) :=
