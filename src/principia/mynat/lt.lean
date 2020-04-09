@@ -153,7 +153,7 @@ begin
     cases hmn with d hd,
     cases d, {
       simp at hd,
-     right, rw hd,
+      right, rw hd,
     }, {
       left,
       rw hd,
@@ -165,6 +165,29 @@ begin
      from lt_impl_le hmnmn,
     }, {
       rw hmnmn,
+    },
+  },
+end
+
+theorem lt_iff_le_and_neq: m < n ↔ m ≤ n ∧ m ≠ n :=
+begin
+  split, {
+    assume hmn,
+    apply and.intro (lt_impl_le hmn),
+    assume h,
+    rw h at hmn,
+    from lt_nrefl hmn,
+  }, {
+    assume h,
+    cases h with hmn hneq,
+    cases hmn with d hd,
+    cases d, {
+      exfalso,
+      from hneq hd.symm,
+    }, {
+      rw lt_iff_succ_le,
+      rw [hd, add_succ, ←succ_add],
+      from le_to_add,
     },
   },
 end

@@ -169,15 +169,25 @@ begin
   },
 end
 
-theorem nonempty_iff_len: lst ≠ [] ↔ len lst ≠ 0 :=
+theorem empty_iff_len_zero: lst = [] ↔ len lst = 0 :=
 begin
-  cases lst, {
-    simp,
+  split, {
+    assume h,
+    rw h,
+    refl,
   }, {
-    simp,
-    from succ_ne_zero,
+    assume h,
+    cases lst, {
+      refl,
+    }, {
+      exfalso,
+      from succ_ne_zero h,
+    },
   },
 end
+
+theorem nonempty_iff_len_nonzero: lst ≠ [] ↔ len lst ≠ 0 :=
+iff_to_contrapositive empty_iff_len_zero
 
 theorem rev_not_empty: lst ≠ [] → rev lst ≠ [] :=
 begin

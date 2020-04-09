@@ -728,7 +728,83 @@ theorem is_perm_sorted_eq:
 is_perm lst1 lst2 → is_sorted lst1 → is_sorted lst2
   → lst1 = lst2 :=
 begin
-  sorry,
+  assume hp12 hs1 hs2,
+  have hl12 := perm_len hp12,
+  induction hl: len lst1 with n hn generalizing lst1 lst2, {
+    rw [zz, ←empty_iff_len_zero] at hl,
+    rw hl,
+    rw hl at hp12,
+    symmetry,
+    from empty_perm_is_empty (perm_symm hp12),
+  }, {
+    cases lst1 with x xs, {
+      contradiction,
+    }, {
+      cases lst2 with y ys, {
+        contradiction,
+      }, {
+        have hxy: x = y, {
+          -- note this is not use of classical reasoning, since
+          -- we know = is decidable
+          by_contradiction hxy',
+          -- note sure if it would be worth it to use wlog or not
+          -- is_sorted (y :: xs) seems like a pain to prove
+          by_cases hxy'': x ≤ y, {
+            have hxly := lt_iff_le_and_neq.mpr ⟨hxy'', hxy'⟩,
+            have h :=
+              hs2 0 (index x (y :: ys)
+                begin
+                  rw ←hp12 x,
+                  rw count_head_eq,
+                  from succ_ne_zero,
+                end)
+                (index_valid _)
+                begin
+                  unfold index,
+                  rw dif_neg hxy',
+                  from zero_lt_succ,
+                end,
+            rw get_zero_cons at h,
+            rw get_index at h,
+            contradiction,
+          }, {
+            have h :=
+              hs1 0 (index y (x :: xs)
+                begin
+                  rw hp12 y,
+                  rw count_head_eq,
+                  from succ_ne_zero,
+                end)
+                (index_valid _)
+                begin
+                  unfold index,
+                  have : ¬y = x, {
+                    assume h,
+                    from hxy' h.symm,
+                  },
+                  rw dif_neg this,
+                  from zero_lt_succ,
+                end,
+            rw get_zero_cons at h,
+            rw get_index at h,
+            contradiction,
+          },
+        },
+        rw hxy,
+        simp,
+        apply hn _ (tail_sorted hs1) (tail_sorted hs2), {
+          simp at hl12,
+          assumption,
+        }, {
+          simp at hl,
+          assumption,
+        }, {
+          rw hxy at hp12,
+          from perm_head_cancel hp12,
+        },
+      }
+    }
+  }
 end
 
 end hidden
