@@ -647,8 +647,8 @@ begin
       rw sub_succ_succ,
     },
     rw [(sum_cancel_restricted _ _ _).mpr
-          (hrw a) (succ n) le_refl, clear hrw,
-        sum_succ, sum_tail, sum_succ, sum_tail],
+          (hrw a) (succ n) le_refl,
+        sum_succ, sum_tail, sum_succ, sum_tail], clear hrw,
     -- convs rearranging
     conv {
       congr,
