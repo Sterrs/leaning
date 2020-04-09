@@ -76,6 +76,8 @@ theorem zero_lt_succ: 0 < succ m := succ_nle_zero
 theorem lt_add: m < n → m + k < n + k :=
 mp_to_contrapositive le_cancel
 
+theorem succ_lt_succ: m < n → succ m < succ n := @lt_add _ _ 1
+
 theorem lt_impl_le: m < n → m ≤ n :=
 begin
   assume hmn,

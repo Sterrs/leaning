@@ -105,6 +105,12 @@ theorem len_cons_succ: len (x :: xs) = succ (len xs) := rfl
 @[simp]
 theorem len_singleton: len [x] = 1 := len_cons_succ
 
+theorem len_of_refl: lst1 = lst2 → len lst1 = len lst2 :=
+begin
+  assume h,
+  rw h,
+end
+
 @[simp]
 theorem len_concat_add: len (lst1 ++ lst2) = len lst1 + len lst2 :=
 begin
