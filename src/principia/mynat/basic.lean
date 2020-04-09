@@ -122,6 +122,22 @@ begin
   cases h,
 end
 
+theorem nzero_iff_succ: m ≠ 0 ↔ ∃ n, m = succ n :=
+begin
+  split; assume h, {
+    cases m,
+      rw zz at h,
+      have : 0 = 0, refl,
+      contradiction,
+    existsi m,
+    refl,
+  }, {
+    cases h with n h,
+    rw h,
+    from succ_ne_zero,
+  },
+end
+
 theorem add_integral: ∀ {m n : mynat}, m + n = 0 → m = 0
 | zero     _ := by simp
 | (succ m) n :=

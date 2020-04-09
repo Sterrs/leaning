@@ -178,6 +178,15 @@ begin
   }
 end
 
+theorem sub_succ_lt: m ≠ 0 → m - succ n < m :=
+begin
+  assume h,
+  rw nzero_iff_succ at h,
+  cases h with k h,
+  rw [h, sub_succ_succ, ←le_iff_lt_succ],
+  from sub_le,
+end
+
 theorem sub_from_le: m ≤ n → m - k ≤ n :=
 begin
   assume hmn,

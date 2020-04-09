@@ -33,6 +33,9 @@ mp_to_contrapositive (le_cancel_strong k)
 theorem nzero_iff_zero_lt: m ≠ 0 ↔ 0 < m :=
 iff_to_contrapositive le_zero_iff.symm
 
+theorem zero_lt_iff_succ: 0 < m ↔ ∃ n, m = succ n :=
+by rw ←nzero_iff_zero_lt; from nzero_iff_succ
+
 theorem lt_to_add_succ: m < m + succ n :=
 begin
   assume hmmsn,
@@ -282,6 +285,26 @@ begin
   assume hlt hnlem,
   have := le_square hnlem,
   contradiction,
+end
+
+theorem lt_le_chain (n : mynat): m < n → n ≤ k → m < k :=
+begin
+  assume hmn hnk,
+  rw lt_iff_succ_le at hmn,
+  rw lt_iff_succ_le,
+  transitivity n,
+    assumption,
+  assumption,
+end
+
+theorem le_lt_chain (n : mynat): m ≤ n → n < k → m < k :=
+begin
+  assume hmn hnk,
+  rw lt_iff_succ_le at hnk,
+  rw le_iff_lt_succ at hmn,
+  apply lt_le_chain (succ n),
+    assumption,
+  assumption,
 end
 
 end hidden
