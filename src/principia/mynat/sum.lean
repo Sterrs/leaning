@@ -15,6 +15,7 @@ open mynat
 -- prove that the sums of a k-th degree polynomial are a k+1th degree
 -- polynomial
 
+-- TODO: Move basic definitions to directory above
 def sequence (α : Type) := mynat → α
 
 namespace sequence
@@ -123,6 +124,14 @@ begin
   },
 end
 
+theorem apply_sum: (∀ n, f n = g n) → sum f k = sum g k :=
+begin
+  assume h,
+  induction k with k hk,
+    refl,
+  rw [sum_succ, sum_succ, h k, hk],
+end
+
 private def two : 2 = succ (succ 0) := rfl
 
 -- phrased in a way that avoids rationals and subtraction :)
@@ -224,6 +233,7 @@ theorem fibonacci_sum: ∀ n, (sum fib (n+1)) + 1 = (fib (n + 2))
       succ_add, fib_succsucc, ←add_one_succ, add_assoc n, ←two_one],
 }
 
+-- TODO: This is not the right file for this.
 -- binomial coefficients, defined via Pascal's triangle,
 -- so's to avoid subtraction, or worse, division!
 def binom: mynat → mynat → mynat
@@ -696,6 +706,18 @@ begin
     repeat {rw lambda_subs},
     rw [sub_succ_succ, binom_succ_succ, ←add_mul, ←add_mul],
   },
+end
+
+-- Lovely corollary
+theorem binom_sum:
+sum (λ k, binom n k) (succ n) = 2^n :=
+begin
+  have hbithm := @binomial_theorem (1:mynat) 1 n,
+  rw ←two_one at hbithm,
+  rw hbithm,
+  apply apply_sum,
+  assume n,
+  rw [one_pow, one_pow, mul_one, mul_one],
 end
 
 theorem sum_reverse:
