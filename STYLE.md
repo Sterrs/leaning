@@ -49,6 +49,7 @@ Just a rough guide as to what style we're trying to use
   an if and only if, as this allows `rw` to work with it
 - Use `intro(s)` to introduce conventional mathematical objects (like numbers
   or lists) and `assume` to introduce hypotheses (instances of propositions).
+- Use `dsimp only []` to expand lambda expressions
 
 More general tips/useful things not to forget:
 
