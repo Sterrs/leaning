@@ -31,6 +31,14 @@ theorem neg_nat_le: -[1+ a] ≤ ↑b := by trivial
 @[simp]
 theorem neg_neg_le: -[1+ a] ≤ -[1+ b] ↔ b ≤ a := by trivial
 
+instance decidable_le: ∀ m n : myint, decidable (m ≤ n)
+| (of_nat a) (of_nat b) :=
+by rw [←coe_nat_eq, ←coe_nat_eq, nat_nat_le]; apply_instance
+| (of_nat a) -[1+ b] := is_false nat_neg_le
+| -[1+ a] (of_nat b) := is_true neg_nat_le
+| -[1+ a] -[1+ b] :=
+by rw neg_neg_le; apply_instance
+
 theorem le_refl: ∀ {m : myint}, m ≤ m
 | (of_nat a) := by rw [←coe_nat_eq, nat_nat_le]; from hidden.le_refl
 | -[1+ a] := by rw [neg_neg_le]; from hidden.le_refl
