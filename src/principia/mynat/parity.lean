@@ -140,14 +140,17 @@ begin
   assumption,
 end
 
-theorem even_or_odd (m: mynat): even m ∨ odd m :=
+instance even_decidable: ∀ m : mynat, decidable (even m) :=
 begin
-  induction m with m_n m_ih, {
-    left, from even_zero,
+  intro m,
+  induction m with m hm, {
+    from is_true even_zero,
   }, {
-    cases m_ih with hem hom,
-    right, from succ_even_is_odd hem,
-    left, from succ_odd_is_even hom,
+    cases hm, {
+      from is_true (succ_odd_is_even hm),
+    }, {
+      from is_false (succ_even_is_odd hm),
+    },
   },
 end
 
@@ -240,7 +243,7 @@ end
 -- basically we can do excluded middle without any of the classical
 theorem even_square: even (m * m) → even m :=
 begin
-  cases (even_or_odd m), {
+  by_cases (even m), {
     assume _,
     assumption,
   }, {
