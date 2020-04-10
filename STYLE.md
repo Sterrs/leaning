@@ -67,3 +67,7 @@ More general tips/useful things not to forget:
 - When a proof boils down to `cases` or `induction`, it's probably
   worth using | construction to make it a bit more explicit which cases
   are being covered, and to shorten the proof.
+- Use `ac_refl` to resolve goals which are equalities dependent only upon
+  commutativity and associativity of operations.
+- If h is an equality, try using `subst h` to rewrite everything using
+  it and then delete it.
