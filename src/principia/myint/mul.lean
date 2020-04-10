@@ -269,13 +269,52 @@ begin
   },
 end
 
+private lemma something_add_one (m : myint): ∃ n, m = n + 1 :=
+by existsi (m + (-1)); rw [add_assoc, neg_self_add, add_zero]
+
+private lemma something_sub_one (m : myint): ∃ n, m = n + -1 :=
+by existsi (m + 1); rw [add_assoc, self_neg_add, add_zero]
+
+-- This proof caused some big problems. What's actually going on here is I'm
+-- using a DIY form of `generalizing` from the `induction` tactic.
+-- The argument is precisely the same as the one used for mynat, which I used
+-- for inspiration
 theorem mul_cancel: m ≠ 0 → m * n = m * k → n = k :=
 begin
-  assume hmne0 h,
-  cases m,
-    sorry,
-  rw [←neg_coe_succ] at h,
-  sorry,
+  revert n,
+  -- Shorthand, then I used `dsimp only [p]` to expand when needed
+  let p : myint → Prop := λ n : myint, ∀ m k, m ≠ 0 → m * n = m * k → n = k,
+  -- apply intduction (λ n, ∀ m k, m * n = m * k → n = k),
+  have h0 : p 0, {
+    intros a b,
+    assume han0 h,
+    rw [mul_zero] at h,
+    cases mul_integral h.symm,
+      symmetry, assumption,
+    contradiction,
+  },
+  have hnext : ∀ n : myint, p n → p (n + 1), {
+    intro n,
+    assume h,
+    intros a b,
+    cases something_add_one b with j hj,
+    subst hj,
+    rw [mul_add, mul_add, add_cancel, add_cancel],
+    from h _ _,
+  },
+  have hprev : ∀ n : myint, p n → p (n - 1), {
+    intro n,
+    assume h,
+    intros a b,
+    cases something_sub_one b with j hj,
+    subst hj,
+    rw [sub_add_neg, mul_add, mul_add, add_cancel, add_cancel],
+    from h _ _,
+  },
+  have h := intduction p h0 hnext hprev,
+  intro n,
+  have := h n,
+  from this m k,
 end
 
 end myint
