@@ -78,6 +78,8 @@ by rw [←coe_nat_eq, nat_neg_mul, neg_nat_mul, hidden.mul_comm]
 | -[1+ a] -[1+ b] :=
 by rw [neg_neg_mul, neg_neg_mul, hidden.mul_comm]
 
+instance mul_is_comm: is_commutative myint mul := ⟨assume a b, mul_comm⟩
+
 -- rfl is magic
 -- This is a "helper" lemma for mul_assoc
 private lemma mul_neg_nat: ∀ {m:myint} {a:mynat}, m * -↑a = -(m * ↑a)
@@ -116,6 +118,9 @@ by rw [←coe_nat_eq, neg_neg_mul, neg_nat_mul, mul_neg_nat, neg_nat_mul,
        neg_neg, nat_nat_mul, hidden.mul_assoc]
 | -[1+ a]    -[1+ b]    -[1+ c]    := by
 rw [neg_neg_mul, neg_neg_mul, nat_neg_mul, neg_nat_mul, hidden.mul_assoc]
+
+instance mul_is_assoc: is_associative myint mul :=
+⟨assume a b c, mul_assoc⟩
 
 theorem mul_neg : m * (-n) = - (m * n) :=
 by rw [←mul_neg_one, ←mul_assoc, ←@neg_one_mul (m*n), mul_comm]
@@ -162,13 +167,13 @@ begin
     rw zero_add,
   }, {
     assume m hi,
-    rw [add_one_mul, add_one_mul, add_one_mul, hi, add_assoc,
-        ←@add_assoc (m*k), @add_comm (m*k), @add_assoc n, ←add_assoc],
+    rw [add_one_mul, add_one_mul, add_one_mul, hi],
+    ac_refl,
   }, {
     assume m hi,
     rw [sub_one_mul, sub_one_mul, sub_one_mul, hi, sub_add_neg,
-        neg_distr, sub_add_neg, sub_add_neg, add_assoc,
-        ←@add_assoc (m*k), @add_comm (m*k), @add_assoc (-n), ←add_assoc],
+        neg_distr, sub_add_neg, sub_add_neg],
+    ac_refl,
   },
 end
 
@@ -245,7 +250,7 @@ begin
       cases hm with a ha,
       cases hn with b hb,
       cases ha; cases hb,
-      all_goals { rw [ha, hb] at h }, {
+      all_goals { subst ha, subst hb, }, {
         rw [nat_nat_mul, ←zero_nat, of_nat_cancel] at h,
         from succ_times_succ_nzero h,
       }, {

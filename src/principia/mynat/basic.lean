@@ -72,10 +72,16 @@ theorem add_assoc: ∀ m n k : mynat, (m + n) + k = m + (n + k)
 | m n zero     := rfl
 | m n (succ k) := by rw [add_succ, add_succ, add_succ, add_assoc]
 
+instance add_is_assoc: is_associative mynat add :=
+⟨assume a b c, add_assoc a b c⟩
+
 @[simp]
 theorem add_comm: ∀ m n : mynat, m + n = n + m
 | m zero     := by rw [zz, add_zero, zero_add]
 | m (succ n) := by rw [add_succ, succ_add, add_comm]
+
+instance add_is_comm: is_commutative mynat add :=
+⟨assume a b, add_comm a b⟩
 
 @[simp] theorem add_one_succ: m + 1 = succ m := rfl
 

@@ -52,6 +52,9 @@ by rw [←coe_nat_eq, neg_nat_add, nat_neg_add]
 | -[1+ a]    -[1+ b]    :=
 by rw [neg_neg_add, neg_neg_add, hidden.add_comm]
 
+instance add_is_comm: is_commutative myint add :=
+⟨assume a b, add_comm⟩
+
 @[simp]
 theorem zero_add: ∀ m : myint, 0 + m = m
 | (of_nat m) := by rw [←zero_nat, ←coe_nat_eq,
@@ -225,6 +228,9 @@ end
 | -[1+ a]    -[1+ b]    -[1+ c]    :=
 by repeat {rw neg_neg_add};
   rw [neg_succ_of_nat_cancel, succ_add, add_succ, hidden.add_assoc]
+
+instance add_is_assoc: is_associative myint add :=
+⟨assume a b c, add_assoc⟩
 
 theorem neg_distr: ∀ {m n : myint}, -(m + n) = -m + -n
 | (of_nat a) (of_nat b) :=
