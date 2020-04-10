@@ -162,7 +162,7 @@ theorem sub_self: ∀ a, sub_nat_nat a a = 0
 
 lemma neg_eq_minus: neg m = -m := rfl
 
-private theorem neg_coe_eq_neg_of_nat: -(↑a) = neg_of_nat a := rfl
+theorem neg_coe_eq_neg_of_nat: -(↑a) = neg_of_nat a := rfl
 
 private theorem neg_neg_of_nat: ∀ {a}, -neg_of_nat a = ↑a
 | zero     := rfl

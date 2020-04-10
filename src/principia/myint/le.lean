@@ -39,6 +39,7 @@ by rw [←coe_nat_eq, ←coe_nat_eq, nat_nat_le]; apply_instance
 | -[1+ a] -[1+ b] :=
 by rw neg_neg_le; apply_instance
 
+@[refl]
 theorem le_refl: ∀ {m : myint}, m ≤ m
 | (of_nat a) := by rw [←coe_nat_eq, nat_nat_le]; from hidden.le_refl
 | -[1+ a] := by rw [neg_neg_le]; from hidden.le_refl
@@ -66,34 +67,41 @@ begin
       neg_distr, add_assoc, neg_self_add, add_zero],
 end
 
--- Reverse implication
-private lemma le_add_rhs_coe: ∀ {m n : myint}, m ≤ n → m ≤ n + ↑c
+private lemma le_add_rhs_one: ∀ {m n : myint}, m ≤ n → m ≤ n + 1
 | (of_nat a) (of_nat b) := assume h,
 begin
   rw [←coe_nat_eq, ←coe_nat_eq, nat_nat_le] at h,
-  rw [←coe_nat_eq, ←coe_nat_eq, nat_nat_add, nat_nat_le],
+  rw [←one_nat, ←coe_nat_eq, ←coe_nat_eq, nat_nat_add, nat_nat_le],
   apply le_add_rhs,
   assumption,
 end
 | (of_nat a) -[1+ b] := assume h, by exfalso; from h
-| -[1+ a] (of_nat b) := assume h, by rw [←coe_nat_eq, nat_nat_add];
-                                     from neg_nat_le
+| -[1+ a] (of_nat b) := assume h,
+by rw [←one_nat, ←coe_nat_eq, nat_nat_add]; from neg_nat_le
 | -[1+ a] -[1+ b] := assume h,
 begin
-  rw [neg_neg_le] at h,
-  cases h with d h,
-  rw [h, ←neg_coe_succ, ←neg_coe_succ, ←succ_add, ←nat_nat_add,
-      neg_distr],
-  sorry,
+  cases b, {
+    rw [zz, ←neg_one, neg_self_add, ←zero_nat],
+    from neg_nat_le,
+  }, {
+    rw [neg_neg_le, ←add_one_succ] at h,
+    rw [neg_succ_of_succ_add_one, neg_neg_le],
+    from hidden.le_cancel (@hidden.le_add_rhs _ _ 1 h),
+  },
 end
 
-private lemma le_to_add_nat: ∀ {a : mynat}, m ≤ m + ↑a
-| zero     := by rw [zz, zero_nat, add_zero]; from le_refl
-| (succ a) :=
+
+-- Reverse implication
+lemma le_add_rhs_coe: m ≤ n → m ≤ n + ↑c :=
 begin
-  rw [←add_one_succ, ←nat_nat_add, ←add_assoc, one_nat],
-  apply le_add_rhs_coe,
-  from le_to_add_nat,
+  assume h,
+  induction c with c hc, {
+    rwa [zz, zero_nat, add_zero],
+  }, {
+    rw [←add_one_succ, ←nat_nat_add, one_nat, ←add_assoc],
+    apply le_add_rhs_one,
+    assumption,
+  },
 end
 
 -- Show old defn of ≤ is equivalent (very useful)
@@ -104,8 +112,9 @@ begin
     assumption,
   }, {
     cases h with a ha,
-    rw ha,
-    apply le_to_add_nat,
+    subst ha,
+    apply le_add_rhs_coe,
+    refl,
   },
 end
 

@@ -376,5 +376,9 @@ by rw [neg_neg_succ, neg_nat_add, sub_succ_succ, sub_self]
 theorem neg_self_add : -m + m = 0 := by
 rw add_comm; apply self_neg_add
 
+lemma neg_succ_of_succ_add_one: -[1+ succ a] + 1 = -[1+ a] :=
+by rw [←one_nat, neg_nat_add, one, sub_succ_succ, zero_sub_neg,
+      ←neg_coe_eq_neg_of_nat, neg_coe_succ]
+
 end myint
 end hidden
