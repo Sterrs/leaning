@@ -1,4 +1,4 @@
-import .add
+import .induction
 
 namespace hidden
 namespace myint
@@ -45,7 +45,7 @@ theorem mul_one: ∀ {m : myint}, m * 1 = m
 | (of_nat a) := rfl
 | -[1+ a] := rfl
 
-theorem one_mul : ∀ {m: myint},1 * m = m
+theorem one_mul : ∀ {m: myint}, 1 * m = m
 | (of_nat a) :=
 by rw [←one_nat, ←coe_nat_eq, nat_nat_mul, hidden.one_mul]
 | -[1+ a] :=
@@ -122,7 +122,54 @@ by rw [←mul_neg_one, ←mul_assoc, ←@neg_one_mul (m*n), mul_comm]
 theorem neg_mul : (-m) * n = - (m * n) :=
 by rw [mul_comm, @mul_comm m, mul_neg]
 
-theorem mul_add : m * (n + k) = m * n + m * k := sorry
+-- TODO: Stupid name
+theorem neg_times_neg : (-m) * (-n) = m * n :=
+by rw [neg_mul, mul_neg, neg_neg]
+
+-- FFS
+private theorem add_one_mul : ∀ {m n : myint}, (m + 1) * n = m * n + n
+| (of_nat a) (of_nat b) :=
+by rw [←coe_nat_eq, ←coe_nat_eq, ←one_nat, nat_nat_add, nat_nat_mul,
+      nat_nat_mul, nat_nat_add, hidden.add_mul, hidden.one_mul]
+| (of_nat a) -[1+ b] :=
+by rw [←coe_nat_eq, nat_neg_mul, ←one_nat, nat_nat_add, nat_neg_mul,
+       ←neg_cancel, neg_neg, neg_distr, neg_neg, neg_neg_succ,
+       nat_nat_add, hidden.add_mul, hidden.one_mul]
+| -[1+ a] (of_nat b) :=
+by rw [←coe_nat_eq, ←neg_coe_succ, neg_mul, nat_nat_mul, succ_mul,
+       ←nat_nat_add, neg_distr, add_assoc, neg_self_add, add_zero,
+       ←add_one_succ, ←nat_nat_add, neg_distr, add_assoc, one_nat,
+       neg_self_add, add_zero, neg_mul, nat_nat_mul]
+| -[1+ a] -[1+ b] := by
+  rw [←neg_coe_succ, ←neg_coe_succ, neg_times_neg, mul_neg, ←neg_mul,
+      neg_distr, neg_neg, neg_one, nat_neg_add, sub_succ_succ,
+      nat_sub_zero, nat_nat_mul, nat_nat_mul, succ_mul, ←nat_nat_add,
+      add_assoc, self_neg_add, add_zero]
+
+private theorem sub_one_mul : (m - 1) * n = m * n - n :=
+begin
+  rw [sub_add_neg, sub_add_neg, ←neg_cancel, ←neg_mul, neg_distr,
+      neg_distr, ←neg_mul, neg_neg, neg_neg],
+  from add_one_mul,
+end
+
+theorem mul_add : m * (n + k) = m * n + m * k :=
+begin
+  revert m,
+  apply intduction, {
+    repeat { rw [zero_mul] },
+    rw zero_add,
+  }, {
+    assume m hi,
+    rw [add_one_mul, add_one_mul, add_one_mul, hi, add_assoc,
+        ←@add_assoc (m*k), @add_comm (m*k), @add_assoc n, ←add_assoc],
+  }, {
+    assume m hi,
+    rw [sub_one_mul, sub_one_mul, sub_one_mul, hi, sub_add_neg,
+        neg_distr, sub_add_neg, sub_add_neg, add_assoc,
+        ←@add_assoc (m*k), @add_comm (m*k), @add_assoc (-n), ←add_assoc],
+  },
+end
 
 theorem add_mul: (m + n) * k = m * k + n * k :=
 by rw [mul_comm, @mul_comm m, @mul_comm n, mul_add]
@@ -130,9 +177,9 @@ by rw [mul_comm, @mul_comm m, @mul_comm n, mul_add]
 private lemma neg_succ_distr: -[1+ a] * m = -m + -(↑a * m) := sorry
 
 --∀ {m n : myint},
-theorem mul_integral: m ≠ 0 → m * n = 0 → n = 0 :=
+theorem mul_integral: m * n = 0 → n = 0 ∨ m = 0 :=
 begin
-  assume hmne0 h,
+  assume h,
   cases m, {
     sorry,
   }, {

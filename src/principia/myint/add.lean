@@ -183,18 +183,19 @@ begin
   rw [hidden.add_zero, hidden.add_zero, succ_add],
 end
 
-private lemma sub_add_neg: ∀ {c : mynat},
+-- Oh god
+private lemma sub_add_neg': ∀ {c : mynat},
 sub_nat_nat a b + -↑c = sub_nat_nat a (b + c)
 | zero := by rw [zz, zero_nat, neg_zero, add_zero, hidden.add_zero]
 | (succ c) :=
 by rw [←add_one_succ, ←nat_nat_add, one_nat, neg_distr_coe_one,
-  add_comm, ←add_neg_one_switch, @add_comm (-↑c), sub_add_neg,
+  add_comm, ←add_neg_one_switch, @add_comm (-↑c), sub_add_neg',
   sub_add_neg_one, add_one_succ, add_succ]
 
 -- Bad naming is bad :/
-theorem sub_neg_add:
+private theorem sub_neg_add:
 sub_nat_nat a (b + succ c) = -[1+ c] + sub_nat_nat a b
-:= by rw [←neg_coe_succ, add_comm, sub_add_neg]
+:= by rw [←neg_coe_succ, add_comm, sub_add_neg']
 
 -- She's a beauty
 theorem add_assoc : ∀ {m n k : myint}, m + n + k = m + (n + k)
