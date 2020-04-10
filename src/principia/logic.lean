@@ -35,4 +35,31 @@ begin
   }
 end
 
+theorem exists_or {α : Type} {p q : α → Prop}:
+(∃ k, p k ∨ q k) ↔ (∃ k, p k) ∨ (∃ k, q k) :=
+begin
+  split; assume h, {
+    cases h with k h,
+    cases h, {
+      left,
+      existsi k,
+      assumption,
+    }, {
+      right,
+      existsi k,
+      assumption,
+    },
+  }, {
+    cases h; cases h with k h, {
+      existsi k,
+      left,
+      assumption,
+    }, {
+      existsi k,
+      right,
+      assumption,
+    },
+  }
+end
+
 end hidden

@@ -1,4 +1,5 @@
 import .induction
+import ..logic
 
 namespace hidden
 namespace myint
@@ -126,7 +127,7 @@ by rw [mul_comm, @mul_comm m, mul_neg]
 theorem neg_times_neg : (-m) * (-n) = m * n :=
 by rw [neg_mul, mul_neg, neg_neg]
 
--- FFS
+-- Effectively succ_mul for myints
 private theorem add_one_mul : ∀ {m n : myint}, (m + 1) * n = m * n + n
 | (of_nat a) (of_nat b) :=
 by rw [←coe_nat_eq, ←coe_nat_eq, ←one_nat, nat_nat_add, nat_nat_mul,
@@ -176,15 +177,90 @@ by rw [mul_comm, @mul_comm m, @mul_comm n, mul_add]
 
 private lemma neg_succ_distr: -[1+ a] * m = -m + -(↑a * m) := sorry
 
+theorem nzero_iff_succ_or_neg_succ:
+m ≠ 0 ↔ ∃ a, m = ↑(succ a) ∨ m = -↑(succ a) :=
+begin
+  rw exists_or,
+  split; assume h, {
+    cases m, {
+      left,
+      cases m, {
+        rw [zz, ←coe_nat_eq, zero_nat] at h,
+        contradiction,
+      }, {
+        existsi m,
+        rw ←coe_nat_eq,
+      }
+    }, {
+      right,
+      existsi m,
+      rw neg_coe_succ,
+    },
+  }, {
+    cases h, {
+      cases h with a h,
+      assume h0,
+      rw [h, ←zero_nat, of_nat_cancel] at h0,
+      from mynat.no_confusion h0,
+    }, {
+      cases h with a h,
+      assume h0,
+      rw [h, ←neg_zero, ←zero_nat, neg_cancel, of_nat_cancel] at h0,
+      from mynat.no_confusion h0,
+    },
+  },
+end
+
+private lemma neq_iff_not_eq: m ≠ n ↔ ¬(m = n) :=
+begin
+  split; assume hneq heq, all_goals { contradiction },
+end
+
+private lemma succ_times_succ_nzero: (succ a) * (succ b) ≠ 0 :=
+begin
+  assume h,
+  have hsan0 : succ a ≠ 0,
+    assume h₁,
+    from mynat.no_confusion h₁,
+  have hsbn0 : succ b ≠ 0,
+    assume h₁,
+    from mynat.no_confusion h₁,
+  from hsbn0 (hidden.mul_integral hsan0 h),
+end
+
 --∀ {m n : myint},
 theorem mul_integral: m * n = 0 → n = 0 ∨ m = 0 :=
 begin
   assume h,
-  cases m, {
-    sorry,
+  by_cases (m = 0), {
+    right, assumption,
   }, {
-    rw [←neg_coe_succ, neg_mul, ←neg_zero, neg_cancel] at h,
-    sorry,
+    by_cases (n = 0), {
+      left, assumption,
+    }, {
+      rename h hn,
+      rename h hm,
+      exfalso,
+      rw [←neq_iff_not_eq, nzero_iff_succ_or_neg_succ] at hn hm,
+      cases hm with a ha,
+      cases hn with b hb,
+      cases ha; cases hb,
+      all_goals { rw [ha, hb] at h }, {
+        rw [nat_nat_mul, ←zero_nat, of_nat_cancel] at h,
+        from succ_times_succ_nzero h,
+      }, {
+        rw [mul_neg, nat_nat_mul, ←neg_zero, neg_cancel, ←zero_nat,
+            of_nat_cancel] at h,
+        from succ_times_succ_nzero h,
+      }, {
+        rw [neg_mul, nat_nat_mul, ←neg_zero, neg_cancel, ←zero_nat,
+            of_nat_cancel] at h,
+        from succ_times_succ_nzero h,
+      }, {
+        rw [neg_times_neg, nat_nat_mul, ←zero_nat, of_nat_cancel] at h,
+        from succ_times_succ_nzero h,
+      },
+    },
   },
 end
 
