@@ -269,4 +269,10 @@ begin
   contradiction,
 end
 
+theorem descend_to_zero (p : mynat → Prop)
+(hdec: ∀ {k}, p (succ k) → p k)
+: ∀ {m}, p m → p 0
+| zero := assume h, by assumption
+| (succ m) := assume h, descend_to_zero (hdec h)
+
 end hidden
