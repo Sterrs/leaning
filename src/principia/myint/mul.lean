@@ -180,8 +180,6 @@ end
 theorem add_mul: (m + n) * k = m * k + n * k :=
 by rw [mul_comm, @mul_comm m, @mul_comm n, mul_add]
 
-private lemma neg_succ_distr: -[1+ a] * m = -m + -(↑a * m) := sorry
-
 theorem nzero_iff_succ_or_neg_succ:
 m ≠ 0 ↔ ∃ a, m = ↑(succ a) ∨ m = -↑(succ a) :=
 begin
