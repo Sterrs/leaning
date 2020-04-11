@@ -315,5 +315,9 @@ begin
   from this m k,
 end
 
+theorem abs_distr: abs m * abs n = abs (m * n) := sorry
+
+theorem abs_eq_sign_self : ↑(abs m) = (sign m) * m := sorry
+
 end myint
 end hidden

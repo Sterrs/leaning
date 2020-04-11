@@ -46,29 +46,6 @@ begin
   from succ_ne_zero hd'.symm,
 end
 
--- this is far too long
-theorem lt_comb (a b c d: mynat): a < b → c < d → a + c < b + d :=
-begin
-  assume hab hcd,
-  assume hbdac,
-  cases (le_total_order a b),
-  cases (le_total_order c d),
-  have hacbd := le_comb h h_1,
-  have hacebd := le_antisymm hacbd hbdac,
-  cases h with x hx,
-  cases h_1 with y hy,
-  rw [hx, hy, add_assoc] at hacebd,
-  have hcxcy := add_cancel hacebd,
-  rw [add_comm, add_assoc, ←add_zero c] at hcxcy,
-  have hxy := add_cancel hcxcy,
-  have hy0 := add_integral hxy.symm,
-  rw hy0 at hy,
-  rw [hy, add_zero] at hcd,
-  from hcd le_refl,
-  from hcd h_1,
-  from hab h,
-end
-
 theorem lt_nzero: ¬m < 0 := (λ h, h zero_le)
 
 theorem zero_lt_succ: 0 < succ m := succ_nle_zero
@@ -244,7 +221,7 @@ begin
   from hnk hkln,
 end
 
-theorem lt_combine (a b : mynat): m < n → a < b → m + a < n + b :=
+theorem lt_comb {a b : mynat}: m < n → a < b → m + a < n + b :=
 begin
   assume hmn hab,
   have h1: m + a < n + a, {
@@ -330,6 +307,12 @@ begin
   apply lt_le_chain (succ n),
     assumption,
   assumption,
+end
+
+theorem lt_comb_mul {a b : mynat}: m < n → a < b → m * a < n * b :=
+begin
+  assume hmn hab hle,
+  sorry,
 end
 
 end hidden

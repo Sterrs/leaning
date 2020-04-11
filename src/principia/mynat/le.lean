@@ -38,14 +38,14 @@ theorem le_eq_refl: m = n → m ≤ n := (λ h, h ▸ le_refl)
 
 theorem le_succ: m ≤ succ m := @le_to_add _ 1
 
-theorem le_comb {a b c d: mynat}: a ≤ b → c ≤ d → a + c ≤ b + d :=
+@[trans]
+theorem le_trans: m ≤ n → n ≤ k → m ≤ k :=
 begin
-  assume hab hcd,
-  cases hab with x hx,
-  cases hcd with y hy,
-  existsi x + y,
-  rw [hx, hy, ←add_assoc, add_assoc a x c, add_comm x c],
-  repeat {rw add_assoc},
+  assume hmn hnk,
+  cases hmn with d hd,
+  cases hnk with d' hd',
+  existsi d + d',
+  rw [hd', hd, add_assoc],
 end
 
 theorem le_add (k: mynat): m ≤ n → m + k ≤ n + k :=
@@ -56,6 +56,15 @@ begin
   rw hd,
   repeat {rw add_assoc},
   rw add_comm d k,
+end
+
+theorem le_comb {a b c d: mynat}: a ≤ b → c ≤ d → a + c ≤ b + d :=
+begin
+  assume hab hcd,
+  transitivity (b + c),
+    from le_add c hab,
+  rwa [add_comm, add_comm b],
+  from le_add b hcd,
 end
 
 theorem le_add_converse (k: mynat): ¬(m ≤ n) → ¬(m + k ≤ n + k) :=
@@ -91,16 +100,6 @@ begin
       },
     },
   },
-end
-
-@[trans]
-theorem le_trans: m ≤ n → n ≤ k → m ≤ k :=
-begin
-  assume hmn hnk,
-  cases hmn with d hd,
-  cases hnk with d' hd',
-  existsi d + d',
-  rw [hd', hd, add_assoc],
 end
 
 theorem le_cancel: m + k ≤ n + k → m ≤ n :=
@@ -296,6 +295,15 @@ begin
     from add_integral hzdd,
   },
   simp [hd, hdz],
+end
+
+theorem le_mul_comb {a b : mynat}: m ≤ n → a ≤ b → m * a ≤ n * b :=
+begin
+  assume hmn hab,
+  transitivity (m * b),
+    from le_mul m hab,
+  have hmbnb := le_mul b hmn,
+  rwa [mul_comm, @mul_comm n],
 end
 
 theorem le_mul_cancel: k ≠ 0 → k * m ≤ k * n → m ≤ n :=

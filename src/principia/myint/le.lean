@@ -118,6 +118,7 @@ begin
   },
 end
 
+@[trans]
 theorem le_trans: m ≤ n → n ≤ k → m ≤ k :=
 begin
   assume hmn hnk,

@@ -1,5 +1,6 @@
 -- vim: ts=2 sw=0 sts=-1 et ai tw=70
 
+import ..logic
 import ..mynat.basic
 import ..mynat.le
 import ..mynat.nat_sub
@@ -49,6 +50,14 @@ instance: has_neg myint := ⟨neg⟩
 def abs : myint → mynat
 | (of_nat m) := m
 | -[1+ m] := succ m
+
+def sign : myint → myint
+| (of_nat a) :=
+match a with
+| zero     := 0
+| (succ _) := 1
+end
+| -[1+ _] := -1
 
 variables {m n k: myint}
 variables {a b c: mynat}
@@ -228,6 +237,26 @@ begin
 end
 | -[1+ a] :=
 by rw [neg_neg_succ, abs_neg_succ, abs_of_nat]
+
+-- Sign
+
+theorem sign_zero: sign 0 = 0 := rfl
+
+theorem sign_neg_succ: sign -[1+ a] = -1 := rfl
+
+theorem sign_succ: sign ↑(succ a) = 1 := rfl
+
+theorem zero_iff_sign_zero: m = 0 ↔ sign m = 0 :=
+begin
+  split; assume h, {
+    subst h, refl,
+  }, {
+    sorry,
+  },
+end
+
+theorem nzero_iff_sign_nzero: m ≠ 0 ↔ sign m ≠ 0 :=
+iff_to_contrapositive zero_iff_sign_zero
 
 -- Decidability
 

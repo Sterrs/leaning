@@ -1,6 +1,5 @@
 import ..mynat.dvd
-import .basic
-import .mul
+import .le
 
 namespace hidden
 namespace myint
@@ -17,10 +16,12 @@ variables {m n : myint}
 theorem int_dvd_iff_abs_dvd :
 m ∣ n ↔ (abs m) ∣ (abs n) :=
 begin
-  split, {
-    assume h,
+  split; assume h, {
+    cases h with k hk,
+    existsi (abs k),
     sorry,
   }, {
+    cases h with k hk,
     sorry,
   },
 end
