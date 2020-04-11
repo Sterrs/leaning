@@ -251,7 +251,20 @@ begin
   split; assume h, {
     subst h, refl,
   }, {
-    sorry,
+    cases m, {
+      cases m, {
+        rw [zz, ←coe_nat_eq, zero_nat],
+      }, {
+        exfalso,
+        rw [←coe_nat_eq, sign_succ, ←zero_nat, ←one_nat, of_nat_cancel]
+        at h,
+        from mynat.no_confusion h,
+      },
+    }, {
+      exfalso,
+      rw [sign_neg_succ] at h,
+      from myint.no_confusion h,
+    },
   },
 end
 
