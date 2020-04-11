@@ -215,6 +215,20 @@ theorem abs_of_nat: abs ↑a = a := rfl
 
 theorem abs_neg_succ: abs -[1+ a] = succ a := rfl
 
+theorem abs_neg: ∀ {m}, abs (-m) = abs m
+| (of_nat a) :=
+begin
+  rw ←coe_nat_eq,
+  cases a, {
+    rw [zz, zero_nat, neg_zero],
+  }, {
+    rw [←neg_neg_succ, neg_neg, neg_neg_succ, abs_of_nat,
+        abs_neg_succ],
+  },
+end
+| -[1+ a] :=
+by rw [neg_neg_succ, abs_neg_succ, abs_of_nat]
+
 -- Decidability
 
 instance: decidable_eq myint
