@@ -13,22 +13,11 @@ by from zero_lt_mul x.denom_pos y.denom_pos⟩
 
 instance: has_add frac := ⟨add⟩
 
-def neg (x : frac) : frac :=
-⟨-x.num, x.denom, x.denom_pos⟩
-
-instance: has_neg frac := ⟨neg⟩
-
 theorem add_num {x y : frac} :
 (x + y).num = x.num * y.denom + y.num * x.denom := rfl
 
 theorem add_denom {x y : frac} :
 (x + y).denom = x.denom * y.denom := rfl
-
-theorem neg_num {x : frac} :
-(-x).num = -x.num := rfl
-
-theorem neg_denom {x : frac} :
-(-x).denom = x.denom := rfl
 
 theorem add_well_defined (a x b y : frac) :
 a ≈ b → x ≈ y → ⟦a + x⟧ = ⟦b + y⟧ :=
@@ -48,15 +37,6 @@ begin
     ac_refl,
   rw [h₂, hab],
   ac_refl,
-end
-
-theorem neg_well_defined (x y : frac) :
-x ≈ y → ⟦-x⟧ = ⟦-y⟧ :=
-begin
-  assume h,
-  rw myrat.class_equiv,
-  repeat { rw neg_num <|> rw neg_denom <|> rw myint.neg_mul },
-  rwa [neg_cancel, ←setoid_equiv],
 end
 
 variables {x y z : frac}
@@ -85,10 +65,10 @@ quotient.lift₂ (λ x y, ⟦x + y⟧) frac.add_well_defined
 
 instance: has_add myrat := ⟨add⟩
 
-def neg : myrat → myrat :=
-quotient.lift (λ x, ⟦-x⟧) frac.neg_well_defined
+def sub (x y : myrat) : myrat :=
+x + -y
 
-instance: has_neg myrat := ⟨neg⟩
+instance: has_sub myrat := ⟨sub⟩
 
 variables {x y z : myrat}
 variables {m n k : myint}

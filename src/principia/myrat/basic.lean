@@ -6,6 +6,7 @@ open myint
 
 namespace frac
 
+-- TODO: Move this to frac.lean
 def frac_eq (x y : frac):
 Prop := x.num * y.denom = y.num * x.denom
 
@@ -46,6 +47,33 @@ instance frac.setoid : setoid frac :=
 theorem setoid_equiv (x y : frac) :
 x ≈ y ↔ x.num * y.denom = y.num * x.denom := by refl
 
+def neg (x : frac) : frac :=
+⟨-x.num, x.denom, x.denom_pos⟩
+
+instance: has_neg frac := ⟨neg⟩
+
+theorem neg_num {x : frac} :
+(-x).num = -x.num := rfl
+
+theorem neg_denom {x : frac} :
+(-x).denom = x.denom := rfl
+
+def abs (x : frac) : frac :=
+⟨myint.abs x.num, x.denom, x.denom_pos⟩
+
+theorem neg_well_defined (x y : frac) :
+x ≈ y → ⟦-x⟧ = ⟦-y⟧ :=
+begin
+  assume h,
+  apply quotient.sound,
+  rw setoid_equiv,
+  repeat { rw neg_num <|> rw neg_denom <|> rw myint.neg_mul },
+  rwa [neg_cancel, ←setoid_equiv],
+end
+
+theorem abs_well_defined (x y : frac) :
+x ≈ y → ⟦abs x⟧ = ⟦abs y⟧ := sorry
+
 end frac
 
 def myrat := quotient frac.frac.setoid
@@ -74,6 +102,14 @@ end
 
 theorem equal_imp_equiv {x y : frac} (h : x = y) :  ⟦x⟧ = ⟦y⟧ :=
 by congr; assumption
+
+def neg : myrat → myrat :=
+quotient.lift (λ x, ⟦-x⟧) frac.neg_well_defined
+
+instance: has_neg myrat := ⟨neg⟩
+
+def abs : myrat → myrat :=
+quotient.lift (λ x : frac, ⟦frac.abs x⟧) frac.abs_well_defined
 
 instance: has_zero myrat := ⟨⟦⟨0, 1, zero_lt_one⟩⟧⟩
 
