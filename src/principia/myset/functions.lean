@@ -1,7 +1,7 @@
 -- vim: ts=2 sw=0 sts=-1 et ai tw=70
 
 import logic.basic
-import .myset
+import .basic
 
 namespace hidden
 
