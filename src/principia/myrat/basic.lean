@@ -61,6 +61,10 @@ theorem neg_denom {x : frac} :
 def abs (x : frac) : frac :=
 ⟨myint.abs x.num, x.denom, x.denom_pos⟩
 
+theorem abs_num (x: frac): (abs x).num = (myint.abs x.num) := rfl
+
+theorem abs_denom (x: frac): (abs x).denom = x.denom := rfl
+
 theorem neg_well_defined (x y : frac) :
 x ≈ y → ⟦-x⟧ = ⟦-y⟧ :=
 begin
@@ -72,7 +76,24 @@ begin
 end
 
 theorem abs_well_defined (x y : frac) :
-x ≈ y → ⟦abs x⟧ = ⟦abs y⟧ := sorry
+x ≈ y → ⟦abs x⟧ = ⟦abs y⟧ :=
+begin
+  assume hxeqy,
+  rw setoid_equiv at hxeqy,
+  apply quotient.sound,
+  rw setoid_equiv,
+  rw abs_num,
+  rw abs_num,
+  rw abs_denom,
+  rw abs_denom,
+  rw zero_lt_abs y.denom_pos,
+  rw zero_lt_abs x.denom_pos,
+  rw nat_nat_mul,
+  rw nat_nat_mul,
+  rw abs_distr,
+  rw abs_distr,
+  rw hxeqy,
+end
 
 end frac
 
@@ -81,16 +102,7 @@ def myrat := quotient frac.frac.setoid
 namespace myrat
 
 private lemma class_setoid (x y : frac) :
-⟦x⟧ = ⟦y⟧ ↔ x ≈ y :=
-begin
-  split; assume h, {
-    apply quotient.exact,
-    assumption,
-  }, {
-    apply quotient.sound,
-    assumption,
-  },
-end
+⟦x⟧ = ⟦y⟧ ↔ x ≈ y := iff.intro quotient.exact quotient.sound
 
 theorem class_equiv {x y : frac} :
 ⟦x⟧ = ⟦y⟧ ↔ x.num * y.denom = y.num * x.denom :=

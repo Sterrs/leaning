@@ -78,5 +78,7 @@ end
 
 theorem zero_lt_sign_mul_self: m ≠ 0 → 0 < (sign m) * m := sorry
 
+theorem zero_lt_abs: 0 < m → m = ↑(abs m) := sorry
+
 end myint
 end hidden
