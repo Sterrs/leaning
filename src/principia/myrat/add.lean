@@ -13,6 +13,8 @@ by from zero_lt_mul x.denom_pos y.denom_pos⟩
 
 instance: has_add frac := ⟨add⟩
 
+theorem frac_add_add (x y: frac): add x y = x + y := rfl
+
 theorem add_num {x y : frac} :
 (x + y).num = x.num * y.denom + y.num * x.denom := rfl
 
@@ -65,6 +67,14 @@ quotient.lift₂ (λ x y, ⟦x + y⟧) frac.add_well_defined
 
 instance: has_add myrat := ⟨add⟩
 
+theorem add_eq_cls (x y: frac) (a b: myrat):
+a = ⟦x⟧ → b = ⟦y⟧ → a + b = ⟦x + y⟧ :=
+begin
+  assume hax hay,
+  rw [hax, hay],
+  refl,
+end
+
 def sub (x y : myrat) : myrat :=
 x + -y
 
@@ -75,9 +85,18 @@ variables {m n k : myint}
 
 theorem sub_add_neg: x + -y = x - y := rfl
 
+theorem int_coe: (↑m: myrat) = ⟦⟨m, 1, zero_lt_one⟩⟧ := rfl
+
 theorem add_coe: (↑m : myrat) + ↑n = ↑(m + n) :=
 begin
-  sorry,
+  rw int_coe,
+  rw int_coe,
+  rw int_coe,
+  rw add_eq_cls _ _ _ _ rfl rfl,
+  rw ←frac.frac_add_add,
+  dsimp [frac.add],
+  repeat {rw myint.mul_one},
+  refl,
 end
 
 theorem neg_coe: -(↑m : myrat) = ↑(-m) :=
