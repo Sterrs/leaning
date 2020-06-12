@@ -177,6 +177,7 @@ private theorem neg_neg_of_nat: ∀ {a}, -neg_of_nat a = ↑a
 | zero     := rfl
 | (succ a) := rfl
 
+@[simp]
 theorem neg_zero: -(0:myint) = 0 := rfl
 
 theorem neg_neg_succ: -(-[1+ a]) = ↑(succ a) := by
@@ -184,6 +185,7 @@ rw ←neg_eq_minus; refl
 
 theorem neg_coe_succ: -(↑(succ a)) = -[1+ a] := rfl
 
+@[simp]
 theorem neg_neg: ∀ {m : myint}, -(-m) = m
 | (of_nat a) := by rw [←coe_nat_eq, neg_coe_eq_neg_of_nat];
                    from neg_neg_of_nat
@@ -195,9 +197,10 @@ begin
   -- To "do the same to both sides"
   have h₁ := congr_arg (λ m, -m) h,
   simp at h₁, -- To simp lambdas
-  rwa neg_neg at h₁,
+  assumption,
 end
 
+@[simp]
 theorem neg_cancel: -m = -n ↔ m = n :=
 begin
   repeat {rw ←neg_eq_minus},

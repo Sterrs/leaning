@@ -40,7 +40,6 @@ theorem of_nat_succ_add_one: of_nat (succ a) = of_nat a + 1 := rfl
 
 theorem sub_add_neg: m - n = m + (-n) := rfl
 
-@[simp]
 theorem add_comm: ∀ {m n : myint}, m + n = n + m
 | (of_nat a) (of_nat b) :=
 by rw [←coe_nat_eq, ←coe_nat_eq, nat_nat_add,
@@ -83,7 +82,6 @@ end
 -- Stupid but useful
 private theorem one: 1 = succ 0 := one_eq_succ_zero.symm
 
-@[simp]
 theorem succ_of_sub_succ: ∀ {a b : mynat},
 sub_nat_nat a (succ b) + 1 = sub_nat_nat a b
 | zero zero := rfl
@@ -99,7 +97,6 @@ by rw [zz, sub_succ_succ, nat_sub_zero, nat_sub_zero, ←one_nat,
 -- succ_of_sub_succ we using recursion
 by rw [sub_succ_succ, sub_succ_succ, succ_of_sub_succ]
 
-@[simp]
 theorem sub_nat_succ:
 ∀ {b : mynat}, sub_nat_nat (succ a) b = sub_nat_nat a b + 1
 | zero     := by rw [←succ_of_sub_succ, sub_succ_succ]
@@ -232,6 +229,7 @@ by repeat {rw neg_neg_add};
 instance add_is_assoc: is_associative myint add :=
 ⟨assume a b c, add_assoc⟩
 
+@[simp]
 theorem neg_distr: ∀ {m n : myint}, -(m + n) = -m + -n
 | (of_nat a) (of_nat b) :=
 begin
@@ -352,14 +350,17 @@ begin
 end
 
 -- It's more useful as an iff
+@[simp]
 theorem add_cancel (k : myint): m + k = n + k ↔ m = n :=
 ⟨add_cancel_mp k, assume h, by congr; assumption⟩
 
+@[simp]
 theorem add_cancel_to_zero: n + m = m ↔ n = 0 :=
 by rw [←zero_add m, ←add_assoc, add_cancel, add_zero]
 
 private lemma add_one_neg_one: (1:myint) + -1 = 0 := rfl
 
+@[simp]
 theorem self_neg_add: ∀ m : myint, m + (-m) = 0
 | (of_nat a) :=
 begin
@@ -373,6 +374,7 @@ end
 | -[1+ a] :=
 by rw [neg_neg_succ, neg_nat_add, sub_succ_succ, sub_self]
 
+@[simp]
 theorem neg_self_add : -m + m = 0 := by
 rw add_comm; apply self_neg_add
 

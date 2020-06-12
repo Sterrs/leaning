@@ -247,7 +247,7 @@ begin
   rwa neg_neg_le,
 end
 
-theorem le_mul_pos: 0 ≤ k → m ≤ n → k * m ≤ k * n :=
+theorem le_mul_nonneg: 0 ≤ k → m ≤ n → k * m ≤ k * n :=
 begin
   assume h0lek hmn,
   rw zero_le_iff_coe at h0lek,
@@ -260,7 +260,7 @@ begin
   refl,
 end
 
-theorem le_mul_neg: k ≤ 0 → m ≤ n → k * n ≤ k * m :=
+theorem le_mul_nonpos: k ≤ 0 → m ≤ n → k * n ≤ k * m :=
 begin
   assume hkle0 hmn,
   rw le_zero_iff_neg_coe at hkle0,
@@ -271,7 +271,7 @@ begin
     existsi a,
     refl,
   },
-  from le_mul_pos this hmn,
+  from le_mul_nonneg this hmn,
 end
 
 theorem le_antisymm: m ≤ n → n ≤ m → m = n :=
@@ -293,6 +293,9 @@ theorem square_non_neg: ∀ {m : myint}, 0 ≤ m * m
 | (of_nat a) := by rw [←coe_nat_eq, nat_nat_mul, ←zero_nat,
                       nat_nat_le]; from zero_le
 | -[1+ a] := by rw [neg_neg_mul, ←zero_nat, nat_nat_le]; from zero_le
+
+
+theorem zero_le_abs: 0 ≤ m → m = ↑(abs m) := sorry
 
 end myint
 end hidden
