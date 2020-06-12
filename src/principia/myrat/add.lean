@@ -85,13 +85,11 @@ variables {m n k : myint}
 
 theorem sub_add_neg: x + -y = x - y := rfl
 
-theorem int_coe: (↑m: myrat) = ⟦⟨m, 1, zero_lt_one⟩⟧ := rfl
-
 theorem add_coe: (↑m : myrat) + ↑n = ↑(m + n) :=
 begin
-  rw int_coe,
-  rw int_coe,
-  rw int_coe,
+  rw coe_int,
+  rw coe_int,
+  rw coe_int,
   rw add_eq_cls _ _ _ _ rfl rfl,
   rw ←frac.frac_add_add,
   dsimp [frac.add],
@@ -102,7 +100,10 @@ end
 theorem neg_coe: -(↑m : myrat) = ↑(-m) :=
 begin
   rw [coe_int, coe_int],
-  sorry,
+  rw neg_eq_cls _ _ rfl,
+  rw frac.frac_neg_neg,
+  dsimp [frac.neg],
+  refl,
 end
 
 theorem add_zero: x + 0 = x := sorry

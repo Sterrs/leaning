@@ -120,6 +120,14 @@ quotient.lift (λ x, ⟦-x⟧) frac.neg_well_defined
 
 instance: has_neg myrat := ⟨neg⟩
 
+theorem neg_eq_cls (x: frac) (a: myrat):
+a = ⟦x⟧ → -a = ⟦-x⟧ :=
+begin
+  assume hax,
+  rw hax,
+  refl,
+end
+
 def abs : myrat → myrat :=
 quotient.lift (λ x : frac, ⟦frac.abs x⟧) frac.abs_well_defined
 
