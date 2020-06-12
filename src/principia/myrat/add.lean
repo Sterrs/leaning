@@ -57,6 +57,44 @@ begin
   split; ac_refl,
 end
 
+theorem neg_add: -(x + y) = (-x) + (-y) :=
+begin
+  rw num_and_denom_eq,
+  split, {
+    rw neg_num,
+    rw add_num,
+    rw add_num,
+    rw neg_num,
+    rw neg_num,
+    rw neg_denom,
+    rw neg_denom,
+    rw myint.neg_distr,
+    rw myint.neg_mul,
+    rw myint.neg_mul,
+  }, {
+    rw neg_denom,
+    rw add_denom,
+    rw add_denom,
+    rw neg_denom,
+    rw neg_denom,
+  },
+end
+
+theorem sub_self: x + -x = ⟨0, x.denom * x.denom, zero_lt_mul x.denom_pos x.denom_pos⟩ :=
+begin
+  rw num_and_denom_eq,
+  split, {
+    rw add_num,
+    rw neg_num,
+    rw neg_denom,
+    rw myint.neg_mul,
+    rw myint.self_neg_add,
+  }, {
+    rw add_denom,
+    rw neg_denom,
+  },
+end
+
 end frac
 
 -- Define addition for myrat, prove things about it
@@ -79,6 +117,14 @@ def sub (x y : myrat) : myrat :=
 x + -y
 
 instance: has_sub myrat := ⟨sub⟩
+
+theorem sub_eq_cls (x y: frac) (a b: myrat):
+a = ⟦x⟧ → b = ⟦y⟧ → a - b = ⟦x + -y⟧ :=
+begin
+  assume hax hay,
+  rw [hax, hay],
+  refl,
+end
 
 variables {x y z : myrat}
 variables {m n k : myint}
@@ -125,23 +171,88 @@ begin
   from and.intro rfl rfl,
 end
 
-theorem zero_add: 0 + x = x := sorry
+theorem add_comm: x + y = y + x :=
+begin
+  cases quotient.exists_rep x with a ha,
+  cases quotient.exists_rep y with b hb,
+  rw ←ha,
+  rw ←hb,
+  rw add_eq_cls _ _ _ _ rfl rfl,
+  rw add_eq_cls _ _ _ _ rfl rfl,
+  rw frac.add_comm,
+end
 
-theorem add_comm: x + y = y + x := sorry
+theorem zero_add: 0 + x = x :=
+begin
+  rw add_comm,
+  from add_zero,
+end
 
 instance add_is_comm: is_commutative myrat add := ⟨@add_comm⟩
 
-theorem add_assoc: x + y + z = x + (y + z) := sorry
+theorem add_assoc: x + y + z = x + (y + z) :=
+begin
+  cases quotient.exists_rep x with a ha,
+  cases quotient.exists_rep y with b hb,
+  cases quotient.exists_rep z with c hc,
+  rw ←ha,
+  rw ←hb,
+  rw ←hc,
+  rw add_eq_cls _ _ _ _ rfl rfl,
+  rw add_eq_cls _ _ _ _ rfl rfl,
+  rw add_eq_cls _ _ _ _ rfl rfl,
+  rw add_eq_cls _ _ _ _ rfl rfl,
+  rw frac.add_assoc,
+end
 
 instance add_is_assoc: is_associative myrat add := ⟨@add_assoc⟩
 
-theorem abs_neg: abs (-x) = abs x := sorry
+theorem abs_neg: abs (-x) = abs x :=
+begin
+  cases quotient.exists_rep x with a ha,
+  rw ←ha,
+  rw neg_eq_cls _ _ rfl,
+  rw abs_eq_cls _ _ rfl,
+  rw abs_eq_cls _ _ rfl,
+  rw frac.abs_neg,
+  rw frac.neg_neg,
+end
 
-theorem neg_neg: -(-x) = x := sorry
+theorem neg_neg: -(-x) = x :=
+begin
+  cases quotient.exists_rep x with a ha,
+  rw ←ha,
+  rw neg_eq_cls _ _ rfl,
+  rw neg_eq_cls _ _ rfl,
+  rw frac.neg_neg,
+end
 
-theorem neg_add: -(x + y) = -x + -y := sorry
+theorem neg_add: -(x + y) = -x + -y :=
+begin
+  cases quotient.exists_rep x with a ha,
+  cases quotient.exists_rep y with b hb,
+  rw ←ha,
+  rw ←hb,
+  rw add_eq_cls _ _ _ _ rfl rfl,
+  rw neg_eq_cls _ _ rfl,
+  rw neg_eq_cls _ _ rfl,
+  rw neg_eq_cls _ _ rfl,
+  rw add_eq_cls _ _ _ _ rfl rfl,
+  rw frac.neg_add,
+end
 
-theorem sub_self: x - x = 0 := sorry
+theorem sub_self: x - x = 0 :=
+begin
+  cases quotient.exists_rep x with a ha,
+  rw ←ha,
+  rw sub_eq_cls _ _ _ _ rfl rfl,
+  rw frac.sub_self,
+  apply quotient.sound,
+  rw frac.setoid_equiv,
+  simp,
+  rw myint.zero_mul,
+  rw myint.zero_mul,
+end
 
 end myrat
 

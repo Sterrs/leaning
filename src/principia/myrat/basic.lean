@@ -67,6 +67,34 @@ theorem abs_num (x: frac): (abs x).num = (myint.abs x.num) := rfl
 
 theorem abs_denom (x: frac): (abs x).denom = x.denom := rfl
 
+theorem abs_neg (x: frac): abs x = abs (-x) :=
+begin
+  rw num_and_denom_eq,
+  split, {
+    rw abs_num,
+    rw abs_num,
+    rw neg_num,
+    rw myint.abs_neg,
+  }, {
+    rw abs_denom,
+    rw abs_denom,
+    rw neg_denom,
+  },
+end
+
+theorem neg_neg (x: frac): -(-x) = x :=
+begin
+  rw num_and_denom_eq,
+  split, {
+    rw neg_num,
+    rw neg_num,
+    rw myint.neg_neg,
+  }, {
+    rw neg_denom,
+    rw neg_denom,
+  },
+end
+
 theorem neg_well_defined (x y : frac) :
 x ≈ y → ⟦-x⟧ = ⟦-y⟧ :=
 begin
@@ -134,6 +162,14 @@ def abs : myrat → myrat :=
 quotient.lift (λ x : frac, ⟦frac.abs x⟧) frac.abs_well_defined
 
 instance: has_zero myrat := ⟨⟦⟨0, 1, zero_lt_one⟩⟧⟩
+
+theorem abs_eq_cls (x: frac) (a: myrat):
+a = ⟦x⟧ → abs a = ⟦frac.abs x⟧ :=
+begin
+  assume hax,
+  rw hax,
+  refl,
+end
 
 theorem rat_zero: (0: myrat) = ⟦⟨0, 1, zero_lt_one⟩⟧ := rfl
 
