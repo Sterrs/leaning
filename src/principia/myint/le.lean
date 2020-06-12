@@ -90,7 +90,6 @@ begin
   },
 end
 
-
 -- Reverse implication
 lemma le_add_rhs_coe: m ≤ n → m ≤ n + ↑c :=
 begin
@@ -132,40 +131,54 @@ begin
   assumption,
 end
 
-theorem le_cancel (k : myint): m ≤ n ↔ m + k ≤ n + k :=
+@[simp]
+theorem le_cancel: m + k ≤ n + k ↔ m ≤ n :=
 begin
   split; assume h, {
-    rw le_iff_exists_nat at h,
-    cases h with a h,
-    rw [h, add_assoc, @add_comm ↑a, ←add_assoc, le_iff_exists_nat],
-    existsi a,
-    refl,
-  }, {
     rw le_iff_exists_nat at h,
     cases h with a h,
     rw [add_assoc, @add_comm k, ←add_assoc, add_cancel] at h,
     rw le_iff_exists_nat,
     existsi a,
     assumption,
+  }, {
+    rw le_iff_exists_nat at h,
+    cases h with a h,
+    rw [h, add_assoc, @add_comm ↑a, ←add_assoc, le_iff_exists_nat],
+    existsi a,
+    refl,
   },
 end
 
+theorem le_add (k  : myint): m ≤ n ↔ m + k ≤ n + k := ⟨le_cancel.mpr, le_cancel.mp⟩
+
+@[simp]
+theorem le_cancel_left : k + m ≤ k + n ↔ m ≤ n :=
+begin
+  rw [myint.add_comm, @myint.add_comm k],
+  simp,
+end
+
+theorem le_add_left (k : myint) : m ≤ n ↔ k + m ≤ k + n := ⟨le_cancel_left.mpr, le_cancel_left.mp⟩
+
+@[simp]
 theorem le_cancel_to_zero_lhs: m ≤ m + n ↔ 0 ≤ n :=
 by rw [←@zero_add m, add_assoc, @add_comm m, ←add_assoc,
-       ←le_cancel, zero_add]
+       le_cancel, zero_add]
 
 -- Exact same proof works :o
+@[simp]
 theorem le_cancel_to_zero_rhs: m + n ≤ m ↔ n ≤ 0 :=
 by rw [←@zero_add m, add_assoc, @add_comm m, ←add_assoc,
-       ←le_cancel, zero_add]
+       le_cancel, zero_add]
 
 theorem le_neg_switch: m ≤ n ↔ -n ≤ -m :=
 begin
   split; assume h,{
-    rwa [le_cancel n, neg_self_add, le_cancel m, @add_comm (-m),
+    rwa [le_add n, neg_self_add, le_add m, @add_comm (-m),
         add_assoc, neg_self_add, zero_add, add_zero],
   }, {
-    rwa [le_cancel n, neg_self_add, le_cancel m, @add_comm (-m),
+    rwa [le_add n, neg_self_add, le_add m, @add_comm (-m),
         add_assoc, neg_self_add, zero_add, add_zero] at h,
   },
 end
@@ -208,8 +221,8 @@ end
 theorem le_comb: m ≤ n → x ≤ y → m + x ≤ n + y :=
 begin
   assume hmn hxy,
-  rw [le_cancel x, @add_comm n] at hmn,
-  rw [le_cancel n, @add_comm y] at hxy,
+  rw [le_add x, @add_comm n] at hmn,
+  rw [le_add n, @add_comm y] at hxy,
   from le_trans hmn hxy,
 end
 
