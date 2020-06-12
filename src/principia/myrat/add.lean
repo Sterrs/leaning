@@ -106,7 +106,24 @@ begin
   refl,
 end
 
-theorem add_zero: x + 0 = x := sorry
+theorem add_zero: x + 0 = x :=
+begin
+  cases quotient.exists_rep x with a ha,
+  rw ←ha,
+  rw rat_zero,
+  rw add_eq_cls _ _ _ _ rfl rfl,
+  rw ←frac.frac_add_add,
+  dsimp [frac.add],
+  rw myint.mul_one,
+  rw myint.zero_mul,
+  rw myint.add_zero,
+  conv in (a.denom * 1) {
+    rw myint.mul_one,
+  },
+  congr,
+  rw frac.num_and_denom_eq,
+  from and.intro rfl rfl,
+end
 
 theorem zero_add: 0 + x = x := sorry
 

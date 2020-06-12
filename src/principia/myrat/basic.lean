@@ -58,6 +58,8 @@ theorem neg_num {x : frac} :
 theorem neg_denom {x : frac} :
 (-x).denom = x.denom := rfl
 
+theorem frac_neg_neg {x: frac}: -x = neg x := rfl
+
 def abs (x : frac) : frac :=
 ⟨myint.abs x.num, x.denom, x.denom_pos⟩
 
@@ -132,6 +134,8 @@ def abs : myrat → myrat :=
 quotient.lift (λ x : frac, ⟦frac.abs x⟧) frac.abs_well_defined
 
 instance: has_zero myrat := ⟨⟦⟨0, 1, zero_lt_one⟩⟧⟩
+
+theorem rat_zero: (0: myrat) = ⟦⟨0, 1, zero_lt_one⟩⟧ := rfl
 
 instance: has_one myrat := ⟨⟦⟨1, 1, zero_lt_one⟩⟧⟩
 
