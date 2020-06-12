@@ -311,8 +311,34 @@ end
 
 theorem lt_comb_mul {a b : mynat}: m < n → a < b → m * a < n * b :=
 begin
-  assume hmn hab hle,
-  sorry,
+  assume hmn hab,
+  -- Is there a way to do without case work?
+  cases m; cases a,
+    any_goals { rw zz at *, },
+    any_goals { rw zero_mul <|> rw mul_zero },
+    any_goals {
+      have ha := @zero_lt_succ a,
+      have hb : 0 < b,
+        transitivity (succ a); assumption,
+    },
+    any_goals {
+      have hm := @zero_lt_succ m,
+      have hn : 0 < n,
+        transitivity (succ m); assumption,
+    },
+    any_goals {
+      rename hab hb,
+      rename hmn hn,
+      rw ←nzero_iff_zero_lt at hn,
+      have := lt_mul hn hb,
+      rw mul_zero at this,
+      assumption,
+    },
+
+  have h₁ := lt_mul (@succ_ne_zero m) hab,
+  have h₂ := lt_mul (nzero_iff_zero_lt.mpr hb) hmn,
+  rw [mul_comm, mul_comm b] at h₂,
+  transitivity (succ m) * b; assumption,
 end
 
 end hidden
