@@ -73,6 +73,8 @@ instance: has_sub myrat := ⟨sub⟩
 variables {x y z : myrat}
 variables {m n k : myint}
 
+theorem sub_add_neg: x + -y = x - y := rfl
+
 theorem add_coe: (↑m : myrat) + ↑n = ↑(m + n) :=
 begin
   sorry,
@@ -95,6 +97,14 @@ instance add_is_comm: is_commutative myrat add := ⟨@add_comm⟩
 theorem add_assoc: x + y + z = x + (y + z) := sorry
 
 instance add_is_assoc: is_associative myrat add := ⟨@add_assoc⟩
+
+theorem abs_neg: abs (-x) = abs x := sorry
+
+theorem neg_neg: -(-x) = x := sorry
+
+theorem neg_add: -(x + y) = -x + -y := sorry
+
+theorem sub_self: x - x = 0 := sorry
 
 end myrat
 

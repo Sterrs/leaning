@@ -45,7 +45,32 @@ end
 
 theorem max_assoc : max a (max b c) = max (max a b) c :=
 begin
-  sorry
+  unfold max,
+  by_cases hab: a ≤ b, {
+    rw if_pos hab,
+    by_cases hbc: b ≤ c, {
+      rw if_pos hbc,
+      rw if_pos (le_trans hab hbc),
+    }, {
+      rw if_neg hbc,
+      rw if_pos hab,
+    },
+  }, {
+    rw if_neg hab,
+    by_cases hbc: b ≤ c, {
+      rw if_pos hbc,
+    }, {
+      rw if_neg hbc,
+      rw if_neg hab,
+      rw if_neg (lt_trans hbc hab),
+    },
+  },
+end
+
+theorem max_lt_cancel: max a b < c → a < c :=
+begin
+  apply le_lt_chain,
+  from max_le,
 end
 
 end hidden
