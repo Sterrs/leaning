@@ -234,15 +234,16 @@ end
 --∀ {m n : myint},
 theorem mul_integral: m * n = 0 → n = 0 ∨ m = 0 :=
 begin
-  assume h,
+  assume h₁,
   by_cases (m = 0), {
     right, assumption,
   }, {
+    rename h hm,
     by_cases (n = 0), {
       left, assumption,
     }, {
       rename h hn,
-      rename h hm,
+      rename h₁ h,
       exfalso,
       rw [←neq_iff_not_eq, nzero_iff_succ_or_neg_succ] at hn hm,
       cases hm with a ha,

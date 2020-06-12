@@ -3,7 +3,6 @@
 import .dvd
 import .induction
 import .fact
-import logic.basic
 
 namespace hidden
 
@@ -327,8 +326,9 @@ begin
   -- Exhibit (fact n) + 1, and we are done.
   existsi (fact n) + 1,
   split, {
-    symmetry,
-    assume heq,
+    assume h₁,
+    have heq := h₁.symm,
+    clear h₁,
     rw add_comm at heq,
     suffices : fact n = 0,
       from fact_nzero this,
