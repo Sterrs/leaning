@@ -13,7 +13,6 @@ variables {α : Type} [mygroup α]
 
 variables {a b c : α}
 -- This sucks
-local notation `e` := e α
 
 theorem mul_by_right : a = b → a * c = b * c :=
 begin
