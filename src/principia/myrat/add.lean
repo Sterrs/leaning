@@ -105,7 +105,7 @@ quotient.lift₂ (λ x y, ⟦x + y⟧) frac.add_well_defined
 
 instance: has_add myrat := ⟨add⟩
 
-theorem add_eq_cls (x y: frac) (a b: myrat):
+theorem add_eq_cls {x y: frac} {a b: myrat}:
 a = ⟦x⟧ → b = ⟦y⟧ → a + b = ⟦x + y⟧ :=
 begin
   assume hax hay,
@@ -118,7 +118,7 @@ x + -y
 
 instance: has_sub myrat := ⟨sub⟩
 
-theorem sub_eq_cls (x y: frac) (a b: myrat):
+theorem sub_eq_cls {x y: frac} {a b: myrat}:
 a = ⟦x⟧ → b = ⟦y⟧ → a - b = ⟦x + -y⟧ :=
 begin
   assume hax hay,
@@ -134,7 +134,7 @@ theorem sub_add_neg: x + -y = x - y := rfl
 theorem add_coe: (↑m : myrat) + ↑n = ↑(m + n) :=
 begin
   repeat { rw coe_int, },
-  rw [add_eq_cls _ _ _ _ rfl rfl, ←frac.frac_add_add],
+  rw [add_eq_cls rfl rfl, ←frac.frac_add_add],
   dsimp [frac.add],
   repeat {rw myint.mul_one},
   refl,
@@ -143,7 +143,7 @@ end
 theorem neg_coe: -(↑m : myrat) = ↑(-m) :=
 begin
   repeat { rw coe_int, },
-  rw [neg_eq_cls _ _ rfl, frac.frac_neg_neg],
+  rw [neg_eq_cls rfl, frac.frac_neg_neg],
   dsimp [frac.neg],
   refl,
 end
@@ -151,7 +151,7 @@ end
 theorem add_zero: x + 0 = x :=
 begin
   cases quotient.exists_rep x with a ha,
-  rw [←ha, rat_zero, add_eq_cls _ _ _ _ rfl rfl, ←frac.frac_add_add],
+  rw [←ha, rat_zero, add_eq_cls rfl rfl, ←frac.frac_add_add],
   dsimp [frac.add],
   rw [myint.mul_one, myint.zero_mul, myint.add_zero],
   conv in (a.denom * 1) {
@@ -167,7 +167,7 @@ begin
   cases quotient.exists_rep x with a ha,
   cases quotient.exists_rep y with b hb,
   rw [←ha, ←hb],
-  repeat { rw add_eq_cls _ _ _ _ rfl rfl, },
+  repeat { rw add_eq_cls rfl rfl, },
   rw frac.add_comm,
 end
 
@@ -186,7 +186,7 @@ begin
   cases quotient.exists_rep y with b hb,
   cases quotient.exists_rep z with c hc,
   rw [←ha, ←hb, ←hc],
-  repeat { rw add_eq_cls _ _ _ _ rfl rfl },
+  repeat { rw add_eq_cls rfl rfl },
   rw frac.add_assoc,
 end
 
@@ -196,7 +196,7 @@ instance add_is_assoc: is_associative myrat add := ⟨@add_assoc⟩
 theorem abs_neg: abs (-x) = abs x :=
 begin
   cases quotient.exists_rep x with a ha,
-  rw [←ha, neg_eq_cls _ _ rfl, abs_eq_cls _ _ rfl, abs_eq_cls _ _ rfl,
+  rw [←ha, neg_eq_cls rfl, abs_eq_cls rfl, abs_eq_cls rfl,
       frac.abs_neg, frac.neg_neg],
 end
 
@@ -204,7 +204,7 @@ end
 theorem neg_neg: -(-x) = x :=
 begin
   cases quotient.exists_rep x with a ha,
-  rw [←ha, neg_eq_cls _ _ rfl, neg_eq_cls _ _ rfl, frac.neg_neg],
+  rw [←ha, neg_eq_cls rfl, neg_eq_cls rfl, frac.neg_neg],
 end
 
 @[simp]
@@ -213,7 +213,7 @@ begin
   cases quotient.exists_rep x with a ha,
   cases quotient.exists_rep y with b hb,
   rw [←ha, ←hb],
-  repeat { rw neg_eq_cls _ _ rfl <|> rw add_eq_cls _ _ _ _ rfl rfl, },
+  repeat { rw neg_eq_cls rfl <|> rw add_eq_cls rfl rfl, },
   rw frac.neg_add,
 end
 
@@ -222,7 +222,7 @@ theorem sub_self: x - x = 0 :=
 begin
   cases quotient.exists_rep x with a ha,
   rw ←ha,
-  rw sub_eq_cls _ _ _ _ rfl rfl,
+  rw sub_eq_cls rfl rfl,
   rw frac.sub_self,
   apply quotient.sound,
   rw frac.setoid_equiv,

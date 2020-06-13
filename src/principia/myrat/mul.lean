@@ -117,7 +117,7 @@ theorem div_eq_mul_inv : x / y = x * y⁻¹ := rfl
 
 -- Multiplication
 
-theorem mul_eq_cls (x y : frac) (a b : myrat) :
+theorem mul_eq_cls {x y : frac} {a b : myrat} :
 a = ⟦x⟧ → b = ⟦y⟧ → a * b = ⟦x * y⟧:=
 begin
   assume hax hby,
@@ -130,7 +130,7 @@ begin
   cases quotient.exists_rep x with a ha,
   cases quotient.exists_rep y with b hb,
   rw [←ha, ←hb],
-  repeat { rw mul_eq_cls _ _ _ _ rfl rfl, },
+  repeat { rw mul_eq_cls rfl rfl, },
   rw class_equiv,
   repeat { rw frac.mul_num <|> rw frac.mul_denom, },
   ac_refl,
@@ -140,7 +140,7 @@ theorem mul_zero: x * 0 = 0 :=
 begin
   cases quotient.exists_rep x with a ha,
   rw [←ha, rat_zero],
-  rw mul_eq_cls _ _ _ _ rfl rfl,
+  rw mul_eq_cls rfl rfl,
   rw class_equiv,
   rw [frac.mul_num, frac.mul_denom],
   dsimp only [],
@@ -150,7 +150,16 @@ end
 theorem zero_mul: 0 * x = 0 :=
 by rw [mul_comm]; exact mul_zero
 
-theorem mul_one: x * 1 = x := sorry
+theorem mul_one: x * 1 = x :=
+begin
+  cases quotient.exists_rep x with a ha,
+  rw [←ha, rat_one],
+  rw mul_eq_cls rfl rfl,
+  rw class_equiv,
+  rw [frac.mul_num, frac.mul_denom],
+  dsimp only [],
+  rw [myint.mul_one, myint.mul_one],
+end
 
 theorem one_mul: 1 * x = x :=
 by rw [mul_comm]; exact mul_one

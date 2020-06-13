@@ -150,7 +150,7 @@ quotient.lift (λ x, ⟦-x⟧) frac.neg_well_defined
 
 instance: has_neg myrat := ⟨neg⟩
 
-theorem neg_eq_cls (x: frac) (a: myrat):
+theorem neg_eq_cls {x: frac} {a: myrat}:
 a = ⟦x⟧ → -a = ⟦-x⟧ :=
 begin
   assume hax,
@@ -163,7 +163,7 @@ quotient.lift (λ x : frac, ⟦frac.abs x⟧) frac.abs_well_defined
 
 instance: has_zero myrat := ⟨⟦⟨0, 1, zero_lt_one⟩⟧⟩
 
-theorem abs_eq_cls (x: frac) (a: myrat):
+theorem abs_eq_cls {x: frac} {a: myrat}:
 a = ⟦x⟧ → abs a = ⟦frac.abs x⟧ :=
 begin
   assume hax,
