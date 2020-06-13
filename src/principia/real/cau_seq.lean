@@ -89,7 +89,7 @@ instance real_setoid: setoid cau_seq :=
 equivalent_trans⟩
 
 theorem setoid_equiv (f g : cau_seq) :
-f ≈ g ↔ equivalent f g := by refl
+f ≈ g ↔ equivalent f g := iff.rfl
 
 end cau_seq
 

@@ -45,7 +45,7 @@ instance frac.setoid : setoid frac :=
 ⟨frac_eq, ⟨frac_eq_refl, frac_eq_symm, frac_eq_trans⟩⟩
 
 theorem setoid_equiv (x y : frac) :
-x ≈ y ↔ x.num * y.denom = y.num * x.denom := by refl
+x ≈ y ↔ x.num * y.denom = y.num * x.denom := iff.rfl
 
 def neg (x : frac) : frac :=
 ⟨-x.num, x.denom, x.denom_pos⟩
