@@ -42,8 +42,6 @@ def inv (x : frac) : frac :=
 if h : x.num = 0 then ⟨0, 1, zero_lt_one⟩ else
 ⟨(sign x.num) * x.denom, (sign x.num) * x.num, zero_lt_sign_mul_self h⟩
 
-#print inv
-
 instance: has_inv frac := ⟨inv⟩
 
 private theorem inv_ite {x : frac} : x⁻¹ = dite (x.num = 0) (λ (h : x.num = 0), ⟨0, 1, zero_lt_one⟩)
@@ -191,10 +189,10 @@ theorem div_inv_switch : x / y = (y / x)⁻¹ :=
 by rw [div_eq_mul_inv, div_eq_mul_inv, inv_distr, inv_inv, mul_comm]
 
 -- I don't know how to prove this
-private theorem idkhow1 : (2 : myrat) = 1 + 1 := sorry
+private theorem ikhow : (2 : myrat) = 1 + 1 := rfl
 
 theorem double_eq_add_self : 2 * x = x + x :=
-by rw [idkhow1, add_mul, one_mul]
+by rw [ikhow, add_mul, one_mul]
 
 -- I don't know how to prove this
 private theorem idkhow2 : (2 : myrat) ≠ 0 := sorry
