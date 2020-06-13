@@ -37,16 +37,63 @@ begin
 end
 
 -- Reciprocal of zero is zero
+-- This has to be an if, because 0 is a different case
 def inv (x : frac) : frac :=
 if h : x.num = 0 then ⟨0, 1, zero_lt_one⟩ else
 ⟨(sign x.num) * x.denom, (sign x.num) * x.num, zero_lt_sign_mul_self h⟩
 
+#print inv
+
 instance: has_inv frac := ⟨inv⟩
 
--- TODO: inv_num & inv_denom
+private theorem inv_ite {x : frac} : x⁻¹ = dite (x.num = 0) (λ (h : x.num = 0), ⟨0, 1, zero_lt_one⟩)
+    (λ (h : ¬x.num = 0),⟨(sign x.num) * x.denom, (sign x.num) * x.num, zero_lt_sign_mul_self h⟩)
+:= rfl
+
+theorem inv_zero {x : frac} (h : x.num = 0) : x⁻¹ = ⟨0, 1, zero_lt_one⟩ :=
+by rw [inv_ite, dif_pos h]
+
+theorem inv_num_nonzero {x : frac} (h : x.num ≠ 0) :
+x⁻¹.num = (sign x.num) * x.denom :=
+by rw [inv_ite, dif_neg h]
+
+theorem inv_denom_nonzero {x : frac} (h : x.num ≠ 0) :
+x⁻¹.denom = (sign x.num) * x.num :=
+by rw [inv_ite, dif_neg h]
 
 theorem inv_well_defined (x y : frac) :
-x ≈ y → ⟦x⁻¹⟧ = ⟦y⁻¹⟧ := sorry
+x ≈ y → ⟦x⁻¹⟧ = ⟦y⁻¹⟧ :=
+begin
+  assume hxy,
+  rw setoid_equiv at hxy,
+  apply quotient.sound,
+  rw setoid_equiv,
+  by_cases x.num = 0, {
+    rw [h, myint.zero_mul] at hxy,
+    have hzero := myint.mul_integral hxy.symm,
+    cases hzero,
+      exfalso, from (myint.lt_imp_ne x.denom_pos) hzero.symm,
+    rw [inv_zero h, inv_zero hzero],
+  }, {
+    have hydn0 : y.denom ≠ 0,
+      from (myint.lt_imp_ne y.denom_pos).symm,
+    have hlhsn0 : x.num * y.denom ≠ 0,
+      rw mul_nonzero_nonzero,
+      split; assumption,
+    have : y.num ≠ 0,
+      rw hxy at hlhsn0,
+      from (mul_nonzero_nonzero.mp hlhsn0).left,
+    rw inv_denom_nonzero h,
+    rw inv_num_nonzero h,
+    rw inv_denom_nonzero this,
+    rw inv_num_nonzero this,
+    have h₁ : x.num.sign * x.denom * (y.num.sign * y.num) = 
+      x.num.sign * y.num.sign * (y.num * x.denom),
+      ac_refl,
+    rw [h₁, ←hxy],
+    ac_refl,
+  },
+end
 
 end frac
 

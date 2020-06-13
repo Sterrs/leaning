@@ -11,10 +11,7 @@ if a ≤ b then b else a
 
 variables {a b c : mynat}
 
-theorem le_imp_max2 (h : a ≤ b) : max a b = b :=
-begin
-  from if_pos h,
-end
+theorem le_imp_max2 (h : a ≤ b) : max a b = b := if_pos h
 
 theorem le_imp_max1 (h : a ≤ b) : max b a = b :=
 begin

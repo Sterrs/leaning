@@ -268,6 +268,26 @@ begin
   },
 end
 
+theorem mul_nonzero_nonzero : m * n ≠ 0 ↔ m ≠ 0 ∧ n ≠ 0 :=
+begin
+  split; assume h, {
+    have : 0 = (0 : myint) := rfl,
+    split, all_goals {
+      assume h0,
+      subst h0,
+    },
+    rw zero_mul at h,
+    contradiction,
+    rw mul_zero at h,
+    contradiction,
+  }, {
+    assume hmn0,
+    cases mul_integral hmn0 with hn0 hm0,
+      from h.right hn0,
+    from h.left hm0,
+  },
+end
+
 private lemma something_add_one (m : myint): ∃ n, m = n + 1 :=
 by existsi (m + (-1)); rw [add_assoc, neg_self_add, add_zero]
 
