@@ -336,9 +336,19 @@ begin
   from this m k,
 end
 
-theorem abs_distr: abs m * abs n = abs (m * n) := sorry
-
+-- Both probably just case work
 theorem abs_eq_sign_self : ↑(abs m) = (sign m) * m := sorry
+
+theorem sign_mult : sign (m * n) = sign m * sign n := sorry
+
+theorem abs_distr: abs m * abs n = abs (m * n) :=
+begin
+  rw [←myint.of_nat_cancel, ←nat_nat_mul],
+  repeat { rw abs_eq_sign_self, },
+  suffices : (sign m) * m * ((sign n) * n) = (sign m * sign n) * (m * n),
+    rw [this, sign_mult],
+  ac_refl,
+end
 
 end myint
 end hidden

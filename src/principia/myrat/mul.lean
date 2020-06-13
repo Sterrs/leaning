@@ -218,7 +218,33 @@ begin
 end
 
 @[simp]
-theorem inv_inv : x⁻¹⁻¹ = x := sorry
+theorem inv_inv : x⁻¹⁻¹ = x :=
+begin
+  cases quotient.exists_rep x with a ha,
+  rw [←ha, inv_eq_cls rfl, inv_eq_cls rfl, class_equiv],
+  by_cases a.num = 0, {
+    have : a⁻¹.num = 0,
+      rw frac.inv_zero h,
+    rw [frac.inv_zero this, h, myint.zero_mul, myint.zero_mul],
+  }, {
+    have : a⁻¹.num ≠ 0,
+      assume h0,
+      rw frac.inv_num_nonzero h at h0,
+      -- Similar pattern used in inv_well_defined
+      have h₁: a.denom ≠ 0,
+        from (myint.lt_imp_ne a.denom_pos).symm,
+      have h₂: a.num.sign = 0,
+        cases myint.mul_integral h0,
+          contradiction,
+        assumption,
+      rw ←myint.zero_iff_sign_zero at h₂,
+      contradiction,
+    rw [frac.inv_num_nonzero this, frac.inv_denom_nonzero this],
+    rw [frac.inv_num_nonzero h, frac.inv_denom_nonzero h],
+    rw myint.sign_mult,
+    ac_refl,
+  },
+end
 
 theorem inv_distr : (x * y)⁻¹ = x⁻¹ * y⁻¹ := sorry
 
