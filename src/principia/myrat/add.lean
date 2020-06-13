@@ -107,11 +107,7 @@ instance: has_add myrat := ⟨add⟩
 
 theorem add_eq_cls {x y: frac} {a b: myrat}:
 a = ⟦x⟧ → b = ⟦y⟧ → a + b = ⟦x + y⟧ :=
-begin
-  assume hax hay,
-  rw [hax, hay],
-  refl,
-end
+λ hax hay, by rw [hax, hay]; refl
 
 def sub (x y : myrat) : myrat :=
 x + -y
@@ -120,11 +116,7 @@ instance: has_sub myrat := ⟨sub⟩
 
 theorem sub_eq_cls {x y: frac} {a b: myrat}:
 a = ⟦x⟧ → b = ⟦y⟧ → a - b = ⟦x + -y⟧ :=
-begin
-  assume hax hay,
-  rw [hax, hay],
-  refl,
-end
+λ hax hay, by rw [hax, hay]; refl
 
 variables {x y z : myrat}
 variables {m n k : myint}

@@ -152,11 +152,7 @@ instance: has_neg myrat := ⟨neg⟩
 
 theorem neg_eq_cls {x: frac} {a: myrat}:
 a = ⟦x⟧ → -a = ⟦-x⟧ :=
-begin
-  assume hax,
-  rw hax,
-  refl,
-end
+λ hax, by rw hax; refl
 
 def abs : myrat → myrat :=
 quotient.lift (λ x : frac, ⟦frac.abs x⟧) frac.abs_well_defined
@@ -165,11 +161,7 @@ instance: has_zero myrat := ⟨⟦⟨0, 1, zero_lt_one⟩⟧⟩
 
 theorem abs_eq_cls {x: frac} {a: myrat}:
 a = ⟦x⟧ → abs a = ⟦frac.abs x⟧ :=
-begin
-  assume hax,
-  rw hax,
-  refl,
-end
+λ hax, by rw hax; refl
 
 theorem rat_zero: (0: myrat) = ⟦⟨0, 1, zero_lt_one⟩⟧ := rfl
 
