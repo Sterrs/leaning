@@ -126,6 +126,8 @@ theorem self_div : x / x = 1 := sorry
 
 theorem div_switch : x / y = (y / x)⁻¹ := sorry
 
+theorem half_plus_half {ε : myrat} : ε / 2 + ε / 2 = ε := sorry
+
 end myrat
 
 end hidden

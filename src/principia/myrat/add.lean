@@ -133,11 +133,8 @@ theorem sub_add_neg: x + -y = x - y := rfl
 
 theorem add_coe: (↑m : myrat) + ↑n = ↑(m + n) :=
 begin
-  rw coe_int,
-  rw coe_int,
-  rw coe_int,
-  rw add_eq_cls _ _ _ _ rfl rfl,
-  rw ←frac.frac_add_add,
+  repeat { rw coe_int, },
+  rw [add_eq_cls _ _ _ _ rfl rfl, ←frac.frac_add_add],
   dsimp [frac.add],
   repeat {rw myint.mul_one},
   refl,
@@ -145,9 +142,8 @@ end
 
 theorem neg_coe: -(↑m : myrat) = ↑(-m) :=
 begin
-  rw [coe_int, coe_int],
-  rw neg_eq_cls _ _ rfl,
-  rw frac.frac_neg_neg,
+  repeat { rw coe_int, },
+  rw [neg_eq_cls _ _ rfl, frac.frac_neg_neg],
   dsimp [frac.neg],
   refl,
 end
@@ -155,14 +151,9 @@ end
 theorem add_zero: x + 0 = x :=
 begin
   cases quotient.exists_rep x with a ha,
-  rw ←ha,
-  rw rat_zero,
-  rw add_eq_cls _ _ _ _ rfl rfl,
-  rw ←frac.frac_add_add,
+  rw [←ha, rat_zero, add_eq_cls _ _ _ _ rfl rfl, ←frac.frac_add_add],
   dsimp [frac.add],
-  rw myint.mul_one,
-  rw myint.zero_mul,
-  rw myint.add_zero,
+  rw [myint.mul_one, myint.zero_mul, myint.add_zero],
   conv in (a.denom * 1) {
     rw myint.mul_one,
   },
@@ -175,13 +166,12 @@ theorem add_comm: x + y = y + x :=
 begin
   cases quotient.exists_rep x with a ha,
   cases quotient.exists_rep y with b hb,
-  rw ←ha,
-  rw ←hb,
-  rw add_eq_cls _ _ _ _ rfl rfl,
-  rw add_eq_cls _ _ _ _ rfl rfl,
+  rw [←ha, ←hb],
+  repeat { rw add_eq_cls _ _ _ _ rfl rfl, },
   rw frac.add_comm,
 end
 
+@[simp]
 theorem zero_add: 0 + x = x :=
 begin
   rw add_comm,
@@ -195,52 +185,39 @@ begin
   cases quotient.exists_rep x with a ha,
   cases quotient.exists_rep y with b hb,
   cases quotient.exists_rep z with c hc,
-  rw ←ha,
-  rw ←hb,
-  rw ←hc,
-  rw add_eq_cls _ _ _ _ rfl rfl,
-  rw add_eq_cls _ _ _ _ rfl rfl,
-  rw add_eq_cls _ _ _ _ rfl rfl,
-  rw add_eq_cls _ _ _ _ rfl rfl,
+  rw [←ha, ←hb, ←hc],
+  repeat { rw add_eq_cls _ _ _ _ rfl rfl },
   rw frac.add_assoc,
 end
 
 instance add_is_assoc: is_associative myrat add := ⟨@add_assoc⟩
 
+@[simp]
 theorem abs_neg: abs (-x) = abs x :=
 begin
   cases quotient.exists_rep x with a ha,
-  rw ←ha,
-  rw neg_eq_cls _ _ rfl,
-  rw abs_eq_cls _ _ rfl,
-  rw abs_eq_cls _ _ rfl,
-  rw frac.abs_neg,
-  rw frac.neg_neg,
+  rw [←ha, neg_eq_cls _ _ rfl, abs_eq_cls _ _ rfl, abs_eq_cls _ _ rfl,
+      frac.abs_neg, frac.neg_neg],
 end
 
+@[simp]
 theorem neg_neg: -(-x) = x :=
 begin
   cases quotient.exists_rep x with a ha,
-  rw ←ha,
-  rw neg_eq_cls _ _ rfl,
-  rw neg_eq_cls _ _ rfl,
-  rw frac.neg_neg,
+  rw [←ha, neg_eq_cls _ _ rfl, neg_eq_cls _ _ rfl, frac.neg_neg],
 end
 
+@[simp]
 theorem neg_add: -(x + y) = -x + -y :=
 begin
   cases quotient.exists_rep x with a ha,
   cases quotient.exists_rep y with b hb,
-  rw ←ha,
-  rw ←hb,
-  rw add_eq_cls _ _ _ _ rfl rfl,
-  rw neg_eq_cls _ _ rfl,
-  rw neg_eq_cls _ _ rfl,
-  rw neg_eq_cls _ _ rfl,
-  rw add_eq_cls _ _ _ _ rfl rfl,
+  rw [←ha, ←hb],
+  repeat { rw neg_eq_cls _ _ rfl <|> rw add_eq_cls _ _ _ _ rfl rfl, },
   rw frac.neg_add,
 end
 
+@[simp]
 theorem sub_self: x - x = 0 :=
 begin
   cases quotient.exists_rep x with a ha,
@@ -253,6 +230,10 @@ begin
   rw myint.zero_mul,
   rw myint.zero_mul,
 end
+
+@[simp]
+theorem neg_self_add : -x + x = 0 :=
+by rw [add_comm, sub_add_neg, sub_self]
 
 end myrat
 

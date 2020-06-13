@@ -51,24 +51,19 @@ begin
     from this,
 end
 
-private theorem h_alf: (2⁻¹: myrat) > 0 := sorry
-private theorem w_h_ole: (2⁻¹: myrat) + 2⁻¹ = 1 := sorry
-
 private theorem equivalent_trans: transitive equivalent :=
 begin
     intros f g h,
     assume hfeqg hgeqh,
     intro ε,
     assume hepos,
-    -- is this the right notation
-    cases hfeqg (ε * 2⁻¹) (myrat.lt_pos_mul _ _ hepos h_alf) with N1 hN1,
-    cases hgeqh (ε * 2⁻¹) (myrat.lt_pos_mul _ _ hepos h_alf) with N2 hN2,
+    cases hfeqg (ε / 2) (myrat.half_pos hepos) with N1 hN1,
+    cases hgeqh (ε / 2) (myrat.half_pos hepos) with N2 hN2,
     existsi max N1 N2,
     intro n,
     assume hN1N2n,
-    have hN1e := hN1 n (max_lt_cancel hN1N2n),
-    rw max_comm at hN1N2n,
-    have hN2e := hN2 n (max_lt_cancel hN1N2n),
+    have hN1e := hN1 n (max_lt_cancel_left hN1N2n),
+    have hN2e := hN2 n (max_lt_cancel_right hN1N2n),
     have := myrat.triangle_ineq (f.val n - g.val n) (g.val n - h.val n),
     conv at this {
       congr,
@@ -85,15 +80,16 @@ begin
     rw myrat.zero_add at this,
     rw myrat.sub_add_neg at this,
     have hcomb := myrat.lt_comb _ _ _ _ hN1e hN2e,
-    rw ←myrat.mul_add at hcomb,
-    rw w_h_ole at hcomb,
-    rw myrat.mul_one at hcomb,
+    rw myrat.half_plus_half at hcomb,
     from myrat.le_lt_chain _ _ _ this hcomb,
 end
 
 instance real_setoid: setoid cau_seq :=
 ⟨equivalent, equivalent_refl, equivalent_symm,
 equivalent_trans⟩
+
+theorem setoid_equiv (f g : cau_seq) :
+f ≈ g ↔ equivalent f g := by refl
 
 end cau_seq
 
