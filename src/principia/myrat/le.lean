@@ -44,7 +44,7 @@ begin
       rw ←hxy,
     },
     have
-      := myint.le_mul_pos
+      := myint.le_mul_nonneg
            (myint.lt_imp_le (myint.zero_lt_mul y.denom_pos b.denom_pos))
            halx,
     have hrw: y.denom * (x.denom * (a.num * b.denom)) = y.denom * b.denom * (a.num * x.denom), {
