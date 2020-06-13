@@ -188,18 +188,20 @@ theorem self_div : x ≠ 0 → x / x = 1 :=
 theorem div_inv_switch : x / y = (y / x)⁻¹ :=
 by rw [div_eq_mul_inv, div_eq_mul_inv, inv_distr, inv_inv, mul_comm]
 
--- I don't know how to prove this
-private theorem ikhow : (2 : myrat) = 1 + 1 := rfl
+private theorem double_one : (2 : myrat) = 1 + 1 := rfl
 
 theorem double_eq_add_self : 2 * x = x + x :=
-by rw [ikhow, add_mul, one_mul]
+by rw [double_one, add_mul, one_mul]
 
--- I don't know how to prove this
-private theorem idkhow2 : (2 : myrat) ≠ 0 := sorry
+private theorem two_nzero : (2 : myrat) ≠ 0 :=
+begin
+  assume water,
+  cases (quotient.exact water),
+end
 
 theorem half_plus_half {ε : myrat} : ε / 2 + ε / 2 = ε :=
 begin
-  rw [←double_eq_add_self, mul_comm, div_mul_cancel idkhow2],
+  rw [←double_eq_add_self, mul_comm, div_mul_cancel two_nzero],
 end
 
 end myrat
