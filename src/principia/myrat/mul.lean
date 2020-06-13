@@ -125,7 +125,7 @@ begin
   refl,
 end
 
-theorem mul_comm: x * y = y * x :=
+theorem mul_comm (x y : myrat): x * y = y * x :=
 begin
   cases quotient.exists_rep x with a ha,
   cases quotient.exists_rep y with b hb,
@@ -180,9 +180,22 @@ end
 
 instance mul_is_assoc: is_associative myrat mul := ⟨@mul_assoc⟩
 
-theorem mul_add: x * (y + z) = x * y + x * z := sorry
+theorem mul_add: x * (y + z) = x * y + x * z :=
+begin
+  cases quotient.exists_rep x with a ha,
+  cases quotient.exists_rep y with b hb,
+  cases quotient.exists_rep z with c hc,
+  rw [←ha, ←hb, ←hc],
+  repeat { rw mul_eq_cls rfl rfl <|> rw add_eq_cls rfl rfl, },
+  rw class_equiv,
+  repeat { rw frac.mul_num <|> rw frac.mul_denom <|> rw frac.add_num <|> rw frac.add_denom, },
+  -- ac_refl can't expand brackets
+  repeat { rw myint.add_mul <|> rw myint.mul_add, },
+  ac_refl,
+end
 
-theorem add_mul: (x + y) * z = x * z + y * z := sorry
+theorem add_mul: (x + y) * z = x * z + y * z :=
+by rw [mul_comm, mul_add, mul_comm, mul_comm z]
 
 -- Reciprocal "inv"
 
