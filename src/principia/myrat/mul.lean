@@ -118,12 +118,8 @@ theorem div_eq_mul_inv : x / y = x * y⁻¹ := rfl
 -- Multiplication
 
 theorem mul_eq_cls {x y : frac} {a b : myrat} :
-a = ⟦x⟧ → b = ⟦y⟧ → a * b = ⟦x * y⟧:=
-begin
-  assume hax hby,
-  rw [hax, hby],
-  refl,
-end
+a = ⟦x⟧ → b = ⟦y⟧ → a * b = ⟦x * y⟧ :=
+λ hax hby, by rw [hax, hby]; refl
 
 theorem mul_comm (x y : myrat): x * y = y * x :=
 begin
@@ -199,8 +195,19 @@ by rw [mul_comm, mul_add, mul_comm, mul_comm z]
 
 -- Reciprocal "inv"
 
+theorem inv_eq_cls {a : myrat} {x : frac}: a = ⟦x⟧ → a⁻¹ = ⟦x⁻¹⟧ :=
+λ h, by rw h; refl
+
 @[simp]
-theorem one_inv : 1⁻¹ = (1 : myrat) := sorry
+theorem one_inv : 1⁻¹ = (1 : myrat) :=
+begin
+  rw [rat_one, @inv_eq_cls _ ⟨1, 1, zero_lt_one⟩ rfl],
+  rw class_equiv,
+  rw [frac.inv_num_nonzero, frac.inv_denom_nonzero],
+  all_goals { dsimp only [], },
+  repeat { rw myint.one_mul <|> rw myint.mul_one, },
+  all_goals { assume h, from myint.zero_ne_one h.symm, },
+end
 
 @[simp]
 theorem zero_inv : 0⁻¹ = (0 : myrat) := sorry

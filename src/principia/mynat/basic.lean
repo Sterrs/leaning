@@ -99,6 +99,12 @@ end
 @[simp]
 theorem one_eq_succ_zero: succ 0 = 1 := rfl
 
+theorem zero_ne_one : (0:  mynat) ≠ 1 :=
+begin
+  assume h,
+  from mynat.no_confusion h,
+end
+
 theorem add_cancel: ∀ {m}, m + n = m + k → n = k
 | zero     := by simp; cc
 | (succ m) := assume h, by {

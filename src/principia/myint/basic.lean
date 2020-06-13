@@ -283,5 +283,13 @@ by rw [←coe_nat_eq, ←coe_nat_eq, of_nat_cancel]; apply_instance
 | -[1+ a] (of_nat b) := is_false of_nat_ne_neg_succ.symm
 | -[1+ a] -[1+ b] := by rw [neg_succ_of_nat_cancel]; apply_instance
 
+theorem zero_ne_one : (0 : myint) ≠ 1 :=
+begin
+  rw [←one_nat, ←zero_nat],
+  assume h,
+  rw of_nat_cancel at h,
+  from zero_ne_one h,
+end
+
 end myint
 end hidden
