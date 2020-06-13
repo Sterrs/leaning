@@ -1,4 +1,4 @@
-import .basic
+import .le
 import ..myset.basic
 
 namespace hidden

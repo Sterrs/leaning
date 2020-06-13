@@ -13,7 +13,7 @@ instance: has_le frac := ⟨le⟩
 theorem le_def (x y: frac):
 x ≤ y ↔ x.num * y.denom ≤ y.num * x.denom := iff.rfl
 
-private theorem le_right (a x b y : frac) :
+private theorem le_right {a x b y : frac} :
 a ≈ b → x ≈ y → (a ≤ x) → (b ≤ y) :=
 begin
   assume hab hxy halx,
@@ -66,8 +66,8 @@ begin
   apply propext,
   from
     iff.intro
-      (le_right _ _ _ _ hab hxy)
-      (le_right _ _ _ _ (setoid.symm hab) (setoid.symm hxy)),
+      (le_right hab hxy)
+      (le_right (setoid.symm hab) (setoid.symm hxy)),
 end
 
 end frac
@@ -77,6 +77,11 @@ namespace myrat
 def le := quotient.lift₂ (λ x y, x ≤ y) frac.le_well_defined
 
 instance: has_le myrat := ⟨le⟩
+
+theorem triangle_ineq (a b: myrat): abs (a + b) ≤ abs a + abs b :=
+begin
+    sorry,
+end
 
 end myrat
 

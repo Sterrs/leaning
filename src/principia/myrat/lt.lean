@@ -9,14 +9,9 @@ def lt (x y : myrat) := ¬y ≤ x
 
 instance: has_lt myrat := ⟨lt⟩
 
-theorem lt_pos_mul (a b: myrat): 0 < a → 0 < b → 0 < a * b :=
+theorem zero_lt_mul (a b: myrat): 0 < a → 0 < b → 0 < a * b :=
 begin
     assume hapos hbpos,
-    sorry,
-end
-
-theorem triangle_ineq (a b: myrat): abs (a + b) ≤ abs a + abs b :=
-begin
     sorry,
 end
 

@@ -81,10 +81,8 @@ begin
     have : y.num ≠ 0,
       rw hxy at hlhsn0,
       from (mul_nonzero_nonzero.mp hlhsn0).left,
-    rw inv_denom_nonzero h,
-    rw inv_num_nonzero h,
-    rw inv_denom_nonzero this,
-    rw inv_num_nonzero this,
+    rw [inv_denom_nonzero h, inv_num_nonzero h],
+    rw [inv_denom_nonzero this, inv_num_nonzero this],
     have h₁ : x.num.sign * x.denom * (y.num.sign * y.num) = 
       x.num.sign * y.num.sign * (y.num * x.denom),
       ac_refl,
