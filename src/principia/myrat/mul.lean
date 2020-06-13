@@ -246,7 +246,32 @@ begin
   },
 end
 
-theorem inv_distr : (x * y)⁻¹ = x⁻¹ * y⁻¹ := sorry
+theorem inv_distr : (x * y)⁻¹ = x⁻¹ * y⁻¹ :=
+begin
+  cases quotient.exists_rep x with a ha,
+  cases quotient.exists_rep y with b hb,
+  rw [←ha, ←hb],
+  repeat { rw inv_eq_cls rfl <|> rw mul_eq_cls rfl rfl, },
+  rw class_equiv,
+  rw [frac.mul_num, frac.mul_denom],
+  by_cases (a * b).num = 0,
+    have : a.num = 0 ∨ b.num = 0,
+      rw [frac.mul_num, myint.mul_comm] at h,
+      from myint.mul_integral h,
+    rw frac.inv_zero h,
+    dsimp only [],
+    rw [myint.zero_mul, myint.mul_one],
+    cases this with ha hb,
+      rw [frac.inv_zero ha, myint.zero_mul],
+    rw [frac.inv_zero hb, myint.mul_zero],
+  have : a.num ≠ 0 ∧ b.num ≠ 0,
+    rwa [←myint.mul_nonzero_nonzero, ←frac.mul_num],
+  rw [frac.inv_num_nonzero h, frac.inv_denom_nonzero h],
+  rw [frac.inv_num_nonzero this.left, frac.inv_denom_nonzero this.left],
+  rw [frac.inv_num_nonzero this.right, frac.inv_denom_nonzero this.right],
+  rw [frac.mul_num, frac.mul_denom, sign_mult],
+  ac_refl,
+end
 
 theorem inv_self_mul : x ≠ 0 → x⁻¹ * x = 1 :=
 begin
@@ -258,7 +283,7 @@ begin
   dsimp only [],
   rw [frac.mul_num, frac.mul_denom],
   have : a.num ≠ 0,
-  rw rat_zero at hx,
+    rw rat_zero at hx,
     have h : ¬⟦a⟧ = ⟦{num := 0, denom := 1, denom_pos := zero_lt_one}⟧,
       from hx,
     clear hx,
