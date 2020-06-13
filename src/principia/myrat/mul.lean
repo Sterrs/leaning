@@ -48,15 +48,6 @@ instance: has_inv frac := ⟨inv⟩
 theorem inv_well_defined (x y : frac) :
 x ≈ y → ⟦x⁻¹⟧ = ⟦y⁻¹⟧ := sorry
 
--- Dividing by zero gives you zero
-def div (x y : frac) : frac :=
-x * y⁻¹
-
-instance: has_div frac := ⟨div⟩
-
-theorem div_well_defined (a x b y : frac) :
-a ≈ b → x ≈ y → ⟦a / x⟧ = ⟦b / y⟧ := sorry
-
 end frac
 
 namespace myrat
@@ -71,12 +62,13 @@ quotient.lift (λ x, ⟦x⁻¹⟧) frac.inv_well_defined
 
 instance: has_inv myrat := ⟨inv⟩
 
-def div : myrat → myrat → myrat :=
-quotient.lift₂ (λ x y, ⟦x / y⟧) frac.div_well_defined
+def div : myrat → myrat → myrat := λ x y, x * y⁻¹
 
 instance: has_div myrat := ⟨div⟩
 
 variables {x y z : myrat}
+
+theorem div_eq_mul_inv : x / y = x * y⁻¹ := rfl
 
 -- Multiplication
 
@@ -102,31 +94,68 @@ theorem add_mul: (x + y) * z = x * z + y * z := sorry
 
 -- Reciprocal "inv"
 
+@[simp]
 theorem one_inv : 1⁻¹ = (1 : myrat) := sorry
 
+@[simp]
 theorem zero_inv : 0⁻¹ = (0 : myrat) := sorry
 
-theorem inv_self_mul : x⁻¹ * x = 1 := sorry
+@[simp]
+theorem inv_inv : x⁻¹⁻¹ = x := sorry
 
-theorem self_inv_mul : x * x⁻¹ = 1 :=
-by rw [mul_comm, inv_self_mul]
+theorem inv_distr : (x * y)⁻¹ = x⁻¹ * y⁻¹ := sorry
+
+theorem inv_self_mul : x ≠ 0 → x⁻¹ * x = 1 := sorry
+
+theorem self_inv_mul : x ≠ 0 → x * x⁻¹ = 1 :=
+begin
+  assume h,
+  rw mul_comm,
+  exact inv_self_mul h,
+end
 
 -- Division
 
-theorem div_one : x / 1 = x := sorry
+@[simp]
+theorem div_one : x / 1 = x :=
+by rw [div_eq_mul_inv, one_inv, mul_one]
 
-theorem one_div : 1 / x = x⁻¹ := sorry
+theorem one_div : 1 / x = x⁻¹ :=
+by rw [div_eq_mul_inv, one_mul]
 
-theorem zero_div : 0 / x = 0 := sorry
+@[simp]
+theorem zero_div : 0 / x = 0 :=
+by rw [div_eq_mul_inv, zero_mul]
 
-theorem div_zero : x / 0 = 0 := sorry
+@[simp]
+theorem div_zero : x / 0 = 0 :=
+by rw [div_eq_mul_inv, zero_inv, mul_zero]
 
--- This is sadly false when x = 0
-theorem self_div : x / x = 1 := sorry
+theorem mul_div_cancel : y ≠ 0 → (x * y) / y = x :=
+λ h, by rw [div_eq_mul_inv, mul_assoc, self_inv_mul h, mul_one]
 
-theorem div_switch : x / y = (y / x)⁻¹ := sorry
+theorem div_mul_cancel : y ≠ 0 → (x / y) * y = x :=
+λ h, by rw [div_eq_mul_inv, mul_assoc, inv_self_mul h, mul_one]
 
-theorem half_plus_half {ε : myrat} : ε / 2 + ε / 2 = ε := sorry
+theorem self_div : x ≠ 0 → x / x = 1 :=
+λ h, by rw [div_eq_mul_inv, self_inv_mul h]
+
+theorem div_inv_switch : x / y = (y / x)⁻¹ :=
+by rw [div_eq_mul_inv, div_eq_mul_inv, inv_distr, inv_inv, mul_comm]
+
+-- I don't know how to prove this
+private theorem idkhow1 : (2 : myrat) = 1 + 1 := sorry
+
+theorem double_eq_add_self : 2 * x = x + x :=
+by rw [idkhow1, add_mul, one_mul]
+
+-- I don't know how to prove this
+private theorem idkhow2 : (2 : myrat) ≠ 0 := sorry
+
+theorem half_plus_half {ε : myrat} : ε / 2 + ε / 2 = ε :=
+begin
+  rw [←double_eq_add_self, mul_comm, div_mul_cancel idkhow2],
+end
 
 end myrat
 

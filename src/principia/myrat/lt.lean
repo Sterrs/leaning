@@ -41,6 +41,13 @@ theorem lt_trans {a b c : myrat} : a < b → b < c → a < c := sorry
 
 theorem half_pos {ε : myrat} : 0 < ε → 0 < ε / 2 := sorry
 
+theorem exists_between (a c : myrat) :
+∃ b : myrat, a < b ∧ b < c :=
+begin
+  existsi (a + c) / 2,
+  sorry,
+end
+
 end myrat
 
 end hidden
