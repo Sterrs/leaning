@@ -175,6 +175,8 @@ theorem rat_zero: (0: myrat) = ⟦⟨0, 1, zero_lt_one⟩⟧ := rfl
 
 instance: has_one myrat := ⟨⟦⟨1, 1, zero_lt_one⟩⟧⟩
 
+theorem rat_one: (1: myrat) = ⟦⟨1, 1, zero_lt_one⟩⟧ := rfl
+
 instance: has_coe myint myrat := ⟨λ m, ⟦⟨m, 1, zero_lt_one⟩⟧⟩
 
 theorem coe_int {m : myint} : (↑m : myrat) = ⟦⟨m, 1, zero_lt_one⟩⟧ :=

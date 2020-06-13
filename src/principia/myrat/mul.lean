@@ -117,15 +117,43 @@ theorem div_eq_mul_inv : x / y = x * y⁻¹ := rfl
 
 -- Multiplication
 
-theorem mul_zero: x * 0 = 0 := sorry
+theorem mul_eq_cls (x y : frac) (a b : myrat) :
+a = ⟦x⟧ → b = ⟦y⟧ → a * b = ⟦x * y⟧:=
+begin
+  assume hax hby,
+  rw [hax, hby],
+  refl,
+end
 
-theorem zero_mul: 0 * x = 0 := sorry
+theorem mul_comm: x * y = y * x :=
+begin
+  cases quotient.exists_rep x with a ha,
+  cases quotient.exists_rep y with b hb,
+  rw [←ha, ←hb],
+  repeat { rw mul_eq_cls _ _ _ _ rfl rfl, },
+  rw class_equiv,
+  repeat { rw frac.mul_num <|> rw frac.mul_denom, },
+  ac_refl,
+end
+
+theorem mul_zero: x * 0 = 0 :=
+begin
+  cases quotient.exists_rep x with a ha,
+  rw [←ha, rat_zero],
+  rw mul_eq_cls _ _ _ _ rfl rfl,
+  rw class_equiv,
+  rw [frac.mul_num, frac.mul_denom],
+  dsimp only [],
+  repeat { rw myint.mul_zero <|> rw myint.zero_mul },
+end
+
+theorem zero_mul: 0 * x = 0 :=
+by rw [mul_comm]; exact mul_zero
 
 theorem mul_one: x * 1 = x := sorry
 
-theorem one_mul: 1 * x = x := sorry
-
-theorem mul_comm: x * y = y * x := sorry
+theorem one_mul: 1 * x = x :=
+by rw [mul_comm]; exact mul_one
 
 instance mul_is_comm: is_commutative myrat mul := ⟨@mul_comm⟩
 
