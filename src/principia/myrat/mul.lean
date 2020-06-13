@@ -248,7 +248,25 @@ end
 
 theorem inv_distr : (x * y)⁻¹ = x⁻¹ * y⁻¹ := sorry
 
-theorem inv_self_mul : x ≠ 0 → x⁻¹ * x = 1 := sorry
+theorem inv_self_mul : x ≠ 0 → x⁻¹ * x = 1 :=
+begin
+  cases quotient.exists_rep x with a ha,
+  assume hx,
+  rw ha.symm at *,
+  rw [inv_eq_cls rfl, mul_eq_cls rfl rfl, rat_one],
+  rw class_equiv,
+  dsimp only [],
+  rw [frac.mul_num, frac.mul_denom],
+  have : a.num ≠ 0,
+  rw rat_zero at hx,
+    have h : ¬⟦a⟧ = ⟦{num := 0, denom := 1, denom_pos := zero_lt_one}⟧,
+      from hx,
+    clear hx,
+    rw [class_equiv, myint.mul_one, myint.zero_mul] at h,
+    assumption,
+  rw [frac.inv_num_nonzero this, frac.inv_denom_nonzero this],
+  ac_refl,
+end
 
 theorem self_inv_mul : x ≠ 0 → x * x⁻¹ = 1 :=
 begin
