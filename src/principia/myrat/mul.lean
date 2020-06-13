@@ -166,7 +166,17 @@ by rw [mul_comm]; exact mul_one
 
 instance mul_is_comm: is_commutative myrat mul := ⟨@mul_comm⟩
 
-theorem mul_assoc: x * y * z = x * (y * z) := sorry
+theorem mul_assoc: x * y * z = x * (y * z) :=
+begin
+  cases quotient.exists_rep x with a ha,
+  cases quotient.exists_rep y with b hb,
+  cases quotient.exists_rep z with c hc,
+  rw [←ha, ←hb, ←hc],
+  repeat { rw mul_eq_cls rfl rfl, },
+  rw class_equiv,
+  repeat { rw frac.mul_num <|> rw frac.mul_denom, },
+  ac_refl,
+end
 
 instance mul_is_assoc: is_associative myrat mul := ⟨@mul_assoc⟩
 
