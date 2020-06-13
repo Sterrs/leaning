@@ -210,7 +210,12 @@ begin
 end
 
 @[simp]
-theorem zero_inv : 0⁻¹ = (0 : myrat) := sorry
+theorem zero_inv : 0⁻¹ = (0 : myrat) :=
+begin
+  rw [rat_zero, @inv_eq_cls _ ⟨0, 1, zero_lt_one⟩ rfl],
+  rw [class_equiv, frac.inv_zero],
+  refl,
+end
 
 @[simp]
 theorem inv_inv : x⁻¹⁻¹ = x := sorry
