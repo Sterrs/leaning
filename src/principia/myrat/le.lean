@@ -78,47 +78,61 @@ def le := quotient.lift₂ (λ x y, x ≤ y) frac.le_well_defined
 
 instance: has_le myrat := ⟨le⟩
 
-variables a b c : myrat
+-- Use Izaak's enormous-brain workaround
+
+theorem le_frac_cls {x y : myrat} {a b : frac} :
+x = ⟦a⟧ → y = ⟦b⟧ → (x ≤ y ↔ a ≤ b) :=
+λ hxa hyb, by rw [hxa, hyb]; refl
+
+theorem le_cls {x y : myrat} {a b : frac} :
+x = ⟦a⟧ → y = ⟦b⟧ → (x ≤ y ↔ a.num * b.denom ≤ b.num * a.denom) :=
+λ hxa hyb, by rw [le_frac_cls hxa hyb]; refl
+
+variables x y z : myrat
 
 @[refl]
-theorem le_refl : a ≤ a := sorry
+theorem le_refl : x ≤ x :=
+begin
+  cases quotient.exists_rep x with a ha,
+  subst ha,
+  rw [le_cls rfl rfl],
+end
+
 @[trans]
-theorem le_trans : a ≤ b → b ≤ c → a ≤ c := sorry
+theorem le_trans : x ≤ y → y ≤ z → x ≤ z := sorry
 
-theorem le_cancel_left {a b c : myrat} : c + a ≤ c + b ↔ a ≤ b := sorry
+theorem le_cancel_left {x y z : myrat} : z + x ≤ z + y ↔ x ≤ y := sorry
 
-theorem le_add_left {a b : myrat} (c : myrat) : a ≤ b ↔ c + a ≤ c + b :=
+theorem le_add_left {x y : myrat} (z : myrat) : x ≤ y ↔ z + x ≤ z + y :=
 le_cancel_left.symm
 
-theorem le_cancel_right {a b c : myrat} : a + c ≤ b + c ↔ a ≤ b :=
-by rw [add_comm, add_comm b]; from le_cancel_left
+theorem le_cancel_right {x y z : myrat} : x + z ≤ y + z ↔ x ≤ y :=
+by rw [add_comm, add_comm y]; from le_cancel_left
 
-theorem le_add_right {a b : myrat} (c : myrat) : a ≤ b ↔ a + c ≤ b + c :=
+theorem le_add_right {x y : myrat} (c : myrat) : x ≤ y ↔ x + z ≤ y + z :=
 le_cancel_right.symm
 
-theorem le_neg_switch : a ≤ b ↔ -b ≤ -a := sorry
+theorem le_neg_switch : x ≤ y ↔ -y ≤ -x := sorry
 
 theorem le_comb {a b : myrat} {x y : myrat} : a ≤ b → x ≤ y → a + x ≤ b + y := sorry
 
-theorem le_total_order : a ≤ b ∨ b ≤ a := sorry
+theorem le_total_order : x ≤ y ∨ y ≤ x := sorry
 
-theorem le_mul_nonneg_left {a b c : myrat} : 0 ≤ c → a ≤ b → c * a ≤ c * b := sorry
+theorem le_mul_nonneg_left {x y z : myrat} : 0 ≤ z → x ≤ y → z * x ≤ z * y := sorry
 
-theorem le_mul_nonneg_right {a b c : myrat} : 0 ≤ c → a ≤ b → a * c ≤ b * c :=
-λ hc hab, by rw [mul_comm, mul_comm b]; from le_mul_nonneg_left hc hab
+theorem le_mul_nonneg_right {x y z : myrat} : 0 ≤ z → x ≤ y → x * z ≤ y * z :=
+λ hc hab, by rw [mul_comm, mul_comm y]; from le_mul_nonneg_left hc hab
 
-theorem le_mul_nonpos_left {a b c : myrat} : c ≤ 0 → a ≤ b → c * b ≤ c * a := sorry
+theorem le_mul_nonpos_left {x y z : myrat} : z ≤ 0 → x ≤ y → z * y ≤ z * x := sorry
 
-theorem le_mul_nonpos_right {a b c : myrat} : c ≤ 0 → a ≤ b → b * c ≤ a * c :=
-λ hc hab, by rw [mul_comm, mul_comm a]; from le_mul_nonpos_left hc hab
+theorem le_mul_nonpos_right {x y z : myrat} : z ≤ 0 → x ≤ y → y * z ≤ x * z :=
+λ hc hab, by rw [mul_comm, mul_comm x]; from le_mul_nonpos_left hc hab
 
-theorem le_antisymm {a b : myrat} : a ≤ b → b ≤ a → a = b := sorry
+theorem le_antisymm {x y : myrat} : x ≤ y → y ≤ x → x = y := sorry
 
-theorem square_nonneg : 0 ≤ a * a := sorry
+theorem square_nonneg : 0 ≤ x * x := sorry
 
--- {a b c : myrat}
-
-theorem triangle_ineq (a b: myrat): abs (a + b) ≤ abs a + abs b :=
+theorem triangle_ineq : abs (x + y) ≤ abs x + abs y :=
 begin
     sorry,
 end
