@@ -119,7 +119,26 @@ begin
   rwa myint.le_mul_cancel_pos_left b.denom_pos at h,
 end
 
-theorem le_cancel_left {x y z : myrat} : z + x ≤ z + y ↔ x ≤ y := sorry
+theorem le_cancel_left {x y z : myrat} : z + x ≤ z + y ↔ x ≤ y :=
+begin
+  cases quotient.exists_rep x with a ha, subst ha,
+  cases quotient.exists_rep y with b hb, subst hb,
+  cases quotient.exists_rep z with c hc, subst hc,
+  repeat { rw [add_eq_cls rfl rfl, le_cls rfl rfl] },
+  repeat { rw frac.add_num <|> rw frac.add_denom, },
+  rw [myint.add_mul, myint.add_mul],
+  have : c.num * a.denom * (c.denom * b.denom) = c.num * b.denom * (c.denom * a.denom),
+    ac_refl,
+  rw this, clear this,
+  rw myint.le_cancel_left,
+  have : a.num * c.denom * (c.denom * b.denom) = a.num * b.denom * c.denom * c.denom,
+    ac_refl,
+  rw this, clear this,
+  have : b.num * c.denom * (c.denom * a.denom) = b.num * a.denom * c.denom * c.denom,
+    ac_refl,
+  rw this, clear this,
+  repeat { rwa myint.le_mul_cancel_pos_right c.denom_pos, },
+end
 
 theorem le_add_left {x y : myrat} (z : myrat) : x ≤ y ↔ z + x ≤ z + y :=
 le_cancel_left.symm
