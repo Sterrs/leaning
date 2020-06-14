@@ -229,7 +229,7 @@ begin
 end
 
 -- Here we pretty much require the old definition
-theorem le_total_order: ∀ {m n : myint}, m ≤ n ∨ n ≤ m
+theorem le_total_order: ∀ m n : myint, m ≤ n ∨ n ≤ m
 | (of_nat a) (of_nat b) :=
 begin
   cases hidden.le_total_order a b,

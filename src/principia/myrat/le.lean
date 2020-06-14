@@ -21,42 +21,42 @@ begin
   rw setoid_equiv at hxy,
   rw le_def,
   rw le_def at halx,
-  apply @myint.le_mul_cancel_pos _ _ (x.denom * a.denom), {
+  have : 0 < x.denom * a.denom, {
     from myint.zero_lt_mul x.denom_pos a.denom_pos,
-  }, {
-    conv {
-      congr,
-      rw myint.mul_assoc,
-      rw myint.mul_comm,
-      rw myint.mul_assoc,
-      rw myint.mul_assoc,
-      congr, skip, congr, skip,
-      rw myint.mul_comm,
-      rw ←hab,
-      skip,
-      rw @myint.mul_comm x.denom,
-      rw myint.mul_assoc,
-      rw myint.mul_comm,
-      rw myint.mul_assoc,
-      rw myint.mul_assoc,
-      congr, skip, congr, skip,
-      rw myint.mul_comm,
-      rw ←hxy,
-    },
-    have
-      := myint.le_mul_nonneg
-           (myint.lt_imp_le (myint.zero_lt_mul y.denom_pos b.denom_pos))
-           halx,
-    have hrw: y.denom * (x.denom * (a.num * b.denom)) = y.denom * b.denom * (a.num * x.denom), {
-      ac_refl,
-    },
-    have hrw2: b.denom * (a.denom * (x.num * y.denom)) = y.denom * b.denom * (x.num * a.denom), {
-      ac_refl,
-    },
-    rw hrw,
-    rw hrw2,
-    assumption,
   },
+  rw ←myint.le_mul_cancel_pos_right this,
+  conv {
+    congr,
+    rw myint.mul_assoc,
+    rw myint.mul_comm,
+    rw myint.mul_assoc,
+    rw myint.mul_assoc,
+    congr, skip, congr, skip,
+    rw myint.mul_comm,
+    rw ←hab,
+    skip,
+    rw @myint.mul_comm x.denom,
+    rw myint.mul_assoc,
+    rw myint.mul_comm,
+    rw myint.mul_assoc,
+    rw myint.mul_assoc,
+    congr, skip, congr, skip,
+    rw myint.mul_comm,
+    rw ←hxy,
+  },
+  have
+    := myint.le_mul_nonneg
+        (myint.lt_imp_le (myint.zero_lt_mul y.denom_pos b.denom_pos))
+        halx,
+  have hrw: y.denom * (x.denom * (a.num * b.denom)) = y.denom * b.denom * (a.num * x.denom), {
+    ac_refl,
+  },
+  have hrw2: b.denom * (a.denom * (x.num * y.denom)) = y.denom * b.denom * (x.num * a.denom), {
+    ac_refl,
+  },
+  rw hrw,
+  rw hrw2,
+  assumption,
 end
 
 theorem le_well_defined (a x b y : frac) :
@@ -159,7 +159,13 @@ begin
   transitivity b + x; assumption,
 end
 
-theorem le_total_order : x ≤ y ∨ y ≤ x := sorry
+theorem le_total_order : x ≤ y ∨ y ≤ x :=
+begin
+  cases quotient.exists_rep x with a ha, subst ha,
+  cases quotient.exists_rep y with b hb, subst hb,
+  rw [le_cls rfl rfl, le_cls rfl rfl],
+  from myint.le_total_order (a.num * b.denom) (b.num * a.denom),
+end
 
 theorem le_mul_nonneg_left {x y z : myrat} : 0 ≤ z → x ≤ y → z * x ≤ z * y := sorry
 
