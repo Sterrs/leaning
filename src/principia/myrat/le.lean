@@ -146,12 +146,18 @@ le_cancel_left.symm
 theorem le_cancel_right {x y z : myrat} : x + z ≤ y + z ↔ x ≤ y :=
 by rw [add_comm, add_comm y]; from le_cancel_left
 
-theorem le_add_right {x y : myrat} (c : myrat) : x ≤ y ↔ x + z ≤ y + z :=
+theorem le_add_right {x y : myrat} (z : myrat) : x ≤ y ↔ x + z ≤ y + z :=
 le_cancel_right.symm
 
 theorem le_neg_switch : x ≤ y ↔ -y ≤ -x := sorry
 
-theorem le_comb {a b : myrat} {x y : myrat} : a ≤ b → x ≤ y → a + x ≤ b + y := sorry
+theorem le_comb {a b : myrat} {x y : myrat} : a ≤ b → x ≤ y → a + x ≤ b + y :=
+begin
+  assume hab hxy,
+  rw le_add_right x at hab,
+  rw le_add_left b at hxy,
+  transitivity b + x; assumption,
+end
 
 theorem le_total_order : x ≤ y ∨ y ≤ x := sorry
 
