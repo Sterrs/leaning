@@ -93,13 +93,31 @@ variables x y z : myrat
 @[refl]
 theorem le_refl : x ≤ x :=
 begin
-  cases quotient.exists_rep x with a ha,
-  subst ha,
-  rw [le_cls rfl rfl],
+  cases quotient.exists_rep x with a ha, subst ha,
+  rw le_cls rfl rfl,
 end
 
 @[trans]
-theorem le_trans : x ≤ y → y ≤ z → x ≤ z := sorry
+theorem le_trans : x ≤ y → y ≤ z → x ≤ z :=
+begin
+  assume hxy hyz,
+  cases quotient.exists_rep x with a ha, subst ha,
+  cases quotient.exists_rep y with b hb, subst hb,
+  cases quotient.exists_rep z with c hc, subst hc,
+  rw le_cls rfl rfl at hxy hyz ⊢,
+  have hxy₁ := myint.le_mul_nonneg (myint.lt_imp_le c.denom_pos) hxy,
+  have hyz₁ := myint.le_mul_nonneg (myint.lt_imp_le a.denom_pos) hyz,
+  have : c.denom * (b.num * a.denom) = a.denom * (b.num * c.denom), ac_refl,
+  rw this at hxy₁,
+  have h : c.denom * (a.num * b.denom) ≤ a.denom * (c.num * b.denom),
+    transitivity a.denom * (b.num * c.denom); assumption,
+  clear hyz hxy hxy₁ hyz₁ this,
+  have : c.denom * (a.num * b.denom) = b.denom * (a.num * c.denom), ac_refl,
+  rw this at h, clear this,
+  have : a.denom * (c.num * b.denom) = b.denom * (c.num * a.denom), ac_refl,
+  rw this at h, clear this,
+  rwa myint.le_mul_cancel_pos_left b.denom_pos at h,
+end
 
 theorem le_cancel_left {x y z : myrat} : z + x ≤ z + y ↔ x ≤ y := sorry
 

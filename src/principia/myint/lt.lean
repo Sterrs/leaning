@@ -168,12 +168,13 @@ begin
   from mynat.no_confusion (add_integral h.symm),
 end
 
+theorem le_mul_cancel_pos_left : 0 < k → (k * m ≤ k * n ↔ m ≤ n) := sorry
+
+theorem le_mul_cancel_pos_right : 0 < k → (m * k ≤ n * k ↔ m ≤ n) := sorry
+
 theorem zero_lt_sign_mul_self: m ≠ 0 → 0 < (sign m) * m := sorry
 
 theorem zero_lt_abs: 0 < m → m = ↑(abs m) := sorry
--- needed for rationals
--- make iff
-theorem le_mul_cancel_pos: 0 < k → m * k ≤ n * k → m ≤ n := sorry
 
 end myint
 end hidden
