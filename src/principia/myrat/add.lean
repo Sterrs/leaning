@@ -154,7 +154,7 @@ begin
   from and.intro rfl rfl,
 end
 
-theorem add_comm: x + y = y + x :=
+theorem add_comm (x y : myrat): x + y = y + x :=
 begin
   cases quotient.exists_rep x with a ha,
   cases quotient.exists_rep y with b hb,

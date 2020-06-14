@@ -131,6 +131,8 @@ begin
   assumption,
 end
 
+-- TODO : Rename to le_cancel_right and le_add_right
+
 @[simp]
 theorem le_cancel: m + k ≤ n + k ↔ m ≤ n :=
 begin
@@ -247,6 +249,8 @@ begin
   rwa neg_neg_le,
 end
 
+-- TODO: Rename to le_mul_nonneg_left and creat le_mul_nonneg_right etc.
+
 theorem le_mul_nonneg: 0 ≤ k → m ≤ n → k * m ≤ k * n :=
 begin
   assume h0lek hmn,
@@ -289,7 +293,9 @@ begin
   assumption,
 end
 
-theorem square_non_neg: ∀ {m : myint}, 0 ≤ m * m
+-- TODO: Rename to square_nonneg
+
+theorem square_non_neg: ∀ m : myint, 0 ≤ m * m
 | (of_nat a) := by rw [←coe_nat_eq, nat_nat_mul, ←zero_nat,
                       nat_nat_le]; from zero_le
 | -[1+ a] := by rw [neg_neg_mul, ←zero_nat, nat_nat_le]; from zero_le

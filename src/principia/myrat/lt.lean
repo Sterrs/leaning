@@ -15,11 +15,16 @@ begin
     sorry,
 end
 
+theorem lt_cancel_left {a b c : myrat} : c + a < c + b ↔ a < b := sorry
+
 theorem lt_add_left {a b : myrat} (c : myrat) : a < b ↔ c + a < c + b :=
-sorry
+lt_cancel_left.symm
+
+theorem lt_cancel_right {a b c : myrat} : a + c < b + c ↔ a < b :=
+by rw [add_comm, add_comm b]; from lt_cancel_left
 
 theorem lt_add_right {a b : myrat} (c : myrat) : a < b ↔ a + c < b + c :=
-sorry
+lt_cancel_right.symm
 
 theorem lt_comb (a b c d: myrat): a < b → c < d → a + c < b + d := sorry
 

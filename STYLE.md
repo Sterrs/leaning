@@ -77,7 +77,7 @@ More general tips/useful things not to forget:
 
 - Use explicit arguments by default. Therefore, when using `variables`, normally
 use explicit arguments.
-- Use implicit arguments for any argument which is mentioned ina hypothesis.
+- Use implicit arguments for any argument which is mentioned in a hypothesis.
 - Use explicit arguments if the theorem is an `↔` or `=`, which will usually be used
 via `rw` (so, definitely if it's an `=`, and based on judgement if it's a `↔`).
 This is because `rw` allows you to optionally specify explicit arguments to help it
