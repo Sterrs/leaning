@@ -227,6 +227,11 @@ end
 theorem neg_self_add : -x + x = 0 :=
 by rw [add_comm, sub_add_neg, sub_self]
 
+theorem abs_sub_switch : abs (x - y) = abs (y - x) :=
+begin
+  sorry,
+end
+
 end myrat
 
 end hidden
