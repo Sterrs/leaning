@@ -300,6 +300,14 @@ theorem square_non_neg: ∀ m : myint, 0 ≤ m * m
                       nat_nat_le]; from zero_le
 | -[1+ a] := by rw [neg_neg_mul, ←zero_nat, nat_nat_le]; from zero_le
 
+theorem zero_is_le_abs: (0: myint) ≤ abs m :=
+begin
+  have := @nat_nat_le 0 (abs m),
+  have h00: (0: myint) = ↑(0: mynat) := rfl,
+  rw h00,
+  rw this,
+  from hidden.zero_le,
+end
 
 theorem zero_le_abs: 0 ≤ m → m = ↑(abs m) :=
 begin
@@ -340,15 +348,27 @@ begin
     rw ←coe_nat_eq,
     rw nat_nat_le,
     dsimp [abs],
-    sorry, -- idk how to use mynat.le_refl
+    from hidden.le_refl,
   }, {
     from neg_nat_le,
   },
 end
 
+-- is this somewhere else?
+theorem coe_inj {m n: mynat}: (↑m: myint) = ↑n → m = n :=
+begin
+  assume h,
+  cases h,
+  refl,
+end
+
 theorem abs_sum: abs m + abs n = abs (abs m + abs n) :=
 begin
-  sorry,
+  have := le_comb (@zero_is_le_abs m) (@zero_is_le_abs n),
+  rw add_zero at this,
+  have this' := zero_le_abs this,
+  rw nat_nat_add at this',
+  from coe_inj this',
 end
 
 theorem triangle_ineq: abs (m + n) ≤ abs m + abs n :=
