@@ -7,7 +7,7 @@ import ..logic
 
 namespace hidden
 
-open mynat
+namespace mynat
 
 variables {m n k: mynat}
 
@@ -307,5 +307,7 @@ by rw [mul_comm, mul_comm m, mul_comm n k, mul_sub]
 @[simp]
 theorem difference_two_squares: m * m - n * n = (m - n) * (m + n) :=
 by rw [sub_mul, mul_add, mul_add, sub_distr, mul_comm m n, add_sub]
+
+end mynat
 
 end hidden

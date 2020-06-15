@@ -86,7 +86,7 @@ begin
   }, {
     rw [neg_neg_le, ←add_one_succ] at h,
     rw [neg_succ_of_succ_add_one, neg_neg_le],
-    from hidden.le_cancel (@hidden.le_add_rhs _ _ 1 h),
+    from mynat.le_cancel (@mynat.le_add_rhs _ _ 1 h),
   },
 end
 
@@ -232,7 +232,7 @@ end
 theorem le_total_order: ∀ m n : myint, m ≤ n ∨ n ≤ m
 | (of_nat a) (of_nat b) :=
 begin
-  cases hidden.le_total_order a b,
+  cases mynat.le_total_order a b,
     left,
     rwa [←coe_nat_eq, ←coe_nat_eq, nat_nat_le],
   right,
@@ -242,7 +242,7 @@ end
 | -[1+ a] (of_nat b) := by left; from neg_nat_le
 | -[1+ a] -[1+ b] :=
 begin
-  cases hidden.le_total_order a b,
+  cases mynat.le_total_order a b,
     right,
     rwa neg_neg_le,
   left,

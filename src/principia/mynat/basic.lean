@@ -15,7 +15,7 @@ inductive mynat
 | zero : mynat
 | succ (n : mynat) : mynat
 
-open mynat
+namespace mynat
 
 -- this instance stuff is pure voodoo but it seems to make the
 -- notation work
@@ -320,5 +320,7 @@ theorem pow_mul (m n : mynat): ∀ k, (m ^ n) ^ k = m ^ (n * k)
 theorem mul_pow (m n : mynat): ∀ k : mynat, (m * n) ^ k = m ^ k * n ^ k
 | zero := by simp
 | (succ k) := by rw [pow_succ, pow_succ, pow_succ, mul_pow]; ac_refl
+
+end mynat
 
 end hidden

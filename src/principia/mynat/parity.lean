@@ -5,7 +5,7 @@ import .induction
 
 namespace hidden
 
-open mynat
+namespace mynat
 
 def even (m: mynat) := 2 ∣ m
 def odd (m: mynat) := ¬even m
@@ -328,5 +328,7 @@ begin
     from hknz (mul_integral hknz hk2e0),
   },
 end
+
+end mynat
 
 end hidden

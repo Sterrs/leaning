@@ -35,7 +35,8 @@ def product {β : Type} [has_mul β] [has_one β]
 
 end sum
 
-section naturals
+namespace mynat
+
 variables a b c d m n k: mynat
 variables term f g : sequence mynat
 
@@ -767,6 +768,6 @@ end
 
 -- TODO: some sort of cross-over episode with bijections
 
-end naturals
+end mynat
 
 end hidden

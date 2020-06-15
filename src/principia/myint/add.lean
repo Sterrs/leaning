@@ -43,13 +43,13 @@ theorem sub_add_neg: m - n = m + (-n) := rfl
 theorem add_comm: ∀ {m n : myint}, m + n = n + m
 | (of_nat a) (of_nat b) :=
 by rw [←coe_nat_eq, ←coe_nat_eq, nat_nat_add,
-       nat_nat_add, of_nat_cancel, hidden.add_comm]
+       nat_nat_add, of_nat_cancel, mynat.add_comm]
 | (of_nat a) -[1+ b]    :=
 by rw [←coe_nat_eq, nat_neg_add, neg_nat_add]
 | -[1+ a]    (of_nat b) :=
 by rw [←coe_nat_eq, neg_nat_add, nat_neg_add]
 | -[1+ a]    -[1+ b]    :=
-by rw [neg_neg_add, neg_neg_add, hidden.add_comm]
+by rw [neg_neg_add, neg_neg_add, mynat.add_comm]
 
 instance add_is_comm: is_commutative myint add :=
 ⟨assume a b, add_comm⟩
@@ -57,7 +57,7 @@ instance add_is_comm: is_commutative myint add :=
 @[simp]
 theorem zero_add: ∀ m : myint, 0 + m = m
 | (of_nat m) := by rw [←zero_nat, ←coe_nat_eq,
-                       nat_nat_add, hidden.zero_add]
+                       nat_nat_add, mynat.zero_add]
 | -[1+ n]    := by rw [←zero_nat, nat_neg_add]; refl
 
 @[simp]
@@ -76,7 +76,7 @@ begin
   cases a,
     rw [zz, ←neg_one, ←negative_one, zero_nat, neg_zero, zero_add],
   rw [neg_coe_succ, ←negative_one, neg_one, neg_neg_add,
-  hidden.add_zero],
+  mynat.add_zero],
 end
 
 -- Stupid but useful
@@ -109,8 +109,8 @@ begin
   rw ←one_nat,
   repeat {rw [←coe_nat_eq]},
   repeat {rw [nat_nat_add]},
-  rw [of_nat_cancel, hidden.add_assoc,
-      hidden.add_comm b, ←hidden.add_assoc],
+  rw [of_nat_cancel, mynat.add_assoc,
+      mynat.add_comm b, mynat.add_assoc],
 end
 | (of_nat a) -[1+ b] :=
 begin
@@ -134,14 +134,14 @@ begin
   rw [←one_nat, neg_nat_add, neg_neg_add, neg_nat_add, one,
   sub_succ_succ, sub_succ_succ, zero_sub_neg, zero_sub_neg, neg_succ],
   cases a,
-    rw [zz, neg_of_nat_zero, zero_add, hidden.zero_add],
+    rw [zz, neg_of_nat_zero, zero_add, mynat.zero_add],
   rw [succ_add, neg_succ, neg_neg_add],
 end
 
 theorem sub_nat_add: ∀ {a},
 sub_nat_nat (a + b) c = ↑a + sub_nat_nat b c
 | zero     := by
-  rw [zz, hidden.zero_add, zero_nat, zero_add]
+  rw [zz, mynat.zero_add, zero_nat, zero_add]
 | (succ a) := by rw [succ_add, sub_nat_succ, sub_nat_add,
 add_one_switch, ←one_nat, nat_nat_add, add_one_succ]
 
@@ -152,7 +152,7 @@ by rw [zz, nat_sub_zero, zero_sub_neg, zero_nat, zero_add,
   neg_one, neg_succ]
 | zero (succ b) :=
 by rw [zz, zero_sub_neg, zero_sub_neg, neg_succ, neg_succ,
-  neg_one, neg_neg_add, hidden.add_zero]
+  neg_one, neg_neg_add, mynat.add_zero]
 | (succ a) zero :=
 by rw [zz, sub_succ_succ, nat_sub_zero, nat_sub_zero, neg_one,
   nat_neg_add, sub_succ_succ, nat_sub_zero]
@@ -163,7 +163,7 @@ private lemma add_neg_one_switch: ∀ {m n : myint},
 (m + n) + -1 = (m + -1) + n
 | (of_nat a) (of_nat b) :=
 by rw [←coe_nat_eq, ←coe_nat_eq, neg_one, nat_nat_add, nat_neg_add,
-  nat_neg_add, add_comm, ←sub_nat_add, hidden.add_comm]
+  nat_neg_add, add_comm, ←sub_nat_add, mynat.add_comm]
 | (of_nat a) -[1+ b] :=
 begin
   rw [←coe_nat_eq, neg_one, nat_neg_add, nat_neg_add],
@@ -175,18 +175,18 @@ begin
 end
 | -[1+ a] (of_nat b) :=
 by rw [←coe_nat_eq, neg_one, neg_nat_add, neg_neg_add, ←neg_one,
-  neg_nat_add, sub_add_neg_one, hidden.add_zero]
+  neg_nat_add, sub_add_neg_one, mynat.add_zero]
 | -[1+ a] -[1+ b] :=
 begin
   rw neg_one,
   repeat {rw neg_neg_add},
-  rw [hidden.add_zero, hidden.add_zero, succ_add],
+  rw [mynat.add_zero, mynat.add_zero, succ_add],
 end
 
 -- Oh god
 private lemma sub_add_neg': ∀ {c : mynat},
 sub_nat_nat a b + -↑c = sub_nat_nat a (b + c)
-| zero := by rw [zz, zero_nat, neg_zero, add_zero, hidden.add_zero]
+| zero := by rw [zz, zero_nat, neg_zero, add_zero, mynat.add_zero]
 | (succ c) :=
 by rw [←add_one_succ, ←nat_nat_add, one_nat, neg_distr_coe_one,
   add_comm, ←add_neg_one_switch, @add_comm (-↑c), sub_add_neg',
@@ -200,31 +200,31 @@ sub_nat_nat a (b + succ c) = -[1+ c] + sub_nat_nat a b
 -- She's a beauty
 theorem add_assoc : ∀ {m n k : myint}, m + n + k = m + (n + k)
 | (of_nat a) (of_nat b) (of_nat c) :=
-by repeat {rw ←coe_nat_eq <|> rw nat_nat_add}; rw hidden.add_assoc
+by repeat {rw ←coe_nat_eq <|> rw nat_nat_add}; rw mynat.add_assoc
 | (of_nat a) (of_nat b) -[1+ c]    :=
 by  rw [←coe_nat_eq, ←coe_nat_eq, nat_nat_add, nat_neg_add,
       nat_neg_add, sub_nat_add]
 | (of_nat a) -[1+ b]    (of_nat c) :=
 by rw [←coe_nat_eq, ←coe_nat_eq, neg_nat_add, nat_neg_add,
-      add_comm, ←sub_nat_add, ←sub_nat_add, hidden.add_comm]
+      add_comm, ←sub_nat_add, ←sub_nat_add, mynat.add_comm]
 | (of_nat a) -[1+ b]    -[1+ c]    :=
 by rw [←coe_nat_eq, neg_neg_add, nat_neg_add, nat_neg_add,
   add_comm, ←sub_neg_add, succ_add, add_succ]
 | -[1+ a]    (of_nat b) (of_nat c) :=
 by rw [←coe_nat_eq, ←coe_nat_eq, neg_nat_add, nat_nat_add,
-      neg_nat_add, add_comm, ←sub_nat_add, hidden.add_comm]
+      neg_nat_add, add_comm, ←sub_nat_add, mynat.add_comm]
 | -[1+ a]    (of_nat b) -[1+ c]    :=
 by rw [←coe_nat_eq, neg_nat_add, nat_neg_add, ←sub_neg_add,
   add_comm, ←sub_neg_add, succ_add, add_succ, succ_add,
-  add_succ, hidden.add_comm]
+  add_succ, mynat.add_comm]
 | -[1+ a]    -[1+ b]    (of_nat c) :=
 begin
   rw [←coe_nat_eq, neg_neg_add, neg_nat_add, neg_nat_add,
-  ←sub_neg_add, succ_add, add_succ, hidden.add_comm],
+  ←sub_neg_add, succ_add, add_succ, mynat.add_comm],
 end
 | -[1+ a]    -[1+ b]    -[1+ c]    :=
 by repeat {rw neg_neg_add};
-  rw [neg_succ_of_nat_cancel, succ_add, add_succ, hidden.add_assoc]
+  rw [neg_succ_of_nat_cancel, succ_add, add_succ, mynat.add_assoc]
 
 instance add_is_assoc: is_associative myint add :=
 ⟨assume a b c, add_assoc⟩
@@ -273,7 +273,7 @@ begin
       of_nat_cancel, of_nat_cancel],
   assume h,
   apply @add_cancel a b 1,
-  rwa [hidden.add_comm, hidden.add_comm 1],
+  rwa [mynat.add_comm, mynat.add_comm 1],
 end
 | (of_nat a) -[1+ b] :=
 begin
@@ -283,7 +283,7 @@ begin
       sub_succ_succ, zero_sub_neg, ←one, nat_nat_add] at h,
   cases b,
     rw [zz, neg_of_nat_zero, ←zero_nat, of_nat_cancel,
-    hidden.add_comm] at h,
+    mynat.add_comm] at h,
     suffices h1ne0 : 1 ≠ (0:mynat),
       from h1ne0 (add_integral h),
     apply mynat.no_confusion,

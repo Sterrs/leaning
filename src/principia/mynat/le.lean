@@ -5,7 +5,7 @@ import ..tactic
 
 namespace hidden
 
-open mynat
+namespace mynat
 
 def le (m n: mynat) :=  ∃ k: mynat, n = m + k
 -- notation
@@ -153,6 +153,8 @@ begin
   },
 end
 
+end mynat
+
 end hidden
 
 -- We have to leave `hidden` to keep tactic.interactive
@@ -186,7 +188,7 @@ do
   -- Get the lambda expression to feed to wlogle
   la ← goal_to_lambda2,
   -- Apply wlogle
-  tactic.apply `(hidden.wlogle %%la),
+  tactic.apply `(hidden.mynat.wlogle %%la),
   -- Put everything back into context
   tactic.intro_lst [m, n, symm],
   swap,
@@ -198,7 +200,8 @@ end wlog_tactic
 -- Return to hidden
 namespace hidden
 
-open mynat
+namespace mynat
+
 variables {m n k: mynat}
 
 theorem le_mul (k: mynat): m ≤ n → k * m ≤ k * n :=
@@ -316,5 +319,7 @@ begin
   have := mul_cancel hk0 heq,
   rw this,
 end
+
+end mynat
 
 end hidden

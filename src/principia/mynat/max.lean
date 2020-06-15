@@ -2,7 +2,7 @@ import .nat_sub
 
 namespace hidden
 
-open mynat
+namespace mynat
 -- TODO: generalise this to relevant types and relations
 def max (a b : mynat) : mynat :=
 if a ≤ b then b else a
@@ -81,5 +81,7 @@ begin
   apply le_lt_chain,
   from max_le_right,
 end
+
+end mynat
 
 end hidden

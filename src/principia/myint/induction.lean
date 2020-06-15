@@ -12,7 +12,7 @@ begin
   intro n,
   cases n, {
     induction n with n hn, {
-      rwa [zz, ←coe_nat_eq, zero_nat],
+      rwa [mynat.zz, ←coe_nat_eq, zero_nat],
     }, {
       rw ←coe_nat_eq at hn,
       have h := hnext hn,
@@ -20,11 +20,11 @@ begin
     },
   }, {
     induction n with n hn, {
-      rw [zz, ←neg_one],
+      rw [mynat.zz, ←neg_one],
       apply @hprev 0,
       assumption,
     }, {
-      rw [←neg_coe_succ, ←add_one_succ, ←nat_nat_add, neg_distr,
+      rw [←neg_coe_succ, ←mynat.add_one_succ, ←nat_nat_add, neg_distr,
           one_nat, ←sub_add_neg],
       apply @hprev (-↑(mynat.succ n)),
       rwa neg_coe_succ,

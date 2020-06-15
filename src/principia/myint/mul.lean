@@ -38,9 +38,9 @@ theorem mul_zero : ∀ {m : myint}, m * 0 = 0
 -- But this isn't rfl???
 theorem zero_mul : ∀ {m : myint}, 0 * m = 0
 | (of_nat a) :=
-by rw [←zero_nat,←coe_nat_eq, nat_nat_mul, hidden.zero_mul]
+by rw [←zero_nat,←coe_nat_eq, nat_nat_mul, mynat.zero_mul]
 | -[1+ a] :=
-by rw [←zero_nat, nat_neg_mul, hidden.zero_mul, zero_nat, neg_zero]
+by rw [←zero_nat, nat_neg_mul, mynat.zero_mul, zero_nat, neg_zero]
 
 theorem mul_one: ∀ {m : myint}, m * 1 = m
 | (of_nat a) := rfl
@@ -48,35 +48,35 @@ theorem mul_one: ∀ {m : myint}, m * 1 = m
 
 theorem one_mul : ∀ {m: myint}, 1 * m = m
 | (of_nat a) :=
-by rw [←one_nat, ←coe_nat_eq, nat_nat_mul, hidden.one_mul]
+by rw [←one_nat, ←coe_nat_eq, nat_nat_mul, mynat.one_mul]
 | -[1+ a] :=
-by rw [←one_nat, nat_neg_mul, hidden.one_mul, neg_coe_succ]
+by rw [←one_nat, nat_neg_mul, mynat.one_mul, neg_coe_succ]
 
 -- Stupid but useful
 private theorem one: 1 = succ 0 := one_eq_succ_zero.symm
 
 theorem mul_neg_one: ∀ {m : myint}, m * (-1) = -m
 | (of_nat a) :=
-by rw [neg_one, ←coe_nat_eq, nat_neg_mul, ←one, hidden.mul_one]
+by rw [neg_one, ←coe_nat_eq, nat_neg_mul, ←one, mynat.mul_one]
 | -[1+ a] :=
-by rw [neg_one, neg_neg_mul, ←one, hidden.mul_one, neg_neg_succ]
+by rw [neg_one, neg_neg_mul, ←one, mynat.mul_one, neg_neg_succ]
 
 theorem neg_one_mul: ∀ {m : myint}, (-1) * m = -m
 | (of_nat a) :=
-by rw [←coe_nat_eq, neg_one, neg_nat_mul, ←one, hidden.one_mul]
+by rw [←coe_nat_eq, neg_one, neg_nat_mul, ←one, mynat.one_mul]
 | -[1+ a] :=
-by rw [neg_one, neg_neg_mul, ←one, hidden.one_mul, neg_neg_succ]
+by rw [neg_one, neg_neg_mul, ←one, mynat.one_mul, neg_neg_succ]
 
 theorem mul_comm: ∀ {m n : myint}, m * n = n * m
 | (of_nat a) (of_nat b) :=
 by rw [←coe_nat_eq, ←coe_nat_eq, nat_nat_mul, nat_nat_mul,
-       hidden.mul_comm]
+       mynat.mul_comm]
 | (of_nat a) -[1+ b] :=
-by rw [←coe_nat_eq, nat_neg_mul, neg_nat_mul, hidden.mul_comm]
+by rw [←coe_nat_eq, nat_neg_mul, neg_nat_mul, mynat.mul_comm]
 | -[1+ a] (of_nat b) :=
-by rw [←coe_nat_eq, nat_neg_mul, neg_nat_mul, hidden.mul_comm]
+by rw [←coe_nat_eq, nat_neg_mul, neg_nat_mul, mynat.mul_comm]
 | -[1+ a] -[1+ b] :=
-by rw [neg_neg_mul, neg_neg_mul, hidden.mul_comm]
+by rw [neg_neg_mul, neg_neg_mul, mynat.mul_comm]
 
 instance mul_is_comm: is_commutative myint mul := ⟨assume a b, mul_comm⟩
 
@@ -93,31 +93,31 @@ by rw [neg_coe_succ, neg_neg_mul, neg_nat_mul, neg_neg]
 -- using the basic rules.
 theorem mul_assoc: ∀ {m n k : myint}, m * n * k = m * (n * k)
 | (of_nat a) (of_nat b) (of_nat c) :=
-by repeat {rw nat_nat_mul <|> rw ←coe_nat_eq}; rw hidden.mul_assoc
+by repeat {rw nat_nat_mul <|> rw ←coe_nat_eq}; rw mynat.mul_assoc
 | (of_nat a) (of_nat b) -[1+ c]    :=
 by rw [←coe_nat_eq, ←coe_nat_eq, nat_nat_mul, nat_neg_mul, nat_neg_mul,
-       mul_neg_nat, nat_nat_mul, hidden.mul_assoc]
+       mul_neg_nat, nat_nat_mul, mynat.mul_assoc]
 | (of_nat a) -[1+ b]    (of_nat c) :=
 by rw [←coe_nat_eq, ←coe_nat_eq, nat_neg_mul, neg_nat_mul, mul_comm,
        mul_neg_nat, mul_neg_nat, nat_nat_mul, nat_nat_mul,
-       hidden.mul_comm, hidden.mul_assoc]
+       mynat.mul_comm, mynat.mul_assoc]
 | (of_nat a) -[1+ b]    -[1+ c]    :=
 by rw [←coe_nat_eq, nat_neg_mul, neg_neg_mul, nat_nat_mul, mul_comm,
-       mul_neg_nat, neg_nat_mul, neg_neg, hidden.mul_comm,
-       hidden.mul_assoc]
+       mul_neg_nat, neg_nat_mul, neg_neg, mynat.mul_comm,
+       mynat.mul_assoc]
 | -[1+ a]    (of_nat b) (of_nat c) :=
 by rw [←coe_nat_eq, ←coe_nat_eq, nat_nat_mul, neg_nat_mul, mul_comm,
-       mul_neg_nat, nat_nat_mul, neg_nat_mul, hidden.mul_comm,
-       hidden.mul_assoc]
+       mul_neg_nat, nat_nat_mul, neg_nat_mul, mynat.mul_comm,
+       mynat.mul_assoc]
 | -[1+ a]    (of_nat b) -[1+ c]    :=
 by rw [←coe_nat_eq, neg_nat_mul, nat_neg_mul, mul_comm, mul_neg_nat,
        mul_neg_nat, neg_nat_mul, neg_nat_mul, neg_neg, neg_neg,
-       hidden.mul_comm, hidden.mul_assoc]
+       mynat.mul_comm, mynat.mul_assoc]
 | -[1+ a]    -[1+ b]    (of_nat c) :=
 by rw [←coe_nat_eq, neg_neg_mul, neg_nat_mul, mul_neg_nat, neg_nat_mul,
-       neg_neg, nat_nat_mul, hidden.mul_assoc]
+       neg_neg, nat_nat_mul, mynat.mul_assoc]
 | -[1+ a]    -[1+ b]    -[1+ c]    := by
-rw [neg_neg_mul, neg_neg_mul, nat_neg_mul, neg_nat_mul, hidden.mul_assoc]
+rw [neg_neg_mul, neg_neg_mul, nat_neg_mul, neg_nat_mul, mynat.mul_assoc]
 
 instance mul_is_assoc: is_associative myint mul :=
 ⟨assume a b c, mul_assoc⟩
@@ -136,11 +136,11 @@ by rw [neg_mul, mul_neg, neg_neg]
 private theorem add_one_mul : ∀ {m n : myint}, (m + 1) * n = m * n + n
 | (of_nat a) (of_nat b) :=
 by rw [←coe_nat_eq, ←coe_nat_eq, ←one_nat, nat_nat_add, nat_nat_mul,
-      nat_nat_mul, nat_nat_add, hidden.add_mul, hidden.one_mul]
+      nat_nat_mul, nat_nat_add, mynat.add_mul, mynat.one_mul]
 | (of_nat a) -[1+ b] :=
 by rw [←coe_nat_eq, nat_neg_mul, ←one_nat, nat_nat_add, nat_neg_mul,
        ←neg_cancel, neg_neg, neg_distr, neg_neg, neg_neg_succ,
-       nat_nat_add, hidden.add_mul, hidden.one_mul]
+       nat_nat_add, mynat.add_mul, mynat.one_mul]
 | -[1+ a] (of_nat b) :=
 by rw [←coe_nat_eq, ←neg_coe_succ, neg_mul, nat_nat_mul, succ_mul,
        ←nat_nat_add, neg_distr, add_assoc, neg_self_add, add_zero,
@@ -228,7 +228,7 @@ begin
   have hsbn0 : succ b ≠ 0,
     assume h₁,
     from mynat.no_confusion h₁,
-  from hsbn0 (hidden.mul_integral hsan0 h),
+  from hsbn0 (mynat.mul_integral hsan0 h),
 end
 
 --∀ {m n : myint},

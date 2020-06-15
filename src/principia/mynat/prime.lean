@@ -6,7 +6,7 @@ import .fact
 
 namespace hidden
 
-open mynat
+namespace mynat
 
 def prime (m: mynat) := m ≠ 1 ∧ ∀ k: mynat, k ∣ m → k = 1 ∨ k = m
 def composite (m : mynat) := ∃ a b: mynat, a ≠ 1 ∧ b ≠ 1 ∧ a * b = m
@@ -366,5 +366,7 @@ begin
   rw [hc, mul_assoc] at hb,
   existsi c, assumption,
 end
+
+end mynat
 
 end hidden

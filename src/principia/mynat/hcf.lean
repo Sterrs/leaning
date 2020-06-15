@@ -4,7 +4,7 @@ import .induction
 
 namespace hidden
 
-open mynat
+namespace mynat
 
 private lemma mod_lemma {m n : mynat} :
  0 < n ∧ n ≤ m → m - n < m :=
@@ -91,5 +91,7 @@ begin
     rw zero_mod,
   },
 end
+
+end mynat
 
 end hidden

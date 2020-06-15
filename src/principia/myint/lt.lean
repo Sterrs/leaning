@@ -155,8 +155,8 @@ begin
   subst ha, subst hb,
   rw [←zero_nat, nat_nat_lt] at h0m h0n,
   rw [←zero_nat, nat_nat_mul, nat_nat_lt],
-  have := lt_comb_mul h0n h0m,
-  rwa [hidden.mul_zero, hidden.mul_comm] at this,
+  have := mynat.lt_comb_mul h0n h0m,
+  rwa [mynat.mul_zero, mynat.mul_comm] at this,
 end
 
 theorem zero_lt_one : 0 < (1 : myint) :=
@@ -165,7 +165,7 @@ begin
   rw le_iff_exists_nat at h,
   cases h with a h,
   rw [←zero_nat, ←one_nat, nat_nat_add, of_nat_cancel] at h,
-  from mynat.no_confusion (add_integral h.symm),
+  from mynat.no_confusion (mynat.add_integral h.symm),
 end
 
 theorem zero_le_one : 0 ≤ (1 : myint) :=

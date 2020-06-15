@@ -4,7 +4,7 @@ import .lt
 
 namespace hidden
 
-open mynat
+namespace mynat
 
 def divides (m n: mynat) := ∃ k: mynat, n = k * m
 instance: has_dvd mynat := ⟨divides⟩
@@ -291,5 +291,7 @@ begin
     refl,
   assumption,
 end
+
+end mynat
 
 end hidden

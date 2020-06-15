@@ -5,7 +5,7 @@ import ..logic
 
 namespace hidden
 
-open mynat
+namespace mynat
 
 def lt (m n: mynat) := ¬n ≤ m
 instance: has_lt mynat := ⟨lt⟩
@@ -318,5 +318,7 @@ begin
   existsi m + a,
   ac_refl,
 end
+
+end mynat
 
 end hidden

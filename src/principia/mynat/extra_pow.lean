@@ -6,7 +6,7 @@ import .lt
 
 namespace hidden
 
-open mynat
+namespace mynat
 
 variables {m n k p a b c: mynat}
 
@@ -217,5 +217,7 @@ begin
     },
   },
 end
+
+end mynat
 
 end hidden
