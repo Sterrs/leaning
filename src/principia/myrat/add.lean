@@ -140,6 +140,7 @@ begin
   refl,
 end
 
+@[simp]
 theorem add_zero: x + 0 = x :=
 begin
   cases quotient.exists_rep x with a ha,
@@ -170,7 +171,7 @@ begin
   from add_zero,
 end
 
-instance add_is_comm: is_commutative myrat add := ⟨@add_comm⟩
+instance add_is_comm: is_commutative myrat add := ⟨add_comm⟩
 
 theorem add_assoc: x + y + z = x + (y + z) :=
 begin
@@ -183,21 +184,6 @@ begin
 end
 
 instance add_is_assoc: is_associative myrat add := ⟨@add_assoc⟩
-
-@[simp]
-theorem abs_neg: abs (-x) = abs x :=
-begin
-  cases quotient.exists_rep x with a ha,
-  rw [←ha, neg_eq_cls rfl, abs_eq_cls rfl, abs_eq_cls rfl,
-      frac.abs_neg, frac.neg_neg],
-end
-
-@[simp]
-theorem neg_neg: -(-x) = x :=
-begin
-  cases quotient.exists_rep x with a ha,
-  rw [←ha, neg_eq_cls rfl, neg_eq_cls rfl, frac.neg_neg],
-end
 
 @[simp]
 theorem neg_add: -(x + y) = -x + -y :=

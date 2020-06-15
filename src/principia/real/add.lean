@@ -76,6 +76,44 @@ end
 
 instance : has_add real := ⟨add⟩
 
+variables x y z w : real
+
+def sub := x + -y
+
+instance : has_sub real := ⟨sub⟩
+
+theorem sub_add_neg : x - y = x + -y := rfl
+
+theorem add_comm : x + y = y + x := sorry
+
+instance add_is_comm : is_commutative real add := ⟨add_comm⟩
+
+theorem add_assoc : x + y + z = x + (y + z) := sorry
+
+instance add_is_assoc : is_associative real add := ⟨add_assoc⟩
+
+@[simp]
+theorem add_zero : x + 0 = x := sorry
+
+@[simp]
+theorem zero_add : 0 + x = x :=
+by rw [add_comm, add_zero]
+
+@[simp]
+theorem neg_add : -(x + y) = -x + -y := sorry
+
+@[simp]
+theorem neg_self_add : -x + x = 0 := sorry
+
+@[simp]
+theorem self_neg_add : x + -x = 0 :=
+by rw [add_comm, neg_self_add]
+
+@[simp]
+theorem sub_self : x - x = 0 :=
+by rw [sub_add_neg, self_neg_add]
+
+
 end real
 
 end hidden

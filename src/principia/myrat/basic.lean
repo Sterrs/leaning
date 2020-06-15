@@ -145,6 +145,23 @@ begin
   },
 end
 
+theorem abs_zero : abs 0 = (0 : myrat) := sorry
+
+@[simp]
+theorem abs_neg (x : myrat) : abs (-x) = abs x :=
+begin
+  cases quotient.exists_rep x with a ha,
+  rw [←ha, neg_eq_cls rfl, abs_eq_cls rfl, abs_eq_cls rfl,
+      frac.abs_neg, frac.neg_neg],
+end
+
+@[simp]
+theorem neg_neg (x : myrat) : -(-x) = x :=
+begin
+  cases quotient.exists_rep x with a ha,
+  rw [←ha, neg_eq_cls rfl, neg_eq_cls rfl, frac.neg_neg],
+end
+
 end myrat
 
 end hidden

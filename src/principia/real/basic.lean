@@ -61,7 +61,30 @@ def real := quotient cau_seq.real_setoid
 
 namespace real
 
+instance : has_zero real := ⟨⟦⟨λ n, 0,
+begin
+  dsimp only [is_cau_seq],
+  rw myrat.sub_self,
+  intros ε hε,
+  existsi (0 : mynat),
+  intros m n hm hn,
+  rwa myrat.abs_zero,
+end⟩⟧⟩
+
+-- Identical proof.
+instance : has_one real := ⟨⟦⟨λ n, 1,
+begin
+  dsimp only [is_cau_seq],
+  rw myrat.sub_self,
+  intros ε hε,
+  existsi (0 : mynat),
+  intros m n hm hn,
+  rwa myrat.abs_zero,
+end⟩⟧⟩
+
 def neg : real → real := quotient.lift (λ f, ⟦-f⟧) cau_seq.neg_well_defined
+
+instance : has_neg real := ⟨neg⟩
 
 end real
 
