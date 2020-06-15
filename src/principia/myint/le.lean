@@ -306,7 +306,7 @@ begin
   have h00: (0: myint) = ↑(0: mynat) := rfl,
   rw h00,
   rw this,
-  from hidden.zero_le,
+  from mynat.zero_le,
 end
 
 theorem zero_le_abs: 0 ≤ m → m = ↑(abs m) :=
@@ -348,7 +348,7 @@ begin
     rw ←coe_nat_eq,
     rw nat_nat_le,
     dsimp [abs],
-    from hidden.le_refl,
+    from mynat.le_refl,
   }, {
     from neg_nat_le,
   },
