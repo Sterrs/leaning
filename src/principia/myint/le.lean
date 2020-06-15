@@ -301,7 +301,25 @@ theorem square_non_neg: ∀ m : myint, 0 ≤ m * m
 | -[1+ a] := by rw [neg_neg_mul, ←zero_nat, nat_nat_le]; from zero_le
 
 
-theorem zero_le_abs: 0 ≤ m → m = ↑(abs m) := sorry
+theorem zero_le_abs: 0 ≤ m → m = ↑(abs m) :=
+begin
+  assume h0m,
+  cases m, {
+    rw ←coe_nat_eq,
+    rw abs_of_nat,
+  }, {
+    cases h0m,
+  },
+end
+
+theorem triangle_ineq: abs (m + n) ≤ abs m + abs n := sorry
+
+theorem triangle_ineq_int: (abs (m + n): myint) ≤ abs m + abs n :=
+begin
+  rw nat_nat_add,
+  rw nat_nat_le,
+  from triangle_ineq,
+end
 
 end myint
 end hidden

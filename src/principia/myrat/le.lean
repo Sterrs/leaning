@@ -187,11 +187,45 @@ theorem le_mul_nonpos_right {x y z : myrat} : z ≤ 0 → x ≤ y → y * z ≤ 
 
 theorem le_antisymm {x y : myrat} : x ≤ y → y ≤ x → x = y := sorry
 
-theorem square_nonneg : 0 ≤ x * x := sorry
+theorem square_nonneg : 0 ≤ x * x :=
+begin
+  cases quotient.exists_rep x with a ha, subst ha,
+  rw mul_eq_cls rfl rfl,
+  rw rat_zero,
+  rw le_cls rfl rfl,
+  simp,
+  rw myint.zero_mul,
+  rw myint.mul_one,
+  rw frac.mul_num,
+  from myint.square_non_neg _,
+end
 
 theorem triangle_ineq : abs (x + y) ≤ abs x + abs y :=
 begin
-    sorry,
+  cases quotient.exists_rep x with a ha, subst ha,
+  cases quotient.exists_rep y with b hb, subst hb,
+  repeat {rw abs_eq_cls rfl <|> rw add_eq_cls rfl rfl},
+  rw le_cls rfl rfl,
+  repeat {rw frac.add_denom <|> rw frac.add_num <|> rw frac.abs_denom},
+  repeat {rw ←@myint.mul_comm (a.denom * b.denom)},
+  apply myint.le_mul_nonneg, {
+    rw ←myint.mul_zero,
+    from myint.le_mul_nonneg
+      (myint.lt_imp_le a.denom_pos)
+      (myint.lt_imp_le b.denom_pos),
+  }, {
+    repeat {rw frac.abs_num},
+    rw frac.add_num,
+    conv {
+      to_rhs,
+      congr, congr, skip,
+      rw myint.zero_le_abs (myint.lt_imp_le b.denom_pos),
+      skip, congr, skip,
+      rw myint.zero_le_abs (myint.lt_imp_le a.denom_pos),
+    },
+    repeat {rw myint.abs_distr_int},
+    from myint.triangle_ineq_int,
+  },
 end
 
 end myrat

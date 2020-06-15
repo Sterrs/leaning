@@ -350,5 +350,11 @@ begin
   ac_refl,
 end
 
+theorem abs_distr_int: (↑(abs m): myint) * ↑(abs n) = ↑(abs (m * n)) :=
+begin
+  rw nat_nat_mul,
+  rw abs_distr,
+end
+
 end myint
 end hidden
