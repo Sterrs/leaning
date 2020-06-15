@@ -61,41 +61,51 @@ def real := quotient cau_seq.real_setoid
 
 namespace real
 
-instance : has_zero real := ⟨⟦⟨λ n, 0,
-begin
-  dsimp only [is_cau_seq],
-  rw myrat.sub_self,
-  intros ε hε,
-  existsi (0 : mynat),
-  intros m n hm hn,
-  rwa myrat.abs_zero,
-end⟩⟧⟩
+instance : has_zero real := ⟨⟦⟨λ n, 0, cau_seq.constant_cauchy 0⟩⟧⟩
+
+theorem real_zero : (0 : real) = ⟦⟨λ n, 0, cau_seq.constant_cauchy 0⟩⟧ := rfl
 
 -- Identical proof.
-instance : has_one real := ⟨⟦⟨λ n, 1,
-begin
-  dsimp only [is_cau_seq],
-  rw myrat.sub_self,
-  intros ε hε,
-  existsi (0 : mynat),
-  intros m n hm hn,
-  rwa myrat.abs_zero,
-end⟩⟧⟩
+instance : has_one real := ⟨⟦⟨λ n, 1, cau_seq.constant_cauchy 1⟩⟧⟩
+
+theorem real_one : (1 : real) = ⟦⟨λ n, 1, cau_seq.constant_cauchy 1⟩⟧ := rfl
 
 -- Identical proof...
-instance : has_coe myrat real := ⟨λ q, ⟦⟨λ n, q,
-begin
-  dsimp only [is_cau_seq],
-  rw myrat.sub_self,
-  intros ε hε,
-  existsi (0 : mynat),
-  intros m n hm hn,
-  rwa myrat.abs_zero,
-end⟩⟧⟩
+instance : has_coe myrat real := ⟨λ q, ⟦⟨λ n, q, cau_seq.constant_cauchy q⟩⟧⟩
 
 def neg : real → real := quotient.lift (λ f, ⟦-f⟧) cau_seq.neg_well_defined
 
 instance : has_neg real := ⟨neg⟩
+
+theorem neg_eq_cls {x : real} {f : cau_seq} : x = ⟦f⟧ → -x = ⟦-f⟧ :=
+λ hxf, by rw hxf; refl
+
+theorem neg_val (f : cau_seq) (n : mynat): (-f).val n = -f.val n := rfl
+
+-- Use this to prove things which hold
+-- "trivially because there is a myrat theorem showing the sequences are the same"
+theorem seq_eq_imp_real_eq {x y : real} {f g : cau_seq}: x = ⟦f⟧ → y = ⟦g⟧ →
+(∀ n, f.val n = g.val n) → x = y :=
+begin
+  assume hxf hyg,
+  subst hxf, subst hyg,
+  assume heq,
+  rw cau_seq.class_equiv,
+  dsimp only [cau_seq.equivalent],
+  intros ε hε,
+  existsi (0 : mynat),
+  intros n hn,
+  rwa [heq n, myrat.sub_self],
+end
+
+theorem neg_neg (x : real) : -(-x) = x :=
+begin
+  cases quotient.exists_rep x with f hf, subst hf,
+  repeat { rw neg_eq_cls rfl, },
+  apply seq_eq_imp_real_eq rfl rfl,
+  intro n,
+  rw [neg_val, neg_val, myrat.neg_neg],
+end
 
 end real
 

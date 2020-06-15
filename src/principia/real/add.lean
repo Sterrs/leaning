@@ -47,6 +47,8 @@ end cau_seq
 
 namespace real
 
+open cau_seq
+
 def add : real → real → real :=
 quotient.lift₂ (λ x y, ⟦x + y⟧)
 begin
@@ -84,26 +86,75 @@ instance : has_sub real := ⟨sub⟩
 
 theorem sub_add_neg : x - y = x + -y := rfl
 
-theorem add_comm : x + y = y + x := sorry
+theorem add_eq_cls {x y : real} {f g : cau_seq}: x = ⟦f⟧ → y = ⟦g⟧ → x + y = ⟦f + g⟧ :=
+λ hxf hyg, by rw [hxf, hyg]; refl
+
+theorem add_comm : x + y = y + x :=
+begin
+  cases quotient.exists_rep x with f hf, subst hf,
+  cases quotient.exists_rep y with g hg, subst hg,
+  repeat { rw [add_eq_cls rfl rfl] },
+  apply seq_eq_imp_real_eq rfl rfl,
+  intro n,
+  rw [add_val, add_val, myrat.add_comm],
+end
 
 instance add_is_comm : is_commutative real add := ⟨add_comm⟩
 
-theorem add_assoc : x + y + z = x + (y + z) := sorry
+theorem add_assoc : x + y + z = x + (y + z) :=
+begin
+  cases quotient.exists_rep x with f hf, subst hf,
+  cases quotient.exists_rep y with g hg, subst hg,
+  cases quotient.exists_rep z with h hh, subst hh,
+  repeat { rw [add_eq_cls rfl rfl] },
+  apply seq_eq_imp_real_eq rfl rfl,
+  intro n,
+  repeat { rw add_val, },
+  ac_refl,
+end
 
 instance add_is_assoc : is_associative real add := ⟨add_assoc⟩
 
 @[simp]
-theorem add_zero : x + 0 = x := sorry
+theorem add_zero : x + 0 = x :=
+begin
+  cases quotient.exists_rep x with f hf, subst hf,
+  rw real_zero,
+  rw add_eq_cls rfl rfl,
+  apply seq_eq_imp_real_eq rfl rfl,
+  intro n,
+  rw add_val,
+  dsimp only [],
+  rw myrat.add_zero,
+end
 
 @[simp]
 theorem zero_add : 0 + x = x :=
 by rw [add_comm, add_zero]
 
 @[simp]
-theorem neg_add : -(x + y) = -x + -y := sorry
+theorem neg_add : -(x + y) = -x + -y :=
+begin
+  cases quotient.exists_rep x with f hf, subst hf,
+  cases quotient.exists_rep y with g hg, subst hg,
+  repeat { rw add_eq_cls rfl rfl <|> rw neg_eq_cls rfl, },
+  apply seq_eq_imp_real_eq rfl rfl,
+  intro n,
+  repeat { rw neg_val <|> rw add_val, },
+  rw myrat.neg_add,
+end
 
 @[simp]
-theorem neg_self_add : -x + x = 0 := sorry
+theorem neg_self_add : -x + x = 0 :=
+begin
+  cases quotient.exists_rep x with f hf, subst hf,
+  rw [neg_eq_cls rfl, add_eq_cls rfl rfl],
+  rw real_zero,
+  apply seq_eq_imp_real_eq rfl rfl,
+  intro n,
+  dsimp only [],
+  rw [add_val, neg_val, myrat.neg_self_add],
+end
 
 @[simp]
 theorem self_neg_add : x + -x = 0 :=
