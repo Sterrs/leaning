@@ -26,11 +26,11 @@ by rw [add_comm, add_comm b]; from lt_cancel_left
 theorem lt_add_right {a b : myrat} (c : myrat) : a < b ↔ a + c < b + c :=
 lt_cancel_right.symm
 
-theorem lt_comb (a b c d: myrat): a < b → c < d → a + c < b + d := sorry
+theorem lt_comb {a b c d: myrat}: a < b → c < d → a + c < b + d := sorry
 
-theorem lt_le_chain (a b c: myrat): a < b → b ≤ c → a < c := sorry
+theorem lt_le_chain {a c: myrat} (b : myrat): a < b → b ≤ c → a < c := sorry
 
-theorem le_lt_chain (a b c: myrat): a ≤ b → b < c → a < c := sorry
+theorem le_lt_chain {a c: myrat} (b : myrat): a ≤ b → b < c → a < c := sorry
 
 theorem abs_diff_lt_left {a b c : myrat} : abs (a - b) < c → b - c < a := sorry
 
