@@ -83,7 +83,7 @@ begin
       from (mul_nonzero_nonzero.mp hlhsn0).left,
     rw [inv_denom_nonzero h, inv_num_nonzero h],
     rw [inv_denom_nonzero this, inv_num_nonzero this],
-    have h₁ : x.num.sign * x.denom * (y.num.sign * y.num) = 
+    have h₁ : x.num.sign * x.denom * (y.num.sign * y.num) =
       x.num.sign * y.num.sign * (y.num * x.denom),
       ac_refl,
     rw [h₁, ←hxy],
@@ -327,16 +327,13 @@ theorem self_div : x ≠ 0 → x / x = 1 :=
 theorem div_inv_switch : x / y = (y / x)⁻¹ :=
 by rw [div_eq_mul_inv, div_eq_mul_inv, inv_distr, inv_inv, mul_comm]
 
-private theorem double_one : (2 : myrat) = 1 + 1 := rfl
+theorem add_div : (x + y) / z = x / z + y / z :=
+by repeat { rw div_eq_mul_inv, }; rw add_mul
+
+theorem one_plus_one : 1 + 1 = (2 : myrat):= rfl
 
 theorem double_eq_add_self : 2 * x = x + x :=
-by rw [double_one, add_mul, one_mul]
-
-private theorem two_nzero : (2 : myrat) ≠ 0 :=
-begin
-  assume water,
-  cases (quotient.exact water),
-end
+by rw [←one_plus_one, add_mul, one_mul]
 
 theorem half_plus_half {ε : myrat} : ε / 2 + ε / 2 = ε :=
 begin

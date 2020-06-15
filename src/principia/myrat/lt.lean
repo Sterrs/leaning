@@ -9,6 +9,10 @@ def lt (x y : myrat) := ¬y ≤ x
 
 instance: has_lt myrat := ⟨lt⟩
 
+variables x y z : myrat
+
+theorem lt_iff_nle : x < y ↔ ¬y ≤ x := by refl
+
 theorem zero_lt_mul (a b: myrat): 0 < a → 0 < b → 0 < a * b :=
 begin
     assume hapos hbpos,
@@ -26,11 +30,25 @@ by rw [add_comm, add_comm b]; from lt_cancel_left
 theorem lt_add_right {a b : myrat} (c : myrat) : a < b ↔ a + c < b + c :=
 lt_cancel_right.symm
 
+theorem lt_mul_pos_right {z : myrat} : 0 < z → ∀ x y : myrat, x < y ↔ x * z < y * z := sorry
+
+theorem lt_mul_pos_left {z : myrat} : 0 < z → ∀ x y : myrat, x < y ↔ z * x < z * y := sorry
+
 theorem lt_comb {a b c d: myrat}: a < b → c < d → a + c < b + d := sorry
+
+-- It's debatable whether these should have b as an implicit or explicit
+-- argument. When used like `transitivity`, by `apply`ing it, we need to supply
+-- which middle term we are using.
+-- However, in all other use cases we would supply both hypotheses.
+-- Personally, I think `apply`ing these theorems should be the standard way to
+-- use them as it involves the least `have` statements, resulting in shorter proofs
+-- with fewer labels used (so no h, h₁, h₂, hxy, hxy₁ etc.)
 
 theorem lt_le_chain {a c: myrat} (b : myrat): a < b → b ≤ c → a < c := sorry
 
 theorem le_lt_chain {a c: myrat} (b : myrat): a ≤ b → b < c → a < c := sorry
+
+-- abs_diff refers to the pattern `abs (a - b) < c` which often shows up in analysis
 
 theorem abs_diff_lt_left {a b c : myrat} : abs (a - b) < c → b - c < a := sorry
 
@@ -39,13 +57,49 @@ theorem abs_diff_lt_right {a b c : myrat} : abs (a - b) < c → a < b + c := sor
 @[trans]
 theorem lt_trans {a b c : myrat} : a < b → b < c → a < c := sorry
 
-theorem half_pos {ε : myrat} : 0 < ε → 0 < ε / 2 := sorry
+theorem zero_lt_one : (0 : myrat) < 1 :=
+begin
+  assume h,
+  from one_nzero (le_antisymm h zero_le_one),
+end
+
+theorem zero_lt_two : (0 : myrat) < 2 :=
+begin
+  rw [←one_plus_one, ←zero_add (0 : myrat)],
+  apply @lt_comb 0 1 0 1; from zero_lt_one,
+end
+
+theorem half_pos {ε : myrat} : 0 < ε → 0 < ε / 2 :=
+assume h, by rwa [lt_mul_pos_right zero_lt_two, zero_mul, div_mul_cancel two_nzero]
 
 theorem exists_between (a c : myrat) :
-∃ b : myrat, a < b ∧ b < c :=
+a < c → ∃ b : myrat, a < b ∧ b < c :=
 begin
+  assume hac,
   existsi (a + c) / 2,
-  sorry,
+  split; rw add_div, {
+    rw [lt_add_left (-(a/2)), ←add_assoc, add_comm _ a, neg_self_add],
+    conv {
+      to_lhs,
+      congr,
+        rw ←@half_plus_half a, skip,
+      skip,
+    },
+    rw [add_assoc, self_neg_add, add_zero, zero_add],
+    rwa [lt_mul_pos_right zero_lt_two, div_mul_cancel two_nzero,
+         div_mul_cancel two_nzero],
+  }, {
+    rw [lt_add_right (-(c / 2)), add_assoc, self_neg_add],
+    conv {
+      to_rhs,
+      congr,
+        rw ←@half_plus_half c, skip,
+      skip,
+    },
+    rw [add_assoc, self_neg_add, add_zero, add_zero],
+    rwa [lt_mul_pos_right zero_lt_two, div_mul_cancel two_nzero,
+         div_mul_cancel two_nzero],
+  },
 end
 
 end myrat

@@ -159,7 +159,7 @@ begin
   rwa [hidden.mul_zero, hidden.mul_comm] at this,
 end
 
-theorem zero_le_one : 0 < (1 : myint) :=
+theorem zero_lt_one : 0 < (1 : myint) :=
 begin
   assume h,
   rw le_iff_exists_nat at h,
@@ -167,6 +167,9 @@ begin
   rw [←zero_nat, ←one_nat, nat_nat_add, of_nat_cancel] at h,
   from mynat.no_confusion (add_integral h.symm),
 end
+
+theorem zero_le_one : 0 ≤ (1 : myint) :=
+lt_imp_le zero_lt_one
 
 theorem le_mul_cancel_pos_left : 0 < k → (k * m ≤ k * n ↔ m ≤ n) := sorry
 

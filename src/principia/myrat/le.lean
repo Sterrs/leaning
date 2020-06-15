@@ -90,6 +90,14 @@ x = ⟦a⟧ → y = ⟦b⟧ → (x ≤ y ↔ a.num * b.denom ≤ b.num * a.denom
 
 variables x y z : myrat
 
+theorem zero_le_one : (0 : myrat) ≤ 1 :=
+begin
+  rw [rat_zero, rat_one, le_cls rfl rfl],
+  dsimp only [],
+  rw [myint.zero_mul, myint.one_mul],
+  from myint.zero_le_one,
+end
+
 @[refl]
 theorem le_refl : x ≤ x :=
 begin

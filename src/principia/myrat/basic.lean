@@ -130,6 +130,12 @@ theorem rat_one: (1: myrat) = ⟦⟨1, 1, zero_lt_one⟩⟧ := rfl
 
 instance: has_coe myint myrat := ⟨λ m, ⟦⟨m, 1, zero_lt_one⟩⟧⟩
 
+theorem one_nzero : (1 : myrat) ≠ 0 :=
+begin
+  assume hydroxide,
+  cases (quotient.exact hydroxide),
+end
+
 theorem coe_int {m : myint} : (↑m : myrat) = ⟦⟨m, 1, zero_lt_one⟩⟧ :=
 rfl
 

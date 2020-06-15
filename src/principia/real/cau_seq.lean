@@ -79,9 +79,9 @@ begin
     },
     rw myrat.zero_add at this,
     rw myrat.sub_add_neg at this,
-    have hcomb := myrat.lt_comb _ _ _ _ hN1e hN2e,
+    have hcomb := myrat.lt_comb hN1e hN2e,
     rw myrat.half_plus_half at hcomb,
-    from myrat.le_lt_chain _ _ _ this hcomb,
+    from myrat.le_lt_chain _ this hcomb,
 end
 
 instance real_setoid: setoid cau_seq :=

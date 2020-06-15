@@ -4,7 +4,7 @@ namespace hidden
 
 namespace cau_seq
 
--- We have to prove that it actually gives a cau_seq 
+-- We have to prove that it actually gives a cau_seq
 def add : cau_seq → cau_seq → cau_seq :=
 λ f g, ⟨λ n, f.val n + g.val n,
 begin

@@ -109,6 +109,12 @@ theorem add_eq_cls {x y: frac} {a b: myrat}:
 a = ⟦x⟧ → b = ⟦y⟧ → a + b = ⟦x + y⟧ :=
 λ hax hay, by rw [hax, hay]; refl
 
+theorem two_nzero : (2 : myrat) ≠ 0 :=
+begin
+  assume water,
+  cases (quotient.exact water),
+end
+
 def sub (x y : myrat) : myrat :=
 x + -y
 
@@ -141,7 +147,7 @@ begin
 end
 
 @[simp]
-theorem add_zero: x + 0 = x :=
+theorem add_zero (x : myrat) : x + 0 = x :=
 begin
   cases quotient.exists_rep x with a ha,
   rw [←ha, rat_zero, add_eq_cls rfl rfl, ←frac.frac_add_add],
@@ -165,11 +171,8 @@ begin
 end
 
 @[simp]
-theorem zero_add: 0 + x = x :=
-begin
-  rw add_comm,
-  from add_zero,
-end
+theorem zero_add (x : myrat): 0 + x = x :=
+by rw [add_comm]; from add_zero _
 
 instance add_is_comm: is_commutative myrat add := ⟨add_comm⟩
 
@@ -212,6 +215,10 @@ end
 @[simp]
 theorem neg_self_add : -x + x = 0 :=
 by rw [add_comm, sub_add_neg, sub_self]
+
+@[simp]
+theorem self_neg_add : x + -x = 0 :=
+by rw [sub_add_neg, sub_self]
 
 theorem abs_sub_switch : abs (x - y) = abs (y - x) :=
 begin
