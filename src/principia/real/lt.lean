@@ -31,7 +31,7 @@ begin
       intro n,
       assume hmax,
       have hf := hN n (mynat.max_lt_cancel_right hmax),
-      have hfg := hM n (mynat.max_lt_cancel_letf hmax),
+      have hfg := hM n (mynat.max_lt_cancel_left hmax),
       clear hmax hM hN M N hequiv,
       rw [myrat.lt_add_right (ε/2), myrat.half_plus_half],
     },
