@@ -82,6 +82,17 @@ begin
   rwa myrat.abs_zero,
 end⟩⟧⟩
 
+-- Identical proof...
+instance : has_coe myrat real := ⟨λ q, ⟦⟨λ n, q,
+begin
+  dsimp only [is_cau_seq],
+  rw myrat.sub_self,
+  intros ε hε,
+  existsi (0 : mynat),
+  intros m n hm hn,
+  rwa myrat.abs_zero,
+end⟩⟧⟩
+
 def neg : real → real := quotient.lift (λ f, ⟦-f⟧) cau_seq.neg_well_defined
 
 instance : has_neg real := ⟨neg⟩
