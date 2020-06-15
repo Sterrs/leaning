@@ -22,8 +22,7 @@ begin
   from lt_nzero hmn,
 end
 
--- eurgh
--- man's gotta do what a man's gotta do to make progress
+-- TODO: this is now proved elsewhere
 theorem lt_mul_combine:
 a < b → m < n → a * m < b * n :=
 begin
@@ -180,6 +179,41 @@ begin
     }, {
       symmetry,
       assumption,
+    },
+  },
+end
+
+-- this is probably bad, I'm rusty
+theorem root_monotone:
+1 < a → n ≠ 0 → a ^ n ≤ b ^ n → a ≤ b :=
+begin
+  assume h1a hnn0 hanbn,
+  by_contradiction,
+  cases n, {
+    contradiction,
+  }, {
+    cases b, {
+      simp at hanbn,
+      rw ←pow_succ at hanbn,
+      have := @pow_gt_1 n a h1a,
+      have := lt_le_chain _ this hanbn,
+      from lt_nzero this,
+    }, {
+      cases b, {
+        simp at hanbn,
+        rw ←pow_succ at hanbn,
+        have := @pow_gt_1 n a h1a,
+        have := lt_le_chain _ this hanbn,
+        from lt_nrefl this,
+      }, {
+        have h1b: 1 < b.succ.succ, {
+          rw ←add_one_succ,
+          rw add_comm,
+          from @lt_to_add_succ 1 b,
+        },
+        have := pow_monotone h1b hnn0 a_1,
+        contradiction,
+      },
     },
   },
 end

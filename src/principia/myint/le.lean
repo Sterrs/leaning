@@ -312,7 +312,60 @@ begin
   },
 end
 
-theorem triangle_ineq: abs (m + n) ≤ abs m + abs n := sorry
+theorem abs_le_square: abs m ≤ abs n ↔ m * m ≤ n * n :=
+begin
+  have hmm := square_non_neg m,
+  have hnn := square_non_neg n,
+  have hmma := zero_le_abs hmm,
+  have hnna := zero_le_abs hnn,
+  rw hmma,
+  rw hnna,
+  rw ←abs_distr,
+  rw ←abs_distr,
+  rw nat_nat_le,
+  split, {
+    assume hmana,
+    from le_mul_comb hmana hmana,
+  }, {
+    assume hma2hna2,
+    by_contradiction,
+    have := lt_comb_mul a a,
+    contradiction,
+  },
+end
+
+theorem le_abs: m ≤ abs m :=
+begin
+  cases m, {
+    rw ←coe_nat_eq,
+    rw nat_nat_le,
+    dsimp [abs],
+    sorry, -- idk how to use mynat.le_refl
+  }, {
+    from neg_nat_le,
+  },
+end
+
+theorem abs_sum: abs m + abs n = abs (abs m + abs n) :=
+begin
+  sorry,
+end
+
+theorem triangle_ineq: abs (m + n) ≤ abs m + abs n :=
+begin
+  rw abs_sum,
+  rw abs_le_square,
+  repeat {rw mul_add <|> rw add_mul},
+  repeat {rw nat_nat_mul},
+  repeat {rw abs_distr},
+  rw ←zero_le_abs (square_non_neg m),
+  rw ←zero_le_abs (square_non_neg n),
+  repeat {rw add_assoc},
+  rw ←le_add_left,
+  repeat {rw ←add_assoc},
+  rw ←le_add,
+  from le_comb le_abs le_abs,
+end
 
 theorem triangle_ineq_int: (abs (m + n): myint) ≤ abs m + abs n :=
 begin
