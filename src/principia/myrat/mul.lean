@@ -191,9 +191,33 @@ end
 theorem add_mul: (x + y) * z = x * z + y * z :=
 by rw [mul_comm, mul_add, mul_comm, mul_comm z]
 
-theorem mul_with_neg : x * (-y) = -(x * y) := sorry
+theorem mul_with_neg : x * (-y) = -(x * y) :=
+begin
+  cases quotient.exists_rep x with a ha, subst ha,
+  cases quotient.exists_rep y with b hb, subst hb,
+  rw neg_eq_cls rfl,
+  repeat {rw mul_eq_cls rfl rfl},
+  rw neg_eq_cls rfl,
+  rw class_equiv,
+  repeat {rw frac.mul_denom <|> rw frac.mul_num},
+  repeat {rw frac.neg_denom <|> rw frac.neg_num},
+  repeat {rw frac.mul_denom <|> rw frac.mul_num},
+  rw myint.mul_neg,
+end
 
-theorem mul_neg_with : (-x) * y = -(x * y) := sorry
+theorem mul_neg_with : (-x) * y = -(x * y) :=
+begin
+  rw mul_comm,
+  rw mul_with_neg,
+  rw mul_comm,
+end
+
+theorem mul_neg_neg: -x * -y = x * y :=
+begin
+  rw mul_with_neg,
+  rw mul_neg_with,
+  rw neg_neg,
+end
 
 -- Reciprocal "inv"
 

@@ -270,7 +270,15 @@ end
 theorem le_mul_nonneg_right {x y z : myrat} : 0 ≤ z → x ≤ y → x * z ≤ y * z :=
 λ hc hab, by rw [mul_comm, mul_comm y]; from le_mul_nonneg_left hc hab
 
-theorem le_mul_nonpos_left {x y z : myrat} : z ≤ 0 → x ≤ y → z * y ≤ z * x := sorry
+theorem le_mul_nonpos_left {x y z : myrat} : z ≤ 0 → x ≤ y → z * y ≤ z * x :=
+begin
+  assume hz0 hxy,
+  rw le_neg_switch at hz0,
+  rw le_neg_switch at hxy,
+  have := le_mul_nonneg_left hz0 hxy,
+  repeat {rw mul_neg_neg at this},
+  assumption,
+end
 
 theorem le_mul_nonpos_right {x y z : myrat} : z ≤ 0 → x ≤ y → y * z ≤ x * z :=
 λ hc hab, by rw [mul_comm, mul_comm x]; from le_mul_nonpos_left hc hab
