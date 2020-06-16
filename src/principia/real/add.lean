@@ -164,7 +164,6 @@ by rw [add_comm, neg_self_add]
 theorem sub_self : x - x = 0 :=
 by rw [sub_add_neg, self_neg_add]
 
-
 end real
 
 end hidden

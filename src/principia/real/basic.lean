@@ -65,12 +65,10 @@ instance : has_zero real := ⟨⟦⟨λ n, 0, cau_seq.constant_cauchy 0⟩⟧⟩
 
 theorem real_zero : (0 : real) = ⟦⟨λ n, 0, cau_seq.constant_cauchy 0⟩⟧ := rfl
 
--- Identical proof.
 instance : has_one real := ⟨⟦⟨λ n, 1, cau_seq.constant_cauchy 1⟩⟧⟩
 
 theorem real_one : (1 : real) = ⟦⟨λ n, 1, cau_seq.constant_cauchy 1⟩⟧ := rfl
 
--- Identical proof...
 instance : has_coe myrat real := ⟨λ q, ⟦⟨λ n, q, cau_seq.constant_cauchy q⟩⟧⟩
 
 def neg : real → real := quotient.lift (λ f, ⟦-f⟧) cau_seq.neg_well_defined

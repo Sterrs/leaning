@@ -191,6 +191,10 @@ end
 theorem add_mul: (x + y) * z = x * z + y * z :=
 by rw [mul_comm, mul_add, mul_comm, mul_comm z]
 
+theorem mul_with_neg : x * (-y) = -(x * y) := sorry
+
+theorem mul_neg_with : (-x) * y = -(x * y) := sorry
+
 -- Reciprocal "inv"
 
 theorem inv_eq_cls {a : myrat} {x : frac}: a = ⟦x⟧ → a⁻¹ = ⟦x⁻¹⟧ :=
@@ -339,6 +343,9 @@ theorem half_plus_half {ε : myrat} : ε / 2 + ε / 2 = ε :=
 begin
   rw [←double_eq_add_self, mul_comm, div_mul_cancel two_nzero],
 end
+
+-- I'm sure I proved this somewhere else
+theorem abs_mul : abs (x * y) = abs x * abs y := sorry
 
 end myrat
 

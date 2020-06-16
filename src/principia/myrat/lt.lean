@@ -48,11 +48,33 @@ theorem lt_le_chain {a c: myrat} (b : myrat): a < b → b ≤ c → a < c := sor
 
 theorem le_lt_chain {a c: myrat} (b : myrat): a ≤ b → b < c → a < c := sorry
 
+theorem abs_lt (a b : myrat) : abs a < b ↔ -b < a ∧ a < b := sorry
+
+theorem abs_lt_left {a b : myrat} : abs a < b → -b < a :=
+λ h, by rw abs_lt at h; from h.left
+
+theorem abs_lt_right {a b : myrat} : abs a < b → a < b :=
+λ h, by rw abs_lt at h; from h.right
+
+theorem lt_abs {a b : myrat} : a < abs b → b < -a ∨ a < b := sorry
+
 -- abs_diff refers to the pattern `abs (a - b) < c` which often shows up in analysis
 
-theorem abs_diff_lt_left {a b c : myrat} : abs (a - b) < c → b - c < a := sorry
+theorem abs_diff_lt_left {a b c : myrat} : abs (a - b) < c → b - c < a :=
+begin
+  assume h,
+  have h₁ := abs_lt_left h,
+  rwa [lt_add_right b, ←sub_add_neg, add_assoc, neg_self_add,
+       add_zero, add_comm, sub_add_neg] at h₁,
+end
 
-theorem abs_diff_lt_right {a b c : myrat} : abs (a - b) < c → a < b + c := sorry
+theorem abs_diff_lt_right {a b c : myrat} : abs (a - b) < c → a < b + c :=
+begin
+  assume h,
+  have h₁ := abs_lt_right h,
+  rwa [lt_add_right b, ←sub_add_neg, add_assoc, neg_self_add,
+       add_zero, add_comm] at h₁,
+end
 
 @[trans]
 theorem lt_trans {a b c : myrat} : a < b → b < c → a < c := sorry
@@ -101,6 +123,12 @@ begin
          div_mul_cancel two_nzero],
   },
 end
+
+theorem lt_mul_comb_nonneg {a b x y : myrat} : 0 ≤ a → 0 ≤ x → a < b → x < y → a * x < b * y := sorry
+
+theorem lt_imp_ne {x y : myrat} : x < y → x ≠ y := sorry
+
+theorem pos_iff_inv_pos : 0 < x ↔ 0 < x⁻¹ := sorry
 
 end myrat
 

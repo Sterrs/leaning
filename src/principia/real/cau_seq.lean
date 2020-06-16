@@ -101,6 +101,14 @@ begin
   rwa myrat.abs_zero,
 end
 
+-- TODO bounded_above and bounded_below
+
+theorem abs_bounded_above (f : cau_seq) :
+∃ (u : myrat), 0 < u ∧ ∀ n, myrat.abs (f.val n) < u:=
+begin
+  sorry,
+end
+
 end cau_seq
 
 end hidden

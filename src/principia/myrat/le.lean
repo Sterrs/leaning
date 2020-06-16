@@ -200,6 +200,8 @@ begin
   from myint.square_non_neg _,
 end
 
+theorem abs_nonneg : 0 ≤ abs x := sorry
+
 theorem triangle_ineq : abs (x + y) ≤ abs x + abs y :=
 begin
   cases quotient.exists_rep x with a ha, subst ha,
