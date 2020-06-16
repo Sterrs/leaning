@@ -225,7 +225,18 @@ begin
   from myint.square_non_neg _,
 end
 
-theorem abs_nonneg : 0 ≤ abs x := sorry
+theorem abs_nonneg : 0 ≤ abs x :=
+begin
+  cases quotient.exists_rep x with a ha, subst ha,
+  rw rat_zero,
+  rw abs_eq_cls rfl,
+  rw le_cls rfl rfl,
+  simp,
+  rw myint.zero_mul,
+  rw myint.mul_one,
+  rw frac.abs_num,
+  from myint.zero_is_le_abs,
+end
 
 theorem triangle_ineq : abs (x + y) ≤ abs x + abs y :=
 begin
