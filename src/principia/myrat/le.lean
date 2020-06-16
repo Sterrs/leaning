@@ -157,14 +157,39 @@ by rw [add_comm, add_comm y]; from le_cancel_left
 theorem le_add_right {x y : myrat} (z : myrat) : x ≤ y ↔ x + z ≤ y + z :=
 le_cancel_right.symm
 
-theorem le_neg_switch : x ≤ y ↔ -y ≤ -x := sorry
-
 theorem le_comb {a b : myrat} {x y : myrat} : a ≤ b → x ≤ y → a + x ≤ b + y :=
 begin
   assume hab hxy,
   rw le_add_right x at hab,
   rw le_add_left b at hxy,
   transitivity b + x; assumption,
+end
+
+private lemma le_neg_switch_right: x ≤ y → -y ≤ -x :=
+begin
+  assume hxy,
+  rw le_add_right (x + y),
+  conv {
+    congr,
+    rw add_comm x,
+    rw ←add_assoc,
+    rw neg_self_add,
+    rw zero_add,
+    skip,
+    rw ←add_assoc,
+    rw neg_self_add,
+    rw zero_add,
+  },
+    assumption,
+end
+
+theorem le_neg_switch: x ≤ y ↔ -y ≤ -x :=
+begin
+  apply iff.intro (le_neg_switch_right _ _),
+  assume hyx,
+  rw ←neg_neg x,
+  rw ←neg_neg y,
+  from le_neg_switch_right _ _ hyx,
 end
 
 theorem le_total_order : x ≤ y ∨ y ≤ x :=
