@@ -222,7 +222,12 @@ by rw [sub_add_neg, sub_self]
 
 theorem abs_sub_switch : abs (x - y) = abs (y - x) :=
 begin
-  sorry,
+  rw ←abs_neg,
+  rw ←sub_add_neg,
+  rw neg_add,
+  rw neg_neg,
+  rw add_comm,
+  rw sub_add_neg,
 end
 
 end myrat

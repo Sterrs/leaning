@@ -73,7 +73,7 @@ More general tips/useful things not to forget:
 - If h is an equality, try using `subst h` to rewrite everything using
   it and then delete it.
 
-## Implicit vs Explicit Arguments 
+## Implicit vs Explicit Arguments
 
 - Use explicit arguments by default. Therefore, when using `variables`, normally
 use explicit arguments.

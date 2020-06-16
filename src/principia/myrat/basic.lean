@@ -151,7 +151,7 @@ begin
   },
 end
 
-theorem abs_zero : abs 0 = (0 : myrat) := sorry
+theorem abs_zero : abs 0 = (0 : myrat) := rfl
 
 @[simp]
 theorem abs_neg (x : myrat) : abs (-x) = abs x :=

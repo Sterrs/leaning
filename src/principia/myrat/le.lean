@@ -200,7 +200,72 @@ begin
   from myint.le_total_order (a.num * b.denom) (b.num * a.denom),
 end
 
-theorem le_mul_nonneg_left {x y z : myrat} : 0 ≤ z → x ≤ y → z * x ≤ z * y := sorry
+theorem le_mul_nonneg_left {x y z : myrat} : 0 ≤ z → x ≤ y → z * x ≤ z * y :=
+begin
+  assume h0z hxy,
+  cases quotient.exists_rep x with a ha, subst ha,
+  cases quotient.exists_rep y with b hb, subst hb,
+  cases quotient.exists_rep z with c hc, subst hc,
+  rw mul_eq_cls rfl rfl,
+  rw mul_eq_cls rfl rfl,
+  rw le_cls rfl rfl,
+  repeat {rw frac.mul_num <|> rw frac.mul_denom},
+  cases hcn: c.num with cn cn, {
+    rw le_cls rfl rfl at hxy,
+    conv {
+      congr,
+      rw myint.mul_assoc,
+      congr,
+      skip,
+      rw myint.mul_comm,
+      rw myint.mul_assoc,
+      congr,
+      skip,
+      rw myint.mul_comm,
+      skip,
+      rw myint.mul_assoc,
+      congr,
+      skip,
+      rw myint.mul_comm,
+      rw myint.mul_assoc,
+      congr,
+      skip,
+      rw myint.mul_comm,
+    },
+    conv {
+      congr,
+      rw ←myint.mul_assoc,
+      skip,
+      rw ←myint.mul_assoc,
+    },
+    apply myint.le_mul_nonneg, {
+      rw ←@myint.mul_zero (myint.of_nat cn),
+      apply myint.le_mul_nonneg, {
+        rw ←myint.coe_nat_eq,
+        -- ???
+        have: (0: myint) = (0: mynat) := rfl,
+        rw this,
+        rw myint.nat_nat_le,
+        from mynat.zero_le,
+      }, {
+        from myint.lt_imp_le (c.denom_pos),
+      },
+    }, {
+      assumption,
+    },
+  }, {
+    exfalso,
+    rw rat_zero at h0z,
+    rw le_cls rfl rfl at h0z,
+    simp at h0z,
+    rw myint.zero_mul at h0z,
+    rw myint.mul_one at h0z,
+    rw hcn at h0z,
+    have: (0: myint) = (0: mynat) := rfl,
+    rw this at h0z,
+    from myint.nat_neg_le h0z,
+  },
+end
 
 theorem le_mul_nonneg_right {x y z : myrat} : 0 ≤ z → x ≤ y → x * z ≤ y * z :=
 λ hc hab, by rw [mul_comm, mul_comm y]; from le_mul_nonneg_left hc hab

@@ -354,7 +354,7 @@ begin
   rw mul_eq_cls rfl rfl,
   rw class_equiv,
   repeat {rw frac.abs_num <|> rw frac.abs_denom},
-  repeat {rw frac.mul_num <|> rw frac.mul_denom},  
+  repeat {rw frac.mul_num <|> rw frac.mul_denom},
   repeat {rw frac.abs_num <|> rw frac.abs_denom},
   rw ←myint.abs_distr,
   rw myint.nat_nat_mul,
