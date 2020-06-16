@@ -230,6 +230,49 @@ begin
   },
 end
 
+theorem archimedes (x: myrat): ∃ n: myint, x ≤ ↑n :=
+begin
+  cases quotient.exists_rep x with a ha, subst ha,
+  cases han: a.num with an an, {
+    existsi myint.of_nat an,
+    rw coe_int,
+    rw le_cls rfl rfl,
+    simp,
+    rw han,
+    rw myint.mul_one,
+    rw myint.zero_le_abs (myint.lt_imp_le a.denom_pos),
+    rw ←myint.coe_nat_eq,
+    rw myint.nat_nat_mul,
+    rw myint.nat_nat_le,
+    rw mynat.mul_comm,
+    apply @mynat.le_rhs_mul an an a.denom.abs _ mynat.le_refl,
+    -- maybe lemma somewhere else
+    cases had: a.denom with ad ad, {
+      cases ad with ad, {
+        have := a.denom_pos,
+        rw had at this,
+        exfalso,
+        from myint.lt_nrefl this,
+      }, {
+        assume h,
+        cases h,
+      },
+    }, {
+      assume h,
+      cases h,
+    },
+  }, {
+    existsi (0: myint),
+    rw coe_int,
+    rw le_cls rfl rfl,
+    simp,
+    rw myint.mul_one,
+    rw myint.zero_mul,
+    rw han,
+    from myint.neg_nat_le,
+  },
+end
+
 end myrat
 
 end hidden
