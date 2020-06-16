@@ -50,7 +50,7 @@ namespace real
 open cau_seq
 
 def add : real → real → real :=
-quotient.lift₂ (λ x y, ⟦x + y⟧)
+quotient.lift₂ (λ f g, ⟦f + g⟧)
 begin
   intros a x b y hab hxy,
   dsimp only [],

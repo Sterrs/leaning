@@ -102,11 +102,26 @@ begin
   },
 end⟩
 
+instance: has_mul cau_seq := ⟨mul⟩
+
 end cau_seq
 
 namespace real
 
 open cau_seq
+
+def mul : real → real → real :=
+quotient.lift₂ (λ f g, ⟦f * g⟧)
+begin
+  intros a x b y hab hxy,
+  dsimp only [],
+  rw cau_seq.class_equiv,
+  rw cau_seq.setoid_equiv at *,
+  dsimp only [cau_seq.equivalent] at *,
+  intros ε hε,
+  -- Proof basically identical to the above...?
+  sorry,
+end
 
 
 end real
