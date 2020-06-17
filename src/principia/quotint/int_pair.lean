@@ -226,12 +226,12 @@ end
 
 def sign (n: int_pair): int_pair :=
 if 0 < n then 1
-  else if n < 0 then 1
+  else if n < 0 then -1
     else 0
 
 theorem sign_def (n: int_pair):
 sign n = if 0 < n then 1
-          else if n < 0 then 1
+          else if n < 0 then -1
             else 0 := rfl
 
 theorem sign_well_defined (n m: int_pair):
