@@ -67,7 +67,6 @@ theorem succ_add: ∀ m n : mynat, succ m + n = succ (m + n)
 | m zero     := rfl
 | m (succ n) := by rw [add_succ, add_succ, succ_add]
 
-@[simp]
 theorem add_assoc: ∀ m n k : mynat, (m + n) + k = m + (n + k)
 | m n zero     := rfl
 | m n (succ k) := by rw [add_succ, add_succ, add_succ, add_assoc]
@@ -75,7 +74,6 @@ theorem add_assoc: ∀ m n k : mynat, (m + n) + k = m + (n + k)
 instance add_is_assoc: is_associative mynat add :=
 ⟨assume a b c, add_assoc a b c⟩
 
-@[simp]
 theorem add_comm: ∀ m n : mynat, m + n = n + m
 | m zero     := by rw [zz, add_zero, zero_add]
 | m (succ n) := by rw [add_succ, succ_add, add_comm]
@@ -221,7 +219,6 @@ theorem mul_add: ∀ m n k : mynat, m * (n + k) = m * n + m * k
 | zero     n k := by repeat { rw zz <|> rw zero_mul <|> rw zero_add }
 | (succ m) n k := by repeat { rw succ_mul <|> rw mul_add }; ac_refl
 
-@[simp]
 theorem mul_assoc: ∀ m n k: mynat, (m * n) * k = m * (n * k)
 | m n zero     := by rw [zz, mul_zero, mul_zero, mul_zero]
 | m n (succ k) := by rw [mul_succ, mul_succ, mul_add, mul_assoc]
@@ -229,7 +226,6 @@ theorem mul_assoc: ∀ m n k: mynat, (m * n) * k = m * (n * k)
 instance mul_is_assoc: is_associative mynat mul :=
 ⟨assume a b c, mul_assoc a b c⟩
 
-@[simp]
 theorem mul_comm: ∀ m n : mynat, m * n = n * m
 | m zero     := by rw [zz, mul_zero, zero_mul]
 | m (succ n) := by rw [mul_succ, succ_mul, mul_comm, add_comm]
