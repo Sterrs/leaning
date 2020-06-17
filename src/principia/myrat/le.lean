@@ -1,6 +1,8 @@
 import ..myint.le
 import .mul
 
+import ..quotint.basic
+
 namespace hidden
 
 namespace frac
@@ -70,13 +72,19 @@ begin
       (le_right (setoid.symm hab) (setoid.symm hxy)),
 end
 
+instance decidable_le: ∀ x y: frac, decidable (x ≤ y) :=
+λ x y, myint.decidable_le _ _
+
 end frac
 
 namespace myrat
 
-def le := quotient.lift₂ (λ x y, x ≤ y) frac.le_well_defined
+def le := quotient.lift₂ frac.le frac.le_well_defined
 
 instance: has_le myrat := ⟨le⟩
+
+instance decidable_le: ∀ x y: myrat, decidable (x ≤ y) :=
+quotint.quotient_decidable_rel frac.le frac.le_well_defined
 
 -- Use Izaak's enormous-brain workaround
 

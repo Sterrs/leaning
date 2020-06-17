@@ -9,6 +9,9 @@ def lt (x y : myrat) := ¬y ≤ x
 
 instance: has_lt myrat := ⟨lt⟩
 
+instance decidable_lt: ∀ x y: myrat, decidable (x < y) :=
+λ x y, not.decidable
+
 variables x y z : myrat
 
 theorem lt_iff_nle : x < y ↔ ¬y ≤ x := by refl

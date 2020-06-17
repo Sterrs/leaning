@@ -13,6 +13,8 @@ namespace quotint
 open quotint
 def quotint := quotient int_pair.int_pair.setoid
 
+instance: decidable_eq quotint := quotient.decidable_eq
+
 instance: has_coe mynat quotint := ⟨λ n, ⟦⟨n, 0⟩⟧⟩
 
 theorem coe_nat_def (a: mynat): (↑a: quotint) = ⟦⟨a, 0⟩⟧ := rfl
@@ -86,13 +88,35 @@ begin
 end
 
 def le: quotint → quotint → Prop :=
-quotient.lift₂ (λ n m, n ≤ m) int_pair.le_well_defined
+quotient.lift₂ int_pair.le int_pair.le_well_defined
 
 instance: has_le quotint := ⟨le⟩
 
 theorem le_eq_cls {x y: int_pair.int_pair} {n m: quotint}:
 n = ⟦x⟧ → m = ⟦y⟧ → (n ≤ m ↔ x ≤ y) :=
 λ hnx hmy, by rw [hnx, hmy]; refl
+
+def lt: quotint → quotint → Prop :=
+quotient.lift₂ int_pair.lt int_pair.lt_well_defined
+
+instance: has_lt quotint := ⟨lt⟩
+
+theorem lt_eq_cls {x y: int_pair.int_pair} {n m: quotint}:
+n = ⟦x⟧ → m = ⟦y⟧ → (n < m ↔ x < y) :=
+λ hnx hmy, by rw [hnx, hmy]; refl
+
+universe u
+
+-- a decidable relation lifted to a quotient type is decidable
+def quotient_decidable_rel
+{α : Sort u} {s : setoid α}
+(rel: α → α → Prop)
+(wd: ∀ n m x y: α, n ≈ x → m ≈ y → (rel n m = rel x y))
+[dr : ∀ a b : α, decidable (rel a b)]:
+∀ a b: quotient s,
+  decidable (quotient.lift₂ rel wd a b) :=
+λ q₁ q₂ : quotient s,
+  quotient.rec_on_subsingleton₂ q₁ q₂ dr
 
 variables {m n k: quotint}
 variables {a b c: mynat}
@@ -244,15 +268,6 @@ end
 
 theorem nzero_iff_sign_nzero: m ≠ 0 ↔ sign m ≠ 0 :=
 iff_to_contrapositive zero_iff_sign_zero
-
--- Decidability
-
--- instance: decidable_eq quotint
--- | (of_nat a) (of_nat b) :=
--- by rw [←coe_nat_eq, ←coe_nat_eq, of_nat_cancel]; apply_instance
--- | (of_nat a) -[1+ b] := is_false of_nat_ne_neg_succ
--- | -[1+ a] (of_nat b) := is_false of_nat_ne_neg_succ.symm
--- | -[1+ a] -[1+ b] := by rw [neg_succ_of_nat_cancel]; apply_instance
 
 theorem zero_ne_one : (0 : quotint) ≠ 1 :=
 begin

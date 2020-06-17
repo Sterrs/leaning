@@ -6,20 +6,20 @@ namespace quotint
 
 open quotint
 
--- NOTE: In this file we try to avoid using anything disgusting, that
--- should be confined to le.lean
-
-def lt (m n : quotint): Prop := ¬n ≤ m
-instance: has_lt quotint := ⟨lt⟩
-
 variables {m n k : quotint}
 variables {a b c : mynat}
 
+-- this is no longer definitionally true. Not sure if that's what we want,
+-- it makes things a bit ugly
 theorem lt_iff_nle : m < n ↔ ¬n ≤ m :=
-by split; all_goals { assume h, assumption }
+begin
+  cases quotient.exists_rep m with a ha, subst ha,
+  cases quotient.exists_rep n with b hb, subst hb,
+  refl,
+end
 
 instance decidable_lt: ∀ m n: quotint, decidable (m < n) :=
-(λ m n, not.decidable)
+quotient_decidable_rel int_pair.lt int_pair.lt_well_defined
 
 @[simp]
 theorem nat_nat_lt : (↑a : quotint) < ↑b ↔ a < b :=
@@ -35,7 +35,7 @@ assume h, nat_neg_le h
 theorem neg_net_lt : -[1+ a] < -[1+ b] ↔ b < a :=
 iff_to_contrapositive neg_neg_le
 
-theorem lt_nrefl : ¬m < m := assume h, h le_refl
+theorem lt_nrefl : ¬m < m := assume h, (lt_iff_nle.mp h) le_refl
 
 theorem lt_imp_ne : m < n → m ≠ n :=
 begin
@@ -48,7 +48,8 @@ begin
   assume hmn,
   cases @le_total_order m n,
     assumption,
-  contradiction,
+  exfalso,
+  from (lt_iff_nle.mp hmn) h,
 end
 
 theorem lt_iff_le_and_ne : m < n ↔ m ≤ n ∧ m ≠ n :=
@@ -60,6 +61,7 @@ begin
     have hmn := lt_imp_le h, exfalso,
     from (lt_imp_ne h) (le_antisymm hmn hnm),
   }, {
+    rw lt_iff_nle,
     assume hmn,
     cases h with hnm hne,
     from hne (le_antisymm hnm hmn),
@@ -161,11 +163,7 @@ end
 
 theorem zero_lt_one : 0 < (1 : quotint) :=
 begin
-  assume h,
-  rw le_iff_exists_nat at h,
-  cases h with a h,
-  rw [←zero_nat, ←one_nat, nat_nat_add, of_nat_cancel] at h,
-  from mynat.no_confusion (mynat.add_integral h.symm),
+  sorry,
 end
 
 theorem zero_le_one : 0 ≤ (1 : quotint) :=
