@@ -21,6 +21,7 @@ instance: has_zero int_pair := ⟨⟨0, 0⟩⟩
 instance: has_one int_pair := ⟨⟨1, 0⟩⟩
 
 @[simp] theorem zero_def: (0: int_pair) = ⟨0, 0⟩ := rfl
+@[simp] theorem one_def: (1: int_pair) = ⟨1, 0⟩ := rfl
 
 theorem eq_iff_split (n m: int_pair):
 n = m ↔ n.a = m.a ∧ n.b = m.b :=
@@ -78,6 +79,16 @@ instance int_pair.setoid : setoid int_pair :=
 
 theorem setoid_equiv (x y : int_pair) :
 x ≈ y ↔ x.a + y.b = y.a + x.b := iff.rfl
+
+theorem sound_exact_iff (x y: int_pair):
+⟦x⟧ = ⟦y⟧ ↔ x ≈ y := iff.intro quotient.exact quotient.sound
+
+instance int_pair_eq_decidable: ∀ n m: int_pair, decidable (n ≈ m) :=
+begin
+  intros n m,
+  rw setoid_equiv,
+  from mynat.decidable_eq _ _,
+end
 
 -- definitions and definitional equalities
 
@@ -302,6 +313,14 @@ begin
     repeat {rw if_neg h0m},
     from neg_well_defined _ _ hnm,
   },
+end
+
+def abs₂ (n: int_pair): mynat := (abs n).a - (abs n).b
+
+theorem abs_2_well_defined (n m: int_pair):
+n ≈ m → abs₂ n = abs₂ m :=
+begin
+  sorry,
 end
 
 def mul (n m: int_pair): int_pair := ⟨n.a * m.a + n.b * m.b, n.a * m.b + n.b * m.a⟩

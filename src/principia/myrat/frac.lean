@@ -72,6 +72,13 @@ instance frac.setoid : setoid frac :=
 theorem setoid_equiv (x y : frac) :
 x ≈ y ↔ x.num * y.denom = y.num * x.denom := iff.rfl
 
+instance decidable_frac_eq: ∀ a b: frac, decidable (a ≈ b) :=
+begin
+  intros a b,
+  rw setoid_equiv,
+  from myint.decidable_eq _ _,
+end
+
 end frac
 
 end hidden

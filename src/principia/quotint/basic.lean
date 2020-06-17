@@ -27,6 +27,9 @@ theorem neg_succ_def (a: mynat): -[1+ a] = ⟦⟨0, succ a⟩⟧ := rfl
 instance: has_zero quotint := ⟨(0: mynat)⟩
 instance: has_one quotint := ⟨(1: mynat)⟩
 
+theorem int_zero: (0: quotint) = ⟦0⟧ := rfl
+theorem int_one: (1: quotint) = ⟦1⟧ := rfl
+
 def neg: quotint → quotint :=
 quotient.lift (λ n, ⟦-n⟧) int_pair.neg_well_defined
 
@@ -65,10 +68,31 @@ instance: has_sub quotint := ⟨sub⟩
 
 theorem sub_def (n m: quotint): n - m = n + -m := rfl
 
+def mul: quotint → quotint → quotint :=
+quotient.lift₂ (λ n m, ⟦n * m⟧) int_pair.mul_well_defined
+
+instance: has_mul quotint := ⟨mul⟩
+
+theorem mul_eq_cls {x y: int_pair.int_pair} {n m: quotint}:
+n = ⟦x⟧ → m = ⟦y⟧ → n * m = ⟦x * y⟧ :=
+λ hnx hmy, by rw [hnx, hmy]; refl
+
+theorem nat_nat_mul {x y: mynat}:
+(↑x: quotint) * ↑y = ↑(x * y) :=
+begin
+  apply quotient.sound,
+  rw int_pair.setoid_equiv,
+  simp,
+end
+
 def le: quotint → quotint → Prop :=
 quotient.lift₂ (λ n m, n ≤ m) int_pair.le_well_defined
 
 instance: has_le quotint := ⟨le⟩
+
+theorem le_eq_cls {x y: int_pair.int_pair} {n m: quotint}:
+n = ⟦x⟧ → m = ⟦y⟧ → (n ≤ m ↔ x ≤ y) :=
+λ hnx hmy, by rw [hnx, hmy]; refl
 
 variables {m n k: quotint}
 variables {a b c: mynat}
@@ -200,20 +224,21 @@ begin
   split; assume h, {
     subst h, refl,
   }, {
-    cases m, {
-      cases m, {
-        rw [zz, ←coe_nat_eq, zero_nat],
-      }, {
-        exfalso,
-        rw [←coe_nat_eq, sign_succ, ←zero_nat, ←one_nat, of_nat_cancel]
-        at h,
-        from mynat.no_confusion h,
-      },
-    }, {
-      exfalso,
-      rw [sign_neg_succ] at h,
-      from quotint.no_confusion h,
-    },
+    sorry,
+    -- cases m, {
+    --   cases m, {
+    --     rw [zz, ←coe_nat_eq, zero_nat],
+    --   }, {
+    --     exfalso,
+    --     rw [←coe_nat_eq, sign_succ, ←zero_nat, ←one_nat, of_nat_cancel]
+    --     at h,
+    --     from mynat.no_confusion h,
+    --   },
+    -- }, {
+    --   exfalso,
+    --   rw [sign_neg_succ] at h,
+    --   from quotint.no_confusion h,
+    -- },
   },
 end
 

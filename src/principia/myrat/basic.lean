@@ -90,6 +90,11 @@ def myrat := quotient frac.frac.setoid
 
 namespace myrat
 
+instance: decidable_eq myrat := quotient.decidable_eq
+
+def f: myrat → myrat :=
+λ x, if x = x then x else x
+
 private lemma class_setoid (x y : frac) :
 ⟦x⟧ = ⟦y⟧ ↔ x ≈ y := iff.intro quotient.exact quotient.sound
 

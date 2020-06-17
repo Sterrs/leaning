@@ -5,6 +5,8 @@ import .nat_sub
 import .fact
 import ..sequence
 
+import .le
+
 namespace hidden
 
 open mynat
@@ -96,8 +98,9 @@ sum (λ k, succ k) n * 2 = n * (n + 1)
 | (succ n) := by conv {
   rw [sum_succ, add_mul, triangular_numbers, two],
   simp,
-  rw [add_comm 1, add_one_succ],
-  simp,
+  rw add_comm n (n + n * n),
+  to_rhs,
+  rw add_assoc,
 }
 
 -- this one's here because it's so nice to state,
@@ -220,6 +223,8 @@ begin
     have: 1 = succ 0 := rfl,
     rw [this, binom_succ_succ, ←this, n_ih],
     simp,
+    rw ←add_one_succ,
+    rw add_comm,
   },
 end
 
@@ -764,6 +769,63 @@ begin
   clear hrw,
   rw [sub_distr, add_comm, add_sub],
   repeat {rw pow_succ},
+end
+
+private lemma am_gm_base:
+4 * (a * b) ≤ (a + b) ^ (2: mynat) :=
+begin
+  wlog_le a b, {
+    rw mul_comm a b,
+    rw add_comm,
+    assumption,
+  }, {
+    cases hle with d hd,
+    subst hd,
+    have: (a + d + a) ^ (2: mynat) = (a + d + a) * (a + d + a) := rfl,
+    rw this, clear this,
+    have: (4: mynat) = 1 + 1 + 1 + 1 := rfl,
+    rw this,
+    simp,
+    existsi d * d,
+    ac_refl,
+  },
+end
+
+theorem am_gm_2:
+2 * (a * b) ≤ a * a + b * b :=
+begin
+  apply @le_cancel _ _ (2 * (a * b)),
+  rw ←mul_add,
+  have: a * a + b * b + 2 * (a * b) = (a + b) ^ (2: mynat), {
+    have: (2: mynat) = 1 + 1 := rfl,
+    repeat {rw this},
+    simp,
+    ac_refl,
+  },
+  rw this, clear this,
+  have: 2 * (a * b + a * b) = 4 * (a * b), {
+    have: (4: mynat) = 1 + 1 + 1 + 1 := rfl,
+    rw this, clear this,
+    have: (2: mynat) = 1 + 1 := rfl,
+    rw this,
+    simp,
+    ac_refl,
+  },
+  rw this,
+  from am_gm_base _ _,
+end
+
+theorem am_gm:
+n ^ n * product f n ≤ (sum f n) ^ n :=
+begin
+  sorry,
+end
+
+theorem cauchy_schwarz:
+(sum (λ k, f k * g k) n) ^ (2: mynat)
+ ≤ sum (λ k, f k * f k) n * sum (λ k, g k * g k) n :=
+begin
+  sorry,
 end
 
 -- TODO: some sort of cross-over episode with bijections
