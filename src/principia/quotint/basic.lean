@@ -277,5 +277,12 @@ begin
   from zero_ne_one h,
 end
 
+theorem le_total_order: m ≤ n ∨ n ≤ m :=
+begin
+  cases quotient.exists_rep m with a ha, subst ha,
+  cases quotient.exists_rep n with b hb, subst hb,
+  from mynat.le_total_order _ _,
+end
+
 end quotint
 end hidden

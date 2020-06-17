@@ -16,6 +16,8 @@ theorem coe_succ: (↑(succ a): quotint) = ↑a + 1 := rfl
 
 theorem sub_add_neg: m - n = m + (-n) := rfl
 
+theorem add_one_succ: (↑a: quotint) + 1 = ↑(succ a) := rfl
+
 theorem add_comm: m + n = n + m :=
 begin
   cases quotient.exists_rep m with a ha, subst ha,

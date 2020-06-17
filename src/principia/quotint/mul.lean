@@ -1,4 +1,5 @@
-import .induction
+import .basic
+import .add
 import ..logic
 import ..mynat.le
 
@@ -145,7 +146,10 @@ begin
   from hsbn0 (mynat.mul_integral hsan0 h),
 end
 
+-- it seems likely that these theorems will become easier to prove
+-- given some theorems about <.
 
+-- Particularly abs is very dependent on inequalities
 
 private lemma mul_integral_biased:
 m ≠ 0 → m * n = 0 → n = 0 :=
@@ -161,6 +165,9 @@ begin
   simp,
   sorry,
 end
+
+theorem mul_integral:
+m * n = 0 → n = 0 ∨ m = 0 := sorry
 
 theorem mul_nonzero_nonzero : m * n ≠ 0 ↔ m ≠ 0 ∧ n ≠ 0 :=
 begin
@@ -188,66 +195,31 @@ by existsi (m + (-1)); rw [add_assoc, neg_self_add, add_zero]
 private lemma something_sub_one (m : quotint): ∃ n, m = n + -1 :=
 by existsi (m + 1); rw [add_assoc, self_neg_add, add_zero]
 
--- This proof caused some big problems. What's actually going on here is I'm
--- using a DIY form of `generalizing` from the `induction` tactic.
--- The argument is precisely the same as the one used for mynat, which I used
--- for inspiration
 theorem mul_cancel: m ≠ 0 → m * n = m * k → n = k :=
 begin
-  revert n,
-  -- Shorthand, then I used `dsimp only [p]` to expand when needed
-  let p : quotint → Prop := λ n : quotint, ∀ m k, m ≠ 0 → m * n = m * k → n = k,
-  -- apply intduction (λ n, ∀ m k, m * n = m * k → n = k),
-  have h0 : p 0, {
-    intros a b,
-    assume han0 h,
-    rw [mul_zero] at h,
-    cases mul_integral h.symm,
-      symmetry, assumption,
-    contradiction,
+  assume hm0 hmnmk,
+  have: m * (n - k) = 0, {
+    rw sub_def,
+    rw mul_add,
+    rw hmnmk,
+    rw mul_neg,
+    simp,
   },
-  have hnext : ∀ n : quotint, p n → p (n + 1), {
-    intro n,
-    assume h,
-    intros a b,
-    cases something_add_one b with j hj,
-    subst hj,
-    rw [mul_add, mul_add, add_cancel, add_cancel],
-    from h _ _,
-  },
-  have hprev : ∀ n : quotint, p n → p (n - 1), {
-    intro n,
-    assume h,
-    intros a b,
-    cases something_sub_one b with j hj,
-    subst hj,
-    rw [sub_add_neg, mul_add, mul_add, add_cancel, add_cancel],
-    from h _ _,
-  },
-  have h := intduction p h0 hnext hprev,
-  intro n,
-  have := h n,
-  from this m k,
+  have this' := mul_integral_biased hm0 this,
+  rw ←add_cancel k at this',
+  rw sub_def at this',
+  rw add_assoc at this',
+  simp at this',
+  assumption,
 end
 
--- Both probably just case work
-theorem abs_eq_sign_self : ↑(abs m) = (sign m) * m := sorry
+theorem abs_eq_sign_self : abs m = (sign m) * m := sorry
 
 theorem sign_mult : sign (m * n) = sign m * sign n := sorry
 
 theorem abs_distr: abs m * abs n = abs (m * n) :=
 begin
-  rw [←quotint.of_nat_cancel, ←nat_nat_mul],
-  repeat { rw abs_eq_sign_self, },
-  suffices : (sign m) * m * ((sign n) * n) = (sign m * sign n) * (m * n),
-    rw [this, sign_mult],
-  ac_refl,
-end
-
-theorem abs_distr_int: (↑(abs m): quotint) * ↑(abs n) = ↑(abs (m * n)) :=
-begin
-  rw nat_nat_mul,
-  rw abs_distr,
+  sorry,
 end
 
 end quotint
