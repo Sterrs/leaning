@@ -339,6 +339,8 @@ theorem mul_a {n m: int_pair}:
 theorem mul_b {n m: int_pair}:
 (n * m).b = n.a * m.b + n.b * m.a := rfl
 
+-- it's very hard to prove multiplication is well defined
+-- in both arguments at once
 private lemma mul_half_defined (n m x: int_pair):
 n ≈ m → ⟦n * x⟧ = ⟦m * x⟧ :=
 begin
@@ -432,7 +434,7 @@ begin
         assumption,
       },
     }, {
-      have: ¬0 ≤ -n, { 
+      have: ¬0 ≤ -n, {
         assume h0negn,
         rw le_def at h0n h0negn,
         simp at h0negn,
