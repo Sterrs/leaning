@@ -71,7 +71,7 @@ begin
   },
 end
 
-theorem lt_add {m n : quotint} (k : quotint): m < n ↔ m + k < n + k :=
+theorem lt_add_right {m n : quotint} (k : quotint): m < n ↔ m + k < n + k :=
 ⟨lt_cancel.mpr, lt_cancel.mp⟩
 
 theorem lt_add_left {m n : quotint} (k : quotint) : m < n ↔ k + m < k + n :=
@@ -108,10 +108,10 @@ end
 theorem lt_iff_sub_pos: m < n ↔ 0 < n + -m :=
 begin
   split; assume h, {
-    rw lt_add (-m) at h,
+    rw lt_add_right (-m) at h,
     simp at h, assumption,
   }, {
-    rw [lt_add m, add_assoc] at h,
+    rw [lt_add_right m, add_assoc] at h,
     simp at h, assumption,
   },
 end

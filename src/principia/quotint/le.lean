@@ -14,24 +14,7 @@ variables m n k x y z : quotint
 variables a b c : mynat
 
 @[simp]
-theorem nat_nat_le: (↑a:quotint) ≤ ↑b ↔ a ≤ b := iff.rfl
-
-@[simp]
-theorem nat_neg_le: ¬(↑a ≤ -[1+ b]) :=
-mynat.succ_nle_zero
-
-@[simp]
-theorem neg_nat_le: -[1+ a] ≤ ↑b :=
-mynat.zero_le
-
-@[simp]
-theorem neg_neg_le: -[1+ a] ≤ -[1+ b] ↔ b ≤ a :=
-begin
-  repeat {rw neg_succ_def},
-  rw le_eq_cls rfl rfl,
-  simp,
-  from iff.intro mynat.le_succ_cancel (mynat.le_add 1),
-end
+theorem coe_coe_le: (↑a:quotint) ≤ ↑b ↔ a ≤ b := iff.rfl
 
 instance decidable_le: ∀ m n : quotint, decidable (m ≤ n) :=
 quotient_decidable_rel int_pair.le int_pair.le_well_defined
@@ -100,7 +83,7 @@ begin
   cases hmn with a ha,
   rw le_iff_exists_nat at hnk,
   cases hnk with b hb,
-  rw [ha, add_assoc, nat_nat_add] at hb,
+  rw [ha, add_assoc, coe_coe_add] at hb,
   rw le_iff_exists_nat,
   existsi (a+b),
   assumption,
@@ -248,7 +231,7 @@ begin
   cases hmn with a ha,
   cases hnm with b hb,
   have hb₁ := hb.symm,
-  rw [ha, add_assoc, add_comm, add_cancel_to_zero, nat_nat_add,
+  rw [ha, add_assoc, add_comm, add_cancel_to_zero, coe_coe_add,
       ←zero_nat, of_nat_cancel] at hb₁,
   have := add_integral hb₁,
   rw [this, zero_nat, add_zero] at ha,
@@ -288,6 +271,17 @@ begin
   apply le_mul_nonneg_left,
     transitivity m; assumption,
   assumption,
+end
+
+theorem le_sqrt_nonneg {m n : quotint} (hm : 0 ≤ m) (hn : 0 ≤ n) :
+m ≤ n ↔ m * m ≤ n * n :=
+begin
+  split; assume h, {
+    apply le_mul_comb_nonneg; assumption,
+  }, {
+    -- Should be possible to convert to coercion and then use mynat.le_sqrt
+    sorry,
+  },
 end
 
 end quotint

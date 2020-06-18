@@ -247,6 +247,8 @@ begin
   },
 end
 
+theorem sign_mult : sign (m * n) = sign m * sign n := sorry
+
 theorem nzero_iff_sign_nzero: m ≠ 0 ↔ sign m ≠ 0 :=
 iff_to_contrapositive zero_iff_sign_zero
 

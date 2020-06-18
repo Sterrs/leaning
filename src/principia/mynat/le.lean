@@ -225,7 +225,7 @@ begin
     from hkn0 rfl,
   }, {
     existsi k * m,
-    simp,
+    rw [succ_mul, add_comm],
   },
 end
 
