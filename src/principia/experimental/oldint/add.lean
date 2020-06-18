@@ -1,30 +1,30 @@
 import .basic
 
 namespace hidden
-namespace myint
+namespace oldint
 
 open mynat
-open myint
+open oldint
 
-def add: myint → myint → myint
+def add: oldint → oldint → oldint
 | (of_nat m) (of_nat n) := of_nat (m + n)
 | -[1+ m]    (of_nat n) := sub_nat_nat n (succ m)
 | (of_nat m) -[1+ n]    := sub_nat_nat m (succ n)
 | -[1+ m]    -[1+ n]    := -[1+ succ (m + n)]
 
-instance: has_add myint := ⟨add⟩
+instance: has_add oldint := ⟨add⟩
 
 -- maybe this is done automatically anyway, idk
-def sub (m n: myint): myint := m + (-n)
-instance: has_sub myint := ⟨sub⟩
+def sub (m n: oldint): oldint := m + (-n)
+instance: has_sub oldint := ⟨sub⟩
 
-variables {m n k : myint}
+variables {m n k : oldint}
 variables {a b c : mynat}
 
 @[simp]
-theorem coe_succ: (↑(succ a): myint) = ↑a + 1 := rfl
+theorem coe_succ: (↑(succ a): oldint) = ↑a + 1 := rfl
 
-@[simp] theorem nat_nat_add: (↑a: myint) + ↑b = ↑(a + b) := rfl
+@[simp] theorem nat_nat_add: (↑a: oldint) + ↑b = ↑(a + b) := rfl
 
 @[simp]
 theorem neg_nat_add: -[1+ a] + ↑b = sub_nat_nat b (succ a) := rfl
@@ -40,7 +40,7 @@ theorem of_nat_succ_add_one: of_nat (succ a) = of_nat a + 1 := rfl
 
 theorem sub_add_neg: m - n = m + (-n) := rfl
 
-theorem add_comm: ∀ {m n : myint}, m + n = n + m
+theorem add_comm: ∀ {m n : oldint}, m + n = n + m
 | (of_nat a) (of_nat b) :=
 by rw [←coe_nat_eq, ←coe_nat_eq, nat_nat_add,
        nat_nat_add, of_nat_cancel, mynat.add_comm]
@@ -51,11 +51,11 @@ by rw [←coe_nat_eq, neg_nat_add, nat_neg_add]
 | -[1+ a]    -[1+ b]    :=
 by rw [neg_neg_add, neg_neg_add, mynat.add_comm]
 
-instance add_is_comm: is_commutative myint add :=
+instance add_is_comm: is_commutative oldint add :=
 ⟨assume a b, add_comm⟩
 
 @[simp]
-theorem zero_add: ∀ m : myint, 0 + m = m
+theorem zero_add: ∀ m : oldint, 0 + m = m
 | (of_nat m) := by rw [←zero_nat, ←coe_nat_eq,
                        nat_nat_add, mynat.zero_add]
 | -[1+ n]    := by rw [←zero_nat, nat_neg_add]; refl
@@ -67,9 +67,9 @@ begin
   rwa add_comm,
 end
 
-private theorem negative_one: -(1 : myint) = -↑(1 : mynat) := rfl
+private theorem negative_one: -(1 : oldint) = -↑(1 : mynat) := rfl
 
-theorem neg_distr_coe_one: -(↑a + (1 : myint)) = -(↑a) + -1 :=
+theorem neg_distr_coe_one: -(↑a + (1 : oldint)) = -(↑a) + -1 :=
 begin
   rw [←one_nat, nat_nat_add, add_one_succ,
   neg_coe_succ],
@@ -102,7 +102,7 @@ theorem sub_nat_succ:
 | zero     := by rw [←succ_of_sub_succ, sub_succ_succ]
 | (succ b) := by rw [succ_of_sub_succ, sub_succ_succ]
 
-private lemma add_one_switch: ∀ {m n : myint},
+private lemma add_one_switch: ∀ {m n : oldint},
 (m + n) + 1 = (m + 1) + n
 | (of_nat a) (of_nat b) :=
 begin
@@ -159,7 +159,7 @@ by rw [zz, sub_succ_succ, nat_sub_zero, nat_sub_zero, neg_one,
 | (succ a) (succ b) :=
 by rw [sub_succ_succ, sub_succ_succ, sub_add_neg_one]
 
-private lemma add_neg_one_switch: ∀ {m n : myint},
+private lemma add_neg_one_switch: ∀ {m n : oldint},
 (m + n) + -1 = (m + -1) + n
 | (of_nat a) (of_nat b) :=
 by rw [←coe_nat_eq, ←coe_nat_eq, neg_one, nat_nat_add, nat_neg_add,
@@ -198,7 +198,7 @@ sub_nat_nat a (b + succ c) = -[1+ c] + sub_nat_nat a b
 := by rw [←neg_coe_succ, add_comm, sub_add_neg']
 
 -- She's a beauty
-theorem add_assoc : ∀ {m n k : myint}, m + n + k = m + (n + k)
+theorem add_assoc : ∀ {m n k : oldint}, m + n + k = m + (n + k)
 | (of_nat a) (of_nat b) (of_nat c) :=
 by repeat {rw ←coe_nat_eq <|> rw nat_nat_add}; rw mynat.add_assoc
 | (of_nat a) (of_nat b) -[1+ c]    :=
@@ -226,11 +226,11 @@ end
 by repeat {rw neg_neg_add};
   rw [neg_succ_of_nat_cancel, succ_add, add_succ, mynat.add_assoc]
 
-instance add_is_assoc: is_associative myint add :=
+instance add_is_assoc: is_associative oldint add :=
 ⟨assume a b c, add_assoc⟩
 
 @[simp]
-theorem neg_distr: ∀ {m n : myint}, -(m + n) = -m + -n
+theorem neg_distr: ∀ {m n : oldint}, -(m + n) = -m + -n
 | (of_nat a) (of_nat b) :=
 begin
   rw [←coe_nat_eq, ←coe_nat_eq],
@@ -265,7 +265,7 @@ by rw [neg_neg_add, neg_neg_succ, neg_neg_succ, neg_neg_succ,
       nat_nat_add, of_nat_cancel, succ_add, add_succ]
 
 -- Existence is pain
-private lemma add_cancel_one: ∀ {m n : myint},
+private lemma add_cancel_one: ∀ {m n : oldint},
 m + 1 = n + 1 → m = n
 | (of_nat a) (of_nat b) :=
 begin
@@ -322,7 +322,7 @@ begin
   rwa neg_cancel at this,
 end
 
-private lemma add_cancel_mp: ∀ k : myint, m + k = n + k → m = n
+private lemma add_cancel_mp: ∀ k : oldint, m + k = n + k → m = n
 | (of_nat a) :=
 begin
   assume h,
@@ -351,17 +351,17 @@ end
 
 -- It's more useful as an iff
 @[simp]
-theorem add_cancel (k : myint): m + k = n + k ↔ m = n :=
+theorem add_cancel (k : oldint): m + k = n + k ↔ m = n :=
 ⟨add_cancel_mp k, assume h, by congr; assumption⟩
 
 @[simp]
 theorem add_cancel_to_zero: n + m = m ↔ n = 0 :=
 by rw [←zero_add m, ←add_assoc, add_cancel, add_zero]
 
-private lemma add_one_neg_one: (1:myint) + -1 = 0 := rfl
+private lemma add_one_neg_one: (1:oldint) + -1 = 0 := rfl
 
 @[simp]
-theorem self_neg_add: ∀ m : myint, m + (-m) = 0
+theorem self_neg_add: ∀ m : oldint, m + (-m) = 0
 | (of_nat a) :=
 begin
   induction a with a ha,
@@ -382,5 +382,5 @@ lemma neg_succ_of_succ_add_one: -[1+ succ a] + 1 = -[1+ a] :=
 by rw [←one_nat, neg_nat_add, one, sub_succ_succ, zero_sub_neg,
       ←neg_coe_eq_neg_of_nat, neg_coe_succ]
 
-end myint
+end oldint
 end hidden

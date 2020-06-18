@@ -1,10 +1,10 @@
 import .add
-import ..mynat.induction
+import principia.mynat.induction
 
 namespace hidden
-namespace myint
+namespace oldint
 
-theorem intduction (p : myint → Prop) :
+theorem intduction (p : oldint → Prop) :
 p 0 → (∀ {n}, p n → p (n + 1)) → (∀ {n}, p n → p (n - 1)) →
 ∀ n, p n :=
 begin
@@ -35,7 +35,7 @@ end
 open mynat
 private theorem one: (1: mynat) = succ 0 := rfl
 
-theorem intduction_from {m : myint} (p : myint → Prop):
+theorem intduction_from {m : oldint} (p : oldint → Prop):
 (∀ {n}, p n → p (n + 1)) → (∀ {n}, p n → p (n - 1)) →
 p m → ∀ n, p n :=
 begin
@@ -63,5 +63,5 @@ begin
   },
 end
 
-end myint
+end oldint
 end hidden

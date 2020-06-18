@@ -2,27 +2,27 @@ import ..logic
 import .le
 
 namespace hidden
-namespace myint
+namespace oldint
 
-open myint
+open oldint
 
 -- NOTE: In this file we try to avoid using anything disgusting, that
 -- should be confined to le.lean
 
-def lt (m n : myint): Prop := ¬n ≤ m
-instance: has_lt myint := ⟨lt⟩
+def lt (m n : oldint): Prop := ¬n ≤ m
+instance: has_lt oldint := ⟨lt⟩
 
-variables {m n k : myint}
+variables {m n k : oldint}
 variables {a b c : mynat}
 
 theorem lt_iff_nle : m < n ↔ ¬n ≤ m :=
 by split; all_goals { assume h, assumption }
 
-instance decidable_lt: ∀ m n: myint, decidable (m < n) :=
+instance decidable_lt: ∀ m n: oldint, decidable (m < n) :=
 (λ m n, not.decidable)
 
 @[simp]
-theorem nat_nat_lt : (↑a : myint) < ↑b ↔ a < b :=
+theorem nat_nat_lt : (↑a : oldint) < ↑b ↔ a < b :=
 iff_to_contrapositive nat_nat_le
 
 theorem nat_neg_lt : ¬↑a < -[1+ b] :=
@@ -77,10 +77,10 @@ begin
   },
 end
 
-theorem lt_add (k : myint): m < n ↔ m + k < n + k :=
+theorem lt_add (k : oldint): m < n ↔ m + k < n + k :=
 ⟨lt_cancel.mpr, lt_cancel.mp⟩
 
-theorem lt_add_left (k : myint) : m < n ↔ k + m < k + n :=
+theorem lt_add_left (k : oldint) : m < n ↔ k + m < k + n :=
 begin
   rw [add_comm, @add_comm k],
   symmetry,
@@ -122,7 +122,7 @@ begin
   },
 end
 
-theorem lt_comb {k j : myint} : m < n → k < j → m + k < n + j :=
+theorem lt_comb {k j : oldint} : m < n → k < j → m + k < n + j :=
 begin
   assume hmn hkj,
   rw lt_iff_sub_pos at *,
@@ -159,7 +159,7 @@ begin
   rwa [mynat.mul_zero, mynat.mul_comm] at this,
 end
 
-theorem zero_lt_one : 0 < (1 : myint) :=
+theorem zero_lt_one : 0 < (1 : oldint) :=
 begin
   assume h,
   rw le_iff_exists_nat at h,
@@ -168,7 +168,7 @@ begin
   from mynat.no_confusion (mynat.add_integral h.symm),
 end
 
-theorem zero_le_one : 0 ≤ (1 : myint) :=
+theorem zero_le_one : 0 ≤ (1 : oldint) :=
 lt_imp_le zero_lt_one
 
 theorem le_mul_cancel_pos_left : 0 < k → (k * m ≤ k * n ↔ m ≤ n) := sorry
@@ -179,5 +179,5 @@ theorem zero_lt_sign_mul_self: m ≠ 0 → 0 < (sign m) * m := sorry
 
 theorem zero_lt_abs: 0 < m → m = ↑(abs m) := sorry
 
-end myint
+end oldint
 end hidden

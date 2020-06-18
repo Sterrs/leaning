@@ -1,25 +1,25 @@
 import .induction
-import ..logic
+import principia.logic
 
 namespace hidden
-namespace myint
+namespace oldint
 
 open mynat
-open myint
+open oldint
 
-variables {m n k : myint}
+variables {m n k : oldint}
 variables {a b c : mynat}
 
-def mul: myint → myint → myint
+def mul: oldint → oldint → oldint
 | (of_nat m) (of_nat n) := of_nat (m * n)
 | -[1+ m] (of_nat n)    := neg_of_nat (succ m * n)
 | (of_nat m) -[1+ n]    := neg_of_nat (m * succ n)
 | -[1+ m] -[1+ n]       := of_nat (succ m * succ n)
 
-instance: has_mul myint := ⟨mul⟩
+instance: has_mul oldint := ⟨mul⟩
 
 @[simp]
-theorem nat_nat_mul: (↑a : myint) * ↑b = ↑(a * b) := rfl
+theorem nat_nat_mul: (↑a : oldint) * ↑b = ↑(a * b) := rfl
 
 @[simp]
 theorem nat_neg_mul: ↑a * -[1+ b] = -(↑(a * succ b)) := rfl
@@ -31,22 +31,22 @@ theorem neg_nat_mul: -[1+ a] * ↑b = -(↑(succ a * b)) := rfl
 theorem neg_neg_mul: -[1+ a] * -[1+ b] = ↑((succ a) * succ b) := rfl
 
 -- Why is this rfl
-theorem mul_zero : ∀ {m : myint}, m * 0 = 0
+theorem mul_zero : ∀ {m : oldint}, m * 0 = 0
 | (of_nat a) := rfl
 | -[1+ a] := rfl
 
 -- But this isn't rfl???
-theorem zero_mul : ∀ {m : myint}, 0 * m = 0
+theorem zero_mul : ∀ {m : oldint}, 0 * m = 0
 | (of_nat a) :=
 by rw [←zero_nat,←coe_nat_eq, nat_nat_mul, mynat.zero_mul]
 | -[1+ a] :=
 by rw [←zero_nat, nat_neg_mul, mynat.zero_mul, zero_nat, neg_zero]
 
-theorem mul_one: ∀ {m : myint}, m * 1 = m
+theorem mul_one: ∀ {m : oldint}, m * 1 = m
 | (of_nat a) := rfl
 | -[1+ a] := rfl
 
-theorem one_mul : ∀ {m: myint}, 1 * m = m
+theorem one_mul : ∀ {m: oldint}, 1 * m = m
 | (of_nat a) :=
 by rw [←one_nat, ←coe_nat_eq, nat_nat_mul, mynat.one_mul]
 | -[1+ a] :=
@@ -55,19 +55,19 @@ by rw [←one_nat, nat_neg_mul, mynat.one_mul, neg_coe_succ]
 -- Stupid but useful
 private theorem one: 1 = succ 0 := one_eq_succ_zero.symm
 
-theorem mul_neg_one: ∀ {m : myint}, m * (-1) = -m
+theorem mul_neg_one: ∀ {m : oldint}, m * (-1) = -m
 | (of_nat a) :=
 by rw [neg_one, ←coe_nat_eq, nat_neg_mul, ←one, mynat.mul_one]
 | -[1+ a] :=
 by rw [neg_one, neg_neg_mul, ←one, mynat.mul_one, neg_neg_succ]
 
-theorem neg_one_mul: ∀ {m : myint}, (-1) * m = -m
+theorem neg_one_mul: ∀ {m : oldint}, (-1) * m = -m
 | (of_nat a) :=
 by rw [←coe_nat_eq, neg_one, neg_nat_mul, ←one, mynat.one_mul]
 | -[1+ a] :=
 by rw [neg_one, neg_neg_mul, ←one, mynat.one_mul, neg_neg_succ]
 
-theorem mul_comm: ∀ {m n : myint}, m * n = n * m
+theorem mul_comm: ∀ {m n : oldint}, m * n = n * m
 | (of_nat a) (of_nat b) :=
 by rw [←coe_nat_eq, ←coe_nat_eq, nat_nat_mul, nat_nat_mul,
        mynat.mul_comm]
@@ -78,11 +78,11 @@ by rw [←coe_nat_eq, nat_neg_mul, neg_nat_mul, mynat.mul_comm]
 | -[1+ a] -[1+ b] :=
 by rw [neg_neg_mul, neg_neg_mul, mynat.mul_comm]
 
-instance mul_is_comm: is_commutative myint mul := ⟨assume a b, mul_comm⟩
+instance mul_is_comm: is_commutative oldint mul := ⟨assume a b, mul_comm⟩
 
 -- rfl is magic
 -- This is a "helper" lemma for mul_assoc
-private lemma mul_neg_nat: ∀ {m:myint} {a:mynat}, m * -↑a = -(m * ↑a)
+private lemma mul_neg_nat: ∀ {m:oldint} {a:mynat}, m * -↑a = -(m * ↑a)
 | (of_nat b) zero := rfl
 | (of_nat b) (succ a) := rfl
 | -[1+ b] zero := rfl
@@ -91,7 +91,7 @@ by rw [neg_coe_succ, neg_neg_mul, neg_nat_mul, neg_neg]
 
 -- These are much simpler than the addition ones, mostly just repeatedly
 -- using the basic rules.
-theorem mul_assoc: ∀ {m n k : myint}, m * n * k = m * (n * k)
+theorem mul_assoc: ∀ {m n k : oldint}, m * n * k = m * (n * k)
 | (of_nat a) (of_nat b) (of_nat c) :=
 by repeat {rw nat_nat_mul <|> rw ←coe_nat_eq}; rw mynat.mul_assoc
 | (of_nat a) (of_nat b) -[1+ c]    :=
@@ -119,7 +119,7 @@ by rw [←coe_nat_eq, neg_neg_mul, neg_nat_mul, mul_neg_nat, neg_nat_mul,
 | -[1+ a]    -[1+ b]    -[1+ c]    := by
 rw [neg_neg_mul, neg_neg_mul, nat_neg_mul, neg_nat_mul, mynat.mul_assoc]
 
-instance mul_is_assoc: is_associative myint mul :=
+instance mul_is_assoc: is_associative oldint mul :=
 ⟨assume a b c, mul_assoc⟩
 
 theorem mul_neg : m * (-n) = - (m * n) :=
@@ -132,8 +132,8 @@ by rw [mul_comm, @mul_comm m, mul_neg]
 theorem neg_times_neg : (-m) * (-n) = m * n :=
 by rw [neg_mul, mul_neg, neg_neg]
 
--- Effectively succ_mul for myints
-private theorem add_one_mul : ∀ {m n : myint}, (m + 1) * n = m * n + n
+-- Effectively succ_mul for oldints
+private theorem add_one_mul : ∀ {m n : oldint}, (m + 1) * n = m * n + n
 | (of_nat a) (of_nat b) :=
 by rw [←coe_nat_eq, ←coe_nat_eq, ←one_nat, nat_nat_add, nat_nat_mul,
       nat_nat_mul, nat_nat_add, mynat.add_mul, mynat.one_mul]
@@ -231,7 +231,7 @@ begin
   from hsbn0 (mynat.mul_integral hsan0 h),
 end
 
---∀ {m n : myint},
+--∀ {m n : oldint},
 theorem mul_integral: m * n = 0 → n = 0 ∨ m = 0 :=
 begin
   assume h₁,
@@ -271,7 +271,7 @@ end
 theorem mul_nonzero_nonzero : m * n ≠ 0 ↔ m ≠ 0 ∧ n ≠ 0 :=
 begin
   split; assume h, {
-    have : 0 = (0 : myint) := rfl,
+    have : 0 = (0 : oldint) := rfl,
     split, all_goals {
       assume h0,
       subst h0,
@@ -288,10 +288,10 @@ begin
   },
 end
 
-private lemma something_add_one (m : myint): ∃ n, m = n + 1 :=
+private lemma something_add_one (m : oldint): ∃ n, m = n + 1 :=
 by existsi (m + (-1)); rw [add_assoc, neg_self_add, add_zero]
 
-private lemma something_sub_one (m : myint): ∃ n, m = n + -1 :=
+private lemma something_sub_one (m : oldint): ∃ n, m = n + -1 :=
 by existsi (m + 1); rw [add_assoc, self_neg_add, add_zero]
 
 -- This proof caused some big problems. What's actually going on here is I'm
@@ -302,7 +302,7 @@ theorem mul_cancel: m ≠ 0 → m * n = m * k → n = k :=
 begin
   revert n,
   -- Shorthand, then I used `dsimp only [p]` to expand when needed
-  let p : myint → Prop := λ n : myint, ∀ m k, m ≠ 0 → m * n = m * k → n = k,
+  let p : oldint → Prop := λ n : oldint, ∀ m k, m ≠ 0 → m * n = m * k → n = k,
   -- apply intduction (λ n, ∀ m k, m * n = m * k → n = k),
   have h0 : p 0, {
     intros a b,
@@ -312,7 +312,7 @@ begin
       symmetry, assumption,
     contradiction,
   },
-  have hnext : ∀ n : myint, p n → p (n + 1), {
+  have hnext : ∀ n : oldint, p n → p (n + 1), {
     intro n,
     assume h,
     intros a b,
@@ -321,7 +321,7 @@ begin
     rw [mul_add, mul_add, add_cancel, add_cancel],
     from h _ _,
   },
-  have hprev : ∀ n : myint, p n → p (n - 1), {
+  have hprev : ∀ n : oldint, p n → p (n - 1), {
     intro n,
     assume h,
     intros a b,
@@ -343,18 +343,18 @@ theorem sign_mult : sign (m * n) = sign m * sign n := sorry
 
 theorem abs_distr: abs m * abs n = abs (m * n) :=
 begin
-  rw [←myint.of_nat_cancel, ←nat_nat_mul],
+  rw [←oldint.of_nat_cancel, ←nat_nat_mul],
   repeat { rw abs_eq_sign_self, },
   suffices : (sign m) * m * ((sign n) * n) = (sign m * sign n) * (m * n),
     rw [this, sign_mult],
   ac_refl,
 end
 
-theorem abs_distr_int: (↑(abs m): myint) * ↑(abs n) = ↑(abs (m * n)) :=
+theorem abs_distr_int: (↑(abs m): oldint) * ↑(abs n) = ↑(abs (m * n)) :=
 begin
   rw nat_nat_mul,
   rw abs_distr,
 end
 
-end myint
+end oldint
 end hidden

@@ -1,9 +1,9 @@
 -- vim: ts=2 sw=0 sts=-1 et ai tw=70
 
-import ..logic
-import ..mynat.basic
-import ..mynat.le
-import ..mynat.nat_sub
+import principia.logic
+import principia.mynat.basic
+import principia.mynat.le
+import principia.mynat.nat_sub
 
 namespace hidden
 
@@ -12,46 +12,46 @@ namespace hidden
 -- - Prove basic theorems about arithmetic again
 -- - Define some quotient/remainder things
 
-inductive myint: Type
-| of_nat         : mynat → myint
-| neg_succ_of_nat: mynat → myint
+inductive oldint: Type
+| of_nat         : mynat → oldint
+| neg_succ_of_nat: mynat → oldint
 
 -- "has coercion" I think. Seems to introduce the notation
 -- ↑n (\u n) for "coerce n"
-instance: has_coe mynat myint := ⟨myint.of_nat⟩
+instance: has_coe mynat oldint := ⟨oldint.of_nat⟩
 
 -- lets you write -[1+ n] for negative numbers. Note the spacing is
 -- unforgiving.
-notation `-[1+ ` n `]` := myint.neg_succ_of_nat n
+notation `-[1+ ` n `]` := oldint.neg_succ_of_nat n
 
-namespace myint
-open myint
+namespace oldint
+open oldint
 open mynat
 
-instance: has_zero myint := ⟨of_nat 0⟩
-instance: has_one myint := ⟨of_nat 1⟩
+instance: has_zero oldint := ⟨of_nat 0⟩
+instance: has_one oldint := ⟨of_nat 1⟩
 
-def neg_of_nat: mynat → myint
+def neg_of_nat: mynat → oldint
 | 0        := 0
 | (succ m) := -[1+ m]
 
-def sub_nat_nat (m n: mynat): myint :=
+def sub_nat_nat (m n: mynat): oldint :=
 match m - n with
 | 0 := neg_of_nat (n - m)
 | d := d
 end
 
-def neg: myint → myint
+def neg: oldint → oldint
 | (of_nat n) := neg_of_nat n
 | -[1+ n]    := succ n
 
-instance: has_neg myint := ⟨neg⟩
+instance: has_neg oldint := ⟨neg⟩
 
-def abs : myint → mynat
+def abs : oldint → mynat
 | (of_nat m) := m
 | -[1+ m] := succ m
 
-def sign : myint → myint
+def sign : oldint → oldint
 | (of_nat a) :=
 match a with
 | zero     := 0
@@ -59,7 +59,7 @@ match a with
 end
 | -[1+ _] := -1
 
-variables {m n k: myint}
+variables {m n k: oldint}
 variables {a b c: mynat}
 
 -- Basic
@@ -68,20 +68,20 @@ lemma of_nat_zero : of_nat 0 = 0 := rfl
 
 lemma of_nat_one : of_nat 1 = 1 := rfl
 
-theorem zero_nat: (↑(0: mynat): myint) = 0 := rfl
+theorem zero_nat: (↑(0: mynat): oldint) = 0 := rfl
 
-theorem one_nat: (↑(1:mynat):myint) = 1 := rfl
+theorem one_nat: (↑(1:mynat):oldint) = 1 := rfl
 
-theorem neg_one: -(1:myint) = -[1+ 0] := rfl
+theorem neg_one: -(1:oldint) = -[1+ 0] := rfl
 
 theorem of_nat_ne_neg_succ: of_nat a ≠ -[1+ b] := by
-  apply myint.no_confusion
+  apply oldint.no_confusion
 
 theorem zero_ne_neg_succ (a : mynat): 0 ≠ -[1+ a] := by
   apply of_nat_ne_neg_succ
 
 @[simp]
-theorem of_nat_cancel: (↑a: myint) = ↑b ↔ a = b :=
+theorem of_nat_cancel: (↑a: oldint) = ↑b ↔ a = b :=
 begin
   split; assume h,
     cases h, refl,
@@ -178,7 +178,7 @@ private theorem neg_neg_of_nat: ∀ {a}, -neg_of_nat a = ↑a
 | (succ a) := rfl
 
 @[simp]
-theorem neg_zero: -(0:myint) = 0 := rfl
+theorem neg_zero: -(0:oldint) = 0 := rfl
 
 theorem neg_neg_succ: -(-[1+ a]) = ↑(succ a) := by
 rw ←neg_eq_minus; refl
@@ -186,7 +186,7 @@ rw ←neg_eq_minus; refl
 theorem neg_coe_succ: -(↑(succ a)) = -[1+ a] := rfl
 
 @[simp]
-theorem neg_neg: ∀ {m : myint}, -(-m) = m
+theorem neg_neg: ∀ {m : oldint}, -(-m) = m
 | (of_nat a) := by rw [←coe_nat_eq, neg_coe_eq_neg_of_nat];
                    from neg_neg_of_nat
 | -[1+ a]    := by rw neg_neg_succ; refl
@@ -266,7 +266,7 @@ begin
     }, {
       exfalso,
       rw [sign_neg_succ] at h,
-      from myint.no_confusion h,
+      from oldint.no_confusion h,
     },
   },
 end
@@ -276,14 +276,14 @@ iff_to_contrapositive zero_iff_sign_zero
 
 -- Decidability
 
-instance: decidable_eq myint
+instance: decidable_eq oldint
 | (of_nat a) (of_nat b) :=
 by rw [←coe_nat_eq, ←coe_nat_eq, of_nat_cancel]; apply_instance
 | (of_nat a) -[1+ b] := is_false of_nat_ne_neg_succ
 | -[1+ a] (of_nat b) := is_false of_nat_ne_neg_succ.symm
 | -[1+ a] -[1+ b] := by rw [neg_succ_of_nat_cancel]; apply_instance
 
-theorem zero_ne_one : (0 : myint) ≠ 1 :=
+theorem zero_ne_one : (0 : oldint) ≠ 1 :=
 begin
   rw [←one_nat, ←zero_nat],
   assume h,
@@ -291,5 +291,5 @@ begin
   from zero_ne_one h,
 end
 
-end myint
+end oldint
 end hidden

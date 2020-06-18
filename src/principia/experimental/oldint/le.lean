@@ -3,23 +3,23 @@ import .mul
 
 namespace hidden
 
-namespace myint
+namespace oldint
 
 open mynat
 
-def le: myint → myint → Prop
+def le: oldint → oldint → Prop
 | (of_nat a) (of_nat b) := a ≤ b
 | (of_nat a) -[1+ b] := false
 | -[1+ a] (of_nat b) := true
 | -[1+ a] -[1+ b] := b ≤ a
 
-instance: has_le myint := ⟨le⟩
+instance: has_le oldint := ⟨le⟩
 
-variables {m n k x y z : myint}
+variables {m n k x y z : oldint}
 variables {a b c : mynat}
 
 @[simp]
-theorem nat_nat_le: (↑a:myint) ≤ ↑b ↔ a ≤ b := by trivial
+theorem nat_nat_le: (↑a:oldint) ≤ ↑b ↔ a ≤ b := by trivial
 
 @[simp]
 theorem nat_neg_le: ¬(↑a ≤ -[1+ b]) :=
@@ -31,7 +31,7 @@ theorem neg_nat_le: -[1+ a] ≤ ↑b := by trivial
 @[simp]
 theorem neg_neg_le: -[1+ a] ≤ -[1+ b] ↔ b ≤ a := by trivial
 
-instance decidable_le: ∀ m n : myint, decidable (m ≤ n)
+instance decidable_le: ∀ m n : oldint, decidable (m ≤ n)
 | (of_nat a) (of_nat b) :=
 by rw [←coe_nat_eq, ←coe_nat_eq, nat_nat_le]; apply_instance
 | (of_nat a) -[1+ b] := is_false nat_neg_le
@@ -40,12 +40,12 @@ by rw [←coe_nat_eq, ←coe_nat_eq, nat_nat_le]; apply_instance
 by rw neg_neg_le; apply_instance
 
 @[refl]
-theorem le_refl: ∀ {m : myint}, m ≤ m
+theorem le_refl: ∀ {m : oldint}, m ≤ m
 | (of_nat a) := by rw [←coe_nat_eq, nat_nat_le]; from hidden.le_refl
 | -[1+ a] := by rw [neg_neg_le]; from hidden.le_refl
 
 -- Forward implication of definitions being equal
-private theorem le_iff_exists_nat_mpr: ∀ {m n : myint},
+private theorem le_iff_exists_nat_mpr: ∀ {m n : oldint},
 m ≤ n → ∃ c : mynat, n = m + ↑c
 | (of_nat a) (of_nat b) := assume h,
 begin
@@ -67,7 +67,7 @@ begin
       neg_distr, add_assoc, neg_self_add, add_zero],
 end
 
-private lemma le_add_rhs_one: ∀ {m n : myint}, m ≤ n → m ≤ n + 1
+private lemma le_add_rhs_one: ∀ {m n : oldint}, m ≤ n → m ≤ n + 1
 | (of_nat a) (of_nat b) := assume h,
 begin
   rw [←coe_nat_eq, ←coe_nat_eq, nat_nat_le] at h,
@@ -152,16 +152,16 @@ begin
   },
 end
 
-theorem le_add (k  : myint): m ≤ n ↔ m + k ≤ n + k := ⟨le_cancel.mpr, le_cancel.mp⟩
+theorem le_add (k  : oldint): m ≤ n ↔ m + k ≤ n + k := ⟨le_cancel.mpr, le_cancel.mp⟩
 
 @[simp]
 theorem le_cancel_left : k + m ≤ k + n ↔ m ≤ n :=
 begin
-  rw [myint.add_comm, @myint.add_comm k],
+  rw [oldint.add_comm, @oldint.add_comm k],
   simp,
 end
 
-theorem le_add_left (k : myint) : m ≤ n ↔ k + m ≤ k + n := ⟨le_cancel_left.mpr, le_cancel_left.mp⟩
+theorem le_add_left (k : oldint) : m ≤ n ↔ k + m ≤ k + n := ⟨le_cancel_left.mpr, le_cancel_left.mp⟩
 
 @[simp]
 theorem le_cancel_to_zero_lhs: m ≤ m + n ↔ 0 ≤ n :=
@@ -229,7 +229,7 @@ begin
 end
 
 -- Here we pretty much require the old definition
-theorem le_total_order: ∀ m n : myint, m ≤ n ∨ n ≤ m
+theorem le_total_order: ∀ m n : oldint, m ≤ n ∨ n ≤ m
 | (of_nat a) (of_nat b) :=
 begin
   cases mynat.le_total_order a b,
@@ -270,7 +270,7 @@ begin
   rw le_zero_iff_neg_coe at hkle0,
   cases hkle0 with a ha,
   rw [ha, neg_mul, neg_mul, le_neg_switch, neg_neg, neg_neg],
-  have : 0 ≤ (↑a : myint), {
+  have : 0 ≤ (↑a : oldint), {
     rw zero_le_iff_coe,
     existsi a,
     refl,
@@ -295,15 +295,15 @@ end
 
 -- TODO: Rename to square_nonneg
 
-theorem square_non_neg: ∀ m : myint, 0 ≤ m * m
+theorem square_non_neg: ∀ m : oldint, 0 ≤ m * m
 | (of_nat a) := by rw [←coe_nat_eq, nat_nat_mul, ←zero_nat,
                       nat_nat_le]; from zero_le
 | -[1+ a] := by rw [neg_neg_mul, ←zero_nat, nat_nat_le]; from zero_le
 
-theorem zero_is_le_abs: (0: myint) ≤ abs m :=
+theorem zero_is_le_abs: (0: oldint) ≤ abs m :=
 begin
   have := @nat_nat_le 0 (abs m),
-  have h00: (0: myint) = ↑(0: mynat) := rfl,
+  have h00: (0: oldint) = ↑(0: mynat) := rfl,
   rw h00,
   rw this,
   from mynat.zero_le,
@@ -355,7 +355,7 @@ begin
 end
 
 -- is this somewhere else?
-theorem coe_inj {m n: mynat}: (↑m: myint) = ↑n → m = n :=
+theorem coe_inj {m n: mynat}: (↑m: oldint) = ↑n → m = n :=
 begin
   assume h,
   cases h,
@@ -387,12 +387,12 @@ begin
   from le_comb le_abs le_abs,
 end
 
-theorem triangle_ineq_int: (abs (m + n): myint) ≤ abs m + abs n :=
+theorem triangle_ineq_int: (abs (m + n): oldint) ≤ abs m + abs n :=
 begin
   rw nat_nat_add,
   rw nat_nat_le,
   from triangle_ineq,
 end
 
-end myint
+end oldint
 end hidden
