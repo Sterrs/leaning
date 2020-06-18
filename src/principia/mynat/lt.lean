@@ -245,10 +245,12 @@ begin
   }, {
     rw ←le_iff_lt_succ at hmln,
     cases hmln with d' hd',
-    simp [hd'] at hd,
-    rw [←add_assoc, add_comm, add_assoc] at hd,
+    rw [hd', mul_succ, mul_add] at hd,
+    have : k + (k * m + k * d') + d = k * m + (k + k * d' + d),
+      ac_refl,
+    rw this at hd, clear this,
     have hcancel := add_cancel_to_zero hd,
-    rw [←add_assoc, add_comm] at hcancel,
+    rw add_assoc at hcancel,
     from hknz (add_integral hcancel),
   },
 end
@@ -273,11 +275,17 @@ begin
       simp [hd],
     }, {
       cases hm2n2 with d' hd',
-      simp [hd] at hd',
-      rw [add_comm, add_comm n, add_comm d, add_comm n] at hd',
-      repeat {rw add_assoc at hd'},
-      rw ←add_succ at hd',
-      exfalso, from succ_ne_zero (add_cancel_to_zero hd'),
+      rw [hd] at hd',
+      repeat { rw mul_succ at hd' <|>
+               rw succ_mul  at hd' <|>
+               rw mul_add  at hd' <|>
+               rw add_mul  at hd' },
+      have : n * n + (d * n + n) + (n + d.succ + (n * d + (d * d + d))) + d' =
+             n * n + (d.succ + (d * n + n + n + n * d + d * d + d + d')),
+        ac_refl,
+      rw this at hd', clear this,
+      have := add_cancel_to_zero hd',
+      exfalso, from succ_ne_zero (add_integral this),
     },
   },
 end
