@@ -278,6 +278,17 @@ end
 theorem le_mul_nonneg_right {x y z : myrat} : 0 ≤ z → x ≤ y → x * z ≤ y * z :=
 λ hc hab, by rw [mul_comm, mul_comm y]; from le_mul_nonneg_left hc hab
 
+theorem le_mul_comb_nonneg {x y z w : myrat}
+(hx : 0 ≤ x) (hz : 0 ≤ z) (hxy : x ≤ y) (hzw : z ≤ w) :
+ x * z ≤ y * w :=
+begin
+  transitivity (y * z),
+    apply le_mul_nonneg_right; assumption,
+  apply le_mul_nonneg_left,
+    transitivity x; assumption,
+  assumption,
+end
+
 theorem le_mul_nonpos_left {x y z : myrat} : z ≤ 0 → x ≤ y → z * y ≤ z * x :=
 begin
   assume hz0 hxy,

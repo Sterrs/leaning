@@ -261,66 +261,11 @@ begin
   },
 end
 
-def abs (n: int_pair): int_pair :=
-if 0 ≤ n then n else -n
-
-@[simp]
-theorem abs_a {n: int_pair}:
-(abs n).a = if 0 ≤ n then n.a else n.b :=
-begin
-  unfold abs,
-  by_cases h0n: 0 ≤ n , {
-    repeat {rw if_pos h0n},
-  }, {
-    repeat {rw if_neg h0n},
-    rw neg_a,
-  },
-end
-
-@[simp]
-theorem abs_b {n: int_pair}:
-(abs n).b = if 0 ≤ n then n.b else n.a :=
-begin
-  unfold abs,
-  by_cases h0n: 0 ≤ n , {
-    repeat {rw if_pos h0n},
-  }, {
-    repeat {rw if_neg h0n},
-    rw neg_b,
-  },
-end
-
 -- is there an easier way?
 private lemma unpropext {p q: Prop}: p = q → (p ↔ q) :=
 begin
   assume hpq,
   rw hpq,
-end
-
-theorem abs_well_defined (n m: int_pair):
-n ≈ m → ⟦abs n⟧ = ⟦abs m⟧ :=
-begin
-  assume hnm,
-  unfold abs,
-  have := unpropext (le_well_defined 0 n 0 m rfl hnm),
-  conv in (0 ≤ n) {
-    rw this,
-  },
-  by_cases h0m: 0 ≤ m, {
-    repeat {rw if_pos h0m},
-    from quotient.sound hnm,
-  }, {
-    repeat {rw if_neg h0m},
-    from neg_well_defined _ _ hnm,
-  },
-end
-
-def abs₂ (n: int_pair): mynat := (abs n).a - (abs n).b
-
-theorem abs_2_well_defined (n m: int_pair):
-n ≈ m → abs₂ n = abs₂ m :=
-begin
-  sorry,
 end
 
 def mul (n m: int_pair): int_pair := ⟨n.a * m.a + n.b * m.b, n.a * m.b + n.b * m.a⟩
@@ -409,51 +354,6 @@ theorem neg_neg: - -n = n :=
 begin
   rw eq_iff_split,
   simp,
-end
-
--- this kind of manually proves some things it shouldn't have to
-@[simp]
-theorem abs_neg: abs (-n) = abs n :=
-begin
-  by_cases h0n: 0 ≤ n, {
-    unfold abs,
-    rw if_pos h0n,
-    by_cases h: n.a = n.b, {
-      have: 0 ≤ -n, {
-        rw le_def,
-        simp,
-        rw h,
-      },
-      rw if_pos this, clear this,
-      rw eq_iff_split,
-      simp,
-      split, {
-        symmetry,
-        assumption,
-      }, {
-        assumption,
-      },
-    }, {
-      have: ¬0 ≤ -n, {
-        assume h0negn,
-        rw le_def at h0n h0negn,
-        simp at h0negn,
-        simp at h0n,
-        from h (mynat.le_antisymm h0negn h0n),
-      },
-      rw if_neg this,
-      rw neg_neg,
-    },
-  }, {
-    unfold abs,
-    rw if_neg h0n,
-    have: 0 ≤ -n, {
-      rw le_def at *,
-      simp at *,
-      from lt_impl_le h0n,
-    },
-    rw if_pos this,
-  },
 end
 
 end int_pair

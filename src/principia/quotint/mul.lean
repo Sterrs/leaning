@@ -9,8 +9,8 @@ namespace quotint
 open mynat
 open quotint
 
-variables {m n k : quotint}
-variables {a b c : mynat}
+variables m n k : quotint
+variables a b c : mynat
 
 theorem mul_comm: m * n = n * m :=
 begin
@@ -35,8 +35,8 @@ begin
 end
 
 @[simp]
-theorem zero_mul : ∀ {m : quotint}, 0 * m = 0
-:= λ m, by rw [mul_comm, mul_zero]
+theorem zero_mul : 0 * m = 0 :=
+by rw [mul_comm, mul_zero]
 
 @[simp]
 theorem mul_one: m * 1 = m :=
@@ -66,10 +66,8 @@ end
 theorem neg_one_mul: ∀ {m : quotint}, (-1) * m = -m
 := λ m, by rw [mul_comm, mul_neg_one]
 
-instance mul_is_comm: is_commutative quotint mul := ⟨assume a b, mul_comm⟩
+instance mul_is_comm: is_commutative quotint mul := ⟨mul_comm⟩
 
--- These are much simpler than the addition ones, mostly just repeatedly
--- using the basic rules.
 theorem mul_assoc: m * n * k = m * (n * k) :=
 begin
   have: ∀ a b: mynat, ∀ f: mynat → mynat, a = b → f a = f b, {
@@ -96,7 +94,7 @@ begin
 end
 
 instance mul_is_assoc: is_associative quotint mul :=
-⟨assume a b c, mul_assoc⟩
+⟨mul_assoc⟩
 
 theorem mul_neg : m * (-n) = - (m * n) :=
 by rw [←mul_neg_one, ←mul_assoc, ←@neg_one_mul (m*n), mul_comm]
@@ -151,7 +149,7 @@ end
 
 -- Particularly abs is very dependent on inequalities
 
-private lemma mul_integral_biased:
+private lemma mul_integral_biased {m n : quotint}:
 m ≠ 0 → m * n = 0 → n = 0 :=
 begin
   cases quotient.exists_rep m with a ha, subst ha,
@@ -166,7 +164,7 @@ begin
   sorry,
 end
 
-theorem mul_integral:
+theorem mul_integral {m n : quotint}:
 m * n = 0 → n = 0 ∨ m = 0 := sorry
 
 theorem mul_nonzero_nonzero : m * n ≠ 0 ↔ m ≠ 0 ∧ n ≠ 0 :=
@@ -195,7 +193,7 @@ by existsi (m + (-1)); rw [add_assoc, neg_self_add, add_zero]
 private lemma something_sub_one (m : quotint): ∃ n, m = n + -1 :=
 by existsi (m + 1); rw [add_assoc, self_neg_add, add_zero]
 
-theorem mul_cancel: m ≠ 0 → m * n = m * k → n = k :=
+theorem mul_cancel {m n k : quotint}: m ≠ 0 → m * n = m * k → n = k :=
 begin
   assume hm0 hmnmk,
   have: m * (n - k) = 0, {
@@ -213,14 +211,9 @@ begin
   assumption,
 end
 
-theorem abs_eq_sign_self : abs m = (sign m) * m := sorry
+theorem mul_neg_with : (-m) * n = -(m * n) := sorry
 
-theorem sign_mult : sign (m * n) = sign m * sign n := sorry
-
-theorem abs_distr: abs m * abs n = abs (m * n) :=
-begin
-  sorry,
-end
+theorem mul_with_neg : m * (-n) = -(m * n) := sorry
 
 end quotint
 end hidden

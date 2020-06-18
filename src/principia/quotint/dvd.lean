@@ -1,5 +1,5 @@
 import ..mynat.dvd
-import .le
+import .max
 
 namespace hidden
 namespace quotint

@@ -6,13 +6,13 @@ namespace quotint
 open mynat
 open quotint
 
-variables {m n k : quotint}
-variables {a b c : mynat}
+variables m n k : quotint
+variables a b c : mynat
 
 @[simp]
 theorem coe_succ: (↑(succ a): quotint) = ↑a + 1 := rfl
 
-@[simp] theorem nat_nat_add: (↑a: quotint) + ↑b = ↑(a + b) := rfl
+@[simp] theorem coe_coe_add: (↑a: quotint) + ↑b = ↑(a + b) := rfl
 
 theorem sub_add_neg: m - n = m + (-n) := rfl
 
@@ -31,7 +31,7 @@ begin
 end
 
 instance add_is_comm: is_commutative quotint add :=
-⟨assume a b, add_comm⟩
+⟨add_comm⟩
 
 @[simp]
 theorem zero_add: 0 + m = m :=
@@ -64,7 +64,7 @@ begin
 end
 
 instance add_is_assoc: is_associative quotint add :=
-⟨assume a b c, add_assoc⟩
+⟨add_assoc⟩
 
 @[simp]
 theorem neg_distr: -(m + n) = -m + -n :=
@@ -77,7 +77,7 @@ begin
   simp,
 end
 
-private lemma add_cancel_mp (k: quotint): m + k = n + k → m = n :=
+private lemma add_cancel_mp {m n : quotint} (k: quotint): m + k = n + k → m = n :=
 begin
   assume hmknk,
   cases quotient.exists_rep m with a ha, subst ha,
@@ -102,7 +102,7 @@ end
 
 -- It's more useful as an iff
 @[simp]
-theorem add_cancel (k : quotint): m + k = n + k ↔ m = n :=
+theorem add_cancel {m n : quotint} (k : quotint): m + k = n + k ↔ m = n :=
 ⟨add_cancel_mp k, assume h, by congr; assumption⟩
 
 @[simp]

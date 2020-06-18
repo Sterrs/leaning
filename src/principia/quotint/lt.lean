@@ -6,8 +6,8 @@ namespace quotint
 
 open quotint
 
-variables {m n k : quotint}
-variables {a b c : mynat}
+variables m n k : quotint
+variables a b c : mynat
 
 -- this is no longer definitionally true. Not sure if that's what we want,
 -- it makes things a bit ugly
@@ -21,35 +21,27 @@ end
 instance decidable_lt: ∀ m n: quotint, decidable (m < n) :=
 quotient_decidable_rel int_pair.lt int_pair.lt_well_defined
 
-@[simp]
-theorem nat_nat_lt : (↑a : quotint) < ↑b ↔ a < b :=
-iff_to_contrapositive nat_nat_le
-
-theorem nat_neg_lt : ¬↑a < -[1+ b] :=
-assume h, h neg_nat_le
-
-theorem neg_nat_lt : -[1+ a] < ↑b :=
-assume h, nat_neg_le h
-
-@[simp]
-theorem neg_net_lt : -[1+ a] < -[1+ b] ↔ b < a :=
-iff_to_contrapositive neg_neg_le
-
-theorem lt_nrefl : ¬m < m := assume h, (lt_iff_nle.mp h) le_refl
-
-theorem lt_imp_ne : m < n → m ≠ n :=
+theorem lt_nrefl : ¬m < m :=
 begin
-  assume hlt heq, subst heq,
-  from lt_nrefl hlt,
+  assume h,
+  rw lt_iff_nle at h,
+  from h (le_refl m),
 end
 
-theorem lt_imp_le : m < n → m ≤ n :=
+theorem lt_imp_ne {m n : quotint}: m < n → m ≠ n :=
+begin
+  assume hlt heq, subst heq,
+  from lt_nrefl m hlt,
+end
+
+theorem lt_imp_le {m n : quotint}: m < n → m ≤ n :=
 begin
   assume hmn,
   cases @le_total_order m n,
     assumption,
   exfalso,
-  from (lt_iff_nle.mp hmn) h,
+  rw lt_iff_nle at hmn,
+  contradiction,
 end
 
 theorem lt_iff_le_and_ne : m < n ↔ m ≤ n ∧ m ≠ n :=
@@ -69,7 +61,7 @@ begin
 end
 
 @[simp]
-theorem lt_cancel : m + k < n + k ↔ m < n :=
+theorem lt_cancel {m n k : quotint} : m + k < n + k ↔ m < n :=
 begin
   split; assume h,
   all_goals {
@@ -79,10 +71,10 @@ begin
   },
 end
 
-theorem lt_add (k : quotint): m < n ↔ m + k < n + k :=
+theorem lt_add {m n : quotint} (k : quotint): m < n ↔ m + k < n + k :=
 ⟨lt_cancel.mpr, lt_cancel.mp⟩
 
-theorem lt_add_left (k : quotint) : m < n ↔ k + m < k + n :=
+theorem lt_add_left {m n : quotint} (k : quotint) : m < n ↔ k + m < k + n :=
 begin
   rw [add_comm, @add_comm k],
   symmetry,
@@ -90,10 +82,10 @@ begin
 end
 
 @[simp]
-theorem lt_cancel_left : k + m < k + n ↔ m < n :=
+theorem lt_cancel_left {m n k : quotint} : k + m < k + n ↔ m < n :=
 ⟨(lt_add_left k).mpr, (lt_add_left k).mp⟩
 
-theorem pos_add : 0 < m → 0 < n → 0 < m + n :=
+theorem pos_add {m n : quotint} : 0 < m → 0 < n → 0 < m + n :=
 begin
   assume hm hn,
   rw lt_iff_le_and_ne at *,
@@ -124,7 +116,7 @@ begin
   },
 end
 
-theorem lt_comb {k j : quotint} : m < n → k < j → m + k < n + j :=
+theorem lt_comb {m n k j : quotint} : m < n → k < j → m + k < n + j :=
 begin
   assume hmn hkj,
   rw lt_iff_sub_pos at *,
@@ -145,20 +137,19 @@ begin
   assumption,
 end
 
+theorem lt_mul_comb_nonneg {m n a b : quotint}
+(hm : 0 ≤ m) (ha : 0 ≤ a) (hmn : m < n) (hab : a < b) :
+m * a < n * b :=
+begin
+  sorry,
+end
+
 -- For myrat
 theorem zero_lt_mul : 0 < m → 0 < n → 0 < m * n :=
 begin
-  assume h0m h0n,
-  have h0lem := lt_imp_le h0m,
-  have h0len := lt_imp_le h0n,
-  rw zero_le_iff_coe at h0lem h0len,
-  cases h0lem with a ha,
-  cases h0len with b hb,
-  subst ha, subst hb,
-  rw [←zero_nat, nat_nat_lt] at h0m h0n,
-  rw [←zero_nat, nat_nat_mul, nat_nat_lt],
-  have := mynat.lt_comb_mul h0n h0m,
-  rwa [mynat.mul_zero, mynat.mul_comm] at this,
+  assume hm hn,
+  rw ←zero_mul 0,
+  apply lt_mul_comb_nonneg; refl <|> assumption, -- Yes, I watch Rick and Morty
 end
 
 theorem zero_lt_one : 0 < (1 : quotint) :=
@@ -174,8 +165,6 @@ theorem le_mul_cancel_pos_left : 0 < k → (k * m ≤ k * n ↔ m ≤ n) := sorr
 theorem le_mul_cancel_pos_right : 0 < k → (m * k ≤ n * k ↔ m ≤ n) := sorry
 
 theorem zero_lt_sign_mul_self: m ≠ 0 → 0 < (sign m) * m := sorry
-
-theorem zero_lt_abs: 0 < m → m = ↑(abs m) := sorry
 
 end quotint
 end hidden

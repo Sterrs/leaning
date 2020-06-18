@@ -48,13 +48,6 @@ theorem sign_eq_cls {x: int_pair.int_pair} {n: quotint}:
 n = ⟦x⟧ → sign n = ⟦int_pair.sign x⟧ :=
 λ hnx, by rw hnx; refl
 
-def abs: quotint → quotint :=
-quotient.lift (λ n, ⟦int_pair.abs n⟧) int_pair.abs_well_defined
-
-theorem abs_eq_cls {x: int_pair.int_pair} {n: quotint}:
-n = ⟦x⟧ → abs n = ⟦int_pair.abs x⟧ :=
-λ hnx, by rw hnx; refl
-
 def add: quotint → quotint → quotint :=
 quotient.lift₂ (λ n m, ⟦n + m⟧) int_pair.add_well_defined
 
@@ -217,18 +210,6 @@ begin
   have h₁ := congr_arg (λ m, -m) h,
   simp at h₁, -- To simp lambdas
   assumption,
-end
-
-theorem abs_of_nat: abs ↑a = a := rfl
-
-theorem abs_neg_succ: abs -[1+ a] = succ a := rfl
-
-theorem abs_neg: abs (-n) = abs n :=
-begin
-  cases (quotient.exists_rep n) with x hx, subst hx,
-  rw neg_eq_cls rfl,
-  repeat {rw abs_eq_cls rfl},
-  rw int_pair.abs_neg,
 end
 
 -- Sign
