@@ -7,8 +7,7 @@
 
 import ..logic
 import ..mynat.basic
-import ..mynat.le
-import ..mynat.nat_sub
+import ..mynat.lt
 
 namespace hidden
 open mynat

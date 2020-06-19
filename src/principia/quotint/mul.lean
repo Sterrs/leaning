@@ -12,6 +12,16 @@ open quotint
 variables m n k : quotint
 variables a b c : mynat
 
+@[simp]
+theorem coe_coe_mul : (↑a : quotint) * ↑b = ↑(a * b) :=
+begin
+  repeat { rw coe_nat_def, },
+  rw mul_eq_cls rfl rfl,
+  apply congr rfl,
+  rw int_pair.eq_iff_split,
+  simp, -- awsome :o
+end
+
 theorem mul_comm: m * n = n * m :=
 begin
   cases quotient.exists_rep m with a ha, subst ha,
