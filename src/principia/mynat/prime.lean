@@ -338,35 +338,6 @@ begin
   from fact_ndvd_lt,
 end
 
--- this is pitched as a kind of long-term goal
-theorem euclids_lemma: prime p → p ∣ m * n → p ∣ m ∨ p ∣ n :=
-begin
-  sorry
-end
-
--- Requires some form of FTA
-theorem dvd_coprime:
-coprime m n → m ∣ k * n → m ∣ k := sorry
-
-theorem coprime_imp_prod_dvd:
-coprime m n → m ∣ k → n ∣ k → m * n ∣ k :=
-begin
-  assume hcp hmk hnk,
-  cases hmk with a ha,
-  cases hnk with b hb,
-  rw hb at ha,
-  have hmb : m ∣ b,
-    have hmprod : m ∣ b * n,
-      rw [ha, mul_comm],
-      apply dvd_mul,
-      refl,
-    apply dvd_coprime,
-    repeat {assumption},
-  cases hmb with c hc,
-  rw [hc, mul_assoc] at hb,
-  existsi c, assumption,
-end
-
 end mynat
 
 end hidden

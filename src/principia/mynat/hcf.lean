@@ -330,6 +330,24 @@ end
 theorem hcf_dvd_right (h : m ≠ 0 ∨ n ≠ 0): hcf m n ∣ n :=
 by rw hcf_comm; from hcf_dvd_left n m (or.symm h)
 
+theorem bezouts_lemma {m n k : mynat} (h : m ≠ 0 ∨ n ≠ 0) :
+(∃ x y : quotint, ↑m * x + ↑n * y = k) ↔ hcf m n ∣ k :=
+begin
+  split; assume h₁, {
+    cases h₁ with x hx,
+    cases hx with y hxy,
+    cases hcf_dvd_left _ _ h with a ha,
+    cases hcf_dvd_right _ _ h with b hb,
+    apply quotint.coe_coe_dvd.mpr,
+    existsi (↑a * x + ↑b * y),
+    rw [quotint.mul_comm, quotint.mul_add, ←quotint.mul_assoc, ←quotint.mul_assoc,
+        coe_coe_mul, coe_coe_mul, mul_comm, mul_comm _ b, ←ha, ←hb],
+    symmetry, assumption,
+  }, {
+    sorry,
+  },
+end
+
 end mynat
 
 end hidden
