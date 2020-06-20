@@ -2,6 +2,7 @@
 
 import .lt
 import ..logic
+import ..myset.basic
 
 namespace hidden
 
@@ -274,5 +275,43 @@ theorem descend_to_zero (p : mynat → Prop)
 : ∀ {m}, p m → p 0
 | zero := assume h, by assumption
 | (succ m) := assume h, descend_to_zero (hdec h)
+
+
+/-- Lemma to shorten things a bit -/
+private lemma nempty_imp_exists {α : Type} {S : myset α}
+(h : ¬myset.empty S) : ∃ x, x ∈ S :=
+by rwa myset.exists_iff_nempty
+
+-- TODO: Is this the right place for this? Is this the right name?
+-- Could make S implicit but this makes the goal state confusing,
+-- filled with _
+-- Notice we don't need to prove that there is a unique such element,
+-- though we do later to actually make it useful
+/-- Given a non-empty set of mynats, (noncomputably) get its least element, via
+well-ordering -/
+noncomputable def min (S : myset mynat) (h : ¬myset.empty S) : mynat :=
+classical.some (well_ordering (nempty_imp_exists h))
+
+-- some_spec is a proof that `some` satifies its definition
+theorem min_property {S : myset mynat} (hS : ¬myset.empty S) :
+min S hS ∈ S :=
+(classical.some_spec (well_ordering (nempty_imp_exists hS))).left
+
+theorem min_le {S : myset mynat} {m : mynat}
+(hS : ¬myset.empty S) (hm : m ∈ S) : min S hS ≤ m :=
+(classical.some_spec (well_ordering (nempty_imp_exists hS))).right m hm
+
+-- Prove that the minimum is unique
+-- I called it min_rw because it allows you to rw inside min, if the sets
+-- are equal
+theorem min_rw {S T : myset mynat} (hS : ¬myset.empty S) (hT : ¬myset.empty T)
+(h : S = T) : min S hS = min T hT :=
+begin
+  apply mynat.le_antisymm; apply min_le,
+    rw h,
+  tactic.swap,
+  rw ←h,
+  all_goals { apply min_property, },
+end
 
 end hidden
