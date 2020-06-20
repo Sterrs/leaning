@@ -170,11 +170,18 @@ end
 theorem succ_coprime: coprime (succ m) m :=
 coprime_symm coprime_succ
 
-theorem coprime_prime:
-prime p → ¬(coprime p n) → p ∣ n :=
+theorem coprime_prime (hp : prime p) :
+¬(coprime p n) → p ∣ n :=
 begin
-  assume hp hncp,
-  sorry, -- Is this classical?
+  assume hncoprime,
+  unfold coprime at hncoprime,
+  rw not_forall at hncoprime,
+  cases hncoprime with k hk,
+  rw [not_imp, not_imp] at hk,
+  cases hp.right k hk.left; subst h,
+    exfalso,
+    from hk.right.right rfl,
+  from hk.right.left,
 end
 
 open classical
@@ -251,18 +258,24 @@ begin
             -- cases
             assume hasn,
             have habsn := hab.right.right,
-            simp [hasn] at habsn,
+            rw [hasn] at habsn,
             cases b,
-            simp at habsn,
-            from succ_ne_zero habsn.symm,
+              simp at habsn,
+              from succ_ne_zero habsn.symm,
             cases b,
-            simp at hab,
+              simp at hab,
+              assumption,
+            suffices : succ (succ b) = 1,
+              rw [←one_eq_succ_zero] at this,
+              suffices hcontra : succ b = 0,
+                from mynat.no_confusion hcontra,
+              apply succ_inj,
+              assumption,
+            apply @mul_cancel_to_one (succ n) _,
+              assume hsucc0,
+              from mynat.no_confusion hsucc0,
+            symmetry,
             assumption,
-            simp at habsn,
-            rw [←add_assoc, add_comm b n,
-                add_assoc, ←add_succ] at habsn,
-            have hcontr := add_cancel_to_zero habsn.symm,
-            from succ_ne_zero hcontr,
           },
           rw le_iff_lt_or_eq at hasn,
           cases hasn,
