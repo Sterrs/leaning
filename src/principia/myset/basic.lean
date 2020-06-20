@@ -19,6 +19,8 @@ variables {α : Type u} {β : Type v}
 def mem (a : α) (s : myset α) : Prop := s a
 instance: has_mem α (myset α) := ⟨myset.mem⟩
 
+theorem mem_def {a : α} {s : myset α} : a ∈ s = s a := rfl
+
 def subset (s : myset α) (t : myset α) : Prop :=
 ∀ a : α, s a → t a
 -- Use \subseteq
@@ -38,6 +40,24 @@ instance: has_union (myset α) := ⟨union⟩
 def empty_of (α : Type u) : myset α := λ a, false
 def empty {α : Type u} (s : myset α) : Prop := ∀ a : α, ¬(a ∈ s)
 def all_of (α : Type u) : myset α := λ a, true
+
+theorem exists_iff_nempty {s : myset α} :
+(∃ x, x ∈ s) ↔ ¬empty s :=
+begin
+  split; assume h, {
+    assume hemp,
+    cases h with x hx,
+    have := hemp x,
+    contradiction,
+  }, {
+    unfold myset.empty at h,
+    rw not_forall at h,
+    cases h with k hk,
+    existsi k,
+    rw not_not at hk,
+    assumption,
+  },
+end
 
 end myset
 

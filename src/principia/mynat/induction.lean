@@ -208,7 +208,7 @@ local attribute [instance] prop_decidable
 
 -- Should help prove Bezout
 theorem well_ordering
-(statement : mynat → Prop) :
+{statement : mynat → Prop} :
 (∃ k : mynat, statement k) →
 ∃ k : mynat, statement k ∧
 ∀ j : mynat, (statement j) →  k ≤ j :=
