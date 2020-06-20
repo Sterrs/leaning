@@ -32,6 +32,9 @@ instance: has_one quotint := ⟨(1: mynat)⟩
 theorem int_zero: (0: quotint) = ⟦0⟧ := rfl
 theorem int_one: (1: quotint) = ⟦1⟧ := rfl
 
+theorem coe_zero : ↑(0 : mynat) = (0 : quotint) := rfl
+theorem coe_one : ↑(1 : mynat) = (1 : quotint) := rfl
+
 def neg: quotint → quotint :=
 quotient.lift (λ n, ⟦-n⟧) int_pair.neg_well_defined
 
