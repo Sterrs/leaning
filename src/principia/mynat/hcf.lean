@@ -309,7 +309,21 @@ begin
         coe_coe_mul, coe_coe_mul, mul_comm, mul_comm _ b, ←ha, ←hb],
     symmetry, assumption,
   }, {
-    sorry,
+    have hprop := min_property (lin_combs_nemp h),
+    rw ←hcf_min_if_one_nzero h at hprop,
+    cases hprop with h0 hprop,
+    cases hprop with x hx,
+    cases hx with y hxy,
+
+    cases h₁ with a ha,
+
+    have := congr_arg (λ x, ↑a * x) hxy,
+    dsimp only [] at this,
+    rw [quotint.mul_add, coe_coe_mul, ←ha] at this,
+    existsi (↑a * x),
+    existsi (↑a * y),
+    rw ←this,
+    ac_refl,
   },
 end
 
