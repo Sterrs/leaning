@@ -189,26 +189,28 @@ begin
   apply dvd_add_lots,
   assumption,
 end
-
+#check succ_add
 theorem lt_ndvd: m ≠ 0 → m < n → ¬n ∣ m :=
 begin
   assume hmnz hmn hndm,
   cases (le_total_order m n),
   cases h with d hd,
   cases d,
-  rw [zz, add_zero] at hd,
-  rw hd at hmn,
-  from hmn le_refl,
-  rw hd at hndm,
-  cases hndm with a ha,
-  cases a,
-  simp at ha,
-  from hmnz ha,
-  simp at ha,
-  rw [←add_succ, ←add_zero m, add_assoc] at ha,
-  have hs0 := add_cancel ha,
-  simp at hs0,
-  from succ_ne_zero hs0.symm,
+    rw [zz, add_zero] at hd,
+    rw hd at hmn,
+    from hmn le_refl,
+
+    rw hd at hndm,
+    cases hndm with a ha,
+    cases a,
+      simp at ha,
+      from hmnz ha,
+    rw succ_mul at ha,
+    rw (by ac_refl : a * (m + d.succ) + (m + d.succ) =
+                     m + (d.succ + a * (m + d.succ))) at ha,
+    have hs0 := add_cancel_to_zero ha,
+    rw succ_add at hs0,
+    from succ_ne_zero hs0,
 
   cases h with d hd,
   cases d,
@@ -236,10 +238,12 @@ begin
   simp [ha],
   simp at hk,
   cases k,
-  simp at hk,
-  contradiction,
-  simp at hk,
-  rw [←add_assoc, add_comm k n, add_assoc, ←add_succ] at hk,
+    simp at hk,
+    contradiction,
+  rw succ_mul at hk,
+  rw (by ac_refl : k.succ + (k * n + n + k.succ * a) =
+                   n + (k.succ + (k * n + k.succ * a))) at hk,
+  rw succ_add at hk,
   exfalso,
   from succ_ne_zero (add_cancel_to_zero hk),
 end
