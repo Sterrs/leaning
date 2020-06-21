@@ -22,32 +22,6 @@ begin
   from lt_nzero hmn,
 end
 
--- TODO: this is now proved elsewhere
-theorem lt_mul_combine:
-a < b → m < n → a * m < b * n :=
-begin
-  assume hab hmn,
-  cases m, {
-    cases hbn: b * n, {
-      exfalso,
-      rw mul_integral (lt_rhs_nonzero hab) hbn at hmn,
-      from lt_nrefl hmn,
-    }, {
-      from zero_lt_succ,
-    },
-  }, {
-    have h1 := lt_mul (@succ_ne_zero m) hab,
-    have h2 := lt_mul (lt_rhs_nonzero hab) hmn,
-    conv at h1 {
-      congr,
-      rw mul_comm,
-      skip,
-      rw mul_comm,
-    },
-    from lt_trans h1 h2,
-  },
-end
-
 theorem pow_gt_1:
 1 < a → 1 < a ^ succ n :=
 begin
@@ -56,7 +30,7 @@ begin
     from h1a,
   }, {
     rw pow_succ,
-    from lt_mul_combine h1a n_ih,
+    from lt_comb_mul h1a n_ih,
   },
 end
 
@@ -148,7 +122,22 @@ begin
         skip,
         rw pow_succ,
       },
-      from lt_mul_combine hab hn,
+      from lt_comb_mul hab hn,
+    },
+  },
+end
+
+theorem pow_monotone_nonstrict:
+a ≤ b → a ^ n ≤ b ^ n :=
+begin
+  assume hab,
+  induction n with n hn, {
+    from le_refl,
+  }, {
+    apply le_mul_comb, {
+      assumption,
+    }, {
+      assumption,
     },
   },
 end

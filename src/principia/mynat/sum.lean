@@ -3,6 +3,7 @@
 import .fib
 import .nat_sub
 import .fact
+import .extra_pow
 import ..sequence
 
 import .le
@@ -46,6 +47,18 @@ variables term f g : sequence mynat
 
 @[simp]
 theorem sum_succ: sum term (succ n) = sum term n + term n := rfl
+
+@[simp]
+theorem sum_one: sum term 1 = term 0 := add_comm _ _
+
+@[simp] theorem prod_zero: product term 0 = 1 := rfl
+
+@[simp]
+theorem prod_succ:
+product term (succ n) = product term n * term n := rfl
+
+@[simp]
+theorem prod_one: product term 1 = term 0 := mul_comm _ _
 
 theorem constant_sum: ∀ n : mynat, sum ↑(1 :mynat) n = n
 | zero := rfl
@@ -732,6 +745,108 @@ begin
   },
 end
 
+-- TODO: general theorem about sum f (n * m) as a double sum?
+theorem sum_split:
+sum f (2 * n) = sum f n + sum (λ k, f (n + k)) n :=
+begin
+  induction n with n hn, {
+    refl,
+  }, {
+    rw mul_succ,
+    rw add_comm 2,
+    have: sum f (2 * n + 2) = sum f (2 * n) + f (2 * n) + f (2 * n + 1) := rfl,
+    rw this, clear this,
+    rw hn,
+    have: f (2 * n) + f (2 * n + 1) = f (n + n) + f (n + succ n), {
+      repeat {rw mul_comm 2},
+      refl,
+    },
+    rw add_assoc,
+    rw this,
+    rw add_assoc,
+    conv {
+      congr, congr, skip,
+      rw ←add_assoc,
+      rw ←sum_succ,
+      rw ←sum_succ,
+      rw sum_tail,
+      rw add_comm,
+    },
+    rw ←add_assoc,
+    rw add_zero,
+    rw ←sum_succ,
+    have: ∀ k, f (n + succ k) = f(succ n + k), {
+      simp,
+    },
+    rw (sum_cancel _ _).mpr this,
+  },
+end
+
+theorem prod_tail:
+product f (succ n) = product (λ k, f (succ k)) n * f 0 :=
+begin
+  induction n with n hn, {
+    refl,
+  }, {
+    rw prod_succ,
+    rw hn,
+    rw mul_assoc,
+    rw mul_comm (f 0),
+    rw ←mul_assoc,
+    rw ←prod_succ,
+  },
+end
+
+theorem prod_congr:
+(∀ k, f k = g k) → (∀ n, product f n = product g n) :=
+begin
+  assume heq,
+  intro n,
+  induction n with n hn, {
+    refl,
+  }, {
+    repeat {rw prod_succ},
+    rw hn,
+    rw heq n,
+  },
+end
+
+theorem prod_split:
+product f (2 * n) = product f n * product (λ k, f (n + k)) n :=
+begin
+  induction n with n hn, {
+    refl,
+  }, {
+    rw mul_succ,
+    rw add_comm 2,
+    have: product f (2 * n + 2) = product f (2 * n) * f (2 * n) * f (2 * n + 1) := rfl,
+    rw this, clear this,
+    rw hn,
+    have: f (2 * n) * f (2 * n + 1) = f (n + n) * f (n + succ n), {
+      repeat {rw mul_comm 2},
+      refl,
+    },
+    rw mul_assoc,
+    rw this,
+    rw mul_assoc,
+    conv {
+      congr, congr, skip,
+      rw ←mul_assoc,
+      rw ←prod_succ,
+      rw ←prod_succ,
+      rw prod_tail,
+      rw mul_comm,
+    },
+    rw ←mul_assoc,
+    rw add_zero,
+    rw ←prod_succ,
+    have: ∀ k, f (n + succ k) = f(succ n + k), {
+      simp,
+    },
+    rw prod_congr _ _ this,
+  },
+end
+
 -- this has some things in common with both the binomial theorem
 -- and the sum of a GP. Particularly, it's more or less a consequence
 -- of the sum of a GP with common ratio in ℚ.
@@ -815,10 +930,133 @@ begin
   from am_gm_base _ _,
 end
 
+private lemma weak_binomial:
+a ^ succ n + b ^ succ n ≤ (a + b) ^ succ n :=
+begin
+  induction n with n hn, {
+    refl,
+  }, {
+    repeat {rw pow_succ _ (succ n)},
+    transitivity (a + b) * (a ^ succ n + b ^ succ n), {
+      existsi b * a ^ succ n + a * b ^ succ n,
+      simp,
+      ac_refl,
+    }, {
+      from le_mul _ hn,
+    },
+  },
+end
+
+private lemma am_gm_double:
+(∀ f, n ^ n * product f n ≤ sum f n ^ n)
+→ (∀ f, (2 * n) ^ (2 * n) * product f (2 * n) ≤ sum f (2 * n) ^ (2 * n)) :=
+begin
+  assume h_ih,
+  intro f,
+  rw mul_pow,
+  rw prod_split,
+  rw sum_split,
+  have: n ^ (2 * n) = n ^ n * n ^ n, {
+    rw mul_comm,
+    from pow_add _ _ _,
+  },
+  rw this, clear this,
+  have:
+    2 ^ (2 * n) * (n ^ n * n ^ n) * (product f n * product (λ (k : mynat), f (n + k)) n)
+    = 2 ^ (2 * n) * ((n ^ n) * product f n) * (n ^ n * product (λ (k : mynat), f (n + k)) n), {
+    ac_refl,
+  },
+  rw this, clear this,
+  transitivity 2 ^ (2 * n) * sum f n ^ n * sum (λ (k : mynat), f (n + k)) n ^ n, {
+    conv {
+      congr,
+      rw mul_assoc,
+      skip,
+      rw mul_assoc,
+    },
+    apply le_mul,
+    apply le_mul_comb, {
+      apply h_ih,
+    }, {
+      apply h_ih,
+    },
+  }, {
+    rw ←pow_mul,
+    rw ←mul_pow,
+    rw ←mul_pow,
+    rw ←pow_mul,
+    apply pow_monotone_nonstrict,
+    rw mul_assoc,
+    apply am_gm_base,
+  },
+end
+
+private lemma am_gm_pow2:
+((2: mynat) ^ n) ^ ((2: mynat) ^ n) * product f (2 ^ n)
+≤ sum f ((2: mynat) ^ n) ^ ((2: mynat) ^ n) :=
+begin
+  induction n with n hn generalizing f, {
+    simp,
+  }, {
+    apply am_gm_double _ hn,
+  },
+end
+
+theorem cantors_weak_thm:
+n ≤ 2 ^ n :=
+begin
+  apply lt_impl_le,
+  rw lt_iff_succ_le,
+  induction n with n hn, {
+    from le_refl,
+  }, {
+    cases hn with d hd,
+    existsi 2 * d + n,
+    rw pow_succ,
+    rw hd,
+    repeat {rw ←add_one_succ <|> rw mul_add},
+    have: (2: mynat) * 1 = 2 := rfl, rw this, clear this,
+    have: n + 1 + 1 = n + 2 := rfl, rw this, clear this,
+    have: 2 * n = n + n, {rw mul_comm, refl,}, rw this, clear this,
+    ac_refl,
+  },
+end
+
+private lemma am_gm_descent_lemma:
+(∀ f, succ n ^ succ n * product f (succ n) ≤ sum f (succ n) ^ succ n)
+→ (∀ f, n ^ n * product f n ≤ sum f n ^ n) :=
+begin
+  assume h_ih,
+  intro f,
+  sorry,
+end
+
+private theorem am_gm_le:
+(∀ f, n ^ n * product f n ≤ (sum f n) ^ n) →
+m ≤ n → (∀ f, m ^ m * product f m ≤ (sum f m) ^ m) :=
+begin
+  assume h hmn,
+  intro f,
+  cases hmn with d hd,
+  induction d with k hk generalizing n m f, {
+    simp at hd,
+    subst hd,
+    apply h,
+  }, {
+    apply hk (m + k) m,
+    apply am_gm_descent_lemma,
+    intro f,
+    subst hd,
+    apply h,
+    refl,
+  },
+end
+
 theorem am_gm:
 n ^ n * product f n ≤ (sum f n) ^ n :=
 begin
-  sorry,
+  apply am_gm_le _ _ _ _ (cantors_weak_thm n),
+  apply am_gm_pow2,
 end
 
 theorem cauchy_schwarz:
