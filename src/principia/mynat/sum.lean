@@ -1055,7 +1055,7 @@ end
 theorem am_gm:
 n ^ n * product f n ≤ (sum f n) ^ n :=
 begin
-  apply am_gm_le _ _ _ _ (cantors_weak_thm n),
+  apply am_gm_le _ _ _ (cantors_weak_thm n),
   apply am_gm_pow2,
 end
 
