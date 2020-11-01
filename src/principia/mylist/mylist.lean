@@ -381,14 +381,10 @@ end
 private theorem succ_le_impl_le (h: succ n ≤ len lst): n ≤ len lst :=
 (le_cancel_strong 1 h)
 
--- we could of course deduce that n ≤ len lst from hsnl,
--- but then this theorem would be less general. This way, we
--- show this theorem holds for all proofs of n ≤ len lst.
 theorem len_take_succ
-(hsnl: succ n ≤ len lst)
-(hnl: n ≤ len lst):
+(hsnl: succ n ≤ len lst):
 len (take (succ n) lst hsnl)
-  = succ (len (take n lst hnl)) :=
+  = succ (len (take n lst (succ_le_impl_le hsnl))) :=
 begin
   induction n with n_n n_ih generalizing lst, {
     simp,
@@ -418,8 +414,7 @@ begin
     }, {
       simp,
       rw len_cons_succ at hsnl,
-      rw len_cons_succ at hnl,
-      from n_ih (le_succ_cancel hsnl) (le_succ_cancel hnl),
+      from n_ih (le_succ_cancel hsnl),
     },
   },
 end
@@ -432,20 +427,20 @@ begin
     refl,
   }, {
     -- really all the hard work happens in len_take_succ
-    simp [len_take_succ _ (succ_le_impl_le hnl)],
+    simp [len_take_succ],
     apply n_ih,
   },
 end
 
-theorem take_concat_drop (hnl_1 hnl_2: n ≤ len lst):
-take n lst hnl_1 ++ drop n lst hnl_2 = lst :=
+theorem take_concat_drop (hnl: n ≤ len lst):
+take n lst hnl ++ drop n lst hnl = lst :=
 begin
   induction n generalizing lst, {
     refl,
   }, {
     cases lst, {
-      simp at hnl_1,
-      cases hnl_1 with d hd,
+      simp at hnl,
+      cases hnl with d hd,
       rw succ_add at hd,
       cases hd,
     }, {
@@ -466,16 +461,29 @@ begin
 end
 
 theorem get_head_drop
-(hnld: n ≤ len lst)
-(hnlg: n < len lst)
-(hdne: drop n lst hnld ≠ []):
-get n lst hnlg = head (drop n lst hnld) hdne :=
+(hnl: n < len lst):
+get n lst hnl = head (drop n lst (lt_impl_le hnl)) (
+  begin
+    rw nonempty_iff_len_nonzero,
+    have := len_drop (lt_impl_le hnl),
+    rw ←this at hnl,
+    conv at hnl {
+      to_lhs,
+      rw ←add_zero n,
+      rw add_comm,
+    },
+    have this2 := lt_cancel n hnl,
+    assume h,
+    rw h at this2,
+    from lt_nrefl this2,
+  end
+) :=
 begin
   induction n generalizing lst, {
     simp,
   }, {
     cases lst, {
-      exfalso, from lt_nzero hnlg,
+      exfalso, from lt_nzero hnl,
     }, {
       simp,
       apply n_ih,
@@ -517,64 +525,6 @@ begin
   rw [←rev_concat, hl1l2l1l3, rev_concat],
 end
 
--- the obvious facts that show that these operations don't depend
--- on how you prove the list is long enough.
-theorem head_h_irrelev
-(hnl_1 hnl_2: lst ≠ []):
-head lst hnl_1 = head lst hnl_2 :=
-begin
-  cases lst, {
-    contradiction,
-  }, {
-    refl,
-  },
-end
-
-theorem tail_h_irrelev
-(hnl_1 hnl_2: lst ≠ []):
-tail lst hnl_1 = tail lst hnl_2 :=
-begin
-  cases lst, {
-    contradiction,
-  }, {
-    refl,
-  },
-end
-
-theorem last_h_irrelev
-(hnl_1 hnl_2: lst ≠ []):
-last lst hnl_1 = last lst hnl_2 :=
-begin
-  cases lst, {
-    contradiction,
-  }, {
-    refl,
-  },
-end
-
-theorem init_h_irrelev
-(hnl_1 hnl_2: lst ≠ []):
-init lst hnl_1 = init lst hnl_2 :=
-begin
-  cases lst, {
-    contradiction,
-  }, {
-    refl,
-  },
-end
-
-theorem take_h_irrelev
-(hnl_1 hnl_2: n ≤ len lst):
-take n lst hnl_1 = take n lst hnl_2 := rfl
-
-theorem drop_h_irrelev
-(hnl_1 hnl_2: n ≤ len lst):
-drop n lst hnl_1 = drop n lst hnl_2 := rfl
-
-theorem get_h_irrelev
-(hnl_1 hnl_2: n < len lst):
-get n lst hnl_1 = get n lst hnl_2 := rfl
-
 @[simp]
 theorem take_all (h: len lst ≤ len lst): take (len lst) lst h = lst :=
 begin
@@ -598,16 +548,19 @@ begin
 end
 
 theorem take_idem
-(hml_1 hml_3: m ≤ len lst)
-(hml_2: m ≤ len (take m lst hml_1)):
-take m (take m lst hml_1) hml_2 = take m lst hml_3 :=
+(hml: m ≤ len lst):
+take m (take m lst hml) (
+  begin
+    rw len_take,
+  end
+) = take m lst hml :=
 begin
   induction m with m hm generalizing lst, {
     refl,
   }, {
     cases lst, {
       exfalso,
-      from lt_nzero (lt_iff_succ_le.mpr hml_1),
+      from lt_nzero (lt_iff_succ_le.mpr hml),
     }, {
       simp,
       apply hm,
@@ -617,21 +570,26 @@ end
 
 theorem take_take
 (hml: m ≤ len lst)
-(hnl_1: n ≤ len (take m lst hml))
-(hnl_2: n ≤ len lst):
-take n (take m lst hml) hnl_1 = take n lst hnl_2 :=
+(hnl: n ≤ len (take m lst hml)):
+take n (take m lst hml) hnl = take n lst (
+  begin
+    rw len_take at hnl,
+    from le_trans hnl hml,
+  end
+) :=
 begin
   induction n with n hn generalizing m lst, {
     refl,
   }, {
     cases lst, {
       exfalso,
-      from lt_nzero (lt_iff_succ_le.mpr hnl_2),
+      rw len_take at hnl,
+      from lt_nzero (lt_iff_succ_le.mpr (le_trans hnl hml)),
     }, {
       cases m, {
         exfalso,
-        simp at hnl_1,
-        from lt_nzero (lt_iff_succ_le.mpr hnl_1),
+        simp at hnl,
+        from lt_nzero (lt_iff_succ_le.mpr hnl),
       }, {
         simp,
         apply hn,
@@ -642,9 +600,14 @@ end
 
 theorem drop_drop
 (hml: m ≤ len lst)
-(hnl: n ≤ len (drop m lst hml))
-(hmnl: m + n ≤ len lst):
-drop n (drop m lst hml) hnl = drop (m + n) lst hmnl :=
+(hnl: n ≤ len (drop m lst hml)):
+drop n (drop m lst hml) hnl = drop (m + n) lst (
+  begin
+    rw ←len_drop hml,
+    rw add_comm m n,
+    from le_comb hnl le_refl,
+  end
+) :=
 begin
   induction m with m hm generalizing n lst, {
     simp,
@@ -660,9 +623,15 @@ begin
 end
 
 theorem drop_one_tail
-(h1l: 1 ≤ len lst)
-(hne: lst ≠ []):
-drop 1 lst h1l = tail lst hne :=
+(h1l: 1 ≤ len lst):
+drop 1 lst h1l = tail lst (
+  begin
+    rw nonempty_iff_len_nonzero,
+    assume h,
+    rw h at h1l,
+    from succ_nle_zero h1l,
+  end
+) :=
 begin
   cases lst, {
     refl,
@@ -684,13 +653,17 @@ begin
 end
 
 theorem take_ignore
-(hnl_1: n ≤ len (xs ++ [x]))
-(hnl_2: n ≤ len xs):
-take n (xs ++ [x]) hnl_1 = take n xs hnl_2 :=
+(hnl: n ≤ len xs):
+take n (xs ++ [x]) (
+  begin
+    rw len_concat_add,
+    from le_add_rhs hnl,
+  end
+  ) = take n xs hnl :=
 begin
   suffices h:
-      take n (take (len xs) (xs ++ [x]) _) _ = take n xs hnl_2, {
-    rw @take_take _ (xs ++ [x]) (len xs) n _ _ _ at h,
+      take n (take (len xs) (xs ++ [x]) _) _ = take n xs hnl, {
+    rw @take_take _ (xs ++ [x]) (len xs) n _ _ at h,
     from h,
   }, {
     conv {
@@ -708,10 +681,20 @@ begin
 end
 
 theorem rev_drop_take
-(hml: m ≤ len lst)
-(hnlr: n ≤ len (rev lst))
 (hmn: m + n = len lst):
-drop m lst hml = rev (take n (rev lst) hnlr) :=
+drop m lst (
+  begin
+    rw ←hmn,
+    from le_to_add,
+  end
+) = rev (take n (rev lst) (
+  begin
+    rw rev_len,
+    rw ←hmn,
+    rw add_comm,
+    from le_to_add,
+  end
+)) :=
 begin
   induction m with m hm generalizing lst, {
     simp at hmn,
@@ -723,22 +706,19 @@ begin
     rw rev_rev,
   }, {
     cases lst, {
-      exfalso, from lt_nzero (lt_iff_succ_le.mpr hml),
+      exfalso,
+      rw succ_add at hmn,
+      from succ_ne_zero hmn,
     }, {
       rw drop_succ_cons,
-      simp at hml,
-      have := hm (le_succ_cancel hml) _ _, {
+      have hmlt: m + n = len lst_tail, {
+        simp at hmn,
+        assumption,
+      },
+      have := hm hmlt, {
         rw this,
         conv in (rev (lst_head :: lst_tail)) {rw rev_cons},
         rw take_ignore,
-      }, {
-        existsi m,
-        rw rev_len,
-        simp at hmn,
-        rw [←hmn, add_comm],
-      }, {
-        simp at hmn,
-        rw [←hmn, add_comm],
       },
     },
   },

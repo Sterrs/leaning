@@ -437,7 +437,7 @@ begin
   unfold swap_elems,
   conv {
     congr,
-    rw ←take_concat_drop hml_ns hml_ns,
+    rw ←take_concat_drop hml_ns,
   },
   repeat {rw concat_assoc},
   apply perm_concat perm_refl,
@@ -452,7 +452,7 @@ begin
     from lt_nrefl hml,
   },
   have hrw := @cons_head_tail _ (drop m lst hml_ns) hdmlne,
-  have hrw2 := get_head_drop hml_ns hml hdmlne,
+  have hrw2 := get_head_drop hml,
   conv {
     congr,
     rw ←hrw,
@@ -473,7 +473,7 @@ begin
         from zero_le,
       },
     end,
-  rw @drop_drop _ _ m 1 _ _ (lt_iff_succ_le.mp hml),
+  rw @drop_drop _ _ m 1,
   conv in (m + 1) {rw add_one_succ},
   have hdl:
     ∀ hsml: succ m ≤ len lst,
@@ -492,7 +492,7 @@ begin
   conv {
     congr,
     congr,
-    rw ←@take_concat_drop _ (drop (succ m) lst _) (n - succ m) (hdl _) (hdl _),
+    rw ←@take_concat_drop _ (drop (succ m) lst _) (n - succ m) (hdl _),
   },
   rw concat_assoc,
   rw concat_assoc,
@@ -505,9 +505,7 @@ begin
     rw add_sub,
     rw add_comm,
   },
-  rw @drop_drop _ lst (succ m) (n - succ m)
-                (lt_iff_succ_le.mp hml) (hdl _)
-                (hrw.symm ▸ lt_impl_le hnl),
+  rw @drop_drop _ lst (succ m) (n - succ m),
   conv {
     congr,
     congr,
@@ -525,7 +523,7 @@ begin
     from lt_nrefl hnl,
   },
   have hrw2 := @cons_head_tail _ (drop n lst hnl_ns) hdnlne,
-  have hrw3 := @get_head_drop _ lst n hnl_ns hnl hdnlne,
+  have hrw3 := @get_head_drop _ lst n hnl,
   conv {
     congr,
     congr,
@@ -539,14 +537,15 @@ begin
   apply @perm_concat _ _ [get n lst hnl] _ perm_refl,
   rw ←@drop_one_tail _ (drop n lst hnl_ns)
     begin
-      cases drop n lst hnl_ns, {
+      cases hl: drop n lst hnl_ns, {
+        rw hl at hdnlne,
         contradiction,
       }, {
         apply succ_le_succ,
         from zero_le,
       },
     end,
-  rw @drop_drop _ _ n 1 _ _ (lt_iff_succ_le.mp hnl),
+  rw @drop_drop _ _ n 1 _ _,
   from perm_refl,
 end
 
