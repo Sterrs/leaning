@@ -137,12 +137,35 @@ end
 
 -- in anticipation of defining products of finite multisets
 
+private lemma concat_nempty_left
+{lst1 lst2: mylist T}
+(h1: lst1 ≠ []):
+lst1 ++ lst2 ≠ [] :=
+begin
+  rw nonempty_iff_len_nonzero at *,
+  rw nzero_iff_zero_lt at *,
+  rw len_concat_add,
+  from lt_add_rhs h1,
+end
+
+private lemma concat_nempty_right
+{lst1 lst2: mylist T}
+(h2: lst2 ≠ []):
+lst1 ++ lst2 ≠ [] :=
+begin
+  rw nonempty_iff_len_nonzero at *,
+  rw nzero_iff_zero_lt at *,
+  rw len_concat_add,
+  rw add_comm,
+  from lt_add_rhs h2,
+end
+
 theorem reduce_assoc_concat
 (f: mynat → mynat → mynat)
 (hassoc: is_associative _ f)
 (lst1 lst2: mylist mynat)
 (h1ne: lst1 ≠ []) (h2ne: lst2 ≠ []):
-reduce f (lst1 ++ lst2) sorry = f (reduce f lst1 h1ne) (reduce f lst2 h2ne) :=
+reduce f (lst1 ++ lst2) (concat_nempty_left h1ne) = f (reduce f lst1 h1ne) (reduce f lst2 h2ne) :=
 begin
   induction lst1 with x xs hxs, {
     contradiction,
@@ -157,11 +180,19 @@ begin
       },
     }, {
       unfold reduce,
-      rw cons_concat,
-      rw cons_concat,
+      conv {
+        to_lhs,
+        congr, skip,
+        rw cons_concat,
+        rw cons_concat,
+      },
       unfold reduce,
       have := hxs cons_not_empty,
-      rw cons_concat at this,
+      conv at this {
+        to_lhs,
+        congr, skip,
+        rw cons_concat,
+      },
       rw this,
       symmetry,
       apply hassoc.assoc,
@@ -175,14 +206,13 @@ theorem reduce_comm_assoc_concat_comm
 (hassoc: is_associative _ f)
 (lst1 lst2: mylist mynat)
 (h1ne: lst1 ≠ []):
-reduce f (lst1 ++ lst2) sorry = reduce f (lst2 ++ lst1) sorry :=
+reduce f (lst1 ++ lst2) (concat_nempty_left h1ne) = reduce f (lst2 ++ lst1) (concat_nempty_right h1ne) :=
 begin
   cases lst1 with x xs, {
     contradiction,
   }, {
     cases lst2 with y ys, {
-      rw concat_empty,
-      refl,
+      simp,
     }, {
       rw reduce_assoc_concat f hassoc (x :: xs) (y :: ys) cons_not_empty cons_not_empty,
       rw reduce_assoc_concat f hassoc (y :: ys) (x :: xs) cons_not_empty cons_not_empty,
@@ -197,15 +227,21 @@ theorem reduce_comm_assoc_concat_transpose
 (hassoc: is_associative _ f)
 (lst1 lst2 lst3: mylist mynat)
 (h1ne: lst1 ≠ []):
-reduce f (lst1 ++ lst2 ++ lst3) sorry = reduce f (lst2 ++ lst1 ++ lst3) sorry :=
+reduce f (lst1 ++ lst2 ++ lst3) (concat_nempty_left (concat_nempty_left h1ne)) = reduce f (lst2 ++ lst1 ++ lst3) (concat_nempty_left (concat_nempty_right h1ne)) :=
 begin
   cases lst3 with z zs, {
-    repeat {rw concat_empty},
+    conv {
+      congr,
+      congr, skip,
+      rw concat_empty,
+      skip, congr, skip,
+      rw concat_empty,
+    },
     apply reduce_comm_assoc_concat_comm _ hcomm hassoc,
     from h1ne,
   }, {
-    rw reduce_assoc_concat f hassoc (lst1 ++ lst2) (z :: zs) sorry cons_not_empty,
-    rw reduce_assoc_concat f hassoc (lst2 ++ lst1) (z :: zs) sorry cons_not_empty,
+    rw reduce_assoc_concat f hassoc (lst1 ++ lst2) (z :: zs) _ cons_not_empty,
+    rw reduce_assoc_concat f hassoc (lst2 ++ lst1) (z :: zs) _ cons_not_empty,
     rw reduce_comm_assoc_concat_comm f hcomm hassoc lst1 lst2 h1ne,
   },
 end
@@ -216,47 +252,59 @@ private lemma reduce_comm_assoc_concat_interchange
 (hassoc: is_associative _ f)
 (a b c d e: mylist mynat)
 (hb: b ≠ []) (hd: d ≠ []):
-reduce f (a ++ b ++ c ++ d ++ e) sorry = reduce f (a ++ d ++ c ++ b ++ e) sorry :=
+reduce f (a ++ b ++ c ++ d ++ e) (concat_nempty_left (concat_nempty_right hd)) = reduce f (a ++ d ++ c ++ b ++ e) (concat_nempty_left (concat_nempty_right hb)) :=
 begin
-  have: (a ++ b ++ c ++ d ++ e) = (a ++ b) ++ (c ++ d) ++ e, {
+  -- tragically we aren't allowed to clear these hypotheses
+  have h1: (a ++ b ++ c ++ d ++ e) = (a ++ b) ++ (c ++ d) ++ e, {
     -- also known as a_refl
     repeat {rw ←concat_assoc},
   },
-  rw this, clear this,
+  conv {congr, congr, skip, rw h1},
   rw reduce_comm_assoc_concat_transpose f hcomm hassoc,
-  have: (c ++ d ++ (a ++ b) ++ e) = (c ++ d ++ a) ++ (b ++ e), {
+  have h2: (c ++ d ++ (a ++ b) ++ e) = (c ++ d ++ a) ++ (b ++ e), {
     repeat {rw ←concat_assoc},
   },
-  rw this, clear this,
+  conv {congr, congr, skip, rw h2},
   rw reduce_comm_assoc_concat_comm f hcomm hassoc,
-  have: (b ++ e ++ (c ++ d ++ a)) = (b ++ e ++ c) ++ d ++ a, {
+  have h3: (b ++ e ++ (c ++ d ++ a)) = (b ++ e ++ c) ++ d ++ a, {
     repeat {rw ←concat_assoc},
   },
-  rw this, clear this,
+  conv {congr, congr, skip, rw h3},
   rw reduce_comm_assoc_concat_transpose f hcomm hassoc,
-  have: (d ++ (b ++ e ++ c) ++ a) = (d ++ b ++ e ++ c) ++ a, {
+  have h4: (d ++ (b ++ e ++ c) ++ a) = (d ++ b ++ e ++ c) ++ a, {
     repeat {rw ←concat_assoc},
   },
-  rw this, clear this,
+  conv {congr, congr, skip, rw h4},
   rw reduce_comm_assoc_concat_comm f hcomm hassoc,
-  have: (a ++ (d ++ b ++ e ++ c)) = (a ++ d) ++ b ++ (e ++ c), {
+  have h5: (a ++ (d ++ b ++ e ++ c)) = (a ++ d) ++ b ++ (e ++ c), {
     repeat {rw ←concat_assoc},
   },
-  rw this, clear this,
+  conv {congr, congr, skip, rw h5},
   rw reduce_comm_assoc_concat_transpose f hcomm hassoc,
-  have: (b ++ (a ++ d) ++ (e ++ c)) = (b ++ a ++ d ++ e) ++ c, {
+  have h6: (b ++ (a ++ d) ++ (e ++ c)) = (b ++ a ++ d ++ e) ++ c, {
     repeat {rw ←concat_assoc},
   },
-  rw this, clear this,
+  conv {congr, congr, skip, rw h6},
   rw reduce_comm_assoc_concat_comm f hcomm hassoc,
-  have: (c ++ (b ++ a ++ d ++ e)) = (c ++ b) ++ (a ++ d) ++ e, {
+  have h7: (c ++ (b ++ a ++ d ++ e)) = (c ++ b) ++ (a ++ d) ++ e, {
     repeat {rw ←concat_assoc},
   },
-  rw this, clear this,
+  conv {congr, congr, skip, rw h7},
   rw reduce_comm_assoc_concat_transpose f hcomm hassoc,
-  repeat {rw ←concat_assoc},
+  conv {congr, congr, skip},
+  have h8: a ++ d ++ (c ++ b) ++ e = a ++ d ++ c ++ b ++ e, {
+    repeat {rw ←concat_assoc},
+  },
+  conv {congr, congr, skip, rw h8},
   -- these are all concatenations involving a non-empty list
-  repeat {sorry},
+  from concat_nempty_right hb,
+  from concat_nempty_left (concat_nempty_right hd),
+  from concat_nempty_right hd,
+  repeat {rw concat_assoc},
+  from concat_nempty_left hd,
+  from concat_nempty_left hb,
+  from concat_nempty_right (concat_nempty_left hd),
+  from concat_nempty_right hb,
 end
 
 theorem reduce_comm_assoc_swap
@@ -266,7 +314,20 @@ theorem reduce_comm_assoc_swap
 (lst: mylist mynat)
 (hmn: m < n)
 (hnl: n < len lst):
-reduce f lst sorry = reduce f (swap_elems m n lst hmn hnl) sorry :=
+reduce f lst (
+  begin
+    rw nonempty_iff_len_nonzero,
+    rw nzero_iff_zero_lt,
+    from le_lt_chain n zero_le hnl,
+  end
+) = reduce f (swap_elems m n lst hmn hnl) (
+  begin
+    rw nonempty_iff_len_nonzero,
+    rw len_swap,
+    rw nzero_iff_zero_lt,
+    from le_lt_chain n zero_le hnl,
+  end
+) :=
 begin
   unfold swap_elems,
   rw reduce_comm_assoc_concat_interchange f hcomm hassoc,
@@ -275,16 +336,16 @@ begin
   conv in lst {rw ←this}, clear this,
   repeat {rw concat_assoc},
   congr,
-  have := @cons_head_tail _ (drop m lst (lt_impl_le (mynat.lt_trans hmn hnl))) sorry,
+  have := @cons_head_tail _ (drop m lst (lt_impl_le (mynat.lt_trans hmn hnl))) _,
   rw ←this, clear this,
   rw ←@get_head_drop _ lst m,
   rw singleton_concat_cons,
   congr,
-  have := @drop_one_tail _ (drop m lst (lt_impl_le (mynat.lt_trans hmn hnl))) sorry,
+  have := @drop_one_tail _ (drop m lst (lt_impl_le (mynat.lt_trans hmn hnl))) _,
   rw ←this, clear this,
-  rw drop_drop sorry sorry,
+  rw drop_drop,
   unfold slice,
-  have := @take_concat_drop _ (drop m.succ lst sorry) (n - m.succ) sorry,
+  have := @take_concat_drop _ (drop m.succ lst _) (n - m.succ) _,
   conv {
     to_lhs,
     congr,
@@ -295,7 +356,7 @@ begin
     rw ←this,
   }, clear this,
   congr,
-  rw drop_drop sorry sorry,
+  rw drop_drop,
   have := sub_add_condition.mpr (lt_iff_succ_le.mp hmn),
   rw add_comm at this,
   conv {
@@ -303,15 +364,27 @@ begin
     congr,
     rw this,
   },
-  have := @cons_head_tail _ (drop n lst (lt_impl_le hnl)) sorry,
+  have := @cons_head_tail _ (drop n lst (lt_impl_le hnl)) _,
   rw ←this, clear this,
-  rw ←@get_head_drop _ lst n sorry,
+  rw ←@get_head_drop _ lst n,
   rw singleton_concat_cons,
   congr,
-  rw ←@drop_one_tail _ (drop n lst sorry) sorry,
-  rw drop_drop sorry sorry,
+  rw ←@drop_one_tail _ (drop n lst _),
+  rw drop_drop,
   refl,
-  sorry, sorry,
+  
+  apply @le_cancel _ _ n,
+  rw len_drop,
+  rw add_comm,
+  from lt_iff_succ_le.mp hnl,
+
+  apply @le_cancel _ _ m,
+  rw len_drop,
+  rw add_comm,
+  from lt_iff_succ_le.mp (lt_trans hmn hnl),
+
+  from cons_not_empty,
+  from cons_not_empty,
 end
 
 -- takes some of the casework out
@@ -357,42 +430,103 @@ begin
       cases lst2 with y ys, {
         contradiction,
       }, {
-        transitivity reduce f (swap_elems 0 (index y (x :: xs) sorry) (x :: xs) sorry sorry) sorry, {
-          apply reduce_comm_assoc_swap,
-          from hcomm,
-          from hassoc,
-        }, {
-          unfold swap_elems,
-          dsimp,
-          conv {
-            to_lhs,
-            congr, skip, congr,
-            rw get_index,
+        have hidxy: count y (x :: xs) ≠ 0, {
+          rw hperm y,
+          unfold count,
+          rw if_pos rfl,
+          from succ_ne_zero,
+        },
+        by_cases hxy: x = y, {
+          conv {congr, congr, skip, rw hxy},
+          cases xs with x' xs, {
+            cases ys with y' ys, {
+              refl,
+            }, {
+              cases hl1l2,
+            },
           },
-          apply reduce_congr f y _ ys sorry sorry,
-          apply hn,
-          apply @perm_head_cancel y,
-          apply @perm_trans _ (x :: xs) _,
-          have := @swap_perm 0 (index y (x :: xs) sorry) (x :: xs) sorry sorry,
-          unfold swap_elems at this,
-          dsimp at this,
-          rw get_index at this,
-          from perm_symm this,
-          assumption,
+          cases ys with y' ys, {
+            cases hl1l2,
+          }, {
+            apply reduce_congr f y (x' :: xs) (y' :: ys) cons_not_empty cons_not_empty,
+            apply hn,
+            rw hxy at hperm,
+            from perm_head_cancel hperm,
+            from succ_inj hl,
+          },
+        }, {
+          have h0lidxy: 0 < index y (x :: xs) hidxy, {
+            assume h,
+            have hidxy0 := le_zero_iff.mp h,
+            have := get_index hidxy (index_valid _),
+            conv at this {
+              congr,
+              congr,
+              rw hidxy0,
+            },
+            dsimp at this,
+            contradiction,
+          },
+          have hswapne: swap_elems 0 (index y (x :: xs) hidxy) (x :: xs) h0lidxy (index_valid _) ≠ mylist.empty, {
+            rw nonempty_iff_len_nonzero,
+            rw len_swap,
+            from succ_ne_zero,
+          },
+          transitivity reduce f (swap_elems 0 (index y (x :: xs) hidxy) (x :: xs) h0lidxy (index_valid _)) hswapne, {
+            apply reduce_comm_assoc_swap,
+            from hcomm,
+            from hassoc,
+          }, {
+            unfold swap_elems,
+            dsimp,
+            conv {
+              to_lhs,
+              congr, skip, congr,
+              rw get_index,
+            },
+            cases ys with y' ys, {
+              have: count y (x :: xs) = 0, {
+                unfold count,
+                rw if_neg (λ h, hxy (eq.symm h)),
+                rw empty_iff_len_zero.mpr (succ_inj hl1l2),
+                refl,
+              },
+              contradiction,
+            }, {
+              apply reduce_congr f y _ (y' :: ys) _ cons_not_empty,
+              apply hn,
+              apply @perm_head_cancel y,
+              apply @perm_trans _ (x :: xs) _,
+              have := @swap_perm 0 (index y (x :: xs) hidxy) (x :: xs) _ _,
+              unfold swap_elems at this,
+              dsimp at this,
+              rw get_index at this,
+              from perm_symm this,
+              assumption,
 
-          suffices: len (swap_elems 0 (index y (x :: xs) sorry) (x :: xs) sorry sorry) = n.succ,
-          unfold swap_elems at this,
-          dsimp at this,
-          repeat {rw len_concat_add at this},
-          simp at this,
-          simp,
-          assumption,
+              suffices: len (swap_elems 0 (index y (x :: xs) hidxy) (x :: xs) _ _) = n.succ,
+              unfold swap_elems at this,
+              dsimp at this,
+              repeat {rw len_concat_add at this},
+              simp at this,
+              simp,
+              assumption,
 
-          have := @swap_perm 0 (index y (x :: xs) sorry) (x :: xs) sorry sorry,
-          rw ←hl,
-          apply perm_len,
-          apply perm_symm,
-          assumption,
+              have := @swap_perm 0 (index y (x :: xs) hidxy) (x :: xs) _ _,
+              rw ←hl,
+              apply perm_len,
+              apply perm_symm,
+              assumption,
+
+              rw nonempty_iff_len_nonzero,
+              rw nzero_iff_zero_lt,
+              rw len_concat_add,
+              rw len_concat_add,
+              unfold len,
+              repeat {rw add_succ <|> rw succ_add},
+              from zero_lt_succ,
+            }
+          },
         },
       },
     },
