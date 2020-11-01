@@ -92,6 +92,9 @@ begin
   },
 end
 
+instance concat_is_assoc (T: Type u): is_associative (mylist T) concat :=
+⟨λ a b c, concat_assoc⟩
+
 def len: mylist T → mynat
 | []        := 0
 | (_ :: xs) := succ (len xs)
