@@ -6,17 +6,17 @@ import ..mynat.sum
 
 namespace hidden
 
-namespace quotint
+namespace myint
 
 open mynat
 
-variables m n k x y z : quotint
+variables m n k x y z : myint
 variables a b c : mynat
 
 @[simp]
-theorem coe_coe_le: (↑a:quotint) ≤ ↑b ↔ a ≤ b := iff.rfl
+theorem coe_coe_le: (↑a:myint) ≤ ↑b ↔ a ≤ b := iff.rfl
 
-instance decidable_le: ∀ m n : quotint, decidable (m ≤ n) :=
+instance decidable_le: ∀ m n : myint, decidable (m ≤ n) :=
 quotient_decidable_rel int_pair.le int_pair.le_well_defined
 
 @[refl]
@@ -27,7 +27,7 @@ begin
 end
 
 -- Forward implication of definitions being equal
-private theorem le_iff_exists_nat_mpr {m n : quotint}:
+private theorem le_iff_exists_nat_mpr {m n : myint}:
 m ≤ n → ∃ c : mynat, n = m + ↑c :=
 begin
   assume hmn,
@@ -45,7 +45,7 @@ begin
   ac_refl,
 end
 
-lemma le_add_rhs_coe {m n : quotint}: m ≤ n → m ≤ n + ↑c :=
+lemma le_add_rhs_coe {m n : myint}: m ≤ n → m ≤ n + ↑c :=
 begin
   assume hmn,
   cases quotient.exists_rep m with a ha, subst ha,
@@ -76,7 +76,7 @@ begin
 end
 
 @[trans]
-theorem le_trans {m k : quotint} (n : quotint) : m ≤ n → n ≤ k → m ≤ k :=
+theorem le_trans {m k : myint} (n : myint) : m ≤ n → n ≤ k → m ≤ k :=
 begin
   assume hmn hnk,
   rw le_iff_exists_nat at hmn,
@@ -90,7 +90,7 @@ begin
 end
 
 @[simp]
-theorem le_cancel_right {m n k : quotint}: m + k ≤ n + k ↔ m ≤ n :=
+theorem le_cancel_right {m n k : myint}: m + k ≤ n + k ↔ m ≤ n :=
 begin
   split; assume h, {
     rw le_iff_exists_nat at h,
@@ -108,17 +108,17 @@ begin
   },
 end
 
-theorem le_add_right {m n : quotint} (k  : quotint): m ≤ n ↔ m + k ≤ n + k :=
+theorem le_add_right {m n : myint} (k  : myint): m ≤ n ↔ m + k ≤ n + k :=
 le_cancel_right.symm
 
 @[simp]
-theorem le_cancel_left {m n k : quotint}: k + m ≤ k + n ↔ m ≤ n :=
+theorem le_cancel_left {m n k : myint}: k + m ≤ k + n ↔ m ≤ n :=
 begin
-  rw [quotint.add_comm, @quotint.add_comm k],
+  rw [myint.add_comm, @myint.add_comm k],
   simp,
 end
 
-theorem le_add_left {m n : quotint} (k : quotint) : m ≤ n ↔ k + m ≤ k + n :=
+theorem le_add_left {m n : myint} (k : myint) : m ≤ n ↔ k + m ≤ k + n :=
 le_cancel_left.symm
 
 @[simp]
@@ -179,7 +179,7 @@ begin
   },
 end
 
-theorem le_comb {m n x y : quotint}: m ≤ n → x ≤ y → m + x ≤ n + y :=
+theorem le_comb {m n x y : myint}: m ≤ n → x ≤ y → m + x ≤ n + y :=
 begin
   assume hmn hxy,
   rw [le_add_right x, @add_comm n] at hmn,
@@ -187,14 +187,14 @@ begin
   transitivity (x + n); assumption,
 end
 
-theorem le_total_order (m n : quotint): m ≤ n ∨ n ≤ m :=
+theorem le_total_order (m n : myint): m ≤ n ∨ n ≤ m :=
 begin
   cases quotient.exists_rep m with a ha, subst ha,
   cases quotient.exists_rep n with b hb, subst hb,
   from mynat.le_total_order _ _,
 end
 
-theorem le_mul_nonneg_left {m n k : quotint}: 0 ≤ k → m ≤ n → k * m ≤ k * n :=
+theorem le_mul_nonneg_left {m n k : myint}: 0 ≤ k → m ≤ n → k * m ≤ k * n :=
 begin
   assume h0lek hmn,
   rw zero_le_iff_coe at h0lek,
@@ -207,16 +207,16 @@ begin
   refl,
 end
 
-theorem le_mul_nonneg_right {m n k : quotint}: 0 ≤ k → m ≤ n → m * k ≤ n * k :=
+theorem le_mul_nonneg_right {m n k : myint}: 0 ≤ k → m ≤ n → m * k ≤ n * k :=
 λ hk hmn, by rw [mul_comm, mul_comm n]; from le_mul_nonneg_left hk hmn
 
-theorem le_mul_nonpos_left {m n k : quotint}: k ≤ 0 → m ≤ n → k * n ≤ k * m :=
+theorem le_mul_nonpos_left {m n k : myint}: k ≤ 0 → m ≤ n → k * n ≤ k * m :=
 begin
   assume hkle0 hmn,
   rw le_zero_iff_neg_coe at hkle0,
   cases hkle0 with a ha,
   rw [ha, neg_mul, neg_mul, le_neg_switch, neg_neg, neg_neg],
-  have : 0 ≤ (↑a : quotint), {
+  have : 0 ≤ (↑a : myint), {
     rw zero_le_iff_coe,
     existsi a,
     refl,
@@ -224,7 +224,7 @@ begin
   from le_mul_nonneg_left this hmn,
 end
 
-theorem le_antisymm {m n : quotint}: m ≤ n → n ≤ m → m = n :=
+theorem le_antisymm {m n : myint}: m ≤ n → n ≤ m → m = n :=
 begin
   assume hmn hnm,
   rw le_iff_exists_nat at hmn hnm,
@@ -258,12 +258,12 @@ begin
 end
 
 -- is this somewhere else?
-theorem coe_inj {m n: mynat}: (↑m: quotint) = ↑n → m = n :=
+theorem coe_inj {m n: mynat}: (↑m: myint) = ↑n → m = n :=
 begin
   sorry,
 end
 
-theorem le_mul_comb_nonneg {m n a b : quotint} (hm : 0 ≤ m) (ha : 0 ≤ a)
+theorem le_mul_comb_nonneg {m n a b : myint} (hm : 0 ≤ m) (ha : 0 ≤ a)
 (hmn : m ≤ n) (hab : a ≤ b) : m * a ≤ n * b :=
 begin
   transitivity (n * a),
@@ -273,7 +273,7 @@ begin
   assumption,
 end
 
-theorem le_sqrt_nonneg {m n : quotint} (hm : 0 ≤ m) (hn : 0 ≤ n) :
+theorem le_sqrt_nonneg {m n : myint} (hm : 0 ≤ m) (hn : 0 ≤ n) :
 m ≤ n ↔ m * m ≤ n * n :=
 begin
   split; assume h, {
@@ -284,5 +284,5 @@ begin
   },
 end
 
-end quotint
+end myint
 end hidden

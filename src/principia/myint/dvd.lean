@@ -2,15 +2,15 @@ import ..mynat.dvd
 import .max
 
 namespace hidden
-namespace quotint
+namespace myint
 
-def dvd (m n : quotint) := ∃ k : quotint, n = k * m
+def dvd (m n : myint) := ∃ k : myint, n = k * m
 
-instance: has_dvd quotint := ⟨dvd⟩
+instance: has_dvd myint := ⟨dvd⟩
 
-def coprime (m n : quotint) := ∀ k: quotint, k ∣ m → k ∣ n → (k = 1 ∨ k = -1)
+def coprime (m n : myint) := ∀ k: myint, k ∣ m → k ∣ n → (k = 1 ∨ k = -1)
 
-variables m n k : quotint
+variables m n k : myint
 
 theorem int_dvd_iff_abs_dvd :
 m ∣ n ↔ (abs m) ∣ (abs n) :=
@@ -26,7 +26,7 @@ begin
 end
 
 @[trans]
-theorem dvd_trans {m n k : quotint}: m ∣ n → n ∣ k → m ∣ k :=
+theorem dvd_trans {m n k : myint}: m ∣ n → n ∣ k → m ∣ k :=
 begin
   assume hmn hnk,
   cases hmn with a ha,
@@ -37,11 +37,11 @@ end
 
 theorem dvd_zero: m ∣ 0 :=
 begin
-  existsi (0: quotint),
+  existsi (0: myint),
   rw zero_mul,
 end
 
-theorem zero_dvd {m : quotint}: 0 ∣ m → m=0 :=
+theorem zero_dvd {m : myint}: 0 ∣ m → m=0 :=
 begin
   assume h,
   cases h with k hk,
@@ -58,11 +58,11 @@ end
 @[refl]
 theorem dvd_refl: m ∣ m :=
 begin
-  existsi (1: quotint),
+  existsi (1: myint),
   rw one_mul,
 end
 
-theorem dvd_mul {k m : quotint}: k ∣ m → k ∣ m * n :=
+theorem dvd_mul {k m : myint}: k ∣ m → k ∣ m * n :=
 begin
   assume hkm,
   cases hkm with a ha,
@@ -72,7 +72,7 @@ begin
   rw mul_comm k n,
 end
 
-theorem dvd_mul_right {k m : quotint}: k ∣ m → k ∣ n * m :=
+theorem dvd_mul_right {k m : myint}: k ∣ m → k ∣ n * m :=
 λ h, by rw mul_comm; from dvd_mul _ h
 
 theorem dvd_multiple: k ∣ n * k :=
@@ -93,13 +93,13 @@ end
 
 -- Reorder variables
 -- have decided not to make implicit because it's too much of a headache
-theorem dvd_remainder (j m n k : quotint):
+theorem dvd_remainder (j m n k : myint):
 j ∣ m → j ∣ n → m + k = n → j ∣ k :=
 begin
   sorry,
 end
 
-theorem coe_coe_dvd {a b : mynat} : a ∣ b ↔ (↑a : quotint) ∣ ↑b :=
+theorem coe_coe_dvd {a b : mynat} : a ∣ b ↔ (↑a : myint) ∣ ↑b :=
 begin
   split; assume h, {
     cases h with k hk,
@@ -111,5 +111,5 @@ begin
   },
 end
 
-end quotint
+end myint
 end hidden

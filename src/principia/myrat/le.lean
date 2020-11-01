@@ -1,7 +1,7 @@
 import ..myint.le
 import .mul
 
-import ..quotint.basic
+import ..myint.basic
 
 namespace hidden
 
@@ -24,9 +24,9 @@ begin
   rw le_def,
   rw le_def at halx,
   have : 0 < x.denom * a.denom, {
-    from myint.zero_lt_mul x.denom_pos a.denom_pos,
+    from myint.zero_lt_mul _ _ x.denom_pos a.denom_pos,
   },
-  rw ←myint.le_mul_cancel_pos_right this,
+  rw ←myint.le_mul_cancel_pos_right _ _ _ this,
   conv {
     congr,
     rw myint.mul_assoc,
@@ -84,7 +84,7 @@ def le := quotient.lift₂ frac.le frac.le_well_defined
 instance: has_le myrat := ⟨le⟩
 
 instance decidable_le: ∀ x y: myrat, decidable (x ≤ y) :=
-quotint.quotient_decidable_rel frac.le frac.le_well_defined
+myint.quotient_decidable_rel frac.le frac.le_well_defined
 
 -- Use Izaak's enormous-brain workaround
 

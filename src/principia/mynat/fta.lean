@@ -1,10 +1,10 @@
 import .hcf
-import ..quotint.dvd
+import ..myint.dvd
 import ..logic
 
 namespace hidden
 
-open quotint
+open myint
 
 namespace mynat
 
@@ -30,7 +30,7 @@ begin
 end
 
 theorem bezouts_lemma_coprime {m n : mynat} (h : coprime m n):
-∃ x y : quotint, ↑m * x + ↑n * y = 1 :=
+∃ x y : myint, ↑m * x + ↑n * y = 1 :=
 begin
   rw [←coe_one, bezouts_lemma (coprime_imp_either_nzero h), coprime_imp_hcf_one h],
   from dvd_refl,
@@ -52,14 +52,14 @@ begin
     cases hx with y hxy,
     have hxyn := congr_arg (λ x, ↑n * x) hxy,
     dsimp only [] at hxyn,
-    rw [quotint.mul_one, quotint.mul_add] at hxyn,
+    rw [myint.mul_one, myint.mul_add] at hxyn,
     rw ←hxyn,
-    apply quotint.dvd_sum,
+    apply myint.dvd_sum,
       rw [(by ac_refl : ↑n * (↑p * x) = ↑p * (↑n * x))],
-      from quotint.dvd_mul (↑n * x) (quotint.dvd_refl ↑p),
-    rw [←quotint.mul_assoc, quotint.coe_coe_mul, mul_comm],
-    apply quotint.dvd_mul,
-    apply quotint.coe_coe_dvd.mp,
+      from myint.dvd_mul (↑n * x) (myint.dvd_refl ↑p),
+    rw [←myint.mul_assoc, myint.coe_coe_mul, mul_comm],
+    apply myint.dvd_mul,
+    apply myint.coe_coe_dvd.mp,
     assumption,
   intros k hkp hkm,
   cases hp.right k hkp with hkeq1 hkeqp,

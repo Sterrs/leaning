@@ -1,6 +1,6 @@
 import ..myset.basic
 import .prime
-import ..quotint.dvd
+import ..myint.dvd
 import ..logic
 
 /- Noncomputable HCF
@@ -16,13 +16,13 @@ properties of this.
 
 namespace hidden
 
-open quotint
+open myint
 
 namespace mynat
 
 /-- Non-zero linear combinations of naturals -/
 def lin_combs (a b : mynat) : myset mynat :=
-λ c, c ≠ 0 ∧ ∃ x y : quotint, ↑a * x + ↑b * y = ↑c
+λ c, c ≠ 0 ∧ ∃ x y : myint, ↑a * x + ↑b * y = ↑c
 
 theorem lin_combs_comm (a b : mynat) : lin_combs a b = lin_combs b a :=
 begin
@@ -39,7 +39,7 @@ begin
     cases hx with y hxy,
     existsi y,
     existsi x,
-    rwa quotint.add_comm,
+    rwa myint.add_comm,
   },
 end
 
@@ -51,16 +51,16 @@ begin
     existsi a,
     split,
       assumption,
-    existsi (1 : quotint),
-    existsi (0 : quotint),
-    rw [quotint.mul_one, quotint.mul_zero, quotint.add_zero],
+    existsi (1 : myint),
+    existsi (0 : myint),
+    rw [myint.mul_one, myint.mul_zero, myint.add_zero],
   }, {
     existsi b,
     split,
       assumption,
-    existsi (0 : quotint),
-    existsi (1 : quotint),
-    rw [quotint.mul_one, quotint.mul_zero, quotint.zero_add],
+    existsi (0 : myint),
+    existsi (1 : myint),
+    rw [myint.mul_one, myint.mul_zero, myint.zero_add],
   },
 end
 
@@ -97,14 +97,14 @@ begin
   cases h with x hx,
   cases hx with y hxy,
   have : ↑k ∣ ↑m * x + ↑n * y,
-    apply quotint.dvd_sum,
-      apply quotint.dvd_mul,
-      apply quotint.coe_coe_dvd.mp,
+    apply myint.dvd_sum,
+      apply myint.dvd_mul,
+      apply myint.coe_coe_dvd.mp,
       assumption,
-    apply quotint.dvd_mul,
-    apply quotint.coe_coe_dvd.mp,
+    apply myint.dvd_mul,
+    apply myint.coe_coe_dvd.mp,
     assumption,
-  apply quotint.coe_coe_dvd.mpr,
+  apply myint.coe_coe_dvd.mpr,
   rwa ←hxy,
 end
 
@@ -263,21 +263,21 @@ begin
   dsimp only [] at hmul,
   rw [coe_coe_mul, ←hq] at hmul,
 
-  have hcoe := congr_arg (λ x, (↑x : quotint)) hmxr,
+  have hcoe := congr_arg (λ x, (↑x : myint)) hmxr,
   dsimp only [] at hcoe,
-  rw [←coe_coe_add, ←quotint.add_cancel (-↑r), quotint.add_assoc,
-      self_neg_add, quotint.add_zero] at hcoe,
+  rw [←coe_coe_add, ←myint.add_cancel (-↑r), myint.add_assoc,
+      self_neg_add, myint.add_zero] at hcoe,
 
-  rw [←hcoe, ←quotint.add_cancel (↑r), quotint.add_assoc, neg_self_add,
-      quotint.add_zero, quotint.add_comm,
-      ←quotint.add_cancel (-(↑q * (↑m * x + ↑n * y))), quotint.add_assoc,
-      self_neg_add, quotint.add_zero, ←mul_neg_with, quotint.mul_add,
-      ←quotint.mul_one (↑m)] at hmul,
+  rw [←hcoe, ←myint.add_cancel (↑r), myint.add_assoc, neg_self_add,
+      myint.add_zero, myint.add_comm,
+      ←myint.add_cancel (-(↑q * (↑m * x + ↑n * y))), myint.add_assoc,
+      self_neg_add, myint.add_zero, ←mul_neg_with, myint.mul_add,
+      ←myint.mul_one (↑m)] at hmul,
 
   have : ↑m * 1 + (-↑q * (↑m * 1 * x) + -↑q * (↑n * y)) =
          ↑m * 1 + ↑m * (1 * -↑q * x) + ↑n * (-↑q * y),
     ac_refl,
-  rw [this, ←quotint.mul_add] at hmul, clear this,
+  rw [this, ←myint.mul_add] at hmul, clear this,
 
   suffices : r ∈ lin_combs m n,
     have hle := min_le (lin_combs_nemp h) this,
@@ -296,16 +296,16 @@ theorem hcf_dvd_right (h : m ≠ 0 ∨ n ≠ 0): hcf m n ∣ n :=
 by rw hcf_comm; from hcf_dvd_left n m (or.symm h)
 
 theorem bezouts_lemma {m n k : mynat} (h : m ≠ 0 ∨ n ≠ 0) :
-(∃ x y : quotint, ↑m * x + ↑n * y = k) ↔ hcf m n ∣ k :=
+(∃ x y : myint, ↑m * x + ↑n * y = k) ↔ hcf m n ∣ k :=
 begin
   split; assume h₁, {
     cases h₁ with x hx,
     cases hx with y hxy,
     cases hcf_dvd_left _ _ h with a ha,
     cases hcf_dvd_right _ _ h with b hb,
-    apply quotint.coe_coe_dvd.mpr,
+    apply myint.coe_coe_dvd.mpr,
     existsi (↑a * x + ↑b * y),
-    rw [quotint.mul_comm, quotint.mul_add, ←quotint.mul_assoc, ←quotint.mul_assoc,
+    rw [myint.mul_comm, myint.mul_add, ←myint.mul_assoc, ←myint.mul_assoc,
         coe_coe_mul, coe_coe_mul, mul_comm, mul_comm _ b, ←ha, ←hb],
     symmetry, assumption,
   }, {
@@ -319,7 +319,7 @@ begin
 
     have := congr_arg (λ x, ↑a * x) hxy,
     dsimp only [] at this,
-    rw [quotint.mul_add, coe_coe_mul, ←ha] at this,
+    rw [myint.mul_add, coe_coe_mul, ←ha] at this,
     existsi (↑a * x),
     existsi (↑a * y),
     rw ←this,

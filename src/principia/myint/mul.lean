@@ -4,16 +4,16 @@ import ..logic
 import ..mynat.le
 
 namespace hidden
-namespace quotint
+namespace myint
 
 open mynat
-open quotint
+open myint
 
-variables m n k : quotint
+variables m n k : myint
 variables a b c : mynat
 
 @[simp]
-theorem coe_coe_mul : (↑a : quotint) * ↑b = ↑(a * b) :=
+theorem coe_coe_mul : (↑a : myint) * ↑b = ↑(a * b) :=
 begin
   repeat { rw coe_nat_def, },
   rw mul_eq_cls rfl rfl,
@@ -60,7 +60,7 @@ begin
 end
 
 @[simp]
-theorem one_mul : ∀ {m: quotint}, 1 * m = m
+theorem one_mul : ∀ {m: myint}, 1 * m = m
 := λ m, by rw [mul_comm, mul_one]
 
 theorem mul_neg_one: m * (-1) = -m :=
@@ -73,10 +73,10 @@ begin
   simp,
 end
 
-theorem neg_one_mul: ∀ {m : quotint}, (-1) * m = -m
+theorem neg_one_mul: ∀ {m : myint}, (-1) * m = -m
 := λ m, by rw [mul_comm, mul_neg_one]
 
-instance mul_is_comm: is_commutative quotint mul := ⟨mul_comm⟩
+instance mul_is_comm: is_commutative myint mul := ⟨mul_comm⟩
 
 theorem mul_assoc: m * n * k = m * (n * k) :=
 begin
@@ -103,7 +103,7 @@ begin
   },
 end
 
-instance mul_is_assoc: is_associative quotint mul :=
+instance mul_is_assoc: is_associative myint mul :=
 ⟨mul_assoc⟩
 
 theorem mul_neg : m * (-n) = - (m * n) :=
@@ -159,7 +159,7 @@ end
 
 -- Particularly abs is very dependent on inequalities
 
-private lemma mul_integral_biased {m n : quotint}:
+private lemma mul_integral_biased {m n : myint}:
 m ≠ 0 → m * n = 0 → n = 0 :=
 begin
   cases quotient.exists_rep m with a ha, subst ha,
@@ -174,13 +174,13 @@ begin
   sorry,
 end
 
-theorem mul_integral {m n : quotint}:
+theorem mul_integral {m n : myint}:
 m * n = 0 → n = 0 ∨ m = 0 := sorry
 
 theorem mul_nonzero_nonzero : m * n ≠ 0 ↔ m ≠ 0 ∧ n ≠ 0 :=
 begin
   split; assume h, {
-    have : 0 = (0 : quotint) := rfl,
+    have : 0 = (0 : myint) := rfl,
     split, all_goals {
       assume h0,
       subst h0,
@@ -197,13 +197,13 @@ begin
   },
 end
 
-private lemma something_add_one (m : quotint): ∃ n, m = n + 1 :=
+private lemma something_add_one (m : myint): ∃ n, m = n + 1 :=
 by existsi (m + (-1)); rw [add_assoc, neg_self_add, add_zero]
 
-private lemma something_sub_one (m : quotint): ∃ n, m = n + -1 :=
+private lemma something_sub_one (m : myint): ∃ n, m = n + -1 :=
 by existsi (m + 1); rw [add_assoc, self_neg_add, add_zero]
 
-theorem mul_cancel {m n k : quotint}: m ≠ 0 → m * n = m * k → n = k :=
+theorem mul_cancel {m n k : myint}: m ≠ 0 → m * n = m * k → n = k :=
 begin
   assume hm0 hmnmk,
   have: m * (n - k) = 0, {
@@ -225,5 +225,5 @@ theorem mul_neg_with : (-m) * n = -(m * n) := sorry
 
 theorem mul_with_neg : m * (-n) = -(m * n) := sorry
 
-end quotint
+end myint
 end hidden

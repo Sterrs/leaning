@@ -2,26 +2,26 @@ import .dvd
 import .mul
 
 namespace hidden
-open quotint
+open myint
 
 -- a and b are congruent modulo n
-def cong (n a b : quotint) : Prop := ∃ k : quotint, a = b + n * k
+def cong (n a b : myint) : Prop := ∃ k : myint, a = b + n * k
 
 -- Throughout this section we will work modulo n
 section mod_n
 
 -- Fix a value n, which we will work modulo
-parameter {n : quotint}
+parameter {n : myint}
 -- Write ≅ for congruent modulo n
 local infix `≅`:50 := cong n
 
-variables {a b c x y z : quotint}
+variables {a b c x y z : myint}
 
 @[refl]
 theorem cong_refl : a ≅ a :=
 begin
-  existsi (0 : quotint),
-  rw [quotint.mul_zero, quotint.add_zero],
+  existsi (0 : myint),
+  rw [myint.mul_zero, myint.add_zero],
 end
 
 @[symm]
@@ -31,8 +31,8 @@ begin
   cases h with k hk,
   existsi -k,
   rw mul_neg,
-  rw ←(@quotint.add_cancel _ _ (n * k)),
-  rw [quotint.add_assoc, quotint.neg_self_add, quotint.add_zero],
+  rw ←(@myint.add_cancel _ _ (n * k)),
+  rw [myint.add_assoc, myint.neg_self_add, myint.add_zero],
   symmetry,
   assumption,
 end
@@ -43,15 +43,15 @@ begin
   assume hab hbc,
   cases hab with k hk,
   cases hbc with m hm,
-  rw [hm, quotint.add_assoc, ←quotint.mul_add] at hk,
+  rw [hm, myint.add_assoc, ←myint.mul_add] at hk,
   existsi m + k,
   assumption,
 end
 
 theorem cong_self_to_zero : n ≅ 0 :=
 begin
-  existsi (1:quotint),
-  rw [quotint.zero_add, quotint.mul_one],
+  existsi (1:myint),
+  rw [myint.zero_add, myint.mul_one],
 end
 
 theorem cong_add_same : a ≅ b → a + c ≅ b + c :=

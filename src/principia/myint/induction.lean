@@ -2,9 +2,9 @@ import .add
 import .le
 
 namespace hidden
-namespace quotint
+namespace myint
 
-theorem intduction (p : quotint → Prop) :
+theorem intduction (p : myint → Prop) :
 p 0 → (∀ {n}, p n → p (n + 1)) → (∀ {n}, p n → p (n - 1)) →
 ∀ n, p n :=
 begin
@@ -38,7 +38,7 @@ begin
   },
 end
 
-theorem intduction_from {m : quotint} (p : quotint → Prop):
+theorem intduction_from {m : myint} (p : myint → Prop):
 (∀ {n}, p n → p (n + 1)) → (∀ {n}, p n → p (n - 1)) →
 p m → ∀ n, p n :=
 begin
@@ -71,5 +71,5 @@ begin
   },
 end
 
-end quotint
+end myint
 end hidden

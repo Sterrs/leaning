@@ -2,28 +2,28 @@ import .lt
 
 namespace hidden
 
-namespace quotint
+namespace myint
 
-def max (a b : quotint) : quotint :=
+def max (a b : myint) : myint :=
 if a ≤ b then b else a
 
-def min (a b : quotint) : quotint :=
+def min (a b : myint) : myint :=
 if a ≤ b then a else b
 
-variables m n k : quotint
+variables m n k : myint
 
 @[simp]
 theorem max_self : max m m = m :=
 by apply if_pos; refl
 
 -- Inconsistent with mynat/max.lean, I know
-theorem le_imp_max {m n : quotint} (hmn : m ≤ n): max m n = n :=
+theorem le_imp_max {m n : myint} (hmn : m ≤ n): max m n = n :=
 begin
   unfold max,
   rw if_pos hmn,
 end
 
-theorem le_imp_max_reverse {m n : quotint} (hnm : n ≤ m) : max m n = m :=
+theorem le_imp_max_reverse {m n : myint} (hnm : n ≤ m) : max m n = m :=
 begin
   by_cases m ≤ n, {
     rw [le_antisymm h hnm, max_self],
@@ -33,10 +33,10 @@ begin
   },
 end
 
-theorem lt_imp_max {m n : quotint} (hmn : m < n) : max m n = n :=
+theorem lt_imp_max {m n : myint} (hmn : m < n) : max m n = n :=
 le_imp_max (lt_imp_le hmn)
 
-theorem lt_imp_max_reverse {m n : quotint} (hnm : n < m) : max m n = m :=
+theorem lt_imp_max_reverse {m n : myint} (hnm : n < m) : max m n = m :=
 le_imp_max_reverse (lt_imp_le hnm)
 
 theorem le_iff_max : m ≤ n ↔ max m n = n :=
@@ -81,7 +81,7 @@ end
 theorem le_max_left : m ≤ max m n :=
 by rw max_comm; from le_max_right _ _
 
-instance : is_commutative quotint max := ⟨max_comm⟩
+instance : is_commutative myint max := ⟨max_comm⟩
 
 -- Max distributes over itself
 theorem max_max : max m (max n k) = max (max m n) (max m k) :=
@@ -103,7 +103,7 @@ begin
   sorry,
 end
 
-instance : is_associative quotint max := ⟨max_assoc⟩
+instance : is_associative myint max := ⟨max_assoc⟩
 
 theorem max_eq_either : max m n = m ∨ max m n = n :=
 begin
@@ -115,12 +115,12 @@ begin
 end
 
 -- Just casework?
-theorem max_sum_le (a b c d : quotint) : max (a + c) (b + d) ≤ max a b + max c d := sorry
+theorem max_sum_le (a b c d : myint) : max (a + c) (b + d) ≤ max a b + max c d := sorry
 
-theorem nonneg_mul_max {m : quotint}:
+theorem nonneg_mul_max {m : myint}:
 0 ≤ m → ∀ n k, m * max n k = max (m * n) (m * k) := sorry
 
-def abs : quotint → quotint := λ m, max m (-m)
+def abs : myint → myint := λ m, max m (-m)
 
 theorem abs_eq_max : abs m = max m (-m) := rfl
 
@@ -129,10 +129,10 @@ by rw [abs_eq_max, max_comm, neg_neg, ←abs_eq_max]
 
 theorem abs_eq_sign_self : abs m = (sign m) * m := sorry
 
-theorem abs_of_nonneg {m : quotint} (h : 0 ≤ m): abs m = m :=
+theorem abs_of_nonneg {m : myint} (h : 0 ≤ m): abs m = m :=
 begin
   rw [abs_eq_max, max_comm, ←le_iff_max],
-  transitivity (0 : quotint),
+  transitivity (0 : myint),
   rwa [le_add_right (-m), zero_add, self_neg_add] at h,
   assumption,
 end
@@ -147,7 +147,7 @@ begin
 end
 
 -- The following three theorems are practically equivalent, needs reorganising a bit
-theorem abs_nonneg_mul {m : quotint} : 0 ≤ m → ∀ n, m * abs n = abs (m * n) := sorry
+theorem abs_nonneg_mul {m : myint} : 0 ≤ m → ∀ n, m * abs n = abs (m * n) := sorry
 
 private theorem abs_cancel_abs_mul_within : abs (abs m * n) = abs (m * n) :=
 begin
@@ -198,6 +198,6 @@ begin
   from max_sum_le _ _ _ _,
 end
 
-end quotint
+end myint
 
 end hidden

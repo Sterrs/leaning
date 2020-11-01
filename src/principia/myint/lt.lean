@@ -2,11 +2,11 @@ import ..logic
 import .le
 
 namespace hidden
-namespace quotint
+namespace myint
 
-open quotint
+open myint
 
-variables m n k : quotint
+variables m n k : myint
 variables a b c : mynat
 
 -- this is no longer definitionally true. Not sure if that's what we want,
@@ -18,7 +18,7 @@ begin
   refl,
 end
 
-instance decidable_lt: ∀ m n: quotint, decidable (m < n) :=
+instance decidable_lt: ∀ m n: myint, decidable (m < n) :=
 quotient_decidable_rel int_pair.lt int_pair.lt_well_defined
 
 theorem lt_nrefl : ¬m < m :=
@@ -28,13 +28,13 @@ begin
   from h (le_refl m),
 end
 
-theorem lt_imp_ne {m n : quotint}: m < n → m ≠ n :=
+theorem lt_imp_ne {m n : myint}: m < n → m ≠ n :=
 begin
   assume hlt heq, subst heq,
   from lt_nrefl m hlt,
 end
 
-theorem lt_imp_le {m n : quotint}: m < n → m ≤ n :=
+theorem lt_imp_le {m n : myint}: m < n → m ≤ n :=
 begin
   assume hmn,
   cases @le_total_order m n,
@@ -61,7 +61,7 @@ begin
 end
 
 @[simp]
-theorem lt_cancel {m n k : quotint} : m + k < n + k ↔ m < n :=
+theorem lt_cancel {m n k : myint} : m + k < n + k ↔ m < n :=
 begin
   split; assume h,
   all_goals {
@@ -71,10 +71,10 @@ begin
   },
 end
 
-theorem lt_add_right {m n : quotint} (k : quotint): m < n ↔ m + k < n + k :=
+theorem lt_add_right {m n : myint} (k : myint): m < n ↔ m + k < n + k :=
 ⟨lt_cancel.mpr, lt_cancel.mp⟩
 
-theorem lt_add_left {m n : quotint} (k : quotint) : m < n ↔ k + m < k + n :=
+theorem lt_add_left {m n : myint} (k : myint) : m < n ↔ k + m < k + n :=
 begin
   rw [add_comm, @add_comm k],
   symmetry,
@@ -82,10 +82,10 @@ begin
 end
 
 @[simp]
-theorem lt_cancel_left {m n k : quotint} : k + m < k + n ↔ m < n :=
+theorem lt_cancel_left {m n k : myint} : k + m < k + n ↔ m < n :=
 ⟨(lt_add_left k).mpr, (lt_add_left k).mp⟩
 
-theorem pos_add {m n : quotint} : 0 < m → 0 < n → 0 < m + n :=
+theorem pos_add {m n : myint} : 0 < m → 0 < n → 0 < m + n :=
 begin
   assume hm hn,
   rw lt_iff_le_and_ne at *,
@@ -116,7 +116,7 @@ begin
   },
 end
 
-theorem lt_comb {m n k j : quotint} : m < n → k < j → m + k < n + j :=
+theorem lt_comb {m n k j : myint} : m < n → k < j → m + k < n + j :=
 begin
   assume hmn hkj,
   rw lt_iff_sub_pos at *,
@@ -137,7 +137,7 @@ begin
   assumption,
 end
 
-theorem lt_mul_comb_nonneg {m n a b : quotint}
+theorem lt_mul_comb_nonneg {m n a b : myint}
 (hm : 0 ≤ m) (ha : 0 ≤ a) (hmn : m < n) (hab : a < b) :
 m * a < n * b :=
 begin
@@ -152,12 +152,12 @@ begin
   apply lt_mul_comb_nonneg; refl <|> assumption, -- Yes, I watch Rick and Morty
 end
 
-theorem zero_lt_one : 0 < (1 : quotint) :=
+theorem zero_lt_one : 0 < (1 : myint) :=
 begin
   sorry,
 end
 
-theorem zero_le_one : 0 ≤ (1 : quotint) :=
+theorem zero_le_one : 0 ≤ (1 : myint) :=
 lt_imp_le zero_lt_one
 
 theorem le_mul_cancel_pos_left : 0 < k → (k * m ≤ k * n ↔ m ≤ n) := sorry
@@ -166,5 +166,5 @@ theorem le_mul_cancel_pos_right : 0 < k → (m * k ≤ n * k ↔ m ≤ n) := sor
 
 theorem zero_lt_sign_mul_self: m ≠ 0 → 0 < (sign m) * m := sorry
 
-end quotint
+end myint
 end hidden
