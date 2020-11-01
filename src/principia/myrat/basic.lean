@@ -61,7 +61,8 @@ begin
   apply quotient.sound,
   rw setoid_equiv,
   repeat { rw neg_num <|> rw neg_denom <|> rw myint.neg_mul },
-  rwa [neg_cancel, ←setoid_equiv],
+  rw ←neg_cancel,
+  rwa ←setoid_equiv,
 end
 
 theorem abs_well_defined (x y : frac) :
@@ -75,12 +76,9 @@ begin
   rw abs_num,
   rw abs_denom,
   rw abs_denom,
-  rw zero_lt_abs y.denom_pos,
-  rw zero_lt_abs x.denom_pos,
-  rw nat_nat_mul,
-  rw nat_nat_mul,
-  rw abs_distr,
-  rw abs_distr,
+  rw zero_lt_abs _ y.denom_pos,
+  rw zero_lt_abs _ x.denom_pos,
+  repeat {rw ←abs_mul},
   rw hxeqy,
 end
 
@@ -138,7 +136,9 @@ instance: has_coe myint myrat := ⟨λ m, ⟦⟨m, 1, zero_lt_one⟩⟧⟩
 theorem one_nzero : (1 : myrat) ≠ 0 :=
 begin
   assume hydroxide,
-  cases (quotient.exact hydroxide),
+  have := quotient.exact hydroxide,
+  rw frac.setoid_equiv at this,
+  cases quotient.exact this,
 end
 
 theorem coe_int {m : myint} : (↑m : myrat) = ⟦⟨m, 1, zero_lt_one⟩⟧ :=

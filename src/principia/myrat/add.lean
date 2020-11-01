@@ -9,7 +9,7 @@ namespace frac
 
 def add (x y : frac) : frac :=
 ⟨x.num * y.denom + y.num * x.denom, x.denom * y.denom,
-by from zero_lt_mul x.denom_pos y.denom_pos⟩
+by from zero_lt_mul _ _ x.denom_pos y.denom_pos⟩
 
 instance: has_add frac := ⟨add⟩
 
@@ -80,7 +80,7 @@ begin
   },
 end
 
-theorem sub_self: x + -x = ⟨0, x.denom * x.denom, zero_lt_mul x.denom_pos x.denom_pos⟩ :=
+theorem sub_self: x + -x = ⟨0, x.denom * x.denom, zero_lt_mul _ _ x.denom_pos x.denom_pos⟩ :=
 begin
   rw num_and_denom_eq,
   split, {
@@ -112,7 +112,9 @@ a = ⟦x⟧ → b = ⟦y⟧ → a + b = ⟦x + y⟧ :=
 theorem two_nzero : (2 : myrat) ≠ 0 :=
 begin
   assume water,
-  cases (quotient.exact water),
+  have := quotient.exact water,
+  rw frac.setoid_equiv at this,
+  cases (quotient.exact this),
 end
 
 def sub (x y : myrat) : myrat :=
@@ -208,8 +210,6 @@ begin
   apply quotient.sound,
   rw frac.setoid_equiv,
   simp,
-  rw myint.zero_mul,
-  rw myint.zero_mul,
 end
 
 @[simp]

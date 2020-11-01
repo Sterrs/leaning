@@ -44,6 +44,20 @@ begin
   contradiction,
 end
 
+theorem lt_iff_succ_le: m < n ↔ m + 1 ≤ n :=
+begin
+  cases quotient.exists_rep m with a ha, subst ha,
+  cases quotient.exists_rep n with b hb, subst hb,
+  rw int_one,
+  rw add_eq_cls rfl rfl,
+  rw le_eq_cls rfl rfl,
+  rw lt_eq_cls rfl rfl,
+  rw int_pair.le_def,
+  rw int_pair.lt_def,
+  simp,
+  from mynat.lt_iff_succ_le,
+end
+
 theorem lt_iff_le_and_ne : m < n ↔ m ≤ n ∧ m ≠ n :=
 begin
   split; assume h, {
@@ -141,7 +155,28 @@ theorem lt_mul_comb_nonneg {m n a b : myint}
 (hm : 0 ≤ m) (ha : 0 ≤ a) (hmn : m < n) (hab : a < b) :
 m * a < n * b :=
 begin
-  sorry,
+  rw lt_iff_succ_le,
+  rw lt_iff_succ_le at hmn,
+  rw lt_iff_succ_le at hab,
+  have := le_mul_comb_nonneg _ _ hmn hab,
+  rw le_iff_exists_nat at this,
+  cases this with x hx,
+  rw hx,
+  repeat {rw mul_add <|> rw add_mul},
+  simp,
+  repeat {rw add_assoc},
+  rw le_cancel_left,
+  have: a + (m + (1 + ↑x)) = 1 + a + m + ↑x := by ac_refl,
+  rw this, clear this,
+  have: (0: myint) ≤ ↑x, {
+    rw int_zero,
+    apply (coe_coe_le 0 x).mpr,
+    from mynat.zero_le,
+  },
+  from myint.le_comb (myint.le_comb (myint.le_comb (@myint.le_refl 1) ha) hm) this,
+
+  from le_add_rhs_coe 1 hm,
+  from le_add_rhs_coe 1 ha,
 end
 
 -- For myrat
@@ -154,7 +189,8 @@ end
 
 theorem zero_lt_one : 0 < (1 : myint) :=
 begin
-  sorry,
+  rw lt_iff_succ_le,
+  from le_refl _,
 end
 
 theorem zero_le_one : 0 ≤ (1 : myint) :=

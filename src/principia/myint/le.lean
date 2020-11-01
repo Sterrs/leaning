@@ -260,7 +260,10 @@ end
 -- is this somewhere else?
 theorem coe_inj {m n: mynat}: (↑m: myint) = ↑n → m = n :=
 begin
-  sorry,
+  assume hmn,
+  have := quotient.exact hmn,
+  cases this,
+  refl,
 end
 
 theorem le_mul_comb_nonneg {m n a b : myint} (hm : 0 ≤ m) (ha : 0 ≤ a)
@@ -280,7 +283,15 @@ begin
     apply le_mul_comb_nonneg; assumption,
   }, {
     -- Should be possible to convert to coercion and then use mynat.le_sqrt
-    sorry,
+    rw zero_le_iff_coe at hm,
+    rw zero_le_iff_coe at hn,
+    cases hm with a ha, subst ha,
+    cases hn with b hb, subst hb,
+    rw coe_coe_le,
+    repeat {rw coe_coe_mul at h},
+    rw coe_coe_le at h,
+    apply mynat.le_sqrt,
+    assumption,
   },
 end
 

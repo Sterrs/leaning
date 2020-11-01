@@ -7,7 +7,7 @@ namespace frac
 
 def mul (x y : frac) : frac :=
 ⟨x.num * y.num, x.denom * y.denom,
-by from zero_lt_mul x.denom_pos y.denom_pos⟩
+by from zero_lt_mul _ _ x.denom_pos y.denom_pos⟩
 
 instance: has_mul frac := ⟨mul⟩
 
@@ -40,12 +40,12 @@ end
 -- This has to be an if, because 0 is a different case
 def inv (x : frac) : frac :=
 if h : x.num = 0 then ⟨0, 1, zero_lt_one⟩ else
-⟨(sign x.num) * x.denom, (sign x.num) * x.num, zero_lt_sign_mul_self h⟩
+⟨(sign x.num) * x.denom, (sign x.num) * x.num, zero_lt_sign_mul_self _ h⟩
 
 instance: has_inv frac := ⟨inv⟩
 
 private theorem inv_ite {x : frac} : x⁻¹ = dite (x.num = 0) (λ (h : x.num = 0), ⟨0, 1, zero_lt_one⟩)
-    (λ (h : ¬x.num = 0),⟨(sign x.num) * x.denom, (sign x.num) * x.num, zero_lt_sign_mul_self h⟩)
+    (λ (h : ¬x.num = 0),⟨(sign x.num) * x.denom, (sign x.num) * x.num, zero_lt_sign_mul_self _ h⟩)
 := rfl
 
 theorem inv_zero {x : frac} (h : x.num = 0) : x⁻¹ = ⟨0, 1, zero_lt_one⟩ :=
@@ -80,11 +80,11 @@ begin
       split; assumption,
     have : y.num ≠ 0,
       rw hxy at hlhsn0,
-      from (mul_nonzero_nonzero.mp hlhsn0).left,
+      from ((mul_nonzero_nonzero _ _).mp hlhsn0).left,
     rw [inv_denom_nonzero h, inv_num_nonzero h],
     rw [inv_denom_nonzero this, inv_num_nonzero this],
-    have h₁ : x.num.sign * x.denom * (y.num.sign * y.num) =
-      x.num.sign * y.num.sign * (y.num * x.denom),
+    have h₁ : sign x.num * x.denom * (sign y.num * y.num) =
+      sign x.num * sign y.num * (y.num * x.denom),
       ac_refl,
     rw [h₁, ←hxy],
     ac_refl,
@@ -259,7 +259,7 @@ begin
       -- Similar pattern used in inv_well_defined
       have h₁: a.denom ≠ 0,
         from (myint.lt_imp_ne a.denom_pos).symm,
-      have h₂: a.num.sign = 0,
+      have h₂: sign a.num = 0,
         cases myint.mul_integral h0,
           contradiction,
         assumption,
@@ -380,8 +380,7 @@ begin
   repeat {rw frac.abs_num <|> rw frac.abs_denom},
   repeat {rw frac.mul_num <|> rw frac.mul_denom},
   repeat {rw frac.abs_num <|> rw frac.abs_denom},
-  rw ←myint.abs_distr,
-  rw myint.nat_nat_mul,
+  rw ←myint.abs_mul,
 end
 
 end myrat

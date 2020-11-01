@@ -1,4 +1,5 @@
 import ..myint.lt
+import ..myint.max
 
 namespace hidden
 

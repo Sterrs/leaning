@@ -86,9 +86,50 @@ instance : is_commutative myint max := ⟨max_comm⟩
 -- Max distributes over itself
 theorem max_max : max m (max n k) = max (max m n) (max m k) :=
 begin
-  by_cases m ≤ n ∧ m ≤ k,
-    sorry,
-  sorry,
+  unfold max,
+  by_cases hmmxnk: m ≤ (max n k); unfold max at hmmxnk, {
+    rw if_pos hmmxnk,
+    by_cases hnk: n ≤ k, {
+      rw if_pos hnk,
+      rw if_pos hnk at hmmxnk,
+      repeat {rw if_pos hmmxnk},
+      by_cases hmn: m ≤ n, {
+        repeat {rw if_pos hmn},
+        rw if_pos hnk,
+      }, {
+        repeat {rw if_neg hmn},
+        rw if_pos hmmxnk,
+      },
+    }, {
+      rw if_neg hnk,
+      rw if_neg hnk at hmmxnk,
+      repeat {rw if_pos hmmxnk},
+      by_cases hmk: m ≤ k, {
+        repeat {rw if_pos hmk},
+        rw if_neg hnk,
+      }, {
+        repeat {rw if_neg hmk},
+        have := max_comm,
+        unfold max at this,
+        rw this,
+        rw if_pos hmmxnk,
+      },
+    },
+  }, {
+    rw if_neg hmmxnk,
+    have hmk: ¬m ≤ k, {
+      assume hmk,
+      have := le_trans _ hmk (le_max_right n k),
+      from hmmxnk this,
+    },
+    have hmn: ¬m ≤ n, {
+      assume hmk,
+      have := le_trans _ hmk (le_max_left n k),
+      from hmmxnk this,
+    },
+    repeat {rw if_neg hmk <|> rw if_neg hmn},
+    rw if_pos (le_refl _),
+  },
 end
 
 theorem max_assoc : max (max m n) k = max m (max n k) :=
@@ -144,6 +185,32 @@ begin
   rw [←lt_iff_nle, lt_add_right (-m), self_neg_add, zero_add] at h,
   rw [←abs_neg, abs_of_nonneg (lt_imp_le h)],
   from lt_imp_le h,
+end
+
+theorem zero_le_abs: 0 ≤ m → m = abs m :=
+begin
+  assume h0m,
+  unfold abs, unfold max,
+  by_cases hmm: m ≤ -m, {
+    rw if_pos hmm,
+    have: -m ≤ 0, {
+      rw le_add_left m,
+      simp,
+      assumption,
+    },
+    repeat {rw ←le_antisymm h0m (le_trans _ hmm this)},
+    refl,
+  }, {
+    rw if_neg hmm,
+  },
+end
+
+theorem zero_lt_abs: 0 < m → m = abs m :=
+begin
+  assume h,
+  apply zero_le_abs,
+  apply lt_imp_le,
+  assumption,
 end
 
 -- The following three theorems are practically equivalent, needs reorganising a bit

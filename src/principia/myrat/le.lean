@@ -47,8 +47,8 @@ begin
     rw ←hxy,
   },
   have
-    := myint.le_mul_nonneg
-        (myint.lt_imp_le (myint.zero_lt_mul y.denom_pos b.denom_pos))
+    := myint.le_mul_nonneg_left
+        (myint.lt_imp_le (myint.zero_lt_mul _ _ y.denom_pos b.denom_pos))
         halx,
   have hrw: y.denom * (x.denom * (a.num * b.denom)) = y.denom * b.denom * (a.num * x.denom), {
     ac_refl,
@@ -121,8 +121,8 @@ begin
   cases quotient.exists_rep y with b hb, subst hb,
   cases quotient.exists_rep z with c hc, subst hc,
   rw le_cls rfl rfl at hxy hyz ⊢,
-  have hxy₁ := myint.le_mul_nonneg (myint.lt_imp_le c.denom_pos) hxy,
-  have hyz₁ := myint.le_mul_nonneg (myint.lt_imp_le a.denom_pos) hyz,
+  have hxy₁ := myint.le_mul_nonneg_left (myint.lt_imp_le c.denom_pos) hxy,
+  have hyz₁ := myint.le_mul_nonneg_left (myint.lt_imp_le a.denom_pos) hyz,
   have : c.denom * (b.num * a.denom) = a.denom * (b.num * c.denom), ac_refl,
   rw this at hxy₁,
   have h : c.denom * (a.num * b.denom) ≤ a.denom * (c.num * b.denom),
@@ -132,7 +132,7 @@ begin
   rw this at h, clear this,
   have : a.denom * (c.num * b.denom) = b.denom * (c.num * a.denom), ac_refl,
   rw this at h, clear this,
-  rwa myint.le_mul_cancel_pos_left b.denom_pos at h,
+  rwa myint.le_mul_cancel_pos_left _ _ _ b.denom_pos at h,
 end
 
 theorem le_cancel_left {x y z : myrat} : z + x ≤ z + y ↔ x ≤ y :=
@@ -153,7 +153,7 @@ begin
   have : b.num * c.denom * (c.denom * a.denom) = b.num * a.denom * c.denom * c.denom,
     ac_refl,
   rw this, clear this,
-  repeat { rwa myint.le_mul_cancel_pos_right c.denom_pos, },
+  repeat { rwa myint.le_mul_cancel_pos_right _ _ _ c.denom_pos, },
 end
 
 theorem le_add_left {x y : myrat} (z : myrat) : x ≤ y ↔ z + x ≤ z + y :=
@@ -218,61 +218,20 @@ begin
   rw mul_eq_cls rfl rfl,
   rw le_cls rfl rfl,
   repeat {rw frac.mul_num <|> rw frac.mul_denom},
-  cases hcn: c.num with cn cn, {
-    rw le_cls rfl rfl at hxy,
-    conv {
-      congr,
-      rw myint.mul_assoc,
-      congr,
-      skip,
-      rw myint.mul_comm,
-      rw myint.mul_assoc,
-      congr,
-      skip,
-      rw myint.mul_comm,
-      skip,
-      rw myint.mul_assoc,
-      congr,
-      skip,
-      rw myint.mul_comm,
-      rw myint.mul_assoc,
-      congr,
-      skip,
-      rw myint.mul_comm,
-    },
-    conv {
-      congr,
-      rw ←myint.mul_assoc,
-      skip,
-      rw ←myint.mul_assoc,
-    },
-    apply myint.le_mul_nonneg, {
-      rw ←@myint.mul_zero (myint.of_nat cn),
-      apply myint.le_mul_nonneg, {
-        rw ←myint.coe_nat_eq,
-        -- ???
-        have: (0: myint) = (0: mynat) := rfl,
-        rw this,
-        rw myint.nat_nat_le,
-        from mynat.zero_le,
-      }, {
-        from myint.lt_imp_le (c.denom_pos),
-      },
-    }, {
-      assumption,
-    },
-  }, {
-    exfalso,
-    rw rat_zero at h0z,
-    rw le_cls rfl rfl at h0z,
-    simp at h0z,
-    rw myint.zero_mul at h0z,
-    rw myint.mul_one at h0z,
-    rw hcn at h0z,
-    have: (0: myint) = (0: mynat) := rfl,
-    rw this at h0z,
-    from myint.nat_neg_le h0z,
+  rw le_frac_cls rfl rfl at hxy,
+  rw rat_zero at h0z,
+  rw le_frac_cls rfl rfl at h0z,
+  rw frac.le_def at hxy,
+  rw frac.le_def at h0z,
+  simp at h0z,
+  have := myint.le_mul_nonneg_left (myint.lt_imp_le c.denom_pos) (myint.le_mul_nonneg_left h0z hxy),
+  have hrw: c.denom * (c.num * (a.num * b.denom)) = c.num * a.num * (c.denom * b.denom)
+      ∧ c.denom * (c.num * (b.num * a.denom)) = c.num * b.num * (c.denom * a.denom), {
+    split; ac_refl,
   },
+  rw ←hrw.left,
+  rw ←hrw.right,
+  assumption,
 end
 
 theorem le_mul_nonneg_right {x y z : myrat} : 0 ≤ z → x ≤ y → x * z ≤ y * z :=
@@ -302,7 +261,17 @@ end
 theorem le_mul_nonpos_right {x y z : myrat} : z ≤ 0 → x ≤ y → y * z ≤ x * z :=
 λ hc hab, by rw [mul_comm, mul_comm x]; from le_mul_nonpos_left hc hab
 
-theorem le_antisymm {x y : myrat} : x ≤ y → y ≤ x → x = y := sorry
+theorem le_antisymm {x y : myrat} : x ≤ y → y ≤ x → x = y :=
+begin
+  assume hxy hyx,
+  cases quotient.exists_rep x with a ha, subst ha,
+  cases quotient.exists_rep y with b hb, subst hb,
+  rw le_cls rfl rfl at hxy,
+  rw le_cls rfl rfl at hyx,
+  apply quotient.sound,
+  rw frac.setoid_equiv,
+  from myint.le_antisymm hxy hyx,
+end
 
 theorem square_nonneg : 0 ≤ x * x :=
 begin
@@ -311,10 +280,7 @@ begin
   rw rat_zero,
   rw le_cls rfl rfl,
   simp,
-  rw myint.zero_mul,
-  rw myint.mul_one,
-  rw frac.mul_num,
-  from myint.square_non_neg _,
+  from myint.square_nonneg _,
 end
 
 theorem abs_nonneg : 0 ≤ abs x :=
@@ -324,10 +290,7 @@ begin
   rw abs_eq_cls rfl,
   rw le_cls rfl rfl,
   simp,
-  rw myint.zero_mul,
-  rw myint.mul_one,
-  rw frac.abs_num,
-  from myint.zero_is_le_abs,
+  from myint.abs_nonneg _,
 end
 
 theorem triangle_ineq : abs (x + y) ≤ abs x + abs y :=
@@ -338,9 +301,9 @@ begin
   rw le_cls rfl rfl,
   repeat {rw frac.add_denom <|> rw frac.add_num <|> rw frac.abs_denom},
   repeat {rw ←@myint.mul_comm (a.denom * b.denom)},
-  apply myint.le_mul_nonneg, {
+  apply myint.le_mul_nonneg_left, {
     rw ←myint.mul_zero,
-    from myint.le_mul_nonneg
+    from myint.le_mul_nonneg_left
       (myint.lt_imp_le a.denom_pos)
       (myint.lt_imp_le b.denom_pos),
   }, {
@@ -349,56 +312,35 @@ begin
     conv {
       to_rhs,
       congr, congr, skip,
-      rw myint.zero_le_abs (myint.lt_imp_le b.denom_pos),
+      rw myint.zero_le_abs _ (myint.lt_imp_le b.denom_pos),
       skip, congr, skip,
-      rw myint.zero_le_abs (myint.lt_imp_le a.denom_pos),
+      rw myint.zero_le_abs _ (myint.lt_imp_le a.denom_pos),
     },
-    repeat {rw myint.abs_distr_int},
-    from myint.triangle_ineq_int,
+    repeat {rw ←myint.abs_mul},
+    from myint.triangle_ineq _ _,
   },
 end
 
-theorem archimedes (x: myrat): ∃ n: myint, x ≤ ↑n :=
+theorem archimedes (x: myrat): ∃ n: myint.myint, x ≤ ↑n :=
 begin
   cases quotient.exists_rep x with a ha, subst ha,
-  cases han: a.num with an an, {
-    existsi myint.of_nat an,
-    rw coe_int,
-    rw le_cls rfl rfl,
-    simp,
-    rw han,
-    rw myint.mul_one,
-    rw myint.zero_le_abs (myint.lt_imp_le a.denom_pos),
-    rw ←myint.coe_nat_eq,
-    rw myint.nat_nat_mul,
-    rw myint.nat_nat_le,
-    rw mynat.mul_comm,
-    apply @mynat.le_rhs_mul an an a.denom.abs _ mynat.le_refl,
-    -- maybe lemma somewhere else
-    cases had: a.denom with ad ad, {
-      cases ad with ad, {
-        have := a.denom_pos,
-        rw had at this,
-        exfalso,
-        from myint.lt_nrefl this,
-      }, {
-        assume h,
-        cases h,
-      },
-    }, {
-      assume h,
-      cases h,
-    },
-  }, {
-    existsi (0: myint),
-    rw coe_int,
-    rw le_cls rfl rfl,
-    simp,
-    rw myint.mul_one,
-    rw myint.zero_mul,
-    rw han,
-    from myint.neg_nat_le,
+  existsi myint.abs a.num,
+  rw coe_int,
+  rw le_cls rfl rfl,
+  simp,
+  apply myint.le_trans _ (myint.le_self_abs _),
+  conv {
+    congr,
+    rw ←@myint.one_mul (myint.abs a.num),
+    rw myint.mul_comm,
   },
+  apply myint.le_mul_comb_nonneg,
+  from myint.abs_nonneg _,
+  from myint.le_add_rhs_coe 1 (myint.le_refl _),
+  from myint.le_refl _,
+  have := a.denom_pos,
+  rw myint.lt_iff_succ_le at this,
+  from this,
 end
 
 end myrat
