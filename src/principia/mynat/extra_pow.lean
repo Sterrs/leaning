@@ -6,7 +6,7 @@ import .lt
 
 namespace hidden
 
-open mynat
+namespace mynat
 
 variables {m n k p a b c: mynat}
 
@@ -22,33 +22,6 @@ begin
   from lt_nzero hmn,
 end
 
--- eurgh
--- man's gotta do what a man's gotta do to make progress
-theorem lt_mul_combine:
-a < b → m < n → a * m < b * n :=
-begin
-  assume hab hmn,
-  cases m, {
-    cases hbn: b * n, {
-      exfalso,
-      rw mul_integral (lt_rhs_nonzero hab) hbn at hmn,
-      from lt_nrefl hmn,
-    }, {
-      from zero_lt_succ,
-    },
-  }, {
-    have h1 := lt_mul (@succ_ne_zero m) hab,
-    have h2 := lt_mul (lt_rhs_nonzero hab) hmn,
-    conv at h1 {
-      congr,
-      rw mul_comm,
-      skip,
-      rw mul_comm,
-    },
-    from lt_trans h1 h2,
-  },
-end
-
 theorem pow_gt_1:
 1 < a → 1 < a ^ succ n :=
 begin
@@ -57,7 +30,7 @@ begin
     from h1a,
   }, {
     rw pow_succ,
-    from lt_mul_combine h1a n_ih,
+    from lt_comb_mul h1a n_ih,
   },
 end
 
@@ -149,7 +122,22 @@ begin
         skip,
         rw pow_succ,
       },
-      from lt_mul_combine hab hn,
+      from lt_comb_mul hab hn,
+    },
+  },
+end
+
+theorem pow_monotone_nonstrict:
+a ≤ b → a ^ n ≤ b ^ n :=
+begin
+  assume hab,
+  induction n with n hn, {
+    from le_refl,
+  }, {
+    apply le_mul_comb, {
+      assumption,
+    }, {
+      assumption,
     },
   },
 end
@@ -183,5 +171,42 @@ begin
     },
   },
 end
+
+-- this is probably bad, I'm rusty
+theorem root_monotone:
+1 < a → n ≠ 0 → a ^ n ≤ b ^ n → a ≤ b :=
+begin
+  assume h1a hnn0 hanbn,
+  by_contradiction,
+  cases n, {
+    contradiction,
+  }, {
+    cases b, {
+      simp at hanbn,
+      rw ←pow_succ at hanbn,
+      have := @pow_gt_1 n a h1a,
+      have := lt_le_chain _ this hanbn,
+      from lt_nzero this,
+    }, {
+      cases b, {
+        simp at hanbn,
+        rw ←pow_succ at hanbn,
+        have := @pow_gt_1 n a h1a,
+        have := lt_le_chain _ this hanbn,
+        from lt_nrefl this,
+      }, {
+        have h1b: 1 < b.succ.succ, {
+          rw ←add_one_succ,
+          rw add_comm,
+          from @lt_to_add_succ 1 b,
+        },
+        have := pow_monotone h1b hnn0 a_1,
+        contradiction,
+      },
+    },
+  },
+end
+
+end mynat
 
 end hidden

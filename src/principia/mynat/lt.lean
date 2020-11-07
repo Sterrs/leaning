@@ -5,7 +5,7 @@ import ..logic
 
 namespace hidden
 
-open mynat
+namespace mynat
 
 def lt (m n: mynat) := ¬n ≤ m
 instance: has_lt mynat := ⟨lt⟩
@@ -33,6 +33,9 @@ mp_to_contrapositive (le_cancel_strong k)
 theorem nzero_iff_zero_lt: m ≠ 0 ↔ 0 < m :=
 iff_to_contrapositive le_zero_iff.symm
 
+theorem zero_lt_iff_succ: 0 < m ↔ ∃ n, m = succ n :=
+by rw ←nzero_iff_zero_lt; from nzero_iff_succ
+
 theorem lt_to_add_succ: m < m + succ n :=
 begin
   assume hmmsn,
@@ -43,35 +46,14 @@ begin
   from succ_ne_zero hd'.symm,
 end
 
--- this is far too long
-theorem lt_comb (a b c d: mynat): a < b → c < d → a + c < b + d :=
-begin
-  assume hab hcd,
-  assume hbdac,
-  cases (le_total_order a b),
-  cases (le_total_order c d),
-  have hacbd := le_comb h h_1,
-  have hacebd := le_antisymm hacbd hbdac,
-  cases h with x hx,
-  cases h_1 with y hy,
-  rw [hx, hy, add_assoc] at hacebd,
-  have hcxcy := add_cancel hacebd,
-  rw [add_comm, add_assoc, ←add_zero c] at hcxcy,
-  have hxy := add_cancel hcxcy,
-  have hy0 := add_integral hxy.symm,
-  rw hy0 at hy,
-  rw [hy, add_zero] at hcd,
-  from hcd le_refl,
-  from hcd h_1,
-  from hab h,
-end
-
 theorem lt_nzero: ¬m < 0 := (λ h, h zero_le)
 
 theorem zero_lt_succ: 0 < succ m := succ_nle_zero
 
 theorem lt_add: m < n → m + k < n + k :=
 mp_to_contrapositive le_cancel
+
+theorem succ_lt_succ: m < n → succ m < succ n := @lt_add _ _ 1
 
 theorem lt_impl_le: m < n → m ≤ n :=
 begin
@@ -148,7 +130,7 @@ begin
     cases hmn with d hd,
     cases d, {
       simp at hd,
-     right, rw hd,
+      right, rw hd,
     }, {
       left,
       rw hd,
@@ -160,6 +142,29 @@ begin
      from lt_impl_le hmnmn,
     }, {
       rw hmnmn,
+    },
+  },
+end
+
+theorem lt_iff_le_and_neq: m < n ↔ m ≤ n ∧ m ≠ n :=
+begin
+  split, {
+    assume hmn,
+    apply and.intro (lt_impl_le hmn),
+    assume h,
+    rw h at hmn,
+    from lt_nrefl hmn,
+  }, {
+    assume h,
+    cases h with hmn hneq,
+    cases hmn with d hd,
+    cases d, {
+      exfalso,
+      from hneq hd.symm,
+    }, {
+      rw lt_iff_succ_le,
+      rw [hd, add_succ, ←succ_add],
+      from le_to_add,
     },
   },
 end
@@ -216,7 +221,7 @@ begin
   from hnk hkln,
 end
 
-theorem lt_combine (a b : mynat): m < n → a < b → m + a < n + b :=
+theorem lt_comb {a b : mynat}: m < n → a < b → m + a < n + b :=
 begin
   assume hmn hab,
   have h1: m + a < n + a, {
@@ -240,10 +245,12 @@ begin
   }, {
     rw ←le_iff_lt_succ at hmln,
     cases hmln with d' hd',
-    simp [hd'] at hd,
-    rw [←add_assoc, add_comm, add_assoc] at hd,
+    rw [hd', mul_succ, mul_add] at hd,
+    have : k + (k * m + k * d') + d = k * m + (k + k * d' + d),
+      ac_refl,
+    rw this at hd, clear this,
     have hcancel := add_cancel_to_zero hd,
-    rw [←add_assoc, add_comm] at hcancel,
+    rw add_assoc at hcancel,
     from hknz (add_integral hcancel),
   },
 end
@@ -268,11 +275,17 @@ begin
       simp [hd],
     }, {
       cases hm2n2 with d' hd',
-      simp [hd] at hd',
-      rw [add_comm, add_comm n, add_comm d, add_comm n] at hd',
-      repeat {rw add_assoc at hd'},
-      rw ←add_succ at hd',
-      exfalso, from succ_ne_zero (add_cancel_to_zero hd'),
+      rw [hd] at hd',
+      repeat { rw mul_succ at hd' <|>
+               rw succ_mul  at hd' <|>
+               rw mul_add  at hd' <|>
+               rw add_mul  at hd' },
+      have : n * n + (d * n + n) + (n + d.succ + (n * d + (d * d + d))) + d' =
+             n * n + (d.succ + (d * n + n + n + n * d + d * d + d + d')),
+        ac_refl,
+      rw this at hd', clear this,
+      have := add_cancel_to_zero hd',
+      exfalso, from succ_ne_zero (add_integral this),
     },
   },
 end
@@ -283,5 +296,37 @@ begin
   have := le_square hnlem,
   contradiction,
 end
+
+theorem lt_le_chain (n : mynat): m < n → n ≤ k → m < k :=
+begin
+  assume hmn hnk,
+  rw lt_iff_succ_le at hmn,
+  rw lt_iff_succ_le,
+  transitivity n,
+    assumption,
+  assumption,
+end
+
+theorem le_lt_chain (n : mynat): m ≤ n → n < k → m < k :=
+begin
+  assume hmn hnk,
+  rw lt_iff_succ_le at hnk,
+  rw le_iff_lt_succ at hmn,
+  apply lt_le_chain (succ n),
+    assumption,
+  assumption,
+end
+
+theorem lt_comb_mul {a b : mynat}: m < n → a < b → m * a < n * b :=
+begin
+  assume hmn hab,
+  rw lt_iff_succ_le at *,
+  apply le_trans _ (le_mul_comb hmn hab),
+  rw [mul_succ, succ_add, succ_mul, ←add_one_succ, ←add_one_succ],
+  existsi m + a,
+  ac_refl,
+end
+
+end mynat
 
 end hidden

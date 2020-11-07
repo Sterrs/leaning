@@ -3,6 +3,10 @@
 import .fib
 import .nat_sub
 import .fact
+import .extra_pow
+import ..sequence
+
+import .le
 
 namespace hidden
 
@@ -14,52 +18,6 @@ open mynat
 -- define polynomials
 -- prove that the sums of a k-th degree polynomial are a k+1th degree
 -- polynomial
-
-def sequence (α : Type) := mynat → α
-
-namespace sequence
-
-variable {α : Type}
-
--- Coerce a value into a sequence of that value.
--- e.g. ↑0 = 0, 0, 0, 0, ... = λ k, 0
--- This is probably bad so might remove this
-
-instance: has_coe α (sequence α) := ⟨λ a, (λ k, a)⟩
-
-@[simp]
-theorem coe_seq (a : α) : (↑a:sequence α) = (λ k : mynat, a) := rfl
-
-@[simp]
-theorem coe_triv (a : α) (n :mynat): (↑a:sequence α) n = a := rfl
-
-variables [has_add α] {β : Type} [has_mul β]
-
-def add (a b : sequence α): sequence α := λ k , a k + b k
-instance: has_add (sequence α) := ⟨add⟩
--- Yuck...
-@[simp] theorem addition (a b : sequence α) (n : mynat) :
-(a + b) n = a n + b n := rfl
-@[simp] theorem coe_add (a : α) (s : sequence α) (n : mynat):
-(↑a + s) n = a + (s n) := rfl
-@[simp] theorem add_coe (s : sequence α) (a : α) (n : mynat):
-(s + ↑a) n = (s n) + a := rfl
-
-def mul (a b : sequence β): sequence β := λ k, a k * b k
-instance: has_mul (sequence β) := ⟨mul⟩
-@[simp] theorem multiplication (a b : sequence β) (n : mynat) :
-(a * b) n = a n * b n := rfl
-@[simp] theorem coe_mul (b : β) (s : sequence β) (n : mynat):
-(↑b * s) n = b * (s n) := rfl
-@[simp] theorem mul_coe (s : sequence β) (b : β) (n : mynat):
-(s * ↑b) n = (s n) * b := rfl
-
-variables [has_zero α] [has_one β]
-
-instance: has_zero (sequence α) := ⟨λ k, 0⟩
-instance: has_one (sequence β) := ⟨λ k, 1⟩
-
-end sequence
 
 open sequence
 
@@ -80,7 +38,8 @@ def product {β : Type} [has_mul β] [has_one β]
 
 end sum
 
-section naturals
+namespace mynat
+
 variables a b c d m n k: mynat
 variables term f g : sequence mynat
 
@@ -88,6 +47,18 @@ variables term f g : sequence mynat
 
 @[simp]
 theorem sum_succ: sum term (succ n) = sum term n + term n := rfl
+
+@[simp]
+theorem sum_one: sum term 1 = term 0 := add_comm _ _
+
+@[simp] theorem prod_zero: product term 0 = 1 := rfl
+
+@[simp]
+theorem prod_succ:
+product term (succ n) = product term n * term n := rfl
+
+@[simp]
+theorem prod_one: product term 1 = term 0 := mul_comm _ _
 
 theorem constant_sum: ∀ n : mynat, sum ↑(1 :mynat) n = n
 | zero := rfl
@@ -123,6 +94,14 @@ begin
   },
 end
 
+theorem apply_sum: (∀ n, f n = g n) → sum f k = sum g k :=
+begin
+  assume h,
+  induction k with k hk,
+    refl,
+  rw [sum_succ, sum_succ, h k, hk],
+end
+
 private def two : 2 = succ (succ 0) := rfl
 
 -- phrased in a way that avoids rationals and subtraction :)
@@ -132,8 +111,9 @@ sum (λ k, succ k) n * 2 = n * (n + 1)
 | (succ n) := by conv {
   rw [sum_succ, add_mul, triangular_numbers, two],
   simp,
-  rw [add_comm 1, add_one_succ],
-  simp,
+  rw add_comm n (n + n * n),
+  to_rhs,
+  rw add_assoc,
 }
 
 -- this one's here because it's so nice to state,
@@ -224,6 +204,7 @@ theorem fibonacci_sum: ∀ n, (sum fib (n+1)) + 1 = (fib (n + 2))
       succ_add, fib_succsucc, ←add_one_succ, add_assoc n, ←two_one],
 }
 
+-- TODO: This is not the right file for this.
 -- binomial coefficients, defined via Pascal's triangle,
 -- so's to avoid subtraction, or worse, division!
 def binom: mynat → mynat → mynat
@@ -255,6 +236,8 @@ begin
     have: 1 = succ 0 := rfl,
     rw [this, binom_succ_succ, ←this, n_ih],
     simp,
+    rw ←add_one_succ,
+    rw add_comm,
   },
 end
 
@@ -405,7 +388,8 @@ private theorem sum_distr':
 sum (λ k, f k + g k) n = (sum f n) + (sum g n) :=
 sum_distr f g n
 
-theorem binom_row_sum:
+-- nicer proof from binomial theorem later
+example:
 -- chad partial function notation
 sum (binom n) (succ n) = 2 ^ n :=
 begin
@@ -698,6 +682,18 @@ begin
   },
 end
 
+-- Lovely corollary
+theorem binom_sum:
+sum (binom n) (succ n) = 2 ^ n :=
+begin
+  have hbithm := @binomial_theorem 1 1 n,
+  rw ←two_one at hbithm,
+  rw hbithm,
+  apply apply_sum,
+  assume n,
+  rw [one_pow, one_pow, mul_one, mul_one],
+end
+
 theorem sum_reverse:
 sum f n = sum (λ k, f (n - succ k)) n :=
 begin
@@ -749,8 +745,329 @@ begin
   },
 end
 
+-- TODO: general theorem about sum f (n * m) as a double sum?
+theorem sum_split:
+sum f (2 * n) = sum f n + sum (λ k, f (n + k)) n :=
+begin
+  induction n with n hn, {
+    refl,
+  }, {
+    rw mul_succ,
+    rw add_comm 2,
+    have: sum f (2 * n + 2) = sum f (2 * n) + f (2 * n) + f (2 * n + 1) := rfl,
+    rw this, clear this,
+    rw hn,
+    have: f (2 * n) + f (2 * n + 1) = f (n + n) + f (n + succ n), {
+      repeat {rw mul_comm 2},
+      refl,
+    },
+    rw add_assoc,
+    rw this,
+    rw add_assoc,
+    conv {
+      congr, congr, skip,
+      rw ←add_assoc,
+      rw ←sum_succ,
+      rw ←sum_succ,
+      rw sum_tail,
+      rw add_comm,
+    },
+    rw ←add_assoc,
+    rw add_zero,
+    rw ←sum_succ,
+    have: ∀ k, f (n + succ k) = f(succ n + k), {
+      simp,
+    },
+    rw (sum_cancel _ _).mpr this,
+  },
+end
+
+theorem prod_tail:
+product f (succ n) = product (λ k, f (succ k)) n * f 0 :=
+begin
+  induction n with n hn, {
+    refl,
+  }, {
+    rw prod_succ,
+    rw hn,
+    rw mul_assoc,
+    rw mul_comm (f 0),
+    rw ←mul_assoc,
+    rw ←prod_succ,
+  },
+end
+
+theorem prod_congr:
+(∀ k, f k = g k) → (∀ n, product f n = product g n) :=
+begin
+  assume heq,
+  intro n,
+  induction n with n hn, {
+    refl,
+  }, {
+    repeat {rw prod_succ},
+    rw hn,
+    rw heq n,
+  },
+end
+
+theorem prod_split:
+product f (2 * n) = product f n * product (λ k, f (n + k)) n :=
+begin
+  induction n with n hn, {
+    refl,
+  }, {
+    rw mul_succ,
+    rw add_comm 2,
+    have: product f (2 * n + 2) = product f (2 * n) * f (2 * n) * f (2 * n + 1) := rfl,
+    rw this, clear this,
+    rw hn,
+    have: f (2 * n) * f (2 * n + 1) = f (n + n) * f (n + succ n), {
+      repeat {rw mul_comm 2},
+      refl,
+    },
+    rw mul_assoc,
+    rw this,
+    rw mul_assoc,
+    conv {
+      congr, congr, skip,
+      rw ←mul_assoc,
+      rw ←prod_succ,
+      rw ←prod_succ,
+      rw prod_tail,
+      rw mul_comm,
+    },
+    rw ←mul_assoc,
+    rw add_zero,
+    rw ←prod_succ,
+    have: ∀ k, f (n + succ k) = f(succ n + k), {
+      simp,
+    },
+    rw prod_congr _ _ this,
+  },
+end
+
+-- this has some things in common with both the binomial theorem
+-- and the sum of a GP. Particularly, it's more or less a consequence
+-- of the sum of a GP with common ratio in ℚ.
+-- However it admits this (superficially) inductionless proof.
+-- Note also that this subtraction is not what it may seem
+theorem difference_of_powers:
+a ^ succ n - b ^ succ n
+  = (a - b) * sum (λ k, a ^ k * b ^ (n - k)) (succ n) :=
+begin
+  rw [sub_mul, ←mul_sum', ←mul_sum', sum_succ,
+      sum_tail, sub_self_eq_zero, pow_zero, mul_one,
+      pow_zero, one_mul, sub_zero],
+  have hrw:
+    ∀ a k, k < n →
+      (λ k,
+        b * (a ^ succ k * b ^ (n - succ k))
+      ) k =
+      (λ k,
+        a * (a ^ k * b ^ (n - k))
+      ) k, {
+    intros a k,
+    assume hkn,
+    repeat {rw lambda_subs},
+    rw [←mul_assoc, mul_comm b, mul_assoc,
+        ←pow_succ, pow_succ a, mul_assoc],
+    suffices h: n - k = succ (n - succ k), {
+      rw h,
+    }, {
+      rw [sub_succ_rearrange, succ_add, ←add_succ],
+      symmetry,
+      from sub_add_condition.mpr (lt_iff_succ_le.mp hkn),
+    },
+  },
+  rw (sum_cancel_restricted _ _ _).mpr (hrw a) _ le_refl,
+  clear hrw,
+  rw [sub_distr, add_comm, add_sub],
+  repeat {rw pow_succ},
+end
+
+private lemma am_gm_base:
+4 * (a * b) ≤ (a + b) ^ (2: mynat) :=
+begin
+  wlog_le a b, {
+    rw mul_comm a b,
+    rw add_comm,
+    assumption,
+  }, {
+    cases hle with d hd,
+    subst hd,
+    have: (a + d + a) ^ (2: mynat) = (a + d + a) * (a + d + a) := rfl,
+    rw this, clear this,
+    have: (4: mynat) = 1 + 1 + 1 + 1 := rfl,
+    rw this,
+    simp,
+    existsi d * d,
+    ac_refl,
+  },
+end
+
+theorem am_gm_2:
+2 * (a * b) ≤ a * a + b * b :=
+begin
+  apply @le_cancel _ _ (2 * (a * b)),
+  rw ←mul_add,
+  have: a * a + b * b + 2 * (a * b) = (a + b) ^ (2: mynat), {
+    have: (2: mynat) = 1 + 1 := rfl,
+    repeat {rw this},
+    simp,
+    ac_refl,
+  },
+  rw this, clear this,
+  have: 2 * (a * b + a * b) = 4 * (a * b), {
+    have: (4: mynat) = 1 + 1 + 1 + 1 := rfl,
+    rw this, clear this,
+    have: (2: mynat) = 1 + 1 := rfl,
+    rw this,
+    simp,
+    ac_refl,
+  },
+  rw this,
+  from am_gm_base _ _,
+end
+
+private lemma weak_binomial:
+a ^ succ n + b ^ succ n ≤ (a + b) ^ succ n :=
+begin
+  induction n with n hn, {
+    refl,
+  }, {
+    repeat {rw pow_succ _ (succ n)},
+    transitivity (a + b) * (a ^ succ n + b ^ succ n), {
+      existsi b * a ^ succ n + a * b ^ succ n,
+      simp,
+      ac_refl,
+    }, {
+      from le_mul _ hn,
+    },
+  },
+end
+
+private lemma am_gm_double:
+(∀ f, n ^ n * product f n ≤ sum f n ^ n)
+→ (∀ f, (2 * n) ^ (2 * n) * product f (2 * n) ≤ sum f (2 * n) ^ (2 * n)) :=
+begin
+  assume h_ih,
+  intro f,
+  rw mul_pow,
+  rw prod_split,
+  rw sum_split,
+  have: n ^ (2 * n) = n ^ n * n ^ n, {
+    rw mul_comm,
+    from pow_add _ _ _,
+  },
+  rw this, clear this,
+  have:
+    2 ^ (2 * n) * (n ^ n * n ^ n) * (product f n * product (λ (k : mynat), f (n + k)) n)
+    = 2 ^ (2 * n) * ((n ^ n) * product f n) * (n ^ n * product (λ (k : mynat), f (n + k)) n), {
+    ac_refl,
+  },
+  rw this, clear this,
+  transitivity 2 ^ (2 * n) * sum f n ^ n * sum (λ (k : mynat), f (n + k)) n ^ n, {
+    conv {
+      congr,
+      rw mul_assoc,
+      skip,
+      rw mul_assoc,
+    },
+    apply le_mul,
+    apply le_mul_comb, {
+      apply h_ih,
+    }, {
+      apply h_ih,
+    },
+  }, {
+    rw ←pow_mul,
+    rw ←mul_pow,
+    rw ←mul_pow,
+    rw ←pow_mul,
+    apply pow_monotone_nonstrict,
+    rw mul_assoc,
+    apply am_gm_base,
+  },
+end
+
+private lemma am_gm_pow2:
+((2: mynat) ^ n) ^ ((2: mynat) ^ n) * product f (2 ^ n)
+≤ sum f ((2: mynat) ^ n) ^ ((2: mynat) ^ n) :=
+begin
+  induction n with n hn generalizing f, {
+    simp,
+  }, {
+    apply am_gm_double _ hn,
+  },
+end
+
+theorem cantors_weak_thm:
+n ≤ 2 ^ n :=
+begin
+  apply lt_impl_le,
+  rw lt_iff_succ_le,
+  induction n with n hn, {
+    from le_refl,
+  }, {
+    cases hn with d hd,
+    existsi 2 * d + n,
+    rw pow_succ,
+    rw hd,
+    repeat {rw ←add_one_succ <|> rw mul_add},
+    have: (2: mynat) * 1 = 2 := rfl, rw this, clear this,
+    have: n + 1 + 1 = n + 2 := rfl, rw this, clear this,
+    have: 2 * n = n + n, {rw mul_comm, refl,}, rw this, clear this,
+    ac_refl,
+  },
+end
+
+private lemma am_gm_descent_lemma:
+(∀ f, succ n ^ succ n * product f (succ n) ≤ sum f (succ n) ^ succ n)
+→ (∀ f, n ^ n * product f n ≤ sum f n ^ n) :=
+begin
+  assume h_ih,
+  intro f,
+  sorry,
+end
+
+private theorem am_gm_le:
+(∀ f, n ^ n * product f n ≤ (sum f n) ^ n) →
+m ≤ n → (∀ f, m ^ m * product f m ≤ (sum f m) ^ m) :=
+begin
+  assume h hmn,
+  intro f,
+  cases hmn with d hd,
+  induction d with k hk generalizing n m f, {
+    simp at hd,
+    subst hd,
+    apply h,
+  }, {
+    apply hk (m + k) m,
+    apply am_gm_descent_lemma,
+    intro f,
+    subst hd,
+    apply h,
+    refl,
+  },
+end
+
+theorem am_gm:
+n ^ n * product f n ≤ (sum f n) ^ n :=
+begin
+  apply am_gm_le _ _ _ (cantors_weak_thm n),
+  apply am_gm_pow2,
+end
+
+theorem cauchy_schwarz:
+(sum (λ k, f k * g k) n) ^ (2: mynat)
+ ≤ sum (λ k, f k * f k) n * sum (λ k, g k * g k) n :=
+begin
+  sorry,
+end
+
 -- TODO: some sort of cross-over episode with bijections
 
-end naturals
+end mynat
 
 end hidden

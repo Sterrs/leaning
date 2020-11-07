@@ -1,4 +1,7 @@
+import .basic
 import .add
+import ..logic
+import ..mynat.le
 
 namespace hidden
 namespace myint
@@ -6,115 +9,102 @@ namespace myint
 open mynat
 open myint
 
-variables {m n k : myint}
-variables {a b c : mynat}
-
-def mul: myint → myint → myint
-| (of_nat m) (of_nat n) := of_nat (m * n)
-| -[1+ m] (of_nat n)    := neg_of_nat (succ m * n)
-| (of_nat m) -[1+ n]    := neg_of_nat (m * succ n)
-| -[1+ m] -[1+ n]       := of_nat (succ m * succ n)
-
-instance: has_mul myint := ⟨mul⟩
+variables m n k : myint
+variables a b c : mynat
 
 @[simp]
-theorem nat_nat_mul: (↑a : myint) * ↑b = ↑(a * b) := rfl
+theorem coe_coe_mul : (↑a : myint) * ↑b = ↑(a * b) :=
+begin
+  repeat { rw coe_nat_def, },
+  rw mul_eq_cls rfl rfl,
+  apply congr rfl,
+  rw int_pair.eq_iff_split,
+  simp, -- awsome :o
+end
+
+theorem mul_comm: m * n = n * m :=
+begin
+  cases quotient.exists_rep m with a ha, subst ha,
+  cases quotient.exists_rep n with b hb, subst hb,
+  repeat {rw mul_eq_cls rfl rfl},
+  apply congr rfl,
+  rw int_pair.eq_iff_split,
+  simp,
+  split; ac_refl,
+end
 
 @[simp]
-theorem nat_neg_mul: ↑a * -[1+ b] = -(↑(a * succ b)) := rfl
+theorem mul_zero: m * 0 = 0 :=
+begin
+  cases quotient.exists_rep m with a ha, subst ha,
+  rw int_zero,
+  repeat {rw mul_eq_cls rfl rfl},
+  apply congr rfl,
+  rw int_pair.eq_iff_split,
+  simp,
+end
 
 @[simp]
-theorem neg_nat_mul: -[1+ a] * ↑b = -(↑(succ a * b)) := rfl
+theorem zero_mul : 0 * m = 0 :=
+by rw [mul_comm, mul_zero]
 
 @[simp]
-theorem neg_neg_mul: -[1+ a] * -[1+ b] = ↑((succ a) * succ b) := rfl
+theorem mul_one: m * 1 = m :=
+begin
+  cases quotient.exists_rep m with a ha, subst ha,
+  rw int_one,
+  repeat {rw mul_eq_cls rfl rfl},
+  apply congr rfl,
+  rw int_pair.eq_iff_split,
+  simp,
+end
 
--- Why is this rfl
-theorem mul_zero : ∀ {m : myint}, m * 0 = 0
-| (of_nat a) := rfl
-| -[1+ a] := rfl
+@[simp]
+theorem one_mul : ∀ {m: myint}, 1 * m = m
+:= λ m, by rw [mul_comm, mul_one]
 
--- But this isn't rfl???
-theorem zero_mul : ∀ {m : myint}, 0 * m = 0
-| (of_nat a) :=
-by rw [←zero_nat,←coe_nat_eq, nat_nat_mul, hidden.zero_mul]
-| -[1+ a] :=
-by rw [←zero_nat, nat_neg_mul, hidden.zero_mul, zero_nat, neg_zero]
-
-theorem mul_one: ∀ {m : myint}, m * 1 = m
-| (of_nat a) := rfl
-| -[1+ a] := rfl
-
-theorem one_mul : ∀ {m: myint},1 * m = m
-| (of_nat a) :=
-by rw [←one_nat, ←coe_nat_eq, nat_nat_mul, hidden.one_mul]
-| -[1+ a] :=
-by rw [←one_nat, nat_neg_mul, hidden.one_mul, neg_coe_succ]
-
--- Stupid but useful
-private theorem one: 1 = succ 0 := one_eq_succ_zero.symm
-
-theorem mul_neg_one: ∀ {m : myint}, m * (-1) = -m
-| (of_nat a) :=
-by rw [neg_one, ←coe_nat_eq, nat_neg_mul, ←one, hidden.mul_one]
-| -[1+ a] :=
-by rw [neg_one, neg_neg_mul, ←one, hidden.mul_one, neg_neg_succ]
+theorem mul_neg_one: m * (-1) = -m :=
+begin
+  cases quotient.exists_rep m with a ha, subst ha,
+  rw int_one,
+  repeat {rw mul_eq_cls rfl rfl <|> rw neg_eq_cls rfl},
+  apply congr rfl,
+  rw int_pair.eq_iff_split,
+  simp,
+end
 
 theorem neg_one_mul: ∀ {m : myint}, (-1) * m = -m
-| (of_nat a) :=
-by rw [←coe_nat_eq, neg_one, neg_nat_mul, ←one, hidden.one_mul]
-| -[1+ a] :=
-by rw [neg_one, neg_neg_mul, ←one, hidden.one_mul, neg_neg_succ]
+:= λ m, by rw [mul_comm, mul_neg_one]
 
-theorem mul_comm: ∀ {m n : myint}, m * n = n * m
-| (of_nat a) (of_nat b) :=
-by rw [←coe_nat_eq, ←coe_nat_eq, nat_nat_mul, nat_nat_mul,
-       hidden.mul_comm]
-| (of_nat a) -[1+ b] :=
-by rw [←coe_nat_eq, nat_neg_mul, neg_nat_mul, hidden.mul_comm]
-| -[1+ a] (of_nat b) :=
-by rw [←coe_nat_eq, nat_neg_mul, neg_nat_mul, hidden.mul_comm]
-| -[1+ a] -[1+ b] :=
-by rw [neg_neg_mul, neg_neg_mul, hidden.mul_comm]
+instance mul_is_comm: is_commutative myint mul := ⟨mul_comm⟩
 
--- rfl is magic
--- This is a "helper" lemma for mul_assoc
-private lemma mul_neg_nat: ∀ {m:myint} {a:mynat}, m * -↑a = -(m * ↑a)
-| (of_nat b) zero := rfl
-| (of_nat b) (succ a) := rfl
-| -[1+ b] zero := rfl
-| -[1+ b] (succ a) :=
-by rw [neg_coe_succ, neg_neg_mul, neg_nat_mul, neg_neg]
+theorem mul_assoc: m * n * k = m * (n * k) :=
+begin
+  have: ∀ a b: mynat, ∀ f: mynat → mynat, a = b → f a = f b, {
+    intros a b f,
+    assume hab,
+    rw hab,
+  },
+  cases quotient.exists_rep m with a ha, subst ha,
+  cases quotient.exists_rep n with b hb, subst hb,
+  cases quotient.exists_rep k with c hc, subst hc,
+  repeat {rw mul_eq_cls rfl rfl},
+  apply congr rfl,
+  rw int_pair.eq_iff_split,
+  simp,
+  split, { -- ac_refl takes too long without a little kick-start
+    repeat {rw mynat.add_assoc <|> rw mynat.mul_assoc},
+    apply this,
+    ac_refl,
+  }, {
+    repeat {rw mynat.add_assoc <|> rw mynat.mul_assoc},
+    apply this,
+    ac_refl,
+  },
+end
 
--- These are much simpler than the addition ones, mostly just repeatedly
--- using the basic rules.
-theorem mul_assoc: ∀ {m n k : myint}, m * n * k = m * (n * k)
-| (of_nat a) (of_nat b) (of_nat c) :=
-by repeat {rw nat_nat_mul <|> rw ←coe_nat_eq}; rw hidden.mul_assoc
-| (of_nat a) (of_nat b) -[1+ c]    :=
-by rw [←coe_nat_eq, ←coe_nat_eq, nat_nat_mul, nat_neg_mul, nat_neg_mul,
-       mul_neg_nat, nat_nat_mul, hidden.mul_assoc]
-| (of_nat a) -[1+ b]    (of_nat c) :=
-by rw [←coe_nat_eq, ←coe_nat_eq, nat_neg_mul, neg_nat_mul, mul_comm,
-       mul_neg_nat, mul_neg_nat, nat_nat_mul, nat_nat_mul,
-       hidden.mul_comm, hidden.mul_assoc]
-| (of_nat a) -[1+ b]    -[1+ c]    :=
-by rw [←coe_nat_eq, nat_neg_mul, neg_neg_mul, nat_nat_mul, mul_comm,
-       mul_neg_nat, neg_nat_mul, neg_neg, hidden.mul_comm,
-       hidden.mul_assoc]
-| -[1+ a]    (of_nat b) (of_nat c) :=
-by rw [←coe_nat_eq, ←coe_nat_eq, nat_nat_mul, neg_nat_mul, mul_comm,
-       mul_neg_nat, nat_nat_mul, neg_nat_mul, hidden.mul_comm,
-       hidden.mul_assoc]
-| -[1+ a]    (of_nat b) -[1+ c]    :=
-by rw [←coe_nat_eq, neg_nat_mul, nat_neg_mul, mul_comm, mul_neg_nat,
-       mul_neg_nat, neg_nat_mul, neg_nat_mul, neg_neg, neg_neg,
-       hidden.mul_comm, hidden.mul_assoc]
-| -[1+ a]    -[1+ b]    (of_nat c) :=
-by rw [←coe_nat_eq, neg_neg_mul, neg_nat_mul, mul_neg_nat, neg_nat_mul,
-       neg_neg, nat_nat_mul, hidden.mul_assoc]
-| -[1+ a]    -[1+ b]    -[1+ c]    := by
-rw [neg_neg_mul, neg_neg_mul, nat_neg_mul, neg_nat_mul, hidden.mul_assoc]
+instance mul_is_assoc: is_associative myint mul :=
+⟨mul_assoc⟩
 
 theorem mul_neg : m * (-n) = - (m * n) :=
 by rw [←mul_neg_one, ←mul_assoc, ←@neg_one_mul (m*n), mul_comm]
@@ -122,33 +112,118 @@ by rw [←mul_neg_one, ←mul_assoc, ←@neg_one_mul (m*n), mul_comm]
 theorem neg_mul : (-m) * n = - (m * n) :=
 by rw [mul_comm, @mul_comm m, mul_neg]
 
-theorem mul_add : m * (n + k) = m * n + m * k := sorry
+-- TODO: Stupid name
+theorem mul_neg_neg : (-m) * (-n) = m * n :=
+by rw [neg_mul, mul_neg, neg_neg]
+
+theorem mul_add : m * (n + k) = m * n + m * k :=
+begin
+  cases quotient.exists_rep m with a ha, subst ha,
+  cases quotient.exists_rep n with b hb, subst hb,
+  cases quotient.exists_rep k with c hc, subst hc,
+  repeat {rw mul_eq_cls rfl rfl <|> rw add_eq_cls rfl rfl},
+  apply congr rfl,
+  rw int_pair.eq_iff_split,
+  simp,
+  split; ac_refl,
+end
 
 theorem add_mul: (m + n) * k = m * k + n * k :=
 by rw [mul_comm, @mul_comm m, @mul_comm n, mul_add]
 
-private lemma neg_succ_distr: -[1+ a] * m = -m + -(↑a * m) := sorry
-
---∀ {m n : myint},
-theorem mul_integral: m ≠ 0 → m * n = 0 → n = 0 :=
+theorem nzero_iff_succ_or_neg_succ:
+m ≠ 0 ↔ ∃ a, m = ↑(succ a) ∨ m = -↑(succ a) :=
 begin
-  assume hmne0 h,
-  cases m, {
-    sorry,
+  sorry,
+end
+
+private lemma neq_iff_not_eq: m ≠ n ↔ ¬(m = n) :=
+begin
+  split; assume hneq heq, all_goals { contradiction },
+end
+
+private lemma succ_times_succ_nzero: (succ a) * (succ b) ≠ 0 :=
+begin
+  assume h,
+  have hsan0 : succ a ≠ 0,
+    assume h₁,
+    from mynat.no_confusion h₁,
+  have hsbn0 : succ b ≠ 0,
+    assume h₁,
+    from mynat.no_confusion h₁,
+  from hsbn0 (mynat.mul_integral hsan0 h),
+end
+
+-- it seems likely that these theorems will become easier to prove
+-- given some theorems about <.
+
+-- Particularly abs is very dependent on inequalities
+
+private lemma mul_integral_biased {m n : myint}:
+m ≠ 0 → m * n = 0 → n = 0 :=
+begin
+  cases quotient.exists_rep m with a ha, subst ha,
+  cases quotient.exists_rep n with b hb, subst hb,
+  repeat {rw mul_eq_cls rfl rfl <|> rw int_zero},
+  assume haneq0 hab0,
+  rw int_pair.sound_exact_iff at hab0,
+  rw int_pair.setoid_equiv at hab0,
+  simp at hab0,
+  repeat {rw int_pair.sound_exact_iff <|> rw int_pair.setoid_equiv},
+  simp,
+  sorry,
+end
+
+theorem mul_integral {m n : myint}:
+m * n = 0 → n = 0 ∨ m = 0 := sorry
+
+theorem mul_nonzero_nonzero : m * n ≠ 0 ↔ m ≠ 0 ∧ n ≠ 0 :=
+begin
+  split; assume h, {
+    have : 0 = (0 : myint) := rfl,
+    split, all_goals {
+      assume h0,
+      subst h0,
+    },
+    rw zero_mul at h,
+    contradiction,
+    rw mul_zero at h,
+    contradiction,
   }, {
-    rw [←neg_coe_succ, neg_mul, ←neg_zero, neg_cancel] at h,
-    sorry,
+    assume hmn0,
+    cases mul_integral hmn0 with hn0 hm0,
+      from h.right hn0,
+    from h.left hm0,
   },
 end
 
-theorem mul_cancel: m ≠ 0 → m * n = m * k → n = k :=
+private lemma something_add_one (m : myint): ∃ n, m = n + 1 :=
+by existsi (m + (-1)); rw [add_assoc, neg_self_add, add_zero]
+
+private lemma something_sub_one (m : myint): ∃ n, m = n + -1 :=
+by existsi (m + 1); rw [add_assoc, self_neg_add, add_zero]
+
+theorem mul_cancel {m n k : myint}: m ≠ 0 → m * n = m * k → n = k :=
 begin
-  assume hmne0 h,
-  cases m,
-    sorry,
-  rw [←neg_coe_succ] at h,
-  sorry,
+  assume hm0 hmnmk,
+  have: m * (n - k) = 0, {
+    rw sub_def,
+    rw mul_add,
+    rw hmnmk,
+    rw mul_neg,
+    simp,
+  },
+  have this' := mul_integral_biased hm0 this,
+  rw ←add_cancel k at this',
+  rw sub_def at this',
+  rw add_assoc at this',
+  simp at this',
+  assumption,
 end
+
+theorem mul_neg_with : (-m) * n = -(m * n) := sorry
+
+theorem mul_with_neg : m * (-n) = -(m * n) := sorry
 
 end myint
 end hidden

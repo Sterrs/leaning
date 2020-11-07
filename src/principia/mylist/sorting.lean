@@ -1,7 +1,7 @@
 import .mylist
 import ..mynat.nat_sub
 
--- Sorting algorithms on lists of naturals
+-- Sorting algorithms and permutations on lists of naturals
 -- can probably be generalised to some type class thing
 
 -- TODO: encode/state criterion for a sorting algorithm to
@@ -423,6 +423,8 @@ begin
   rw len_drop,
 end
 
+-- TODO: all this hypothesis-slinging is getting a bit ugly
+
 -- good god working with equivalence relations is a pain
 theorem swap_perm
 (hmn: m < n)
@@ -435,7 +437,7 @@ begin
   unfold swap_elems,
   conv {
     congr,
-    rw ←take_concat_drop hml_ns hml_ns,
+    rw ←take_concat_drop hml_ns,
   },
   repeat {rw concat_assoc},
   apply perm_concat perm_refl,
@@ -450,7 +452,7 @@ begin
     from lt_nrefl hml,
   },
   have hrw := @cons_head_tail _ (drop m lst hml_ns) hdmlne,
-  have hrw2 := get_head_drop hml_ns hml hdmlne,
+  have hrw2 := get_head_drop hml,
   conv {
     congr,
     rw ←hrw,
@@ -471,7 +473,7 @@ begin
         from zero_le,
       },
     end,
-  rw @drop_drop _ _ m 1 _ _ (lt_iff_succ_le.mp hml),
+  rw @drop_drop _ _ m 1,
   conv in (m + 1) {rw add_one_succ},
   have hdl:
     ∀ hsml: succ m ≤ len lst,
@@ -490,7 +492,7 @@ begin
   conv {
     congr,
     congr,
-    rw ←@take_concat_drop _ (drop (succ m) lst _) (n - succ m) (hdl _) (hdl _),
+    rw ←@take_concat_drop _ (drop (succ m) lst _) (n - succ m) (hdl _),
   },
   rw concat_assoc,
   rw concat_assoc,
@@ -503,9 +505,7 @@ begin
     rw add_sub,
     rw add_comm,
   },
-  rw @drop_drop _ lst (succ m) (n - succ m)
-                (lt_iff_succ_le.mp hml) (hdl _)
-                (hrw.symm ▸ lt_impl_le hnl),
+  rw @drop_drop _ lst (succ m) (n - succ m),
   conv {
     congr,
     congr,
@@ -523,7 +523,7 @@ begin
     from lt_nrefl hnl,
   },
   have hrw2 := @cons_head_tail _ (drop n lst hnl_ns) hdnlne,
-  have hrw3 := @get_head_drop _ lst n hnl_ns hnl hdnlne,
+  have hrw3 := @get_head_drop _ lst n hnl,
   conv {
     congr,
     congr,
@@ -537,30 +537,273 @@ begin
   apply @perm_concat _ _ [get n lst hnl] _ perm_refl,
   rw ←@drop_one_tail _ (drop n lst hnl_ns)
     begin
-      cases drop n lst hnl_ns, {
+      cases hl: drop n lst hnl_ns, {
+        rw hl at hdnlne,
         contradiction,
       }, {
         apply succ_le_succ,
         from zero_le,
       },
     end,
-  rw @drop_drop _ _ n 1 _ _ (lt_iff_succ_le.mp hnl),
+  rw @drop_drop _ _ n 1 _ _,
   from perm_refl,
 end
 
--- TODO: all this hypothesis-slinging is getting a bit ugly
+-- TODO: swap involutive, get_swap
+
+theorem count_head_eq:
+count x (x :: xs) = succ (count x xs) :=
+begin
+  unfold count,
+  rw if_pos rfl,
+end
+
+-- again should be typeclass
+-- also this kind of signals how useless ∈ was
+def index:
+Π (n: mynat) (lst: mylist mynat), count n lst ≠ 0 → mynat
+| n []        h := absurd count_empty h
+| n (x :: xs) h := if hnx: n = x then
+                   0 else
+                   succ (index n xs
+                    begin
+                      unfold count at h,
+                      rw if_neg hnx at h,
+                      from h,
+                    end)
+
+theorem index_head_eq
+(hc: count x (x :: xs) ≠ 0):
+index x (x :: xs) hc = 0 := dif_pos rfl
+
+theorem index_valid
+(hc: count n lst ≠ 0):
+index n lst hc < len lst :=
+begin
+  induction lst with head tail h_ih, {
+    contradiction,
+  }, {
+    unfold index,
+    by_cases hnh: n = head, {
+      rw dif_pos hnh,
+      from zero_lt_succ,
+    }, {
+      rw dif_neg hnh,
+      from succ_lt_succ (h_ih _),
+    },
+  },
+end
+
+@[simp]
+theorem get_index
+(hc: count n lst ≠ 0)
+(hil: index n lst hc < len lst):
+get (index n lst hc) lst hil = n :=
+begin
+  induction lst with head tail h_ih, {
+    contradiction,
+  }, {
+    unfold index,
+    by_cases hnh: n = head, {
+      conv {
+        congr,
+        congr,
+        rw dif_pos hnh,
+      },
+      rw get_zero_cons,
+      from hnh.symm,
+    }, {
+      conv {
+        congr,
+        congr,
+        rw dif_neg hnh,
+      },
+      rw get_succ_cons,
+      apply h_ih,
+    },
+  },
+end
+
+theorem perm_head_cancel:
+is_perm (x :: xs) (x :: ys) → is_perm xs ys :=
+begin
+  assume hpxsys,
+  intro m,
+  have := hpxsys m,
+  unfold count at this,
+  by_cases hmx: m = x, {
+    repeat {rw if_pos hmx at this},
+    from succ_inj this,
+  }, {
+    repeat {rw if_neg hmx at this},
+    from this,
+  },
+end
+
+theorem perm_concat_cancel:
+is_perm (xs ++ lst1) (xs ++ lst2) → is_perm lst1 lst2 :=
+begin
+  induction xs with x xs h_ih, {
+    assume h,
+    from h,
+  }, {
+    assume h,
+    apply h_ih,
+    from perm_head_cancel h,
+  },
+end
 
 theorem perm_len:
 is_perm lst1 lst2 → len lst1 = len lst2 :=
 begin
-  sorry,
+  induction lst1 with x xs h_ih generalizing lst2, {
+    assume h,
+    rw empty_perm_is_empty (perm_symm h),
+  }, {
+    assume h,
+    cases lst2 with y ys, {
+      cases empty_perm_is_empty h,
+    }, {
+      by_cases hxy: x = y, {
+        rw hxy at h,
+        -- can't work out direct way to "cancel" succs in goal
+        simp,
+        apply h_ih,
+        from perm_head_cancel h,
+      }, {
+         have h_aux_1: count x (y :: ys) ≠ 0, {
+          rw ←h x,
+          rw count_head_eq,
+          from succ_ne_zero,
+         },
+         have h_aux_2: 0 < index x (y :: ys) h_aux_1, {
+          unfold index,
+          rw dif_neg hxy,
+          from zero_lt_succ,
+         },
+        -- world record for biggest "have" type-to-value ratio
+        -- thank your maker that I split away some of the
+        -- auxiliary hypotheses
+        -- also I had to in order to do "cases" with hypothesis later,
+        -- so couldn't afford to have any _s lying around
+        have hpswap:
+          is_perm
+            (y :: ys)
+            (swap_elems
+              0
+              (index x (y :: ys) h_aux_1)
+              (y :: ys)
+              h_aux_2
+              (index_valid h_aux_1)) := swap_perm _ _,
+        have hxswap := perm_trans h hpswap,
+        clear hpswap,
+        cases
+            hswap: swap_elems 0 (index x (y :: ys) h_aux_1) (y :: ys) h_aux_2 (index_valid h_aux_1)
+            with swap_head swap_tail, {
+          rw hswap at hxswap,
+          cases (empty_perm_is_empty hxswap),
+        }, {
+          rw hswap at hxswap,
+          have hxsh: swap_head = x, {
+            unfold swap_elems at hswap,
+            symmetry,
+            rw [take_zero, empty_concat, get_index] at hswap,
+            from cons_injective_1 hswap,
+          },
+          rw hxsh at hxswap, clear hxsh,
+          have := len_of_refl hswap,
+          rw len_swap at this,
+          rw this,
+          simp,
+          apply h_ih,
+          from perm_head_cancel hxswap,
+        },
+      },
+    },
+  },
 end
 
 theorem is_perm_sorted_eq:
 is_perm lst1 lst2 → is_sorted lst1 → is_sorted lst2
   → lst1 = lst2 :=
 begin
-  sorry,
+  assume hp12 hs1 hs2,
+  have hl12 := perm_len hp12,
+  induction hl: len lst1 with n hn generalizing lst1 lst2, {
+    rw [zz, ←empty_iff_len_zero] at hl,
+    rw hl,
+    rw hl at hp12,
+    symmetry,
+    from empty_perm_is_empty (perm_symm hp12),
+  }, {
+    cases lst1 with x xs, {
+      contradiction,
+    }, {
+      cases lst2 with y ys, {
+        contradiction,
+      }, {
+        have hxy: x = y, {
+          -- note this is not use of classical reasoning, since
+          -- we know = is decidable
+          by_contradiction hxy',
+          -- note sure if it would be worth it to use wlog or not
+          -- is_sorted (y :: xs) seems like a pain to prove
+          by_cases hxy'': x ≤ y, {
+            have hxly := lt_iff_le_and_neq.mpr ⟨hxy'', hxy'⟩,
+            have h :=
+              hs2 0 (index x (y :: ys)
+                begin
+                  rw ←hp12 x,
+                  rw count_head_eq,
+                  from succ_ne_zero,
+                end)
+                (index_valid _)
+                begin
+                  unfold index,
+                  rw dif_neg hxy',
+                  from zero_lt_succ,
+                end,
+            rw get_zero_cons at h,
+            rw get_index at h,
+            contradiction,
+          }, {
+            have h :=
+              hs1 0 (index y (x :: xs)
+                begin
+                  rw hp12 y,
+                  rw count_head_eq,
+                  from succ_ne_zero,
+                end)
+                (index_valid _)
+                begin
+                  unfold index,
+                  have: ¬y = x, {
+                    assume h,
+                    from hxy' h.symm,
+                  },
+                  rw dif_neg this,
+                  from zero_lt_succ,
+                end,
+            rw get_zero_cons at h,
+            rw get_index at h,
+            contradiction,
+          },
+        },
+        rw hxy,
+        simp,
+        apply hn _ (tail_sorted hs1) (tail_sorted hs2), {
+          simp at hl12,
+          assumption,
+        }, {
+          simp at hl,
+          assumption,
+        }, {
+          rw hxy at hp12,
+          from perm_head_cancel hp12,
+        },
+      },
+    },
+  },
 end
 
 end hidden

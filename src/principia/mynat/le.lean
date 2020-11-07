@@ -5,7 +5,7 @@ import ..tactic
 
 namespace hidden
 
-open mynat
+namespace mynat
 
 def le (m n: mynat) :=  ∃ k: mynat, n = m + k
 -- notation
@@ -38,14 +38,14 @@ theorem le_eq_refl: m = n → m ≤ n := (λ h, h ▸ le_refl)
 
 theorem le_succ: m ≤ succ m := @le_to_add _ 1
 
-theorem le_comb {a b c d: mynat}: a ≤ b → c ≤ d → a + c ≤ b + d :=
+@[trans]
+theorem le_trans: m ≤ n → n ≤ k → m ≤ k :=
 begin
-  assume hab hcd,
-  cases hab with x hx,
-  cases hcd with y hy,
-  existsi x + y,
-  rw [hx, hy, ←add_assoc, add_assoc a x c, add_comm x c],
-  repeat {rw add_assoc},
+  assume hmn hnk,
+  cases hmn with d hd,
+  cases hnk with d' hd',
+  existsi d + d',
+  rw [hd', hd, add_assoc],
 end
 
 theorem le_add (k: mynat): m ≤ n → m + k ≤ n + k :=
@@ -56,6 +56,15 @@ begin
   rw hd,
   repeat {rw add_assoc},
   rw add_comm d k,
+end
+
+theorem le_comb {a b c d: mynat}: a ≤ b → c ≤ d → a + c ≤ b + d :=
+begin
+  assume hab hcd,
+  transitivity (b + c),
+    from le_add c hab,
+  rwa [add_comm, add_comm b],
+  from le_add b hcd,
 end
 
 theorem le_add_converse (k: mynat): ¬(m ≤ n) → ¬(m + k ≤ n + k) :=
@@ -91,16 +100,6 @@ begin
       },
     },
   },
-end
-
-@[trans]
-theorem le_trans: m ≤ n → n ≤ k → m ≤ k :=
-begin
-  assume hmn hnk,
-  cases hmn with d hd,
-  cases hnk with d' hd',
-  existsi d + d',
-  rw [hd', hd, add_assoc],
 end
 
 theorem le_cancel: m + k ≤ n + k → m ≤ n :=
@@ -154,6 +153,8 @@ begin
   },
 end
 
+end mynat
+
 end hidden
 
 -- We have to leave `hidden` to keep tactic.interactive
@@ -187,7 +188,7 @@ do
   -- Get the lambda expression to feed to wlogle
   la ← goal_to_lambda2,
   -- Apply wlogle
-  tactic.apply `(hidden.wlogle %%la),
+  tactic.apply `(hidden.mynat.wlogle %%la),
   -- Put everything back into context
   tactic.intro_lst [m, n, symm],
   swap,
@@ -199,7 +200,8 @@ end wlog_tactic
 -- Return to hidden
 namespace hidden
 
-open mynat
+namespace mynat
+
 variables {m n k: mynat}
 
 theorem le_mul (k: mynat): m ≤ n → k * m ≤ k * n :=
@@ -223,7 +225,7 @@ begin
     from hkn0 rfl,
   }, {
     existsi k * m,
-    simp,
+    rw [succ_mul, add_comm],
   },
 end
 
@@ -298,6 +300,15 @@ begin
   simp [hd, hdz],
 end
 
+theorem le_mul_comb {a b : mynat}: m ≤ n → a ≤ b → m * a ≤ n * b :=
+begin
+  assume hmn hab,
+  transitivity (m * b),
+    from le_mul m hab,
+  have hmbnb := le_mul b hmn,
+  rwa [mul_comm, @mul_comm n],
+end
+
 theorem le_mul_cancel: k ≠ 0 → k * m ≤ k * n → m ≤ n :=
 begin
   assume hk0 hle,
@@ -308,5 +319,7 @@ begin
   have := mul_cancel hk0 heq,
   rw this,
 end
+
+end mynat
 
 end hidden

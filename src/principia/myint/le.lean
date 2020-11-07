@@ -1,5 +1,8 @@
 import .basic
+import .int_pair
 import .mul
+
+import ..mynat.sum
 
 namespace hidden
 
@@ -7,149 +10,138 @@ namespace myint
 
 open mynat
 
-def le: myint → myint → Prop
-| (of_nat a) (of_nat b) := a ≤ b
-| (of_nat a) -[1+ b] := false
-| -[1+ a] (of_nat b) := true
-| -[1+ a] -[1+ b] := b ≤ a
-
-instance: has_le myint := ⟨le⟩
-
-variables {m n k x y z : myint}
-variables {a b c : mynat}
+variables m n k x y z : myint
+variables a b c : mynat
 
 @[simp]
-theorem nat_nat_le: (↑a:myint) ≤ ↑b ↔ a ≤ b := by trivial
+theorem coe_coe_le: (↑a:myint) ≤ ↑b ↔ a ≤ b := iff.rfl
 
-@[simp]
-theorem nat_neg_le: ¬(↑a ≤ -[1+ b]) :=
-by { rw coe_nat_eq, assume h, from h }
+instance decidable_le: ∀ m n : myint, decidable (m ≤ n) :=
+quotient_decidable_rel int_pair.le int_pair.le_well_defined
 
-@[simp]
-theorem neg_nat_le: -[1+ a] ≤ ↑b := by trivial
-
-@[simp]
-theorem neg_neg_le: -[1+ a] ≤ -[1+ b] ↔ b ≤ a := by trivial
-
-theorem le_refl: ∀ {m : myint}, m ≤ m
-| (of_nat a) := by rw [←coe_nat_eq, nat_nat_le]; from hidden.le_refl
-| -[1+ a] := by rw [neg_neg_le]; from hidden.le_refl
+@[refl]
+theorem le_refl: m ≤ m :=
+begin
+  cases quotient.exists_rep m with a ha, subst ha,
+  from mynat.le_refl,
+end
 
 -- Forward implication of definitions being equal
-private theorem le_iff_exists_nat_mpr: ∀ {m n : myint},
-m ≤ n → ∃ c : mynat, n = m + ↑c
-| (of_nat a) (of_nat b) := assume h,
+private theorem le_iff_exists_nat_mpr {m n : myint}:
+m ≤ n → ∃ c : mynat, n = m + ↑c :=
 begin
-  rw [←coe_nat_eq, ←coe_nat_eq, nat_nat_le] at h,
-  cases h with c h,
-  existsi c,
-  rwa [←coe_nat_eq, ←coe_nat_eq, nat_nat_add, of_nat_cancel],
-end
-| (of_nat a) -[1+ b] := assume h, by exfalso; from h
-| -[1+ a] (of_nat b) := assume h,
-by existsi (succ a + b); rw [←nat_nat_add, ←neg_coe_succ, ←add_assoc,
-                             neg_self_add, zero_add, coe_nat_eq]
-| -[1+ a] -[1+ b] := assume h,
-begin
-  rw neg_neg_le at h,
-  cases h with c h,
-  existsi c,
-  rw [h, ←neg_coe_succ, ←neg_coe_succ, ←succ_add, ←nat_nat_add,
-      neg_distr, add_assoc, neg_self_add, add_zero],
+  assume hmn,
+  cases quotient.exists_rep m with a ha, subst ha,
+  cases quotient.exists_rep n with b hb, subst hb,
+  rw le_eq_cls rfl rfl at hmn,
+  cases hmn with d hd,
+  existsi d,
+  rw coe_nat_def,
+  rw add_eq_cls rfl rfl,
+  apply quotient.sound,
+  rw int_pair.setoid_equiv,
+  simp,
+  rw hd,
+  ac_refl,
 end
 
--- Reverse implication
-private lemma le_add_rhs_coe: ∀ {m n : myint}, m ≤ n → m ≤ n + ↑c
-| (of_nat a) (of_nat b) := assume h,
+lemma le_add_rhs_coe {m n : myint}: m ≤ n → m ≤ n + ↑c :=
 begin
-  rw [←coe_nat_eq, ←coe_nat_eq, nat_nat_le] at h,
-  rw [←coe_nat_eq, ←coe_nat_eq, nat_nat_add, nat_nat_le],
-  apply le_add_rhs,
-  assumption,
-end
-| (of_nat a) -[1+ b] := assume h, by exfalso; from h
-| -[1+ a] (of_nat b) := assume h, by rw [←coe_nat_eq, nat_nat_add];
-                                     from neg_nat_le
-| -[1+ a] -[1+ b] := assume h,
-begin
-  rw [neg_neg_le] at h,
-  cases h with d h,
-  rw [h, ←neg_coe_succ, ←neg_coe_succ, ←succ_add, ←nat_nat_add,
-      neg_distr],
-  sorry,
-end
-
-private lemma le_to_add_nat: ∀ {a : mynat}, m ≤ m + ↑a
-| zero     := by rw [zz, zero_nat, add_zero]; from le_refl
-| (succ a) :=
-begin
-  rw [←add_one_succ, ←nat_nat_add, ←add_assoc, one_nat],
-  apply le_add_rhs_coe,
-  from le_to_add_nat,
+  assume hmn,
+  cases quotient.exists_rep m with a ha, subst ha,
+  cases quotient.exists_rep n with b hb, subst hb,
+  rw coe_nat_def,
+  rw add_eq_cls rfl rfl,
+  rw le_eq_cls rfl rfl,
+  rw le_eq_cls rfl rfl at hmn,
+  rw int_pair.le_def at *,
+  simp,
+  have: b.a + c + a.b = b.a + a.b + c := by ac_refl,
+  rw this,
+  from mynat.le_add_rhs hmn,
 end
 
 -- Show old defn of ≤ is equivalent (very useful)
 theorem le_iff_exists_nat: m ≤ n ↔ ∃ a : mynat, n = m + ↑a :=
 begin
-  split; assume h, {
-    apply le_iff_exists_nat_mpr,
-    assumption,
+  split, {
+    from le_iff_exists_nat_mpr,
   }, {
+    assume h,
     cases h with a ha,
-    rw ha,
-    apply le_to_add_nat,
+    subst ha,
+    apply le_add_rhs_coe,
+    refl,
   },
 end
 
-theorem le_trans: m ≤ n → n ≤ k → m ≤ k :=
+@[trans]
+theorem le_trans {m k : myint} (n : myint) : m ≤ n → n ≤ k → m ≤ k :=
 begin
   assume hmn hnk,
   rw le_iff_exists_nat at hmn,
   cases hmn with a ha,
   rw le_iff_exists_nat at hnk,
   cases hnk with b hb,
-  rw [ha, add_assoc, nat_nat_add] at hb,
+  rw [ha, add_assoc, coe_coe_add] at hb,
   rw le_iff_exists_nat,
   existsi (a+b),
   assumption,
 end
 
-theorem le_cancel (k : myint): m ≤ n ↔ m + k ≤ n + k :=
+@[simp]
+theorem le_cancel_right {m n k : myint}: m + k ≤ n + k ↔ m ≤ n :=
 begin
   split; assume h, {
-    rw le_iff_exists_nat at h,
-    cases h with a h,
-    rw [h, add_assoc, @add_comm ↑a, ←add_assoc, le_iff_exists_nat],
-    existsi a,
-    refl,
-  }, {
     rw le_iff_exists_nat at h,
     cases h with a h,
     rw [add_assoc, @add_comm k, ←add_assoc, add_cancel] at h,
     rw le_iff_exists_nat,
     existsi a,
     assumption,
+  }, {
+    rw le_iff_exists_nat at h,
+    cases h with a h,
+    rw [h, add_assoc, @add_comm ↑a, ←add_assoc, le_iff_exists_nat],
+    existsi a,
+    refl,
   },
 end
 
+theorem le_add_right {m n : myint} (k  : myint): m ≤ n ↔ m + k ≤ n + k :=
+le_cancel_right.symm
+
+@[simp]
+theorem le_cancel_left {m n k : myint}: k + m ≤ k + n ↔ m ≤ n :=
+begin
+  rw [myint.add_comm, @myint.add_comm k],
+  simp,
+end
+
+theorem le_add_left {m n : myint} (k : myint) : m ≤ n ↔ k + m ≤ k + n :=
+le_cancel_left.symm
+
+@[simp]
 theorem le_cancel_to_zero_lhs: m ≤ m + n ↔ 0 ≤ n :=
 by rw [←@zero_add m, add_assoc, @add_comm m, ←add_assoc,
-       ←le_cancel, zero_add]
+       le_cancel_right, zero_add]
 
 -- Exact same proof works :o
+@[simp]
 theorem le_cancel_to_zero_rhs: m + n ≤ m ↔ n ≤ 0 :=
 by rw [←@zero_add m, add_assoc, @add_comm m, ←add_assoc,
-       ←le_cancel, zero_add]
+       le_cancel_right, zero_add]
 
 theorem le_neg_switch: m ≤ n ↔ -n ≤ -m :=
 begin
-  split; assume h,{
-    rwa [le_cancel n, neg_self_add, le_cancel m, @add_comm (-m),
-        add_assoc, neg_self_add, zero_add, add_zero],
-  }, {
-    rwa [le_cancel n, neg_self_add, le_cancel m, @add_comm (-m),
-        add_assoc, neg_self_add, zero_add, add_zero] at h,
+  rw @le_add_right (-n) (-m) (n + m),
+  conv in (-m + (n + m)) {
+    congr, skip,
+    rw add_comm,
   },
+  repeat {rw ←add_assoc},
+  repeat {rw neg_self_add},
+  simp,
 end
 
 theorem zero_le_iff_coe: 0 ≤ m ↔ ∃ a: mynat, m = ↑a :=
@@ -187,36 +179,22 @@ begin
   },
 end
 
-theorem le_comb: m ≤ n → x ≤ y → m + x ≤ n + y :=
+theorem le_comb {m n x y : myint}: m ≤ n → x ≤ y → m + x ≤ n + y :=
 begin
   assume hmn hxy,
-  rw [le_cancel x, @add_comm n] at hmn,
-  rw [le_cancel n, @add_comm y] at hxy,
-  from le_trans hmn hxy,
+  rw [le_add_right x, @add_comm n] at hmn,
+  rw [le_add_right n, @add_comm y] at hxy,
+  transitivity (x + n); assumption,
 end
 
--- Here we pretty much require the old definition
-theorem le_total_order: ∀ {m n : myint}, m ≤ n ∨ n ≤ m
-| (of_nat a) (of_nat b) :=
+theorem le_total_order (m n : myint): m ≤ n ∨ n ≤ m :=
 begin
-  cases hidden.le_total_order a b,
-    left,
-    rwa [←coe_nat_eq, ←coe_nat_eq, nat_nat_le],
-  right,
-  rwa [←coe_nat_eq, ←coe_nat_eq, nat_nat_le],
-end
-| (of_nat a) -[1+ b] := by right; from neg_nat_le
-| -[1+ a] (of_nat b) := by left; from neg_nat_le
-| -[1+ a] -[1+ b] :=
-begin
-  cases hidden.le_total_order a b,
-    right,
-    rwa neg_neg_le,
-  left,
-  rwa neg_neg_le,
+  cases quotient.exists_rep m with a ha, subst ha,
+  cases quotient.exists_rep n with b hb, subst hb,
+  from mynat.le_total_order _ _,
 end
 
-theorem le_mul_pos: 0 ≤ k → m ≤ n → k * m ≤ k * n :=
+theorem le_mul_nonneg_left {m n k : myint}: 0 ≤ k → m ≤ n → k * m ≤ k * n :=
 begin
   assume h0lek hmn,
   rw zero_le_iff_coe at h0lek,
@@ -224,12 +202,15 @@ begin
   rw le_iff_exists_nat at hmn,
   cases hmn with b hb,
   rw [ha, hb, mul_add, le_cancel_to_zero_lhs, nat_nat_mul],
-  apply zero_le_iff_coe.mpr,
+  rw zero_le_iff_coe,
   existsi (a*b),
   refl,
 end
 
-theorem le_mul_neg: k ≤ 0 → m ≤ n → k * n ≤ k * m :=
+theorem le_mul_nonneg_right {m n k : myint}: 0 ≤ k → m ≤ n → m * k ≤ n * k :=
+λ hk hmn, by rw [mul_comm, mul_comm n]; from le_mul_nonneg_left hk hmn
+
+theorem le_mul_nonpos_left {m n k : myint}: k ≤ 0 → m ≤ n → k * n ≤ k * m :=
 begin
   assume hkle0 hmn,
   rw le_zero_iff_neg_coe at hkle0,
@@ -240,17 +221,17 @@ begin
     existsi a,
     refl,
   },
-  from le_mul_pos this hmn,
+  from le_mul_nonneg_left this hmn,
 end
 
-theorem le_antisymm: m ≤ n → n ≤ m → m = n :=
+theorem le_antisymm {m n : myint}: m ≤ n → n ≤ m → m = n :=
 begin
   assume hmn hnm,
   rw le_iff_exists_nat at hmn hnm,
   cases hmn with a ha,
   cases hnm with b hb,
   have hb₁ := hb.symm,
-  rw [ha, add_assoc, add_comm, add_cancel_to_zero, nat_nat_add,
+  rw [ha, add_assoc, add_comm, add_cancel_to_zero, coe_coe_add,
       ←zero_nat, of_nat_cancel] at hb₁,
   have := add_integral hb₁,
   rw [this, zero_nat, add_zero] at ha,
@@ -258,10 +239,61 @@ begin
   assumption,
 end
 
-theorem square_non_neg: ∀ {m : myint}, 0 ≤ m * m
-| (of_nat a) := by rw [←coe_nat_eq, nat_nat_mul, ←zero_nat,
-                      nat_nat_le]; from zero_le
-| -[1+ a] := by rw [neg_neg_mul, ←zero_nat, nat_nat_le]; from zero_le
+theorem square_nonneg: 0 ≤ m * m :=
+begin
+  cases quotient.exists_rep m with a ha, subst ha,
+  rw mul_eq_cls rfl rfl,
+  rw int_zero,
+  rw le_eq_cls rfl rfl,
+  rw int_pair.le_def,
+  simp,
+  have: a.a * a.b + a.b * a.a = 2 * (a.a * a.b), {
+    have: (2: mynat) = 1 + 1 := rfl,
+    rw this,
+    simp,
+    ac_refl,
+  },
+  rw this,
+  from mynat.am_gm_2 _ _,
+end
+
+-- is this somewhere else?
+theorem coe_inj {m n: mynat}: (↑m: myint) = ↑n → m = n :=
+begin
+  assume hmn,
+  have := quotient.exact hmn,
+  cases this,
+  refl,
+end
+
+theorem le_mul_comb_nonneg {m n a b : myint} (hm : 0 ≤ m) (ha : 0 ≤ a)
+(hmn : m ≤ n) (hab : a ≤ b) : m * a ≤ n * b :=
+begin
+  transitivity (n * a),
+    apply le_mul_nonneg_right; assumption,
+  apply le_mul_nonneg_left,
+    transitivity m; assumption,
+  assumption,
+end
+
+theorem le_sqrt_nonneg {m n : myint} (hm : 0 ≤ m) (hn : 0 ≤ n) :
+m ≤ n ↔ m * m ≤ n * n :=
+begin
+  split; assume h, {
+    apply le_mul_comb_nonneg; assumption,
+  }, {
+    -- Should be possible to convert to coercion and then use mynat.le_sqrt
+    rw zero_le_iff_coe at hm,
+    rw zero_le_iff_coe at hn,
+    cases hm with a ha, subst ha,
+    cases hn with b hb, subst hb,
+    rw coe_coe_le,
+    repeat {rw coe_coe_mul at h},
+    rw coe_coe_le at h,
+    apply mynat.le_sqrt,
+    assumption,
+  },
+end
 
 end myint
 end hidden

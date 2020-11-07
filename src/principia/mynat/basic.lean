@@ -15,7 +15,7 @@ inductive mynat
 | zero : mynat
 | succ (n : mynat) : mynat
 
-open mynat
+namespace mynat
 
 -- this instance stuff is pure voodoo but it seems to make the
 -- notation work
@@ -67,15 +67,19 @@ theorem succ_add: ∀ m n : mynat, succ m + n = succ (m + n)
 | m zero     := rfl
 | m (succ n) := by rw [add_succ, add_succ, succ_add]
 
-@[simp]
 theorem add_assoc: ∀ m n k : mynat, (m + n) + k = m + (n + k)
 | m n zero     := rfl
 | m n (succ k) := by rw [add_succ, add_succ, add_succ, add_assoc]
 
-@[simp]
+instance add_is_assoc: is_associative mynat add :=
+⟨assume a b c, add_assoc a b c⟩
+
 theorem add_comm: ∀ m n : mynat, m + n = n + m
 | m zero     := by rw [zz, add_zero, zero_add]
 | m (succ n) := by rw [add_succ, succ_add, add_comm]
+
+instance add_is_comm: is_commutative mynat add :=
+⟨assume a b, add_comm a b⟩
 
 @[simp] theorem add_one_succ: m + 1 = succ m := rfl
 
@@ -92,6 +96,12 @@ end
 
 @[simp]
 theorem one_eq_succ_zero: succ 0 = 1 := rfl
+
+theorem zero_ne_one : (0:  mynat) ≠ 1 :=
+begin
+  assume h,
+  from mynat.no_confusion h,
+end
 
 theorem add_cancel: ∀ {m}, m + n = m + k → n = k
 | zero     := by simp; cc
@@ -120,6 +130,22 @@ theorem succ_ne_zero: succ m ≠ 0 :=
 begin
   assume h,
   cases h,
+end
+
+theorem nzero_iff_succ: m ≠ 0 ↔ ∃ n, m = succ n :=
+begin
+  split; assume h, {
+    cases m,
+      rw zz at h,
+      have : 0 = 0, refl,
+      contradiction,
+    existsi m,
+    refl,
+  }, {
+    cases h with n h,
+    rw h,
+    from succ_ne_zero,
+  },
 end
 
 theorem add_integral: ∀ {m n : mynat}, m + n = 0 → m = 0
@@ -191,24 +217,21 @@ theorem succ_mul: ∀ m n : mynat, (succ m) * n = m * n + n
 @[simp]
 theorem mul_add: ∀ m n k : mynat, m * (n + k) = m * n + m * k
 | zero     n k := by repeat { rw zz <|> rw zero_mul <|> rw zero_add }
-| (succ m) n k := by {
-  repeat { rw succ_mul },
-  conv {
-    to_lhs,
-    rw [mul_add, add_assoc, ←add_assoc (m*k), add_comm (m*k),
-        add_assoc n, ←add_assoc],
-  },
-}
+| (succ m) n k := by repeat { rw succ_mul <|> rw mul_add }; ac_refl
 
-@[simp]
 theorem mul_assoc: ∀ m n k: mynat, (m * n) * k = m * (n * k)
 | m n zero     := by rw [zz, mul_zero, mul_zero, mul_zero]
 | m n (succ k) := by rw [mul_succ, mul_succ, mul_add, mul_assoc]
 
-@[simp]
+instance mul_is_assoc: is_associative mynat mul :=
+⟨assume a b c, mul_assoc a b c⟩
+
 theorem mul_comm: ∀ m n : mynat, m * n = n * m
 | m zero     := by rw [zz, mul_zero, zero_mul]
 | m (succ n) := by rw [mul_succ, succ_mul, mul_comm, add_comm]
+
+instance mul_is_comm: is_commutative mynat mul :=
+⟨assume a b, mul_comm a b⟩
 
 @[simp]
 theorem add_mul (m n k : mynat) : (m + n) * k = m * k + n * k :=
@@ -236,13 +259,11 @@ end
 
 theorem mul_cancel: m ≠ 0 → m * n = m * k → n = k :=
 begin
-  induction n with n hn generalizing m k, {
-    assume hmn0 hmk0,
-    simp at hmk0,
+  induction n with n hn generalizing m k; assume hmn0 heq, {
+    simp at heq,
     symmetry,
-    from mul_integral hmn0 hmk0.symm,
+    from mul_integral hmn0 heq.symm,
   }, {
-    assume hmn0 heq,
     cases k, {
       exfalso,
       rw [zz, mul_zero] at heq,
@@ -269,73 +290,33 @@ end
 @[simp]
 theorem pow_succ (m n : mynat) : m ^ (succ n) = m * (m ^ n) := rfl
 
-theorem zero_pow: m ≠ 0 → (0: mynat) ^ m = 0 :=
-begin
-  assume hmn0,
-  induction m with m_n m_ih, {
-    contradiction,
-  }, {
-    simp,
-  },
-end
+theorem zero_pow: ∀ {m : mynat}, m ≠ 0 → (0: mynat) ^ m = 0
+| zero     := assume h, by contradiction
+| (succ m) := assume h, by simp
 
 @[simp]
 theorem pow_one: n ^ (1: mynat) = n := rfl
 
 @[simp]
-theorem one_pow:
-(1: mynat) ^ n = 1 :=
-begin
-  induction n with n hn, {
-    refl,
-  }, {
-    simp [hn],
-  },
-end
+theorem one_pow: ∀ {n : mynat}, (1: mynat) ^ n = 1
+| zero     := rfl
+| (succ n) := by rw [pow_succ, one_mul, one_pow]
 
 @[simp]
-theorem pow_add (m n k : mynat) : m ^ (n + k) = (m ^ n) * (m ^ k) :=
-begin
-  induction k with k_n k_ih, {
-    simp,
-  }, {
-    simp [k_ih],
-    -- it would be really nice to have a tactic to just
-    -- sort out associative commutative operations like this
-    conv {
-      to_lhs,
-      rw ←mul_assoc,
-      congr,
-      rw mul_comm,
-    },
-    rw mul_assoc,
-  },
-end
+theorem pow_add (m n : mynat) : ∀ k, m ^ (n + k) = (m ^ n) * (m ^ k)
+| zero := by simp
+| (succ k) := by simp [pow_add]; ac_refl
 
 @[simp]
-theorem pow_mul (m n k : mynat): (m ^ n) ^ k = m ^ (n * k) :=
-begin
-  induction k with k_n k_ih, {
-    simp,
-  }, {
-    simp [k_ih],
-  },
-end
+theorem pow_mul (m n : mynat): ∀ k, (m ^ n) ^ k = m ^ (n * k)
+| zero := by rw [zz, pow_zero, mul_zero, pow_zero]
+| (succ k) := by rw [pow_succ, mul_succ, pow_add, pow_mul]
 
 @[simp]
-theorem mul_pow (m n k : mynat): (m * n) ^ k = m ^ k * n ^ k :=
-begin
-  induction k with k_n k_ih, {
-    simp,
-  }, {
-    simp [k_ih],
-    conv in (n * _) {
-        rw ←mul_assoc,
-        congr,
-        rw mul_comm,
-    },
-    rw mul_assoc,
-  },
-end
+theorem mul_pow (m n : mynat): ∀ k : mynat, (m * n) ^ k = m ^ k * n ^ k
+| zero := by simp
+| (succ k) := by rw [pow_succ, pow_succ, pow_succ, mul_pow]; ac_refl
+
+end mynat
 
 end hidden

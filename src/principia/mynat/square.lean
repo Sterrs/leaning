@@ -4,7 +4,7 @@ import .prime
 
 namespace hidden
 
-open mynat
+namespace mynat
 
 def square (m : mynat) := ∃ k : mynat, m = k * k
 
@@ -56,5 +56,7 @@ begin
     existsi m, symmetry, assumption,
   from (square_imp_not_prime hs) two_prime,
 end
+
+end mynat
 
 end hidden

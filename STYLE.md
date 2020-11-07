@@ -49,6 +49,7 @@ Just a rough guide as to what style we're trying to use
   an if and only if, as this allows `rw` to work with it
 - Use `intro(s)` to introduce conventional mathematical objects (like numbers
   or lists) and `assume` to introduce hypotheses (instances of propositions).
+- Use `dsimp only []` to expand lambda expressions
 
 More general tips/useful things not to forget:
 
@@ -67,3 +68,17 @@ More general tips/useful things not to forget:
 - When a proof boils down to `cases` or `induction`, it's probably
   worth using | construction to make it a bit more explicit which cases
   are being covered, and to shorten the proof.
+- Use `ac_refl` to resolve goals which are equalities dependent only upon
+  commutativity and associativity of operations.
+- If h is an equality, try using `subst h` to rewrite everything using
+  it and then delete it.
+
+## Implicit vs Explicit Arguments
+
+- Use explicit arguments by default. Therefore, when using `variables`, normally
+use explicit arguments.
+- Use implicit arguments for any argument which is mentioned in a hypothesis.
+- Use explicit arguments if the theorem is an `↔` or `=`, which will usually be used
+via `rw` (so, definitely if it's an `=`, and based on judgement if it's a `↔`).
+This is because `rw` allows you to optionally specify explicit arguments to help it
+decide which part(s) of the expression to rewrite.
