@@ -10,5 +10,6 @@ default: comparison.md ../README.md
 comparison.md: $(ALL_STRIPPED_LEAN) make_comparison.py
 	python3 make_comparison.py > $@
 
-../README.md: comparison.md
-	{ git show lean-3.4.2:README.md && cat $<; } > $@
+# this is now highly unstable
+# ../README.md: comparison.md
+# 	{ git show lean-3.4.2:README.md && cat $<; } > $@
