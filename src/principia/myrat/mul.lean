@@ -36,16 +36,22 @@ begin
   ac_refl,
 end
 
+private lemma sign_self_mul (m: myint): m ≠ 0 → 0 < sign m * m :=
+begin
+  rw mul_comm,
+  from zero_lt_sign_mul_self m,
+end
+
 -- Reciprocal of zero is zero
 -- This has to be an if, because 0 is a different case
 def inv (x : frac) : frac :=
 if h : x.num = 0 then ⟨0, 1, zero_lt_one⟩ else
-⟨(sign x.num) * x.denom, (sign x.num) * x.num, zero_lt_sign_mul_self _ h⟩
+⟨(sign x.num) * x.denom, (sign x.num) * x.num, sign_self_mul _ h⟩
 
 instance: has_inv frac := ⟨inv⟩
 
 private theorem inv_ite {x : frac} : x⁻¹ = dite (x.num = 0) (λ (h : x.num = 0), ⟨0, 1, zero_lt_one⟩)
-    (λ (h : ¬x.num = 0),⟨(sign x.num) * x.denom, (sign x.num) * x.num, zero_lt_sign_mul_self _ h⟩)
+    (λ (h : ¬x.num = 0),⟨(sign x.num) * x.denom, (sign x.num) * x.num, sign_self_mul _ h⟩)
 := rfl
 
 theorem inv_zero {x : frac} (h : x.num = 0) : x⁻¹ = ⟨0, 1, zero_lt_one⟩ :=
@@ -263,11 +269,11 @@ begin
         cases myint.mul_integral h0,
           contradiction,
         assumption,
-      rw ←myint.zero_iff_sign_zero at h₂,
+      rw myint.sign_zero_iff_zero at h₂,
       contradiction,
     rw [frac.inv_num_nonzero this, frac.inv_denom_nonzero this],
     rw [frac.inv_num_nonzero h, frac.inv_denom_nonzero h],
-    rw myint.sign_mult,
+    rw myint.sign_mul,
     ac_refl,
   },
 end
@@ -295,7 +301,7 @@ begin
   rw [frac.inv_num_nonzero h, frac.inv_denom_nonzero h],
   rw [frac.inv_num_nonzero this.left, frac.inv_denom_nonzero this.left],
   rw [frac.inv_num_nonzero this.right, frac.inv_denom_nonzero this.right],
-  rw [frac.mul_num, frac.mul_denom, sign_mult],
+  rw [frac.mul_num, frac.mul_denom, sign_mul],
   ac_refl,
 end
 
@@ -381,6 +387,21 @@ begin
   repeat {rw frac.mul_num <|> rw frac.mul_denom},
   repeat {rw frac.abs_num <|> rw frac.abs_denom},
   rw ←myint.abs_mul,
+end
+
+theorem mul_integral: x * y = 0 → x = 0 ∨ y = 0 :=
+begin
+  assume hxy0,
+  by_cases h: y = 0, {
+    right, assumption,
+  }, {
+    left,
+    have := @mul_div_cancel x y h,
+    rw hxy0 at this,
+    rw zero_div at this,
+    symmetry,
+    assumption,
+  },
 end
 
 end myrat

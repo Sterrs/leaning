@@ -408,6 +408,35 @@ begin
   },
 end
 
+theorem sign_mul: sign (m * n) = sign m * sign n :=
+begin
+  by_cases hm0: m = 0,
+  subst hm0, repeat {rw sign_zero <|> rw zero_mul},
+  by_cases hn0: n = 0,
+  subst hn0, repeat {rw sign_zero <|> rw mul_zero},
+  apply @mul_cancel (abs (m * n)), {
+    assume h,
+    rw ←zero_iff_abs_zero at h,
+    cases mul_integral h; contradiction,
+  }, {
+    conv {
+      congr,
+      rw mul_comm,
+      rw sign_abs_mul,
+      skip,
+      rw abs_mul,
+      rw mul_comm (abs m),
+      rw mul_assoc,
+      rw ←mul_assoc (abs m),
+      rw mul_comm (abs m),
+      rw sign_abs_mul,
+      rw mul_comm,
+      rw mul_assoc,
+      rw sign_abs_mul,
+    },
+  },
+end
+
 theorem zero_lt_sign_mul_self: m ≠ 0 → 0 < m * sign m :=
 begin
   assume hmn0,

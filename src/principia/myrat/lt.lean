@@ -14,12 +14,39 @@ instance decidable_lt: ∀ x y: myrat, decidable (x < y) :=
 
 variables x y z : myrat
 
-theorem lt_iff_nle : x < y ↔ ¬y ≤ x := by refl
+theorem lt_iff_nle : x < y ↔ ¬y ≤ x := iff.rfl
+
+theorem lt_impl_ne {x y : myrat} : x < y → x ≠ y :=
+begin
+  assume hxy hxeqy,
+  subst hxeqy,
+  apply hxy,
+  refl,
+end
+
+theorem lt_impl_le: x < y → x ≤ y :=
+begin
+  assume hxy,
+  cases le_total_order x y with h h, {
+    assumption,
+  }, {
+    contradiction,
+  },
+end
 
 theorem zero_lt_mul (a b: myrat): 0 < a → 0 < b → 0 < a * b :=
 begin
-    assume hapos hbpos,
-    sorry,
+  assume hapos hbpos,
+  assume hab0,
+  have := le_mul_nonneg_right (lt_impl_le _ _ hapos) (lt_impl_le _ _ hbpos),
+  rw zero_mul at this,
+  rw mul_comm at this,
+  have h0 := le_antisymm hab0 this,
+  cases (mul_integral h0) with ha hb,
+  have hc := lt_impl_ne hapos,
+  from hc ha.symm,
+  have hc := lt_impl_ne hbpos,
+  from hc hb.symm,
 end
 
 theorem lt_cancel_left {a b c : myrat} : c + a < c + b ↔ a < b := sorry
@@ -128,8 +155,6 @@ begin
 end
 
 theorem lt_mul_comb_nonneg {a b x y : myrat} : 0 ≤ a → 0 ≤ x → a < b → x < y → a * x < b * y := sorry
-
-theorem lt_imp_ne {x y : myrat} : x < y → x ≠ y := sorry
 
 theorem pos_iff_inv_pos : 0 < x ↔ 0 < x⁻¹ := sorry
 
