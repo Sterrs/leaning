@@ -33,7 +33,9 @@ begin
     simp,
   }, {
     simp,
-    refl,
+    rw ←one_eq_succ_zero,
+    rw fib_succsucc,
+    simp,
   }, {
     intro k,
     assume h_ih1 h_ih2,

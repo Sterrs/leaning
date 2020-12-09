@@ -168,8 +168,6 @@ theorem abs_eq_max : abs m = max m (-m) := rfl
 theorem abs_neg: abs (-n) = abs n :=
 by rw [abs_eq_max, max_comm, neg_neg, ←abs_eq_max]
 
-theorem abs_eq_sign_self : abs m = (sign m) * m := sorry
-
 theorem abs_of_nonneg {m : myint} (h : 0 ≤ m): abs m = m :=
 begin
   rw [abs_eq_max, max_comm, ←le_iff_max],
@@ -213,9 +211,6 @@ begin
   assumption,
 end
 
--- The following three theorems are practically equivalent, needs reorganising a bit
-theorem abs_nonneg_mul {m : myint} : 0 ≤ m → ∀ n, m * abs n = abs (m * n) := sorry
-
 private theorem abs_cancel_abs_mul_within : abs (abs m * n) = abs (m * n) :=
 begin
   unfold abs,
@@ -237,6 +232,19 @@ begin
       rw abs_of_nonneg this,
   rw this,
   rw [abs_cancel_abs_mul_within, mul_comm m (abs n), abs_cancel_abs_mul_within, mul_comm],
+end
+
+-- The following three theorems are practically equivalent, needs reorganising a bit
+theorem abs_nonneg_mul {m : myint} : 0 ≤ m → ∀ n, m * abs n = abs (m * n) :=
+begin
+  assume h0m,
+  intro n,
+  conv {
+    to_lhs,
+    congr,
+    rw zero_le_abs _ h0m,
+  },
+  rw abs_mul,
 end
 
 theorem abs_le_square: abs m ≤ abs n ↔ m * m ≤ n * n :=
@@ -263,6 +271,70 @@ begin
   repeat { rw abs_eq_max, },
   rw neg_distr,
   from max_sum_le _ _ _ _,
+end
+
+theorem zero_iff_abs_zero: m = 0 ↔ abs m = 0 :=
+begin
+  split, {
+    assume hm0,
+    rw hm0,
+    refl,
+  }, {
+    assume habs,
+    unfold abs at habs,
+    unfold max at habs,
+    by_cases hmm: (m ≤ -m), {
+      rw if_pos hmm at habs,
+      rw ←add_cancel (-m),
+      simp,
+      symmetry,
+      assumption,
+    }, {
+      rw if_neg hmm at habs,
+      assumption,
+    },
+  },
+end
+
+theorem sign_mul_self_abs: m * sign m = abs m :=
+begin
+  by_cases h0m: 0 < m, {
+    rw pos_sign _ h0m,
+    rw mul_one,
+    from zero_lt_abs _ h0m,
+  }, {
+    by_cases hm0: m < 0, {
+      rw neg_sign _ hm0,
+      rw mul_neg,
+      rw mul_one,
+      rw lt_add_right (-m) at hm0,
+      simp at hm0,
+      rw ←abs_neg,
+      from zero_lt_abs _ hm0,
+    }, {
+      cases lt_trichotomy 0 m, {
+        rw ←h,
+        refl,
+      }, {
+        cases h; contradiction,
+      },
+    },
+  },
+end
+
+
+theorem zero_lt_sign_mul_self: m ≠ 0 → 0 < m * sign m :=
+begin
+  assume hmn0,
+  rw sign_mul_self_abs,
+  rw lt_iff_le_and_ne,
+  split, {
+    from abs_nonneg _,
+  }, {
+    assume h,
+    have := (zero_iff_abs_zero _).mpr h.symm,
+    contradiction,
+  },
 end
 
 end myint

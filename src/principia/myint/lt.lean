@@ -196,11 +196,98 @@ end
 theorem zero_le_one : 0 ≤ (1 : myint) :=
 lt_imp_le zero_lt_one
 
-theorem le_mul_cancel_pos_left : 0 < k → (k * m ≤ k * n ↔ m ≤ n) := sorry
+theorem zero_le_cancel_pos:
+0 < k → 0 ≤ m * k → 0 ≤ m :=
+begin
+  assume h0k h0mk,
+  by_contradiction hm,
+  rw ←lt_iff_nle at hm,
+  rw lt_iff_sub_pos at hm,
+  rw zero_add at hm,
+  have := zero_lt_mul _ _ h0k hm,
+  rw mul_neg at this,
+  rw ←zero_add (-(k * m)) at this,
+  rw ←lt_iff_sub_pos at this,
+  rw lt_iff_nle at this,
+  rw mul_comm at this,
+  contradiction,
+end
 
-theorem le_mul_cancel_pos_right : 0 < k → (m * k ≤ n * k ↔ m ≤ n) := sorry
+theorem le_mul_cancel_pos_left : 0 < k → (k * m ≤ k * n ↔ m ≤ n) :=
+begin
+  assume h0k,
+  split, {
+    assume hkmkn,
+    rw le_add_right (-m),
+    simp,
+    rw le_add_right (-(k * m)) at hkmkn,
+    simp at hkmkn,
+    rw ←mul_neg at hkmkn,
+    rw ←mul_add at hkmkn,
+    apply zero_le_cancel_pos _ k h0k,
+    rw mul_comm,
+    assumption,
+  }, {
+    assume hmn,
+    apply le_mul_nonneg_left,
+    from lt_imp_le h0k,
+    assumption,
+  },
+end
 
-theorem zero_lt_sign_mul_self: m ≠ 0 → 0 < (sign m) * m := sorry
+theorem le_mul_cancel_pos_right : 0 < k → (m * k ≤ n * k ↔ m ≤ n) :=
+begin
+  assume h0k,
+  repeat {rw ←mul_comm k},
+  from le_mul_cancel_pos_left _ _ _ h0k,
+end
+
+theorem pos_sign: 0 < m → sign m = 1 :=
+begin
+  cases quotient.exists_rep m with a ha, subst ha,
+  rw int_zero,
+  rw int_one,
+  assume h0a,
+  rw lt_eq_cls rfl rfl at h0a,
+  rw sign_eq_cls rfl,
+  apply quotient.sound,
+  rw int_pair.setoid_equiv,
+  unfold int_pair.sign,
+  repeat {rw if_pos h0a},
+end
+
+theorem neg_sign: m < 0 → sign m = -1 :=
+begin
+  assume hm,
+  have: ¬(0 < m), {
+    rw lt_iff_nle,
+    rw decidable.not_not_iff,
+    from lt_imp_le hm,
+  },
+  cases quotient.exists_rep m with a ha, subst ha,
+  rw int_zero at hm,
+  rw int_zero at this,
+  rw int_one,
+  rw lt_eq_cls rfl rfl at hm,
+  rw lt_eq_cls rfl rfl at this,
+  rw sign_eq_cls rfl,
+  apply quotient.sound,
+  rw int_pair.setoid_equiv,
+  unfold int_pair.sign,
+  repeat {rw if_neg this},
+  repeat {rw if_pos hm},
+end
+
+theorem lt_trichotomy: m = n ∨ m < n ∨ n < m :=
+begin
+  cases quotient.exists_rep m with a ha, subst ha,
+  cases quotient.exists_rep n with n hn, subst hn,
+  repeat {rw lt_eq_cls rfl rfl},
+  repeat {rw int_pair.lt_def},
+  rw int_pair.sound_exact_iff,
+  rw int_pair.setoid_equiv,
+  from mynat.lt_trichotomy,
+end
 
 end myint
 end hidden

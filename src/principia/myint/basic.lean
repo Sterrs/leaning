@@ -219,41 +219,8 @@ end
 
 theorem sign_zero: sign 0 = 0 := rfl
 
-theorem sign_neg_succ: sign -[1+ a] = -1 :=
-begin
-  sorry,
-end
-
 -- °_° wtf
 theorem sign_succ: sign ↑(succ a) = 1 := rfl
-
-theorem zero_iff_sign_zero: m = 0 ↔ sign m = 0 :=
-begin
-  split; assume h, {
-    subst h, refl,
-  }, {
-    sorry,
-    -- cases m, {
-    --   cases m, {
-    --     rw [zz, ←coe_nat_eq, zero_nat],
-    --   }, {
-    --     exfalso,
-    --     rw [←coe_nat_eq, sign_succ, ←zero_nat, ←one_nat, of_nat_cancel]
-    --     at h,
-    --     from mynat.no_confusion h,
-    --   },
-    -- }, {
-    --   exfalso,
-    --   rw [sign_neg_succ] at h,
-    --   from myint.no_confusion h,
-    -- },
-  },
-end
-
-theorem sign_mult : sign (m * n) = sign m * sign n := sorry
-
-theorem nzero_iff_sign_nzero: m ≠ 0 ↔ sign m ≠ 0 :=
-iff_to_contrapositive zero_iff_sign_zero
 
 theorem zero_ne_one : (0 : myint) ≠ 1 :=
 begin
