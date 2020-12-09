@@ -3,35 +3,19 @@
 -- Note we're not currently transitioning over to hidden namespace - we probably should,
 -- though it will break things
 
+import ..myset.basic
+
+namespace hidden
+
 structure topological_space (α : Type) :=
-(is_open : set (set α))
-(univ_open : is_open set.univ)
+(is_open : myset (myset α))
+(univ_open : is_open myset.univ)
 (empty_open : is_open ∅)
-(open_union_open (σ : set (set α)): σ ⊆ is_open → is_open ⋃₀ σ)
-(open_intersection_open (U V : set α) : is_open U → is_open V → is_open (U ∩ V))
+(open_union_open (σ : myset (myset α)): σ ⊆ is_open → is_open ⋃₀ σ)
+(open_intersection_open (U V : myset α) : is_open U → is_open V → is_open (U ∩ V))
 
 -- Don't know what this does
 -- attribute [class] topological_space
-
-namespace function -- This is an actual Lean namespace!!!
-
-def image {α β : Type} (f : α → β) (U : set α) := {b | ∃ a, a ∈ U ∧ f a = b}
-
-def inverse_image {α β : Type} (f : α → β) (V : set β) := {a | f a ∈ V}
-
-end function
-
-
-namespace set -- This is an actual Lean namespace!!!
-
-variables {α β : Type}
-
-def prod (U : set α) (V : set β) : set (α × β) :=
-{t | t.1 ∈ U ∧ t.2 ∈ V}
-
-notation U × V := prod U V
-
-end set
 
 namespace topological_space
 
@@ -39,11 +23,11 @@ variables {α β : Type}
 -- include X Y
 
 -- We don't assume a topology and define a base, we *build* a topology from a base
-def is_base (B : set (set α)) :=
-set.univ ∈ B ∧ ∀ b₁ b₂: set α, b₁ ∈ B → b₂ ∈ B → b₁ ∩ b₂ ∈ B
+def is_base (B : myset (myset α)) :=
+myset.univ ∈ B ∧ ∀ b₁ b₂: myset α, b₁ ∈ B → b₂ ∈ B → b₁ ∩ b₂ ∈ B
 
--- Given a suitable set, build a topological space with it as a base.
-def space_from_base (B : set (set α)) (hB : is_base B) : topological_space α :=
+-- Given a suitable myset, build a topological space with it as a base.
+def space_from_base (B : myset (myset α)) (hB : is_base B) : topological_space α :=
 {
   is_open := λ U, (∀ x : α, x ∈ U → (∃ b, b ∈ B ∧ x ∈ b ∧ b ⊆ U)),
   univ_open :=
@@ -51,7 +35,7 @@ def space_from_base (B : set (set α)) (hB : is_base B) : topological_space α :
     unfold is_base at hB,
     intro x,
     assume h,
-    existsi set.univ,
+    existsi myset.univ,
     split,
       from hB.left,
     split,
@@ -75,7 +59,7 @@ def space_from_base (B : set (set α)) (hB : is_base B) : topological_space α :
     assume hx,
     cases hx with Uj hUj, -- Zsak called it U_j in his proof
     cases hUj with hUj hxUj, -- ???
-    have h := hσ hUj,
+    have h := hσ Uj hUj,
     cases h x hxUj with b hb,
     existsi b,
     split,
@@ -86,7 +70,8 @@ def space_from_base (B : set (set α)) (hB : is_base B) : topological_space α :
     assume hy,
     existsi Uj,
     existsi hUj,
-    from hb.right.right hy,
+    apply hb.right.right,
+    from hy,
   end,
   open_intersection_open :=
   begin
@@ -109,20 +94,22 @@ def space_from_base (B : set (set α)) (hB : is_base B) : topological_space α :
     intro y,
     assume hy,
     split,
-      from hb₁.right.right hy.left,
-    from hb₂.right.right hy.right,
+      apply hb₁.right.right,
+      from hy.left,
+    apply hb₂.right.right,
+    from hy.right,
   end
 }
 
-def product_base (X : topological_space α) (Y : topological_space β) : set (set (α × β)) :=
-{ b | ∃ (U : set α) (V : set β), b = (U × V) ∧ is_open X U ∧ is_open Y V }
+def product_base (X : topological_space α) (Y : topological_space β) : myset (myset (α × β)) :=
+{ b | ∃ (U : myset α) (V : myset β), b = (U × V) ∧ is_open X U ∧ is_open Y V }
 
 theorem is_base_product_base (X : topological_space α) (Y : topological_space β) :
 is_base (product_base X Y) :=
 begin
   split,
-    existsi set.univ,
-    existsi set.univ,
+    existsi myset.univ,
+    existsi myset.univ,
     split,
       apply funext,
       intro x,
@@ -168,10 +155,10 @@ end
 def product_topology (X : topological_space α) (Y : topological_space β) :
 topological_space (α × β) := space_from_base (product_base X Y) (is_base_product_base X Y)
 
--- TODO: Theorem which actually makes the product topology usable: what is an open set?
+-- TODO: Theorem which actually makes the product topology usable: what is an open myset?
 
 def is_continuous (f : α → β) [X : topological_space α] [Y : topological_space β] : Prop :=
-∀ V : set β, is_open Y V → is_open X (function.inverse_image f V)
+∀ V : myset β, is_open Y V → is_open X (myset.inverse_image f V)
 
 def discrete_topology (α : Type) : topological_space α :=
 {
@@ -184,7 +171,7 @@ def discrete_topology (α : Type) : topological_space α :=
 
 def indiscrete_topology (α : Type) : topological_space α :=
 {
-  is_open := λ U, U = ∅ ∨ U = set.univ,
+  is_open := λ U, U = ∅ ∨ U = myset.univ,
   univ_open := begin
     right,
     refl,
@@ -204,7 +191,7 @@ def indiscrete_topology (α : Type) : topological_space α :=
       rw [hU, hV],
       -- Now we are proving ∅ ∩ ∅ = ∅
       apply funext,     -- *
-      intro x,          -- * These three lines are effectively `apply setext`
+      intro x,          -- * These three lines are effectively `apply mysetext`
       apply propext,    -- *
       split; assume h,
       exact h.left,
@@ -219,7 +206,7 @@ def indiscrete_topology (α : Type) : topological_space α :=
         from h.left,
       split,
         from h,
-      unfold set.univ,
+      unfold myset.univ,
     }, {
       left,
       apply funext,
@@ -229,7 +216,7 @@ def indiscrete_topology (α : Type) : topological_space α :=
       split; assume h,
         from h.right,
       split,
-        unfold set.univ,
+        unfold myset.univ,
       from h,
     }, {
       right,
@@ -238,16 +225,18 @@ def indiscrete_topology (α : Type) : topological_space α :=
       apply propext,
       subst hU, subst hV,
       split; assume h,
-        unfold set.univ,
-      split; unfold set.univ,
+        unfold myset.univ,
+      split; unfold myset.univ,
     },
   end
 }
 
 def is_disconnected (X : topological_space α) : Prop :=
-∃ U V : set α, U ≠ ∅ ∧ V ≠ ∅ ∧ is_open X U ∧ is_open X V ∧ U ∩ V = ∅ ∧ U ∪ V = set.univ
+∃ U V : myset α, U ≠ ∅ ∧ V ≠ ∅ ∧ is_open X U ∧ is_open X V ∧ U ∩ V = ∅ ∧ U ∪ V = myset.univ
 
 def is_connected (X : topological_space α) : Prop :=
 ¬is_disconnected X
 
 end topological_space
+
+end hidden

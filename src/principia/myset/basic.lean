@@ -1,6 +1,6 @@
 -- vim: ts=2 sw=0 sts=-1 et ai tw=70
 
-import ..mynat.lt
+import ..logic
 
 namespace hidden
 
@@ -58,6 +58,26 @@ begin
     assumption,
   },
 end
+
+-- Set product, gives myset (α × β)
+def set_prod (U : myset α) (V : myset β) : myset (α × β) :=
+{t | t.1 ∈ U ∧ t.2 ∈ V}
+
+notation U × V := set_prod U V
+
+instance : has_emptyc (myset α) :=
+⟨λ a, false⟩
+
+@[reducible]
+def sUnion (s : myset (myset α)) : myset α := {t | ∃ a ∈ s, t ∈ a}
+prefix `⋃₀`:120 := sUnion
+
+def univ : myset α :=
+λ a, true
+
+def image {α β : Type} (f : α → β) (U : myset α) := {b | ∃ a, a ∈ U ∧ f a = b}
+
+def inverse_image {α β : Type} (f : α → β) (V : myset β) := {a | f a ∈ V}
 
 end myset
 
