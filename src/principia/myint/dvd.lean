@@ -18,10 +18,19 @@ begin
   split; assume h, {
     cases h with k hk,
     existsi (abs k),
-    sorry,
+    rw hk,
+    rw abs_mul,
   }, {
     cases h with k hk,
-    sorry,
+    existsi (k * sign n * sign m),
+    repeat {rw mul_assoc},
+    rw mul_comm _ m,
+    rw sign_mul_self_abs,
+    rw mul_comm _ (abs m),
+    rw ←mul_assoc,
+    rw ←hk,
+    rw mul_comm,
+    rw sign_abs_mul,
   },
 end
 
@@ -96,7 +105,17 @@ end
 theorem dvd_remainder (j m n k : myint):
 j ∣ m → j ∣ n → m + k = n → j ∣ k :=
 begin
-  sorry,
+  assume hjm hjn hmkn,
+  rw ←add_cancel (-m) at hmkn,
+  rw add_comm (m + k) at hmkn,
+  rw ←add_assoc at hmkn,
+  simp at hmkn,
+  rw hmkn,
+  apply dvd_sum,
+  assumption,
+  rw ←neg_one_mul,
+  apply dvd_mul_right,
+  assumption,
 end
 
 theorem coe_coe_dvd {a b : mynat} : a ∣ b ↔ (↑a : myint) ∣ ↑b :=
@@ -107,7 +126,22 @@ begin
     rw ←coe_coe_mul,
     from dvd_mul_right _ (by refl),
   }, {
-    sorry,
+    cases h with k hk,
+    cases (le_iff_exists_nat 0 (abs k)).mp (abs_nonneg _) with l hl,
+    rw zero_add at hl,
+    existsi l,
+    have hcb := (zero_le_iff_coe b).mpr ⟨b, rfl⟩,
+    have hca := (zero_le_iff_coe a).mpr ⟨a, rfl⟩,
+    have: abs ↑b = abs k * abs ↑a, {
+      rw hk,
+      rw abs_mul,
+    },
+    rw hl at this,
+    apply coe_inj,
+    rw ←zero_le_abs _ hcb at this,
+    rw ←zero_le_abs _ hca at this,
+    rw ←coe_coe_mul,
+    assumption,
   },
 end
 

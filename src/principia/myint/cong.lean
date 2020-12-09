@@ -61,21 +61,57 @@ begin
   unfold cong,
   rw hk,
   existsi k,
-  -- Basic arithmetic
-  sorry,
+  repeat {rw add_assoc},
+  rw add_comm _ c,
 end
 
 theorem cong_add : a ≅ b → x ≅ y → a + x ≅ b + y :=
 begin
-  sorry,
+  assume hab hxy,
+  transitivity a + y,
+  repeat {rw add_comm a},
+  from cong_add_same hxy,
+  rw add_comm y,
+  from cong_add_same hab,
 end
 
-theorem cong_mul_same : a ≅ b → c * a ≅ c * b := sorry
+theorem cong_mul_same : a ≅ b → c * a ≅ c * b :=
+begin
+  assume hab,
+  cases hab with k hk,
+  existsi (k * c),
+  rw hk,
+  rw mul_add,
+  rw mul_comm c (n * k),
+  rw mul_assoc,
+end
 
-theorem cong_mul : a ≅ b → x ≅ y → a * x ≅ b * y := sorry
+theorem cong_mul : a ≅ b → x ≅ y → a * x ≅ b * y :=
+begin
+  assume hab hxy,
+  transitivity a * y,
+  from cong_mul_same hxy,
+  repeat {rw mul_comm _ y},
+  from cong_mul_same hab,
+end
 
 
-theorem cong_zero_iff_dvd : a ≅ 0 ↔ n ∣ a := sorry
+theorem cong_zero_iff_dvd : a ≅ 0 ↔ n ∣ a :=
+begin
+  split; assume h, {
+    cases h with k hk,
+    existsi k,
+    rw hk,
+    rw zero_add,
+    rw mul_comm,
+  }, {
+    cases h with k hk,
+    existsi k,
+    rw hk,
+    rw zero_add,
+    rw mul_comm,
+  },
+end
 
 -- Euclid's Lemma
 theorem exists_inverse (h : coprime a n): ∃ k, a * k ≅ 1 :=

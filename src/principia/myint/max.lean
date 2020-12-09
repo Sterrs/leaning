@@ -132,20 +132,6 @@ begin
   },
 end
 
-theorem max_assoc : max (max m n) k = max m (max n k) :=
-begin
-  by_cases m ≤ n,
-    rw le_imp_max h,
-    have : m ≤ max n k,
-      transitivity n,
-        assumption,
-      from le_max_left _ _,
-    rw le_imp_max this,
-  sorry,
-end
-
-instance : is_associative myint max := ⟨max_assoc⟩
-
 theorem max_eq_either : max m n = m ∨ max m n = n :=
 begin
   by_cases m ≤ n,
@@ -155,11 +141,67 @@ begin
   rwa lt_imp_max_reverse,
 end
 
--- Just casework?
-theorem max_sum_le (a b c d : myint) : max (a + c) (b + d) ≤ max a b + max c d := sorry
+theorem max_assoc : max (max m n) k = max m (max n k) :=
+begin
+  by_cases m ≤ n, {
+    rw le_imp_max h,
+    have : m ≤ max n k,
+      transitivity n,
+        assumption,
+      from le_max_left _ _,
+    rw le_imp_max this,
+  }, {
+    rw ←lt_iff_nle at h,
+    rw max_comm m n,
+    rw le_imp_max (lt_imp_le h),
+    by_cases h': m ≤ k, {
+      rw le_imp_max h',
+      have := le_trans _ (lt_imp_le h) h',
+      rw le_imp_max this,
+      rw le_imp_max h',
+    }, {
+      rw ←lt_iff_nle at h',
+      rw max_comm m k,
+      rw le_imp_max (lt_imp_le h'),
+      cases max_eq_either n k with h h; rw h; clear h,
+      rw max_comm m n,
+      rw le_imp_max (lt_imp_le h),
+      rw max_comm m k,
+      rw le_imp_max (lt_imp_le h'),
+    },
+  },
+end
 
+instance : is_associative myint max := ⟨max_assoc⟩
+
+theorem max_sum_le (a b c d : myint) : max (a + c) (b + d) ≤ max a b + max c d :=
+begin
+  cases max_eq_either (a + c) (b + d) with h; rw h; clear h, {
+    from le_comb (le_max_left _  _) (le_max_left _ _),
+ }, {
+    from le_comb (le_max_right _  _) (le_max_right _ _),
+ }
+end
+
+-- yes it takes longer this way abut it's a matter of principle
 theorem nonneg_mul_max {m : myint}:
-0 ≤ m → ∀ n k, m * max n k = max (m * n) (m * k) := sorry
+0 ≤ m → m * max n k = max (m * n) (m * k) :=
+begin
+  assume h0m,
+  revert n k,
+  apply wlogle, {
+    intros n k,
+    assume h,
+    rw max_comm k n,
+    rw max_comm (m * k) (m * n),
+    assumption,
+  }, {
+    intros n k,
+    assume hnk,
+    rw le_imp_max hnk,
+    rw le_imp_max (le_mul_nonneg_left h0m hnk),
+  },
+end
 
 def abs : myint → myint := λ m, max m (-m)
 
@@ -322,6 +364,49 @@ begin
   },
 end
 
+theorem sign_zero_iff_zero: sign m = 0 ↔ m = 0 :=
+begin
+  split, {
+    assume hsgnm,
+    rw zero_iff_abs_zero,
+    rw ←sign_mul_self_abs,
+    rw hsgnm,
+    rw mul_zero,
+  }, {
+    assume h, rw h, refl,
+  },
+end
+
+theorem sign_abs_mul: sign m * abs m = m :=
+begin
+  by_cases h: m = 0, {
+    rw h,
+    refl,
+  }, {
+    apply @mul_cancel (sign m),
+    assume hs,
+    rw sign_zero_iff_zero at hs,
+    contradiction,
+    rw mul_comm _ m,
+    rw sign_mul_self_abs,
+    cases (lt_trichotomy m 0) with hm0 ht, {
+      rw hm0,
+      refl,
+    }, {
+      cases ht with hm0 h0m, {
+        rw neg_sign _ hm0,
+        rw ←mul_assoc,
+        rw neg_mul,
+        rw mul_neg,
+        rw neg_neg,
+        repeat {rw one_mul},
+      }, {
+        rw pos_sign _ h0m,
+        repeat {rw one_mul},
+      },
+    },
+  },
+end
 
 theorem zero_lt_sign_mul_self: m ≠ 0 → 0 < m * sign m :=
 begin

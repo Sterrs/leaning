@@ -194,6 +194,20 @@ begin
   from mynat.le_total_order _ _,
 end
 
+theorem wlogle
+(p: myint → myint → Prop)
+(hsymm: ∀ m n: myint, p m n → p n m):
+(∀ m n: myint, m ≤ n → p m n) → (∀ m n: myint, p m n) :=
+begin
+  assume hwlog,
+  intros m n,
+  cases le_total_order m n with hmn hnm, {
+    from hwlog m n hmn,
+  }, {
+    from hsymm _ _ (hwlog n m hnm),
+  },
+end
+
 theorem le_mul_nonneg_left {m n k : myint}: 0 ≤ k → m ≤ n → k * m ≤ k * n :=
 begin
   assume h0lek hmn,

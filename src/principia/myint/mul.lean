@@ -131,12 +131,6 @@ end
 theorem add_mul: (m + n) * k = m * k + n * k :=
 by rw [mul_comm, @mul_comm m, @mul_comm n, mul_add]
 
-theorem nzero_iff_succ_or_neg_succ:
-m ≠ 0 ↔ ∃ a, m = ↑(succ a) ∨ m = -↑(succ a) :=
-begin
-  sorry,
-end
-
 private lemma neq_iff_not_eq: m ≠ n ↔ ¬(m = n) :=
 begin
   split; assume hneq heq, all_goals { contradiction },
@@ -159,6 +153,7 @@ end
 
 -- Particularly abs is very dependent on inequalities
 
+-- hmmmmmm
 private lemma mul_integral_biased {m n : myint}:
 m ≠ 0 → m * n = 0 → n = 0 :=
 begin
@@ -171,11 +166,57 @@ begin
   simp at hab0,
   repeat {rw int_pair.sound_exact_iff <|> rw int_pair.setoid_equiv},
   simp,
-  sorry,
+  cases (le_total_order a.a a.b) with ha ha; cases ha with d hd, {
+    rw hd at hab0,
+    simp at hab0,
+    rw ←mynat.add_assoc at hab0,
+    rw mynat.add_comm (a.a * b.a) at hab0,
+    rw mynat.add_assoc at hab0,
+    have := mynat.add_cancel (mynat.add_cancel hab0),
+    apply @mynat.mul_cancel d _ _,
+    assume hd0,
+    apply haneq0,
+    apply quotient.sound,
+    rw int_pair.setoid_equiv,
+    rw hd,
+    rw hd0,
+    simp,
+    symmetry, assumption,
+  }, {
+    rw hd at hab0,
+    simp at hab0,
+
+    conv at hab0 {
+      to_rhs,
+      rw mynat.add_comm,
+    },
+    rw mynat.add_assoc at hab0,
+    have hw := mynat.add_cancel hab0,
+    rw mynat.add_comm at hw,
+    have := mynat.add_cancel hw,
+    apply @mynat.mul_cancel d _ _,
+    assume hd0,
+    apply haneq0,
+    apply quotient.sound,
+    rw int_pair.setoid_equiv,
+    rw hd,
+    rw hd0,
+    simp,
+    assumption,
+  },
 end
 
 theorem mul_integral {m n : myint}:
-m * n = 0 → n = 0 ∨ m = 0 := sorry
+m * n = 0 → n = 0 ∨ m = 0 :=
+begin
+  assume hmn,
+  by_cases h: m = 0, {
+    right, assumption,
+  }, {
+    left,
+    from mul_integral_biased h hmn,
+  },
+end
 
 theorem mul_nonzero_nonzero : m * n ≠ 0 ↔ m ≠ 0 ∧ n ≠ 0 :=
 begin
@@ -221,9 +262,10 @@ begin
   assumption,
 end
 
-theorem mul_neg_with : (-m) * n = -(m * n) := sorry
+-- clean up later. These are used in myrat
+theorem mul_neg_with : (-m) * n = -(m * n) := neg_mul m n
 
-theorem mul_with_neg : m * (-n) = -(m * n) := sorry
+theorem mul_with_neg : m * (-n) = -(m * n) := mul_neg m n
 
 end myint
 end hidden
