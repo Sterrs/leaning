@@ -72,12 +72,24 @@ instance : has_emptyc (myset α) :=
 def sUnion (s : myset (myset α)) : myset α := {t | ∃ a ∈ s, t ∈ a}
 prefix `⋃₀`:120 := sUnion
 
+@[reducible]
+def sIntersection (s : myset (myset α)) : myset α :=
+{t | ∀ a ∈ s, t ∈ a}
+prefix `⋂₀`:120 := sIntersection
+
 def univ : myset α :=
 λ a, true
 
 def image {α β : Type} (f : α → β) (U : myset α) := {b | ∃ a, a ∈ U ∧ f a = b}
 
 def inverse_image {α β : Type} (f : α → β) (V : myset β) := {a | f a ∈ V}
+
+def compl (s : myset α) : myset α :=
+{a | a ∉ s}
+
+-- Used to restrict some set to a subtype ("intersect" a set with a subtype)
+def subtype_restriction (Y : myset α) (U : myset α) : myset (subtype Y) :=
+{ w | ↑w ∈ U }
 
 end myset
 

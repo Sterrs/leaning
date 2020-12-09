@@ -22,6 +22,22 @@ namespace topological_space
 variables {α β : Type}
 -- include X Y
 
+def is_hausdorff (X : topological_space α) : Prop :=
+∀ x y : α, x ≠ y → ∃ (U V : myset α), is_open X U ∧ is_open X V ∧ x ∈ U ∧ y ∈ V
+
+def is_closed (X : topological_space α) (A : myset α) : Prop :=
+is_open X (myset.compl A)
+
+-- An attempt to create subspaces
+def subspace_topology (X : topological_space α) (Y : myset α) : topological_space (subtype Y) :=
+{
+  is_open := { V | ∃ U : myset α, is_open X U ∧ V = myset.subtype_restriction Y U },
+  univ_open := sorry,
+  empty_open := sorry,
+  open_union_open := sorry,
+  open_intersection_open := sorry
+}
+
 -- We don't assume a topology and define a base, we *build* a topology from a base
 def is_base (B : myset (myset α)) :=
 myset.univ ∈ B ∧ ∀ b₁ b₂: myset α, b₁ ∈ B → b₂ ∈ B → b₁ ∩ b₂ ∈ B
@@ -155,11 +171,6 @@ end
 def product_topology (X : topological_space α) (Y : topological_space β) :
 topological_space (α × β) := space_from_base (product_base X Y) (is_base_product_base X Y)
 
--- TODO: Theorem which actually makes the product topology usable: what is an open myset?
-
-def is_continuous (f : α → β) [X : topological_space α] [Y : topological_space β] : Prop :=
-∀ V : myset β, is_open Y V → is_open X (myset.inverse_image f V)
-
 def discrete_topology (α : Type) : topological_space α :=
 {
   is_open := λ U, true,
@@ -231,12 +242,15 @@ def indiscrete_topology (α : Type) : topological_space α :=
   end
 }
 
-def is_disconnected (X : topological_space α) : Prop :=
-∃ U V : myset α, U ≠ ∅ ∧ V ≠ ∅ ∧ is_open X U ∧ is_open X V ∧ U ∩ V = ∅ ∧ U ∪ V = myset.univ
+def interior (X : topological_space α) (A : myset α) : myset α :=
+⋃₀ { U | is_open X U ∧ U ⊆ A }
 
-def is_connected (X : topological_space α) : Prop :=
-¬is_disconnected X
+def closure (X : topological_space α) (A : myset α) : myset α :=
+⋂₀ { F | is_closed X F ∧ A ⊆ F }
+
+def is_dense (X : topological_space α) (A : myset α) : Prop :=
+closure X A = myset.univ
 
 end topological_space
-
+#check subtype
 end hidden
