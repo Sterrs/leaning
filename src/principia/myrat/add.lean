@@ -230,6 +230,31 @@ begin
   rw sub_add_neg,
 end
 
+@[simp]
+theorem zero_sub: 0 - x = -x :=
+begin
+  rw ←sub_add_neg,
+  rw zero_add,
+end
+
+-- wtf
+@[simp]
+theorem sub_zero: x - 0 = x :=
+begin
+  rw ←sub_add_neg,
+  rw ←@neg_neg x,
+  rw ←@neg_add (-x) 0,
+  rw add_zero,
+end
+
+@[simp]
+theorem neg_zero: -(0: myrat) = 0 :=
+begin
+  rw ←zero_add (-0: myrat),
+  rw sub_add_neg,
+  rw sub_zero,
+end
+
 end myrat
 
 end hidden

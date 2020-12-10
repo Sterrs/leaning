@@ -451,6 +451,9 @@ begin
   },
 end
 
+theorem abs_eq_plusminus: abs m = m ∨ abs m = -m :=
+max_eq_either m (-m)
+
 end myint
 
 end hidden

@@ -293,6 +293,18 @@ begin
   from myint.abs_nonneg _,
 end
 
+theorem le_self_abs: x ≤ abs x :=
+begin
+  cases quotient.exists_rep x with a ha, subst ha,
+  rw abs_eq_cls rfl,
+  rw le_cls rfl rfl,
+  rw frac.abs_num,
+  rw frac.abs_denom,
+  conv {to_rhs, rw myint.zero_lt_abs _ a.denom_pos},
+  rw ←myint.abs_mul,
+  from myint.le_self_abs _,
+end
+
 theorem triangle_ineq : abs (x + y) ≤ abs x + abs y :=
 begin
   cases quotient.exists_rep x with a ha, subst ha,

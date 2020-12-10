@@ -166,6 +166,31 @@ begin
       frac.abs_neg, frac.neg_neg],
 end
 
+theorem abs_plusminus {x: myrat}: abs x = x ∨ abs x = -x :=
+begin
+  cases quotient.exists_rep x with a ha, subst ha,
+  repeat {rw abs_eq_cls rfl},
+  rw neg_eq_cls rfl,
+  repeat {rw frac.sound_exact_iff <|> rw frac.setoid_equiv},
+  repeat {rw frac.abs_num <|> rw frac.abs_denom},
+  cases myint.abs_eq_plusminus (a.num * a.denom) with h h, {
+    left,
+    rw myint.abs_mul at h,
+    have := myint.zero_lt_abs _ a.denom_pos,
+    rw ←this at h,
+    assumption,
+  }, {
+    right,
+    rw myint.abs_mul at h,
+    have := myint.zero_lt_abs _ a.denom_pos,
+    rw ←this at h,
+    rw frac.neg_denom,
+    rw frac.neg_num,
+    rw mul_neg_with,
+    assumption,
+  },
+end
+
 @[simp]
 theorem neg_neg (x : myrat) : -(-x) = x :=
 begin

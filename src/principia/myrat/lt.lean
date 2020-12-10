@@ -24,6 +24,12 @@ begin
   refl,
 end
 
+theorem lt_nrefl: ¬(x < x) :=
+begin
+  assume h,
+  from lt_impl_ne h rfl,
+end
+
 theorem lt_impl_le: x < y → x ≤ y :=
 begin
   assume hxy,
@@ -32,6 +38,26 @@ begin
   }, {
     contradiction,
   },
+end
+
+theorem lt_very_antisymmetric: ¬(x < y ∧ y < x) :=
+begin
+  assume h,
+  cases h with hxy hyx,
+  cases le_total_order x y; contradiction,
+end
+
+theorem lt_neg_switch: x < y ↔ -y < -x :=
+iff_to_contrapositive (le_neg_switch y x)
+
+@[trans]
+theorem lt_trans {a b c : myrat} : a < b → b < c → a < c :=
+begin
+  assume hab hbc hac,
+  have := le_trans _ _ _ (lt_impl_le _ _ hab) (lt_impl_le _ _ hbc),
+  have h := le_antisymm hac this,
+  subst h,
+  from lt_very_antisymmetric _ _ ⟨hbc, hab⟩,
 end
 
 theorem zero_lt_mul (a b: myrat): 0 < a → 0 < b → 0 < a * b :=
@@ -49,7 +75,8 @@ begin
   from hc hb.symm,
 end
 
-theorem lt_cancel_left {a b c : myrat} : c + a < c + b ↔ a < b := sorry
+theorem lt_cancel_left {a b c : myrat} : c + a < c + b ↔ a < b :=
+iff_to_contrapositive le_cancel_left
 
 theorem lt_add_left {a b : myrat} (c : myrat) : a < b ↔ c + a < c + b :=
 lt_cancel_left.symm
@@ -60,11 +87,64 @@ by rw [add_comm, add_comm b]; from lt_cancel_left
 theorem lt_add_right {a b : myrat} (c : myrat) : a < b ↔ a + c < b + c :=
 lt_cancel_right.symm
 
-theorem lt_mul_pos_right {z : myrat} : 0 < z → ∀ x y : myrat, x < y ↔ x * z < y * z := sorry
+theorem lt_rearrange: x < y ↔ 0 < y - x :=
+begin
+  have := @lt_cancel_right x y (-x),
+  simp at this,
+  symmetry,
+  from this,
+end
 
-theorem lt_mul_pos_left {z : myrat} : 0 < z → ∀ x y : myrat, x < y ↔ z * x < z * y := sorry
+theorem lt_mul_pos_right {z : myrat} : 0 < z → ∀ x y : myrat, x < y ↔ x * z < y * z :=
+begin
+  assume h0z,
+  intros x y,
+  split; assume h, {
+    rw lt_rearrange,
+    rw lt_rearrange at h,
+    rw ←sub_mul,
+    from zero_lt_mul _ _ h h0z,
+  }, {
+    rw lt_rearrange,
+    rw lt_rearrange at h,
+    assume h0yx,
+    rw ←sub_mul at h,
+    by_cases h1: 0 ≤ y - x, {
+      have := le_antisymm h0yx h1,
+      rw this at h,
+      rw zero_mul at h,
+      from lt_nrefl _ h,
+    }, {
+      rw ←lt_iff_nle at h1,
+      rw lt_rearrange at h1,
+      have := zero_lt_mul _ _ h1 h0z,
+      rw zero_sub at this,
+      rw lt_neg_switch at this,
+      rw mul_neg_with at this,
+      rw neg_neg at this,
+      rw neg_zero at this,
+      from lt_very_antisymmetric _ _ ⟨this, h⟩,
+    },
+  },
+end
 
-theorem lt_comb {a b c d: myrat}: a < b → c < d → a + c < b + d := sorry
+theorem lt_mul_pos_left {z : myrat} : 0 < z → ∀ x y : myrat, x < y ↔ z * x < z * y :=
+begin
+  assume h0z,
+  intros x y,
+  repeat {rw mul_comm z},
+  from lt_mul_pos_right h0z x y,
+end
+
+theorem lt_comb {a b c d: myrat}: a < b → c < d → a + c < b + d :=
+begin
+  assume hab hcd,
+  transitivity a + d,
+  rw ←lt_add_left,
+  assumption,
+  rw ←lt_add_right,
+  assumption,
+end
 
 -- It's debatable whether these should have b as an implicit or explicit
 -- argument. When used like `transitivity`, by `apply`ing it, we need to supply
@@ -74,11 +154,72 @@ theorem lt_comb {a b c d: myrat}: a < b → c < d → a + c < b + d := sorry
 -- use them as it involves the least `have` statements, resulting in shorter proofs
 -- with fewer labels used (so no h, h₁, h₂, hxy, hxy₁ etc.)
 
-theorem lt_le_chain {a c: myrat} (b : myrat): a < b → b ≤ c → a < c := sorry
+theorem lt_le_chain {a c: myrat} (b : myrat): a < b → b ≤ c → a < c :=
+begin
+  assume hab hbc hac,
+  have := le_trans _ _ _ (lt_impl_le _ _ hab) hbc,
+  have h := le_antisymm this hac,
+  subst h,
+  clear hac this,
+  have := le_antisymm (lt_impl_le _ _ hab) hbc,
+  subst this,
+  from lt_nrefl _ hab,
+end
 
-theorem le_lt_chain {a c: myrat} (b : myrat): a ≤ b → b < c → a < c := sorry
+theorem le_lt_chain {a c: myrat} (b : myrat): a ≤ b → b < c → a < c :=
+begin
+  assume hab hbc hac,
+  have := le_trans _ _ _ hab (lt_impl_le _ _ hbc),
+  have h := le_antisymm this hac,
+  subst h,
+  clear hac this,
+  have := le_antisymm (lt_impl_le _ _ hbc) hab,
+  subst this,
+  from lt_nrefl _ hbc,
+end
 
-theorem abs_lt (a b : myrat) : abs a < b ↔ -b < a ∧ a < b := sorry
+theorem lt_le_comb {a b c d: myrat}: a < b → c ≤ d → a + c < b + d :=
+begin
+  assume hab hcd,
+  apply le_lt_chain (a + d),
+  rw ←le_add_left,
+  assumption,
+  rw ←lt_add_right,
+  assumption,
+end
+
+theorem abs_lt (a b : myrat) : abs a < b ↔ -b < a ∧ a < b :=
+begin
+  split; assume h, {
+    split, {
+      rw lt_neg_switch,
+      rw neg_neg,
+      apply le_lt_chain a.abs, {
+        rw ←abs_neg,
+        from le_self_abs _,
+      }, {
+        assumption,
+      },
+    }, {
+      apply le_lt_chain a.abs, {
+        from le_self_abs _,
+      }, {
+        assumption,
+      },
+    },
+  }, {
+    cases h with hba hab,
+    rw lt_neg_switch at hba,
+    rw neg_neg at hba,
+    cases (@abs_plusminus a) with h h, {
+      rw h,
+      assumption,
+    }, {
+      rw h,
+      assumption,
+    },
+  },
+end
 
 theorem abs_lt_left {a b : myrat} : abs a < b → -b < a :=
 λ h, by rw abs_lt at h; from h.left
@@ -86,7 +227,20 @@ theorem abs_lt_left {a b : myrat} : abs a < b → -b < a :=
 theorem abs_lt_right {a b : myrat} : abs a < b → a < b :=
 λ h, by rw abs_lt at h; from h.right
 
-theorem lt_abs {a b : myrat} : a < abs b → b < -a ∨ a < b := sorry
+theorem lt_abs {a b : myrat} : a < abs b → b < -a ∨ a < b :=
+begin
+  assume hab,
+  cases @abs_plusminus b with h h, {
+    rw ←h,
+    right, assumption,
+  }, {
+    left,
+    rw lt_neg_switch,
+    rw neg_neg,
+    rw ←h,
+    assumption,
+  },
+end
 
 -- abs_diff refers to the pattern `abs (a - b) < c` which often shows up in analysis
 
@@ -105,9 +259,6 @@ begin
   rwa [lt_add_right b, ←sub_add_neg, add_assoc, neg_self_add,
        add_zero, add_comm] at h₁,
 end
-
-@[trans]
-theorem lt_trans {a b c : myrat} : a < b → b < c → a < c := sorry
 
 theorem zero_lt_one : (0 : myrat) < 1 :=
 begin
@@ -154,9 +305,84 @@ begin
   },
 end
 
-theorem lt_mul_comb_nonneg {a b x y : myrat} : 0 ≤ a → 0 ≤ x → a < b → x < y → a * x < b * y := sorry
+theorem lt_mul_comb_nonneg {a b x y : myrat} : 0 ≤ a → 0 ≤ x → a < b → x < y → a * x < b * y :=
+begin
+  assume h0a h0x hab hxy haxby,
+  have := le_mul_comb_nonneg h0a h0x
+    (lt_impl_le _ _ hab) (lt_impl_le _ _ hxy),
+  have has := le_antisymm haxby this,
+  clear haxby this,
+  have h1: x * (b - a) + b * (y - x) = 0, {
+    repeat {rw mul_sub},
+    rw has,
+    repeat {rw mul_comm _ x},
+    repeat {rw ←sub_add_neg},
+    rw add_comm,
+    rw add_assoc,
+    rw add_comm,
+    repeat {rw add_assoc},
+    rw neg_self_add,
+    rw add_zero,
+    rw neg_self_add,
+  },
+  have h2: 0 ≤ x * (b - a), {
+    rw lt_rearrange at hab,
+    have := le_mul_comb_nonneg (le_refl _) (le_refl _) h0x
+      (lt_impl_le _ _ hab),
+    rw zero_mul at this,
+    assumption,
+  },
+  have h3: 0 < b * (y - x), {
+    rw lt_rearrange at hxy,
+    from zero_lt_mul _ _ (le_lt_chain _ h0a hab) hxy,
+  },
+  have := lt_le_comb h3 h2,
+  rw add_zero at this,
+  rw add_comm at this,
+  rw h1 at this,
+  from lt_nrefl _ this,
+end
 
-theorem pos_iff_inv_pos : 0 < x ↔ 0 < x⁻¹ := sorry
+private lemma inv_pos: 0 < x → 0 < x⁻¹ :=
+begin
+  assume h0x,
+  assume hxi0,
+  by_cases h: 0 ≤ x⁻¹, {
+    have := le_antisymm hxi0 h,
+    have hx0: x = 0, {
+      rw ←@inv_inv x,
+      rw this,
+      refl,
+    },
+    subst hx0,
+    from lt_nrefl _ h0x,
+  }, {
+    rw ←lt_iff_nle at h,
+    rw lt_neg_switch at h,
+    rw neg_zero at h,
+    have := zero_lt_mul _ _ h0x h,
+    rw mul_with_neg at this,
+    rw mul_comm at this,
+    rw inv_self_mul at this,
+    rw lt_neg_switch at this,
+    rw neg_zero at this,
+    rw neg_neg at this,
+    from this zero_le_one,
+    assume hc,
+    from lt_impl_ne h0x hc.symm,
+ },
+end
+
+theorem pos_iff_inv_pos : 0 < x ↔ 0 < x⁻¹ :=
+begin
+  split, {
+    from inv_pos x,
+  }, {
+    have := inv_pos x⁻¹,
+    rw inv_inv at this,
+    assumption,
+  },
+end
 
 end myrat
 

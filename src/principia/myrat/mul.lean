@@ -225,6 +225,20 @@ begin
   rw neg_neg,
 end
 
+theorem sub_mul: (x - y) * z = x * z - y * z :=
+begin
+  repeat {rw ←sub_add_neg},
+  rw add_mul,
+  rw mul_neg_with,
+end
+
+theorem mul_sub: z * (x - y) = z * x - z * y :=
+begin
+  repeat {rw ←sub_add_neg},
+  rw mul_add,
+  rw mul_with_neg,
+end
+
 -- Reciprocal "inv"
 
 theorem inv_eq_cls {a : myrat} {x : frac}: a = ⟦x⟧ → a⁻¹ = ⟦x⁻¹⟧ :=
