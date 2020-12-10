@@ -189,7 +189,7 @@ begin
   apply dvd_add_lots,
   assumption,
 end
-#check succ_add
+
 theorem lt_ndvd: m ≠ 0 → m < n → ¬n ∣ m :=
 begin
   assume hmnz hmn hndm,

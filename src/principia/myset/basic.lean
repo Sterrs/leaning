@@ -68,6 +68,28 @@ notation U × V := set_prod U V
 instance : has_emptyc (myset α) :=
 ⟨λ a, false⟩
 
+theorem empty_iff_eq_empty {s: myset α}: empty s ↔ s = ∅ :=
+begin
+  split; assume h, {
+    apply funext,
+    intro a,
+    have := h a,
+    apply propext,
+    split, {
+      assume hs, contradiction,
+    }, {
+      assume he,
+      exfalso,
+      from he,
+    },
+  }, {
+    intro a,
+    assume hs,
+    rw h at hs,
+    from hs,
+  },
+end
+
 @[reducible]
 def sUnion (s : myset (myset α)) : myset α := {t | ∃ a ∈ s, t ∈ a}
 prefix `⋃₀`:120 := sUnion

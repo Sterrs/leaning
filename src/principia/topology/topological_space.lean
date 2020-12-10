@@ -19,6 +19,10 @@ structure topological_space (α : Type) :=
 
 namespace topological_space
 
+open classical
+
+local attribute [instance] classical.prop_decidable
+
 variables {α β : Type}
 -- include X Y
 
@@ -32,10 +36,75 @@ is_open X (myset.compl A)
 def subspace_topology (X : topological_space α) (Y : myset α) : topological_space (subtype Y) :=
 {
   is_open := { V | ∃ U : myset α, is_open X U ∧ V = myset.subtype_restriction Y U },
-  univ_open := sorry,
-  empty_open := sorry,
-  open_union_open := sorry,
-  open_intersection_open := sorry
+  univ_open :=
+  begin
+    existsi myset.univ,
+    split, {
+      from X.univ_open,
+    }, {
+      apply funext,
+      intro x,
+      refl,
+    },
+  end,
+  empty_open :=
+  begin
+    -- it does weird things if i try ∅
+    existsi (λ x, false),
+    split, {
+      from X.empty_open,
+    }, {
+      apply funext,
+      intro x,
+      refl,
+    },
+  end,
+  open_union_open :=
+  begin
+    sorry, -- need to make a lot of choices here!
+    -- we want the union of all the sets that intersect with the
+    -- subspace to give a set in S
+  end,
+  open_intersection_open :=
+  begin
+    intros U V,
+    assume hU hV,
+    cases hU with U' hU',
+    cases hV with V' hV',
+    existsi U' ∩ V',
+    split, {
+      apply X.open_intersection_open, {
+        from hU'.left,
+      }, {
+        from hV'.left,
+      },
+    }, {
+      apply funext,
+      intro x,
+      apply propext,
+      split, {
+        assume hUVx,
+        split, {
+          have := hUVx.left,
+          rw hU'.right at this,
+          from this,
+        }, {
+          have := hUVx.right,
+          rw hV'.right at this,
+          from this,
+        },
+      }, {
+        assume hUVx,
+        split, {
+          rw hU'.right,
+          from hUVx.left,
+        }, {
+          rw hV'.right,
+          from hUVx.right,
+        },
+      },
+    },
+  end
 }
 
 -- We don't assume a topology and define a base, we *build* a topology from a base
@@ -193,7 +262,35 @@ def indiscrete_topology (α : Type) : topological_space α :=
   end,
   open_union_open := λ σ h,
   begin
-    sorry,
+    by_cases hempty: ⋃₀ σ = ∅, {
+      left, assumption,
+    }, {
+      right,
+      rw ←myset.empty_iff_eq_empty at hempty,
+      rw ←myset.exists_iff_nempty at hempty,
+      cases hempty with x hx,
+      apply funext,
+      intro y,
+      apply propext,
+      dsimp only [myset.univ],
+      split; assume hy, {
+        trivial,
+      }, {
+        dsimp only [myset.sUnion],
+        dsimp only [myset.sUnion] at hx,
+        cases hx with S hS,
+        cases hS with H hH,
+        cases h S H with he hu, {
+          rw he at hH,
+          exfalso, from hH,
+        }, {
+          existsi S,
+          existsi H,
+          rw hu,
+          trivial,
+        },
+      },
+    },
   end,
   open_intersection_open := λ U V hU hV,
   begin
@@ -252,5 +349,4 @@ def is_dense (X : topological_space α) (A : myset α) : Prop :=
 closure X A = myset.univ
 
 end topological_space
-#check subtype
 end hidden
