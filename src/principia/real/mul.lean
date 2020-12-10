@@ -410,14 +410,47 @@ by rw [mul_comm, mul_one]; refl
 
 theorem mul_assoc: x * y * z = x * (y * z) :=
 begin
-  sorry,
+  cases quotient.exists_rep x with a ha,
+  cases quotient.exists_rep y with b hb,
+  cases quotient.exists_rep z with c hc,
+  have h₁: x * y * z = ⟦a * b * c⟧,
+    rw mul_eq_cls, rw mul_eq_cls,
+    repeat { symmetry, assumption, },
+  have h₂: x * (y * z) = ⟦a * (b * c)⟧,
+    rw mul_eq_cls,
+    symmetry, assumption,
+    rw mul_eq_cls,
+    symmetry, assumption,
+    symmetry, assumption,
+  apply seq_eq_imp_real_eq h₁ h₂,
+  intro n,
+  repeat { rw cau_seq.mul_val, },
+  from myrat.mul_assoc,
 end
 
 instance mul_is_assoc: is_associative real mul := ⟨@mul_assoc⟩
 
 theorem mul_add: x * (y + z) = x * y + x * z :=
 begin
-  sorry,
+  cases quotient.exists_rep x with a ha,
+  cases quotient.exists_rep y with b hb,
+  cases quotient.exists_rep z with c hc,
+  have h₁: x * (y + z) = ⟦a * (b + c)⟧,
+    rw mul_eq_cls,
+    symmetry, assumption,
+    rw add_eq_cls,
+    symmetry, assumption,
+    symmetry, assumption,
+  have h₂: x * y + x * z = ⟦a * b + a * c⟧,
+    rw add_eq_cls,
+    rw mul_eq_cls,
+    repeat { symmetry, assumption, },
+    rw mul_eq_cls,
+    repeat { symmetry, assumption, },
+  apply seq_eq_imp_real_eq h₁ h₂,
+  intro n,
+  rw [cau_seq.add_val, cau_seq.mul_val, cau_seq.add_val, cau_seq.mul_val],
+  from myrat.mul_add,
 end
 
 theorem add_mul: (x + y) * z = x * z + y * z :=
@@ -425,18 +458,29 @@ by rw [mul_comm, mul_add, mul_comm, mul_comm z]
 
 theorem mul_with_neg : x * (-y) = -(x * y) :=
 begin
-  sorry,
+  cases quotient.exists_rep x with a ha,
+  cases quotient.exists_rep y with b hb,
+  have h₁: x * -y = ⟦a * -b⟧,
+    rw mul_eq_cls,
+    symmetry, assumption,
+    rw neg_eq_cls,
+    symmetry, assumption,
+  have h₂: -(x * y) = ⟦-(a * b)⟧,
+    rw neg_eq_cls,
+    rw mul_eq_cls,
+    symmetry, assumption,
+    symmetry, assumption,
+  apply seq_eq_imp_real_eq h₁ h₂,
+  intro n,
+  rw [cau_seq.mul_val, cau_seq.neg_val, cau_seq.neg_val, cau_seq.mul_val],
+  from myrat.mul_with_neg,
 end
 
 theorem mul_neg_with : (-x) * y = -(x * y) :=
-begin
-  sorry,
-end
+by rw [mul_comm, mul_with_neg, mul_comm]
 
 theorem mul_neg_neg: -x * -y = x * y :=
-begin
-  sorry,
-end
+by rw [mul_with_neg, mul_neg_with, neg_neg]
 
 -- Reciprocal "inv"
 
