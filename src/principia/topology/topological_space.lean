@@ -61,9 +61,52 @@ def subspace_topology (X : topological_space α) (Y : myset α) : topological_sp
   end,
   open_union_open :=
   begin
-    sorry, -- need to make a lot of choices here!
-    -- we want the union of all the sets that intersect with the
-    -- subspace to give a set in S
+    intros σ hσ,
+    change ∃ U, X.is_open U ∧ (⋃₀ σ) = Y.subtype_restriction U,
+    let τ : myset (myset α) :=
+    {W | X.is_open W ∧ ∃ V : myset (subtype Y), V ∈ σ ∧ V = Y.subtype_restriction W},
+    existsi ⋃₀τ,
+    split, {
+      apply X.open_union_open,
+      intros U hU,
+      from hU.left,
+    }, {
+      unfold myset.subtype_restriction,
+      apply funext,
+      intro x,
+      apply propext,
+      split; assume h, {
+        change ↑x ∈ ⋃₀ τ,
+        dsimp only [τ],
+        change ∃ V ∈ τ, ↑x ∈ V,
+        change ∃ W ∈ σ, x ∈ W at h,
+        cases h with W hW,
+        cases hW with hWσ hxW,
+        cases hσ _ hWσ with U hU,
+        existsi U,
+        cases hU with hUopen hWU,
+        suffices : U ∈ τ,
+          existsi this,
+          rwa hWU at hxW,
+        dsimp only [τ],
+        split,
+          assumption,
+        existsi W,
+        split; assumption,
+      }, {
+        change ∃ V ∈ τ, ↑x ∈ V at h,
+        change ∃ W ∈ σ, x ∈ W,
+        cases h with V hV,
+        cases hV with hVτ hxV,
+        existsi Y.subtype_restriction V,
+        cases hVτ with hVopen this,
+        cases this with U this,
+        cases this with hUσ hUV,
+        rw hUV at hUσ,
+        existsi hUσ,
+        assumption,
+      },
+    },
   end,
   open_intersection_open :=
   begin
