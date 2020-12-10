@@ -111,12 +111,6 @@ begin
   sorry,
 end
 
-theorem nonzero_impl_eventually_non_zero (f : cau_seq) (hf : ¬f ≈ 0) :
-∃ N : mynat, ∀ n : mynat, N < n → f.val n ≠ 0 :=
-begin
-  sorry,
-end
-
 theorem nzero_impl_abs_eventually_bounded_below (f : cau_seq) (hf : ¬f ≈ 0) :
 ∃ (C : myrat) (N : mynat), 0 < C ∧ ∀ n : mynat, N < n → C < (f.val n).abs :=
 begin
