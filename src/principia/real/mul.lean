@@ -357,6 +357,13 @@ begin
   },
 end
 
+instance: has_inv real := ⟨inv⟩
+
+def div: real → real → real :=
+λ x y, x * y⁻¹
+
+instance: has_div real := ⟨div⟩
+
 variables x y z : real
 
 -- Use a b c for corresponding sequences
@@ -406,7 +413,7 @@ begin
   sorry,
 end
 
-instance mul_is_assoc: is_associative myrat mul := ⟨@mul_assoc⟩
+instance mul_is_assoc: is_associative real mul := ⟨@mul_assoc⟩
 
 theorem mul_add: x * (y + z) = x * y + x * z :=
 begin
@@ -433,11 +440,8 @@ end
 
 -- Reciprocal "inv"
 
-theorem inv_eq_cls {a : myrat} {x : frac}: a = ⟦x⟧ → a⁻¹ = ⟦x⁻¹⟧ :=
-λ h, by rw h; refl
-
 @[simp]
-theorem one_inv : 1⁻¹ = (1 : myrat) :=
+theorem one_inv : 1⁻¹ = (1 : real) :=
 begin
   sorry,
 end
@@ -459,17 +463,19 @@ begin
   sorry,
 end
 
-theorem inv_self_mul : x ≠ 0 → x⁻¹ * x = 1 :=
+theorem inv_self_mul {x : real}: x ≠ 0 → x⁻¹ * x = 1 :=
 begin
   sorry,
 end
 
-theorem self_inv_mul : x ≠ 0 → x * x⁻¹ = 1 :=
+theorem self_inv_mul {x : real}: x ≠ 0 → x * x⁻¹ = 1 :=
 begin
   sorry,
 end
 
 -- Division
+
+theorem div_eq_mul_inv : x / y = x * y⁻¹ := rfl
 
 @[simp]
 theorem div_one : x / 1 = x :=
@@ -486,13 +492,13 @@ by rw [div_eq_mul_inv, zero_mul]
 theorem div_zero : x / 0 = 0 :=
 by rw [div_eq_mul_inv, zero_inv, mul_zero]
 
-theorem mul_div_cancel : y ≠ 0 → (x * y) / y = x :=
+theorem mul_div_cancel {y : real}: y ≠ 0 → (x * y) / y = x :=
 λ h, by rw [div_eq_mul_inv, mul_assoc, self_inv_mul h, mul_one]
 
-theorem div_mul_cancel : y ≠ 0 → (x / y) * y = x :=
+theorem div_mul_cancel {y : real} : y ≠ 0 → (x / y) * y = x :=
 λ h, by rw [div_eq_mul_inv, mul_assoc, inv_self_mul h, mul_one]
 
-theorem self_div : x ≠ 0 → x / x = 1 :=
+theorem self_div {x : real} : x ≠ 0 → x / x = 1 :=
 λ h, by rw [div_eq_mul_inv, self_inv_mul h]
 
 theorem div_inv_switch : x / y = (y / x)⁻¹ :=
@@ -501,21 +507,20 @@ by rw [div_eq_mul_inv, div_eq_mul_inv, inv_distr, inv_inv, mul_comm]
 theorem add_div : (x + y) / z = x / z + y / z :=
 by repeat { rw div_eq_mul_inv, }; rw add_mul
 
-theorem one_plus_one : 1 + 1 = (2 : myrat):= rfl
+theorem one_plus_one : 1 + 1 = (2 : real):= rfl
 
 theorem double_eq_add_self : 2 * x = x + x :=
 by rw [←one_plus_one, add_mul, one_mul]
 
-theorem half_plus_half {ε : myrat} : ε / 2 + ε / 2 = ε :=
+theorem half_plus_half {ε : real} : ε / 2 + ε / 2 = ε :=
 begin
-  rw [←double_eq_add_self, mul_comm, div_mul_cancel two_nzero],
+  rw [←double_eq_add_self, mul_comm, div_mul_cancel _ two_nzero],
 end
 
--- I'm sure I proved this somewhere else
-theorem abs_mul : abs (x * y) = abs x * abs y :=
-begin
-  sorry,
-end
+-- theorem abs_mul : abs (x * y) = abs x * abs y :=
+-- begin
+--   sorry,
+-- end
 
 theorem mul_integral: x * y = 0 → x = 0 ∨ y = 0 :=
 begin
