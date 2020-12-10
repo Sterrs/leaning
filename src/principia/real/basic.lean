@@ -90,7 +90,7 @@ begin
   assume heq,
   rw cau_seq.class_equiv,
   rw ←cau_seq.setoid_equiv,
-  apply cau_seq.seq_eq_imp_cau_seq_equiv,
+  apply cau_seq.seq_eq_impl_cau_seq_equiv,
   assumption,
 end
 
