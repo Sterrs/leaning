@@ -73,6 +73,9 @@ instance frac.setoid : setoid frac :=
 theorem setoid_equiv (x y : frac) :
 x ≈ y ↔ x.num * y.denom = y.num * x.denom := iff.rfl
 
+theorem sound_exact_iff (x y: frac):
+⟦x⟧ = ⟦y⟧ ↔ x ≈ y := iff.intro quotient.exact quotient.sound
+
 instance decidable_frac_eq: ∀ a b: frac, decidable (a ≈ b) :=
 begin
   intros a b,
