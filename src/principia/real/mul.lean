@@ -128,10 +128,7 @@ begin
   have h0AAε : 0 < A * (A * ε), {
     repeat {
       rw ←@myrat.mul_zero 0,
-      apply myrat.lt_mul_comb_nonneg,
-        refl,
-        refl,
-        from hN.left,
+      apply myrat.lt_mul_comb_nonneg (by refl) (by refl) hN.left,
     },
     assumption,
   },
@@ -201,6 +198,22 @@ begin
   refl,
 end⟩
 
+instance: has_inv cau_seq := ⟨inv⟩
+
+-- Lemma to help rewrite definitional equalities
+lemma inv_def (f : cau_seq) (n : mynat) :
+(f⁻¹).val n = if f ≈ (0 : cau_seq) then 0 else (f.val n)⁻¹ :=
+rfl
+
+theorem inv_equiv_zero (a : cau_seq) (h : a ≈ 0) : a⁻¹ ≈ 0 :=
+begin
+  apply cau_seq.seq_eq_impl_cau_seq_equiv,
+  intro n,
+  rw [inv_def, if_pos],
+  refl,
+  assumption,
+end
+
 end cau_seq
 
 namespace real
@@ -223,6 +236,126 @@ instance: has_mul real := ⟨mul⟩
 theorem mul_eq_cls {a b : cau_seq} {x y : real} :
 x = ⟦a⟧ → y = ⟦b⟧ → x * y = ⟦a * b⟧ :=
 λ hax hby, by rw [hax, hby]; refl
+
+open classical
+
+local attribute [instance] classical.prop_decidable
+
+def inv: real → real :=
+quotient.lift (λ f, ⟦f⁻¹⟧)
+begin
+  intros a b hab,
+  have ha := a.property,
+  have hb := b.property,
+  dsimp only [],
+  by_cases ha0: a ≈ (0 : cau_seq), {
+    have: b ≈ (0 : cau_seq),
+      apply @setoid.trans cau_seq _ b a 0,
+        apply @setoid.symm cau_seq _ a b,
+        assumption,
+      assumption,
+    rw [cau_seq.class_equiv, ←cau_seq.setoid_equiv],
+    apply @setoid.trans cau_seq _ a⁻¹ 0 b⁻¹,
+      apply cau_seq.inv_equiv_zero,
+      assumption,
+    apply @setoid.symm cau_seq _ _ _,
+    apply cau_seq.inv_equiv_zero,
+    assumption,
+  }, {
+    have hb0 : ¬b ≈ (0 : cau_seq),
+      assume hb0,
+      apply ha0,
+      apply @setoid.trans cau_seq _ a b 0,
+        assumption,
+      assumption,
+    cases cau_seq.nzero_impl_abs_eventually_bounded_below a ha0 with A hA,
+    cases cau_seq.nzero_impl_abs_eventually_bounded_below b hb0 with B hB,
+    cases hA with N₁ hN₁,
+    cases hB with N₂ hN₂,
+    rw cau_seq.class_equiv,
+    rw cau_seq.setoid_equiv at hab,
+    dsimp only [cau_seq.equivalent] at hab ⊢,
+    intros ε hε,
+    have h0ABε : 0 < A * (B * ε), {
+      rw ←@myrat.zero_mul 0,
+      apply myrat.lt_mul_comb_nonneg (by refl) (by refl) hN₁.left,
+      rw ←@myrat.zero_mul 0,
+      apply myrat.lt_mul_comb_nonneg (by refl) (by refl) hN₂.left hε,
+    },
+    cases hab (A * (B * ε)) h0ABε with N₃ hN₃,
+    existsi mynat.max (mynat.max N₁ N₂) N₃,
+    intros n hn,
+    rw [cau_seq.inv_def, cau_seq.inv_def, if_neg ha0, if_neg hb0],
+    have hanpos : 0 < (a.val n).abs, {
+      transitivity A,
+        from hN₁.left,
+      apply hN₁.right n,
+      apply @mynat.max_lt_cancel_left _ N₂ _,
+      apply @mynat.max_lt_cancel_left _ N₃ _,
+      assumption,
+    },
+    have hbnpos : 0 < (b.val n).abs, {
+      transitivity B,
+        from hN₂.left,
+      apply hN₂.right n,
+      apply @mynat.max_lt_cancel_right N₁ _ _,
+      apply @mynat.max_lt_cancel_left _ N₃ _,
+      assumption,
+    },
+    have hanzero : a.val n ≠ 0, {
+      assume this,
+      rw this at hanpos,
+      rw myrat.abs_zero at hanpos,
+      apply myrat.lt_nrefl 0,
+      assumption,
+    },
+    have hbnzero : b.val n ≠ 0, {
+      assume this,
+      rw this at hbnpos,
+      rw myrat.abs_zero at hbnpos,
+      apply myrat.lt_nrefl 0,
+      assumption,
+    },
+    -- A small amount of rearranging...
+    rw [myrat.lt_mul_pos_left hanpos, ←myrat.abs_mul, ←myrat.sub_add_neg, myrat.mul_add,
+        myrat.self_inv_mul hanzero, myrat.lt_mul_pos_left hbnpos, ←myrat.abs_mul,
+        myrat.mul_add, myrat.mul_one, myrat.mul_with_neg, myrat.mul_with_neg, myrat.add_comm,
+        myrat.mul_comm (a.val n), ←myrat.mul_assoc, myrat.self_inv_mul hbnzero,
+        myrat.one_mul, ←myrat.abs_neg, myrat.neg_add, myrat.neg_neg, myrat.sub_add_neg],
+    apply myrat.lt_le_chain (A * (B * ε)), {
+      apply hN₃ n,
+      apply mynat.max_lt_cancel_right hn,
+    }, {
+      rw [←@myrat.mul_assoc (b.val n).abs, myrat.mul_comm (b.val n).abs, @myrat.mul_assoc (a.val n).abs],
+      apply myrat.le_mul_comb_nonneg, {
+        from myrat.lt_impl_le _ _ hN₁.left,
+      }, {
+        rw ←@myrat.zero_mul 0,
+        apply myrat.le_mul_comb_nonneg (by refl) (by refl),
+        from myrat.lt_impl_le _ _ hN₂.left,
+        from myrat.lt_impl_le _ _ hε,
+      }, {
+        apply myrat.lt_impl_le _ _,
+        apply hN₁.right n,
+        apply @mynat.max_lt_cancel_left _ N₂ _,
+        apply @mynat.max_lt_cancel_left _ N₃ _,
+        assumption,
+      },
+      apply myrat.le_mul_comb_nonneg, {
+        from myrat.lt_impl_le _ _ hN₂.left,
+      }, {
+        from myrat.lt_impl_le _ _ hε,
+      }, {
+        apply myrat.lt_impl_le _ _,
+        apply hN₂.right n,
+        apply @mynat.max_lt_cancel_right N₁ _ _,
+        apply @mynat.max_lt_cancel_left _ N₃ _,
+        assumption,
+      },
+      refl,
+    },
+  },
+end
 
 variables x y z : real
 
@@ -381,31 +514,12 @@ end
 -- I'm sure I proved this somewhere else
 theorem abs_mul : abs (x * y) = abs x * abs y :=
 begin
-  cases quotient.exists_rep x with a ha, subst ha,
-  cases quotient.exists_rep y with b hb, subst hb,
-  rw mul_eq_cls rfl rfl,
-  repeat {rw abs_eq_cls rfl},
-  rw mul_eq_cls rfl rfl,
-  rw class_equiv,
-  repeat {rw frac.abs_num <|> rw frac.abs_denom},
-  repeat {rw frac.mul_num <|> rw frac.mul_denom},
-  repeat {rw frac.abs_num <|> rw frac.abs_denom},
-  rw ←myint.abs_mul,
+  sorry,
 end
 
 theorem mul_integral: x * y = 0 → x = 0 ∨ y = 0 :=
 begin
-  assume hxy0,
-  by_cases h: y = 0, {
-    right, assumption,
-  }, {
-    left,
-    have := @mul_div_cancel x y h,
-    rw hxy0 at this,
-    rw zero_div at this,
-    symmetry,
-    assumption,
-  },
+  sorry,
 end
 
 end real

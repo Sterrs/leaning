@@ -89,11 +89,9 @@ begin
   subst hxf, subst hyg,
   assume heq,
   rw cau_seq.class_equiv,
-  dsimp only [cau_seq.equivalent],
-  intros ε hε,
-  existsi (0 : mynat),
-  intros n hn,
-  rwa [heq n, myrat.sub_self],
+  rw ←cau_seq.setoid_equiv,
+  apply cau_seq.seq_eq_imp_cau_seq_equiv,
+  assumption,
 end
 
 theorem neg_neg (x : real) : -(-x) = x :=

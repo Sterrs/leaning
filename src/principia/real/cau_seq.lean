@@ -91,6 +91,17 @@ equivalent_trans⟩
 theorem setoid_equiv (f g : cau_seq) :
 f ≈ g ↔ equivalent f g := iff.rfl
 
+theorem seq_eq_impl_cau_seq_equiv (f g : cau_seq) : (∀ n, f.val n = g.val n) → f ≈ g :=
+begin
+  assume h,
+  rw setoid_equiv,
+  unfold equivalent,
+  intros ε hε,
+  existsi (0 : mynat),
+  intros n hn,
+  rwa [h n,myrat.sub_self],
+end
+
 theorem constant_cauchy (x : myrat) : is_cau_seq (λ n, x) :=
 begin
   dsimp only [is_cau_seq],
