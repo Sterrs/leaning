@@ -61,7 +61,7 @@ def real := quotient cau_seq.real_setoid
 
 namespace real
 
-instance : has_zero real := ⟨⟦⟨λ n, 0, cau_seq.constant_cauchy 0⟩⟧⟩
+instance : has_zero real := ⟨⟦0⟧⟩
 
 theorem real_zero : (0 : real) = ⟦⟨λ n, 0, cau_seq.constant_cauchy 0⟩⟧ := rfl
 

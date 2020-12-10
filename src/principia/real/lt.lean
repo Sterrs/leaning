@@ -53,7 +53,9 @@ namespace real
 def positive : real → Prop :=
 quotient.lift cau_seq.positive cau_seq.positive_well_defined
 
--- Need subtraction, then x < y ↔ positive (x - y)
+def lt (x y : real) := positive (x - y)
+
+instance: has_lt real := ⟨lt⟩
 
 end real
 

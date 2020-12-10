@@ -283,6 +283,11 @@ begin
   from myint.square_nonneg _,
 end
 
+theorem self_le_abs : x ≤ abs x :=
+begin
+  sorry,
+end
+
 theorem abs_nonneg : 0 ≤ abs x :=
 begin
   cases quotient.exists_rep x with a ha, subst ha,

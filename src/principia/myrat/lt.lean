@@ -34,6 +34,16 @@ begin
   },
 end
 
+theorem lt_nrefl: ¬x < x :=
+begin
+  sorry,
+end
+
+theorem lt_iff_le_and_neq: x < y ↔ x ≤ y ∧ x ≠ y :=
+begin
+  sorry,
+end
+
 theorem zero_lt_mul (a b: myrat): 0 < a → 0 < b → 0 < a * b :=
 begin
   assume hapos hbpos,
