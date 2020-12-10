@@ -10,7 +10,7 @@ instance: has_le real := ⟨le⟩
 
 variables x y z : real
 
-theorem lt_iff_nle : x < y ↔ ¬y ≤ x := iff.rfl
+theorem le_iff_nlt : x ≤ y ↔ ¬y < x := iff.rfl
 
 end real
 

@@ -40,11 +40,6 @@ begin
   },
 end
 
-theorem lt_iff_le_and_neq: x < y ↔ x ≤ y ∧ x ≠ y :=
-begin
-  sorry,
-end
-
 theorem lt_very_antisymmetric: ¬(x < y ∧ y < x) :=
 begin
   assume h,
@@ -386,6 +381,63 @@ begin
     have := inv_pos x⁻¹,
     rw inv_inv at this,
     assumption,
+  },
+end
+
+theorem le_iff_lt_or_eq: x ≤ y ↔ x < y ∨ x = y :=
+begin
+  split, {
+    assume hxy,
+    by_cases h: y ≤ x, {
+      right,
+      from  le_antisymm hxy h,
+    }, {
+      left,
+      assumption,
+    },
+  }, {
+    assume h,
+    cases h with h1 h2, {
+      from lt_impl_le _ _ h1,
+    }, {
+      rw h2,
+    },
+  },
+end
+
+theorem lt_trichotomy: x = y ∨ x < y ∨ y < x :=
+begin
+  by_cases h: x ≤ y, {
+    rw le_iff_lt_or_eq at h,
+    cases h with h h, {
+      right, left, assumption,
+    }, {
+      left, assumption,
+    },
+  }, {
+    right, right, assumption,
+  },
+end
+
+-- basically de Morgan
+theorem lt_iff_le_and_neq: x < y ↔ x ≤ y ∧ x ≠ y :=
+begin
+  split, {
+    assume h,
+    split, {
+      from lt_impl_le _ _ h,
+    }, {
+      from lt_impl_ne h,
+    },
+  }, {
+    assume h,
+    rw le_iff_lt_or_eq at h,
+    cases h with h1 h2,
+    cases h1 with h h, {
+      assumption,
+    }, {
+      contradiction,
+    },
   },
 end
 
