@@ -13,7 +13,7 @@ local attribute [instance] classical.prop_decidable
 def is_continuous (f : α → β) [X : topological_space α] [Y : topological_space β] : Prop :=
 ∀ V : myset β, is_open Y V → is_open X (myset.inverse_image f V)
 
--- e.g. Identity, constant, inclusion functions are cts
+-- e.g. projections in product topology
 
 theorem identity_continuous [X : topological_space α]:
 @is_continuous _ _ (id: α → α) X X :=
@@ -74,6 +74,36 @@ begin
     refl,
   },
 end
+
+theorem continuous_to_image
+[X : topological_space α] [Y : topological_space β]
+(f: α → β):
+@is_continuous _ _ f X Y →
+@is_continuous _ _ (myset.function_restrict_to_image f)
+               X (subspace_topology Y (myset.image f myset.univ)) :=
+begin
+  assume hfc,
+  intro U,
+  assume hUo,
+  cases hUo with V hV,
+  cases hV with hVo hVU,
+  have: (myset.inverse_image (myset.function_restrict_to_image f) U)
+        = myset.inverse_image f V, {
+    apply funext,
+    intro x,
+    apply propext,
+    split; assume h, {
+      rw hVU at h,
+      from h,
+    }, {
+      rw hVU,
+      from h,
+    },
+  },
+  rw this,
+  from hfc V hVo,
+end
+
 
 end topological_space
 

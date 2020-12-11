@@ -106,12 +106,185 @@ def image {α β : Type} (f : α → β) (U : myset α) := {b | ∃ a, a ∈ U �
 
 def inverse_image {α β : Type} (f : α → β) (V : myset β) := {a | f a ∈ V}
 
+theorem inverse_image_of_image
+{α β : Type} (f: α → β) (U : myset α):
+U ⊆ inverse_image f (image f U) :=
+begin
+  intro x,
+  assume hx,
+  existsi x,
+  split, assumption, trivial,
+end
+
+theorem image_of_inverse_image
+{α β : Type} (f: α → β) (U : myset β):
+image f (inverse_image f U) ⊆ U :=
+begin
+  intro x,
+  assume hx,
+  cases hx with y hy,
+  rw ←hy.right,
+  from hy.left,
+end
+
+theorem subset_empty_impl_empty
+{α: Type} (U: myset α):
+U ⊆ ∅ → U = ∅ :=
+begin
+  assume hUe,
+  apply funext,
+  intro x,
+  apply propext,
+  split; assume h, {
+    from hUe _ h,
+  }, {
+    exfalso, from h,
+  },
+end
+
+theorem univ_subset_impl_univ
+{α: Type} (U: myset α):
+myset.univ ⊆ U → U = myset.univ :=
+begin
+  assume h,
+  apply funext,
+  intro x,
+  apply propext,
+  split; assume hux, {
+    trivial,
+  }, {
+    from h x trivial,
+  },
+end
+
+theorem image_nonempty
+{α β : Type} (f: α → β) (U: myset α):
+U ≠ ∅ → image f U ≠ ∅ :=
+begin
+  assume hUne,
+  assume hpreUe,
+  rw ←empty_iff_eq_empty at hpreUe,
+  change ¬(U = ∅) at hUne,
+  rw ←empty_iff_eq_empty at hUne,
+  rw ←exists_iff_nempty at hUne,
+  cases hUne with x hx,
+  apply hpreUe (f x),
+  existsi x,
+  split, assumption, refl,
+end
+
+theorem image_empty
+{α β : Type} (f: α → β) (U: myset α):
+U = ∅ → image f U = ∅ :=
+begin
+  assume hUe,
+  apply funext,
+  intro x,
+  apply propext,
+  split; assume h, {
+    cases h with y hy,
+    rw hUe at hy,
+    from hy.left,
+  }, {
+    exfalso, from h,
+  },
+end
+
+theorem inverse_image_empty
+{α β : Type} (f: α → β) (U: myset β):
+U = ∅ → inverse_image f U = ∅ :=
+begin
+  assume hUe,
+  apply funext,
+  intro x,
+  apply propext,
+  split; assume h, {
+    rw hUe at h,
+    from h,
+  }, {
+    exfalso, from h,
+  },
+end
+
+theorem inverse_image_intersection
+{α β : Type} (f: α → β) (U V: myset β):
+inverse_image f (U ∩ V) = inverse_image f U ∩ inverse_image f V :=
+begin
+  refl,
+end
+
+theorem inverse_image_union
+{α β : Type} (f: α → β) (U V: myset β):
+inverse_image f (U ∪ V) = inverse_image f U ∪ inverse_image f V :=
+begin
+  refl,
+end
+
+theorem inverse_image_of_image_of_univ
+{α β : Type} (f: α → β):
+myset.univ = inverse_image f (image f myset.univ) :=
+begin
+  symmetry,
+  apply univ_subset_impl_univ,
+  apply inverse_image_of_image,
+end
+
 def compl (s : myset α) : myset α :=
 {a | a ∉ s}
 
 -- Used to restrict some set to a subtype ("intersect" a set with a subtype)
 def subtype_restriction (Y : myset α) (U : myset α) : myset (subtype Y) :=
 { w | ↑w ∈ U }
+
+def function_restrict_to_image
+{α β: Type} (f: α → β): α → subtype (myset.image f myset.univ)
+:= λ x, ⟨f x, ⟨x, ⟨true.intro, rfl⟩⟩⟩
+
+theorem to_image_surjective
+{α β: Type} (f: α → β):
+(image (function_restrict_to_image f) univ) = univ :=
+begin
+  apply funext,
+  intro x,
+  apply propext,
+  split; assume h, {
+    trivial,
+  }, {
+    cases x.property with y hy,
+    unfold image,
+    existsi y,
+    split, {
+      trivial,
+    }, {
+      apply subtype.eq,
+      rw ←hy.right,
+      refl,
+    },
+  },
+end
+
+theorem nonempty_inverse_image_surjective
+{α β: Type} (f: α → β) (U: myset (subtype (image f univ))):
+U ≠ ∅ →
+inverse_image (function_restrict_to_image f) U ≠ ∅ :=
+begin
+  assume hUne,
+  assume hpreUe,
+  rw ←empty_iff_eq_empty at hpreUe,
+  change ¬(U = ∅) at hUne,
+  rw ←empty_iff_eq_empty at hUne,
+  rw ←exists_iff_nempty at hUne,
+  cases hUne with x hx,
+  cases x.property with y hy,
+  apply hpreUe y,
+  unfold inverse_image,
+  have: x = ⟨f y, begin rw hy.right, from x.property end⟩, {
+    apply subtype.eq,
+    from hy.right.symm,
+  },
+  rw this at hx, clear this,
+  from hx,
+end
 
 end myset
 
