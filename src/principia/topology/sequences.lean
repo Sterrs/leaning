@@ -18,7 +18,26 @@ def converges_to
 ∀ U: myset α, X.is_open U → x ∈ U →
 ∃ N: mynat, ∀ n: mynat, N ≤ n → xn n ∈ U
 
-theorem image_of_sequence
+theorem eventually_constant_converges
+(X: topological_space α)
+(xn: sequence α)
+(x: α):
+(∃ (N: mynat), ∀ n: mynat, N ≤ n → xn n = x) →
+converges_to X x xn :=
+begin
+  assume hconst,
+  intro U,
+  assume hUo,
+  assume hxU,
+  cases hconst with N hN,
+  existsi N,
+  intro n,
+  assume hNn,
+  rw hN n hNn,
+  assumption,
+end
+
+theorem image_converges
 (X: topological_space α) (Y: topological_space β)
 (x: α) (xn: sequence α) (hxnconv: converges_to X x xn)
 (f: α → β) (hfc: @is_continuous _ _ f X Y):
@@ -71,6 +90,98 @@ begin
   contradiction,
 end
 
+theorem indiscrete_converges
+(x: α) (xn: sequence α):
+converges_to (indiscrete_topology α) x xn :=
+begin
+  intro U,
+  assume hUo,
+  assume hxU,
+  existsi (0: mynat),
+  intro n,
+  assume h0n,
+  cases hUo with h h, {
+    rw h at hxU,
+    exfalso, from hxU,
+  }, {
+    rw h,
+    trivial,
+  },
+end
+
+theorem discrete_converges
+(x: α) (xn: sequence α):
+converges_to (discrete_topology α) x xn ↔
+ ∃ N: mynat, ∀ n: mynat, N ≤ n → xn n = x :=
+begin
+  split, {
+    assume hconv,
+    cases hconv ({y | y = x}) trivial rfl with N hN,
+    existsi N,
+    intro n,
+    assume hNn,
+    from hN n hNn,
+  }, {
+    apply eventually_constant_converges,
+  },
+end
+
+theorem product_converges
+(X: topological_space α) (Y: topological_space β)
+(x: α × β) (xn: sequence (α × β)):
+converges_to (product_topology X Y) x xn ↔
+(converges_to X x.fst (λ n, (xn n).fst) ∧
+ converges_to Y x.snd (λ n, (xn n).snd)) :=
+begin
+  split, {
+    assume hconv,
+    split, {
+      apply image_converges (product_topology X Y) X x, {
+        apply hconv,
+      }, {
+        apply projection_continuous,
+      },
+    }, {
+      apply image_converges (product_topology X Y) Y x, {
+        apply hconv,
+      }, {
+        apply projection_2_continuous,
+      },
+    },
+  }, {
+    assume hconv,
+    intro U,
+    assume hUo hxU,
+    cases hconv with hconvX hconvY,
+    cases hUo _ hxU with W hW,
+    cases hW.left with W1 hW1,
+    cases hW1 with W2 hW12,
+    have hxW := hW.right.left,
+    rw hW12.left at hxW,
+    cases hconvX W1 hW12.right.left hxW.left with N1 hN1,
+    cases hconvY W2 hW12.right.right hxW.right with N2 hN2,
+    existsi (mynat.max N1 N2),
+    intro n,
+    assume hmxn,
+    apply hW.right.right,
+    rw hW12.left,
+    split, {
+      apply hN1,
+      transitivity (mynat.max N1 N2), {
+        from mynat.max_le_left,
+      }, {
+        assumption,
+      },
+    }, {
+      apply hN2,
+      transitivity (mynat.max N1 N2), {
+        from mynat.max_le_right,
+      }, {
+        assumption,
+      },
+    },
+  },
+end
 
 end topological_space
 
