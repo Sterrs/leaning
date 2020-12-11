@@ -201,7 +201,7 @@ end⟩
 instance: has_inv cau_seq := ⟨inv⟩
 
 -- Lemma to help rewrite definitional equalities
-lemma inv_def (f : cau_seq) (n : mynat) :
+lemma inv_val (f : cau_seq) (n : mynat) :
 (f⁻¹).val n = if f ≈ (0 : cau_seq) then 0 else (f.val n)⁻¹ :=
 rfl
 
@@ -209,7 +209,7 @@ theorem inv_equiv_zero (a : cau_seq) (h : a ≈ 0) : a⁻¹ ≈ 0 :=
 begin
   apply cau_seq.seq_eq_impl_cau_seq_equiv,
   intro n,
-  rw [inv_def, if_pos],
+  rw [inv_val, if_pos],
   refl,
   assumption,
 end
@@ -285,7 +285,7 @@ begin
     cases hab (A * (B * ε)) h0ABε with N₃ hN₃,
     existsi mynat.max (mynat.max N₁ N₂) N₃,
     intros n hn,
-    rw [cau_seq.inv_def, cau_seq.inv_def, if_neg ha0, if_neg hb0],
+    rw [cau_seq.inv_val, cau_seq.inv_val, if_neg ha0, if_neg hb0],
     have hanpos : 0 < (a.val n).abs, {
       transitivity A,
         from hN₁.left,
@@ -358,6 +358,10 @@ begin
 end
 
 instance: has_inv real := ⟨inv⟩
+
+theorem inv_eq_cls {a : cau_seq} {x : real} :
+x = ⟦a⟧ → x⁻¹ = ⟦a⁻¹⟧ :=
+λ hax, by rw hax; refl
 
 def div: real → real → real :=
 λ x y, x * y⁻¹
@@ -484,21 +488,39 @@ by rw [mul_with_neg, mul_neg_with, neg_neg]
 
 -- Reciprocal "inv"
 
+-- Not sure what this was supposed to be, might be useful
+-- theorem  : ¬x = 0 → x = ⟦a⟧ → x⁻¹ = sorry := sorry
+
 @[simp]
 theorem one_inv : 1⁻¹ = (1 : real) :=
 begin
+  rw real_one,
+  have h : (1 : real)⁻¹ = ⟦1⁻¹⟧,
+    apply inv_eq_cls real_one,
+  apply seq_eq_imp_real_eq h real_one,
+  intro n,
+  dsimp only [],
   sorry,
 end
 
 @[simp]
 theorem zero_inv : 0⁻¹ = (0 : real) :=
 begin
-  sorry,
+  have h : (0 : real)⁻¹ = ⟦0⁻¹⟧,
+    apply inv_eq_cls real_zero,
+  apply seq_eq_imp_real_eq h real_zero,
+  intro n,
+  dsimp only [],
+  rw [cau_seq.inv_val, if_pos],
+  apply @setoid.refl _ _ _,
 end
 
 @[simp]
 theorem inv_inv : x⁻¹⁻¹ = x :=
 begin
+  by_cases x = 0,
+    subst h,
+    rw [zero_inv, zero_inv],
   sorry,
 end
 

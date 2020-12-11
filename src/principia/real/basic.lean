@@ -65,7 +65,7 @@ instance : has_zero real := ⟨⟦0⟧⟩
 
 theorem real_zero : (0 : real) = ⟦⟨λ n, 0, cau_seq.constant_cauchy 0⟩⟧ := rfl
 
-instance : has_one real := ⟨⟦⟨λ n, 1, cau_seq.constant_cauchy 1⟩⟧⟩
+instance : has_one real := ⟨⟦1⟧⟩
 
 theorem real_one : (1 : real) = ⟦⟨λ n, 1, cau_seq.constant_cauchy 1⟩⟧ := rfl
 

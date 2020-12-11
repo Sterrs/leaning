@@ -114,6 +114,8 @@ end
 
 instance: has_zero cau_seq := ⟨⟨λ n, 0, constant_cauchy 0⟩⟩
 
+instance: has_one cau_seq := ⟨⟨λ n, 1, constant_cauchy 1⟩⟩
+
 -- TODO bounded_above and bounded_below
 
 theorem abs_bounded_above (f : cau_seq) :
