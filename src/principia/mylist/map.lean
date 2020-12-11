@@ -2,6 +2,7 @@ import .mylist
 import .sorting
 
 namespace hidden
+namespace mylist
 
 open mynat
 
@@ -134,6 +135,20 @@ begin
     },
   },
 end
+
+theorem map_concat (f: T → T2):
+map f (lst1 ++ lst2) = map f lst1 ++ map f lst2 :=
+begin
+  induction lst1 with x xs ih_xs, {
+    refl,
+  }, {
+    rw cons_concat,
+    unfold map,
+    rw ih_xs,
+    refl,
+  },
+end
+
 
 -- in anticipation of defining products of finite multisets
 
@@ -533,4 +548,5 @@ begin
   },
 end
 
+end mylist
 end hidden

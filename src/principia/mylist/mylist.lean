@@ -17,6 +17,8 @@ inductive mylist (T: Sort u)
 open mylist
 open mynat
 
+namespace mylist
+
 variable {T: Sort u}
 -- Haskell-like convention, use x::xs to pattern match head/tail
 variables {x y z: T}
@@ -805,4 +807,5 @@ end lwf
 -- | (x :: y :: xs) := x = last (y :: xs) (cons_not_empty _ _)
 --                   ∧ palindrome (init (y :: xs) (cons_not_empty _ _))
 
+end mylist
 end hidden

@@ -7,6 +7,7 @@ import ..mylist.map
 -- Definitions and theorems relating to finite sets
 
 namespace hidden
+namespace myset
 
 universes u
 
@@ -216,4 +217,5 @@ begin
   },
 end
 
+end myset
 end hidden

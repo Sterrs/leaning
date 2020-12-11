@@ -4,6 +4,7 @@ import ..logic
 import .basic
 
 namespace hidden
+namespace myset
 
 universes u v w
 
@@ -142,4 +143,5 @@ end
 
 end theorems
 
+end myset
 end hidden

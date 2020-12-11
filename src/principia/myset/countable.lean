@@ -4,6 +4,7 @@ import .finite
 
 -- Definitions and theorems relating to countability
 namespace hidden
+namespace myset
 
 universes u v w
 
@@ -34,4 +35,5 @@ begin
   },
 end
 
+end myset
 end hidden

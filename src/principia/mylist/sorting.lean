@@ -9,6 +9,7 @@ import ..mynat.nat_sub
 -- more algorithms, obviously
 
 namespace hidden
+namespace mylist
 
 open mynat
 
@@ -806,4 +807,5 @@ begin
   },
 end
 
+end mylist
 end hidden

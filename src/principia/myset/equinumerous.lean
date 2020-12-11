@@ -4,6 +4,7 @@ import ..logic
 import .functions
 
 namespace hidden
+namespace myset
 
 universes u v w
 
@@ -187,4 +188,5 @@ begin
   },
 end
 
+end myset
 end hidden

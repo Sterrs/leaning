@@ -4,6 +4,8 @@
 -- though it will break things
 
 import ..myset.basic
+import ..myset.finite
+import ..mylist.map
 
 namespace hidden
 
@@ -438,6 +440,86 @@ begin
         }, {
           from hV.right.left,
         },
+      },
+    },
+  },
+end
+
+theorem hausdorff_point_closed
+(X: topological_space α) (h_ausdorff: is_hausdorff X)
+(x: α):
+is_closed X ({y: α | y = x}) :=
+begin
+  apply (open_iff_neighbourhood_forall _ _).mpr,
+  intro y,
+  assume hynex,
+  cases h_ausdorff y x hynex with U hUV,
+  cases hUV with V hUV,
+  existsi U,
+  split, {
+    from hUV.left,
+  }, split, {
+    from hUV.right.right.left,
+  }, {
+    intro z,
+    assume hUz,
+    assume hzx,
+    rw ←myset.empty_iff_eq_empty at hUV,
+    apply hUV.right.right.right.right x,
+    split, {
+      have: z = x := hzx,
+      rw ←this,
+      assumption,
+    }, {
+      from hUV.right.right.right.left,
+    },
+  },
+end
+
+private lemma append_not_empty
+(lst: mylist α) (x: α): lst ++ [x] ≠ [] :=
+begin
+  assume h,
+  rw mylist.empty_iff_len_zero at h,
+  rw mylist.len_concat_add at h,
+  from mynat.succ_ne_zero h,
+end
+
+def list_open
+(X: topological_space α) (σ: mylist (myset α)): Prop :=
+mylist.reduce and (mylist.map X.is_open (σ ++ [myset.univ]))
+begin
+  rw mylist.map_concat,
+  apply append_not_empty,
+end
+
+def list_intersection
+(X: topological_space α) (σ: mylist (myset α)): myset α :=
+mylist.reduce myset.intersection (σ ++ [myset.univ])
+(append_not_empty _ _)
+
+-- finite intersections of open set are open,
+-- stated with lists
+theorem finite_open_intersection_open
+(X: topological_space α) (σ : mylist (myset α))
+(hso: list_open X σ):
+X.is_open (list_intersection X σ) :=
+begin
+  induction σ, {
+    from X.univ_open,
+  }, {
+    cases σ_tail, {
+      apply X.open_intersection_open, {
+        from hso.left,
+      }, {
+        from X.univ_open,
+      },
+    }, {
+      apply X.open_intersection_open, {
+        from hso.left,
+      }, {
+        apply σ_ih,
+        from hso.right,
       },
     },
   },
