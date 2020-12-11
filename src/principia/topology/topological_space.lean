@@ -383,5 +383,63 @@ def closure (X : topological_space α) (A : myset α) : myset α :=
 def is_dense (X : topological_space α) (A : myset α) : Prop :=
 closure X A = myset.univ
 
+def is_neighbourhood (X: topological_space α) (U: myset α) (x: α): Prop :=
+∃ V: myset α, X.is_open V ∧ x ∈ V ∧ V ⊆ U
+
+-- turns out neighbourhoods are useful!!!
+-- I like this theorem because it means I don't have to unironically write
+-- down unions all the time
+theorem open_iff_neighbourhood_forall
+(X: topological_space α) (U: myset α):
+X.is_open U ↔ ∀ x: α, x ∈ U → is_neighbourhood X U x :=
+begin
+  split, {
+    assume hUo,
+    intro x,
+    assume hxU,
+    existsi U,
+    split, {
+      assumption,
+    }, split, {
+      assumption,
+    }, {
+      refl,
+    },
+  }, {
+    assume hUnbhd,
+    have hunion := X.open_union_open
+      {V | X.is_open V ∧ V ⊆ U}
+      begin
+        intro V,
+        assume hV,
+        from hV.left,
+      end,
+    suffices heq: (⋃₀{V : myset α | X.is_open V ∧ V ⊆ U}) = U, {
+      rw ←heq,
+      assumption,
+    }, {
+      apply funext,
+      intro x,
+      apply propext,
+      split; assume h, {
+        cases h with V hV,
+        cases hV with hV hxV,
+        apply hV.right,
+        assumption,
+      }, {
+        cases hUnbhd x h with V hV,
+        existsi V,
+        split, split, {
+          from hV.left,
+        }, {
+          from hV.right.right,
+        }, {
+          from hV.right.left,
+        },
+      },
+    },
+  },
+end
+
 end topological_space
 end hidden

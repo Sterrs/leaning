@@ -50,6 +50,17 @@ Just a rough guide as to what style we're trying to use
 - Use `intro(s)` to introduce conventional mathematical objects (like numbers
   or lists) and `assume` to introduce hypotheses (instances of propositions).
 - Use `dsimp only []` to expand lambda expressions
+- If you are using `split` multiple times to split up what looks like a
+  non-nested expression, indent as follows:
+      split, {
+        ...
+      }, split, {
+        ...
+      }, split, {
+        ...
+      }, {
+        ...
+      }
 
 More general tips/useful things not to forget:
 

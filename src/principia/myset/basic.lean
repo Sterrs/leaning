@@ -26,6 +26,15 @@ def subset (s : myset α) (t : myset α) : Prop :=
 -- Use \subseteq
 instance: has_subset (myset α) := ⟨myset.subset⟩
 
+@[refl]
+theorem subset_refl (s: myset α):
+s ⊆ s :=
+begin
+  intro x,
+  assume h,
+  assumption,
+end
+
 def power_set (s : myset α) : myset (myset α) :=
 λ t, t ⊆ s
 
@@ -217,6 +226,17 @@ theorem inverse_image_union
 {α β : Type} (f: α → β) (U V: myset β):
 inverse_image f (U ∪ V) = inverse_image f U ∪ inverse_image f V :=
 begin
+  refl,
+end
+
+theorem inverse_image_composition
+{α β γ: Type} (f: α → β) (g: β → γ) (U: myset γ):
+inverse_image (g ∘ f) U =
+inverse_image f (inverse_image g U) :=
+begin
+  apply funext,
+  intro x,
+  apply propext,
   refl,
 end
 
