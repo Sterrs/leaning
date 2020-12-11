@@ -57,6 +57,20 @@ begin
   },
 end
 
+theorem closed_limit
+(X: topological_space α) (Y: myset α)
+(hYc: X.is_closed Y)
+(x: α) (xn: sequence α) (hxnconv: converges_to X x xn)
+(hxnY: ∀ n: mynat, xn n ∈ Y):
+x ∈ Y :=
+begin
+  by_contradiction hxY,
+  cases hxnconv (myset.compl Y) hYc hxY with N hN,
+  have hxNY := hxnY N,
+  have hxNYc := hN N mynat.le_refl,
+  contradiction,
+end
+
 
 end topological_space
 
