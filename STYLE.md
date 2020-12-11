@@ -52,6 +52,7 @@ Just a rough guide as to what style we're trying to use
 - Use `dsimp only []` to expand lambda expressions
 - If you are using `split` multiple times to split up what looks like a
   non-nested expression, indent as follows:
+  ```
       split, {
         ...
       }, split, {
@@ -61,6 +62,7 @@ Just a rough guide as to what style we're trying to use
       }, {
         ...
       }
+  ```
 
 More general tips/useful things not to forget:
 
