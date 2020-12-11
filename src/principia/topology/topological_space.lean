@@ -27,7 +27,9 @@ variables {α β : Type}
 -- include X Y
 
 def is_hausdorff (X : topological_space α) : Prop :=
-∀ x y : α, x ≠ y → ∃ (U V : myset α), is_open X U ∧ is_open X V ∧ x ∈ U ∧ y ∈ V
+∀ x y : α, x ≠ y →
+  ∃ (U V : myset α),
+    is_open X U ∧ is_open X V ∧ x ∈ U ∧ y ∈ V ∧ U ∩ V = ∅
 
 def is_closed (X : topological_space α) (A : myset α) : Prop :=
 is_open X (myset.compl A)
