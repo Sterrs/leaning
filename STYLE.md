@@ -30,6 +30,8 @@ Just a rough guide as to what style we're trying to use
   about.
 - Always name hypotheses explicitly (for example use `with` after cases or induction),
   even if choosing to use the generated name.
+- Name new constructions with [`my`](https://www.youtube.com/watch?v=H4BNbHBcnDI) as a prefix if you
+  feel like it, to emphasise that it is in fact [mine](https://www.youtube.com/watch?v=2dTh3iI0is8)
 - The unary operators `¬`, `←` should *not* be followed by a space.
 - The binary operators `+`, `*`, `^`, `∣`, `→`, should be surrounded by a space
 - For colons, usually put no space before and one space after
