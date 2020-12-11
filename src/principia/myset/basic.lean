@@ -99,6 +99,15 @@ begin
   },
 end
 
+theorem exists_iff_neq_empty {S: myset α}:
+(∃ x, x ∈ S) ↔ S ≠ ∅ :=
+begin
+  have: S ≠ ∅ ↔ ¬S = ∅ := iff.rfl,
+  rw this,
+  rw ←empty_iff_eq_empty,
+  rw ←exists_iff_nempty,
+end
+
 @[reducible]
 def sUnion (s : myset (myset α)) : myset α := {t | ∃ a ∈ s, t ∈ a}
 prefix `⋃₀`:120 := sUnion

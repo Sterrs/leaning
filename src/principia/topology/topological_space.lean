@@ -525,5 +525,149 @@ begin
   },
 end
 
+theorem topological_space_eq
+(X: topological_space α) (Y: topological_space α):
+X.is_open = Y.is_open → X = Y :=
+begin
+  -- idk how to prove this
+  sorry,
+end
+
+theorem discrete_subspace
+(S: myset α):
+discrete_topology (subtype S) =
+subspace_topology (discrete_topology α) S :=
+begin
+  apply topological_space_eq,
+  apply funext,
+  intro X,
+  apply propext,
+  split; assume h, {
+    -- is this sensible ? ?
+    existsi λ x, ∃ hxS: x ∈ S, (⟨x, hxS⟩: subtype S) ∈ X,
+    split, {
+      trivial,
+    }, {
+      apply funext,
+      intro x,
+      apply propext,
+      split, {
+        assume hx,
+        existsi x.property,
+        have: (⟨↑x, x.property⟩: subtype S) = x, {
+          apply subtype.eq,
+          refl,
+        },
+        rw this,
+        from hx,
+      }, {
+        assume hx,
+        cases hx with hX hx,
+        have: (⟨↑x, hX⟩: subtype S) = x, {
+          apply subtype.eq,
+          refl,
+        },
+        rw ←this,
+        from hx,
+      },
+    },
+  }, {
+    trivial,
+  },
+end
+
+theorem indiscrete_subspace
+(S: myset α):
+indiscrete_topology (subtype S) =
+subspace_topology (indiscrete_topology α) S :=
+begin
+  apply topological_space_eq,
+  apply funext,
+  intro X,
+  apply propext,
+  split; assume hXo, {
+    cases hXo with hXe hXu, {
+      rw hXe,
+      apply topological_space.empty_open,
+    }, {
+      rw hXu,
+      apply topological_space.univ_open,
+    },
+  }, {
+    cases hXo with U hXo,
+    cases hXo with hUo hXU,
+    cases hUo with hUe hUu, {
+      rw hUe at hXU,
+      left,
+      rw hXU,
+      refl,
+    }, {
+      rw hUu at hXU,
+      right,
+      rw hXU,
+      refl,
+    },
+  },
+end
+
+theorem empty_discrete: sorry := sorry
+
+theorem empty_indiscrete: sorry := sorry
+
+theorem singleton_discrete: sorry := sorry
+
+theorem singleton_indiscrete (X: topological_space α) (x: α):
+discrete_topology (subtype ({y | y = x})) =
+subspace_topology X ({y | y = x}) :=
+begin
+  apply topological_space.rec,
+  intros,
+  symmetry,
+  apply topological_space.rec,
+  intros,
+  simp, -- forgive me
+  apply funext,
+  intro S,
+  apply propext,
+  by_cases hSe: S = ∅, {
+    rw hSe,
+    split; assume h,
+    assumption,
+    assumption,
+  }, {
+    change S ≠ ∅ at hSe,
+    rw ←myset.exists_iff_neq_empty at hSe,
+    cases hSe with y hy,
+    have: S = myset.univ, {
+      apply funext,
+      intro z,
+      apply propext,
+      split; assume h, {
+        trivial,
+      }, {
+        have: y = z, {
+          let x': subtype {y : α | y = x} := ⟨x, rfl⟩,
+          transitivity x', {
+            have := y.property,
+            apply subtype.eq,
+            from this,
+          }, {
+            symmetry,
+            have := z.property,
+            apply subtype.eq,
+            from this,            
+          },
+        },
+        rw this at hy,
+        assumption,
+      },
+    },
+    rw this,
+    split; assume h,
+    assumption,
+    assumption,
+  },
+end
+
 end topological_space
 end hidden

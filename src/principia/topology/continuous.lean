@@ -13,8 +13,6 @@ local attribute [instance] classical.prop_decidable
 def is_continuous (f : α → β) [X : topological_space α] [Y : topological_space β] : Prop :=
 ∀ V : myset β, is_open Y V → is_open X (myset.inverse_image f V)
 
--- maybe prove some stuff about when functions to do with base topologies are cts
-
 theorem identity_continuous [X : topological_space α]:
 @is_continuous _ _ (id: α → α) X X :=
 begin
