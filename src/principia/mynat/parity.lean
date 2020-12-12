@@ -211,7 +211,7 @@ begin
   cases hm with a ha,
   existsi a * n,
   rw ha,
-  simp,
+  ac_refl,
 end
 
 theorem even_mul_even: even m → even n → even (m * n) :=
@@ -227,7 +227,9 @@ begin
   have hesm := succ_odd_is_even hom,
   have hesn := succ_odd_is_even hon,
   have hesmsn := even_mul_even hesm hesn,
-  simp at hesmsn,
+  rw mul_succ at hesmsn,
+  rw succ_mul at hesmsn,
+  rw succ_add at hesmsn,
   have homn := cancel_succ_even hesmsn,
   rw ←add_assoc at homn,
   have hemn: even (m + n), {
@@ -235,7 +237,8 @@ begin
     simp at hesmpsn,
     from even_periodic.mpr hesmpsn,
   },
-  rw [add_comm, add_comm n m] at homn,
+  rw add_comm m at homn,
+  rw add_assoc at homn,
   have homn' := odd_periodic_lots hemn homn,
   from homn' heven,
 end
@@ -270,12 +273,15 @@ begin
   have hnn0: n ≠ 0, {
     assume hn0,
     simp [hn0] at hn2k2,
+    rw mul_comm at hn2k2,
+    rw mul_comm 2 at hn2k2,
     from h20 (mul_integral hknz (mul_integral hknz hn2k2.symm)),
   },
   have h2dvdn: 2 ∣ n, {
     have h2dvdn2: 2 ∣ n * n, {
       existsi k * k,
-      simp [hn2k2],
+      rw hn2k2,
+      ac_refl,
     },
     from even_square h2dvdn2,
   },
