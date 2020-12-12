@@ -114,6 +114,12 @@ begin
   rw [←neg_unique, mul_comm (-a), mul_comm a, ←mul_add, neg_add, mul_zero],
 end
 
+theorem mul_neg : -(a * b) = a * (-b) :=
+begin
+  rw [mul_comm a (-b), mul_comm a b],
+  apply neg_mul,
+end
+
 theorem neg_distr : -(a + b) = -a + -b :=
 by rw [neg_eq_mul_neg_one a, neg_eq_mul_neg_one b, ←mul_add, ←neg_eq_mul_neg_one]
 
@@ -128,15 +134,42 @@ end
 theorem add_comm : a + b = b + a :=
 by rw [neg_eq, neg_distr, neg_distr_swap]
 
-theorem test : a * b + b = (a + 1) * b :=
+-- This is an important theorem.
+theorem one_eq_zero_impl_all_zero : (1 : α) = 0 → ∀ x : α, x = 0 :=
 begin
-  conv {
-    to_lhs,
-    congr,
-      skip,
-    rw [←one_mul b],
+  assume h10,
+  intro x,
+  rw [←one_mul x, h10, zero_mul],
+end
+
+def sub : α → α → α := λ a b, a + (-b)
+instance: has_sub α := ⟨sub⟩
+
+theorem sub_self : a - a = 0 :=
+begin
+  change a + -a = 0,
+  apply add_neg,
+end
+
+theorem mul_sub : a * (b - c) = a * b - a * c :=
+begin
+  change a * (b + (-c)) = a * b + -(a * c),
+  rw [mul_add, ←mul_neg],
+end
+
+theorem sub_mul : (a - b) * c = a * c - b * c:=
+by rw [mul_comm, mul_sub, mul_comm a, mul_comm b]
+
+-- This is handy imo
+theorem sub_to_zero_iff_eq : a - b = 0 ↔ a = b :=
+begin
+  split; assume h, {
+    symmetry,
+    rwa [neg_eq, ←neg_unique, add_comm],
+  }, {
+    change a + -b = 0,
+    rwa [neg_unique, neg_neg],
   },
-  rw ←add_mul,
 end
 
 end myring
