@@ -1,5 +1,3 @@
-
-
 namespace hidden
 
 -- Commutative Unitary Ring
@@ -134,7 +132,16 @@ end
 theorem add_comm : a + b = b + a :=
 by rw [neg_eq, neg_distr, neg_distr_swap]
 
--- This is an important theorem.
+theorem add_cancel_left_to_zero : a + b = b → a = 0 :=
+begin
+  assume h,
+  apply add_cancel_right _ _ b,
+  rwa zero_add,
+end
+
+theorem add_cancel_right_to_zero : a + b = a → b = 0 :=
+λ h, add_cancel_left_to_zero b a (by rwa add_comm at h)
+
 theorem one_eq_zero_impl_all_zero : (1 : α) = 0 → ∀ x : α, x = 0 :=
 begin
   assume h10,
