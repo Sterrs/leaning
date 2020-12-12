@@ -3,6 +3,7 @@ import .int_pair
 import .mul
 
 import ..mynat.sum
+import ..myring.order
 
 namespace hidden
 
@@ -308,6 +309,14 @@ begin
     assumption,
   },
 end
+
+instance: ordered_myring myint := ⟨λ a b c, (@le_add_right a b c).mp, λ a b ha hb,
+begin
+  rw ←mul_zero a,
+  apply le_mul_nonneg_left _ _,
+    assumption,
+  assumption,
+end⟩
 
 end myint
 end hidden

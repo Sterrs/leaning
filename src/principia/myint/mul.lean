@@ -2,6 +2,7 @@ import .basic
 import .add
 import ..logic
 import ..mynat.le
+import ..myring.basic
 
 namespace hidden
 namespace myint
@@ -266,6 +267,9 @@ end
 theorem mul_neg_with : (-m) * n = -(m * n) := neg_mul m n
 
 theorem mul_with_neg : m * (-n) = -(m * n) := mul_neg m n
+
+instance: myring myint :=
+⟨add_assoc, add_zero, self_neg_add, mul_assoc, mul_comm, mul_one, mul_add⟩
 
 end myint
 end hidden
