@@ -3,8 +3,7 @@
 namespace hidden
 
 -- Commutative Unitary Ring
-class myring (α : Type) [has_add α] [has_zero α] [has_neg α]
-[has_mul α] [has_one α] :=
+class myring (α : Type) extends has_add α, has_zero α, has_neg α, has_mul α, has_one α :=
 (add_assoc (a b c : α) : a + b + c = a + (b + c))
 (add_zero (a : α) : a + 0 = a)
 (add_neg (a : α) : a + -a = 0)
@@ -15,8 +14,7 @@ class myring (α : Type) [has_add α] [has_zero α] [has_neg α]
 
 namespace myring
 
-variables {α : Type} (a b c : α)
-variables [has_add α] [has_zero α] [has_neg α] [has_mul α] [has_one α] [myring α]
+variables {α : Type} [myring α] (a b c : α)
 
 theorem one_mul : 1 * a = a :=
 begin
