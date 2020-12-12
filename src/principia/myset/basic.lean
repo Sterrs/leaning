@@ -120,6 +120,15 @@ prefix `⋂₀`:120 := sIntersection
 def univ : myset α :=
 λ a, true
 
+def singleton (x: α): myset α :=
+{y | y = x}
+
+theorem singleton_eq (x y: α): y ∈ singleton x → y = x :=
+begin
+  assume hyx,
+  from hyx,
+end
+
 def image {α β : Type} (f : α → β) (U : myset α) := {b | ∃ a, a ∈ U ∧ f a = b}
 
 def inverse_image {α β : Type} (f : α → β) (V : myset β) := {a | f a ∈ V}

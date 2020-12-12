@@ -655,51 +655,21 @@ begin
   from hS'.right,
 end
 
-private lemma append_not_empty
-(lst: mylist α) (x: α): lst ++ [x] ≠ [] :=
-begin
-  assume h,
-  rw mylist.empty_iff_len_zero at h,
-  rw mylist.len_concat_add at h,
-  from mynat.succ_ne_zero h,
-end
-
-def list_open
-(X: topological_space α) (σ: mylist (myset α)): Prop :=
-mylist.reduce and (mylist.map X.is_open (σ ++ [myset.univ]))
-begin
-  rw mylist.map_concat,
-  apply append_not_empty,
-end
-
-def list_intersection
-(X: topological_space α) (σ: mylist (myset α)): myset α :=
-mylist.reduce myset.intersection (σ ++ [myset.univ])
-(append_not_empty _ _)
-
 -- finite intersections of open set are open,
 -- stated with lists
 theorem finite_open_intersection_open
 (X: topological_space α) (σ : mylist (myset α))
-(hso: list_open X σ):
-X.is_open (list_intersection X σ) :=
+(hso: mylist.for_all X.is_open σ):
+X.is_open (mylist.reduce_d myset.intersection myset.univ σ) :=
 begin
   induction σ, {
     from X.univ_open,
   }, {
-    cases σ_tail, {
-      apply X.open_intersection_open, {
-        from hso.left,
-      }, {
-        from X.univ_open,
-      },
+    apply X.open_intersection_open, {
+      from hso.left,
     }, {
-      apply X.open_intersection_open, {
-        from hso.left,
-      }, {
-        apply σ_ih,
-        from hso.right,
-      },
+      apply σ_ih,
+      from hso.right,
     },
   },
 end

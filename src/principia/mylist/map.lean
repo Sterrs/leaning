@@ -6,8 +6,9 @@ namespace mylist
 
 open mynat
 
-universe u
-variables {T T2: Sort u}
+universes u v
+variables {T: Sort v} {T2: Sort u}
+variables {T3: Type u} {T4: Type v}
 variables {m n k: mynat}
 variables {lst lst1 lst2: mylist T}
 variables {lst' lst1' lst2': mylist T2}
@@ -18,12 +19,27 @@ def map (f: T → T2): mylist T → mylist T2
 | (x :: xs) := f x :: map xs
 
 -- aka foldl
--- it seemed to be quite disgusting to have a special identity value to return
--- for empty lists
+-- this form looks yuckier but I think it's nicer to prove things with
 def reduce (f: T → T → T): Π lst: mylist T, lst ≠ [] → T
 | [] h             := absurd rfl h
 | (x :: []) h      := x
 | (x :: y :: xs) h := f x (reduce (y :: xs) cons_not_empty)
+
+-- reduce with a "default" value for empty lists
+def reduce_d (f: T → T → T) (default: T): mylist T → T
+| [] := default
+| (x :: xs) := f x (reduce_d xs)
+
+def for_all (p: T → Prop) (lst: mylist T): Prop :=
+reduce_d and true (map p lst)
+
+def for_some (p: T → Prop) (lst: mylist T): Prop :=
+reduce_d or false (map p lst)
+
+def filter (p: T → Prop)
+[hpdec: ∀ t: T, decidable (p t)]: mylist T → mylist T
+| [] := []
+| (x :: xs) := if p x then x :: filter xs else filter xs
 
 -- make n zeroes
 def zeroes: mynat → mylist mynat
@@ -86,6 +102,118 @@ begin
     unfold len,
     rw len_map,
     rw hm,
+  },
+end
+
+theorem contains_map (f: T3 → T4) (x: T3) (lst: mylist T3):
+contains x lst → contains (f x) (map f lst) :=
+begin
+  assume hxl,
+  induction lst with y ys ih_ys, {
+    exfalso, from hxl,
+  }, {
+    cases hxl with hxl hxl, {
+      rw hxl,
+      left,
+      trivial,
+    }, {
+      right,
+      apply ih_ys,
+      assumption,
+    },
+  },
+end
+
+-- should probably be shortened or at least split up
+theorem contains_filter (x: T3) (lst: mylist T3)
+(p: T3 → Prop)
+[hpdec: ∀ t: T3, decidable (p t)]:
+contains x (filter p lst) ↔ contains x lst ∧ p x :=
+begin
+  split; assume hx, {
+    split, {
+      induction lst with y ys ih_ys, {
+        exfalso, from hx,
+      }, {
+        by_cases hpy: p y, {
+          unfold filter at hx,
+          rw if_pos hpy at hx,
+          cases hx with hx hx, {
+            rw hx,
+            left, trivial,
+          }, {
+            right,
+            apply ih_ys,
+            assumption,
+          },
+        }, {
+          unfold filter at hx,
+          rw if_neg hpy at hx,
+          right,
+          apply ih_ys,
+          assumption,
+        },
+      },
+    }, {
+      induction lst with y ys ih_ys, {
+        exfalso, from hx,
+      }, {
+        by_cases hpy: p y, {
+          unfold filter at hx,
+          rw if_pos hpy at hx,
+          cases hx with hx hx, {
+            rw hx,
+            assumption,
+          }, {
+            apply ih_ys,
+            assumption,
+          },
+        }, {
+          unfold filter at hx,
+          rw if_neg hpy at hx,
+          apply ih_ys,
+          assumption,
+        },
+      },
+    },
+  }, {
+    induction lst with y ys ih_ys, {
+      exfalso,
+      from hx.left,
+    }, {
+      by_cases hpy: p y, {
+        unfold filter,
+        rw if_pos hpy,
+        cases hx.left with hxys hxys, {
+          rw hxys,
+          left,
+          refl,
+        }, {
+          right,
+          apply ih_ys,
+          split, {
+            assumption,
+          }, {
+            from hx.right,
+          },
+        },
+      }, {
+        unfold filter,
+        rw if_neg hpy,
+        apply ih_ys,
+        split, {
+          cases hx.left with hxys hxys, {
+            rw ←hxys at hpy,
+            exfalso,
+            from hpy hx.right,
+          }, {
+            assumption,
+          },
+        }, {
+          from hx.right,
+        },
+      },
+    },
   },
 end
 
