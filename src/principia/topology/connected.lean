@@ -11,11 +11,57 @@ open classical
 
 local attribute [instance] classical.prop_decidable
 
+-- Goal Of The Game: product of connected spaces is connected
+
 def is_disconnected (X : topological_space α) : Prop :=
 ∃ U V : myset α, U ≠ ∅ ∧ V ≠ ∅ ∧ is_open X U ∧ is_open X V ∧ U ∩ V = ∅ ∧ U ∪ V = myset.univ
 
 def is_connected (X : topological_space α) : Prop :=
 ¬is_disconnected X
+
+theorem disconnect_clopen (X: topological_space α) (U V: myset α):
+X.is_open U ∧ X.is_open V ∧ U ∩ V = ∅ ∧ U ∪ V = myset.univ →
+X.is_closed U ∧ X.is_closed V :=
+begin
+  assume h,
+  cases h with hUo h,
+  cases h with hVo h,
+  cases h with hUVdsj hUVcov,
+  -- also a candidate for myset
+  have: U.compl = V, {
+    apply funext,
+    intro x,
+    apply propext,
+    split, {
+      assume hx,
+      have: x ∈ U ∪ V, {
+        rw hUVcov, trivial,
+      },
+      cases this with hU hV, {
+        contradiction,
+      }, {
+        assumption,
+      },
+    }, {
+      assume hx hUx,
+      have: x ∈ U ∩ V, {
+        split; assumption,
+      },
+      rw hUVdsj at this,
+      from this,
+    },
+  },
+  rw ←myset.compl_compl U,
+  conv {
+    congr,
+    rw this,
+    skip,
+    rw ←this,
+  },
+  unfold is_closed,
+  repeat {rw myset.compl_compl},
+  split; assumption,
+end
 
 theorem image_connected
 (X: topological_space α) (Y: topological_space β)
@@ -155,6 +201,7 @@ begin
   },
 end
 
+-- maybe split up more to avoid cpu stress
 theorem connected_iff_N_image_const
 (X: topological_space α):
 is_connected X ↔
@@ -212,12 +259,106 @@ begin
       },
     },
   }, {
-    -- show that if U and V disconnect X then indicator function of U
-    -- is non-constant
-    sorry,
-  }
+    assume hfNc,
+    assume hXdc,
+    cases hXdc with U hXdc,
+    cases hXdc with V hXdc,
+    suffices:
+        ∃ (f : α → mynat),
+          @is_continuous _ _ f X (discrete_topology mynat) ∧
+          ∃ (x y : α), f x ≠ f y, {
+      cases this with f hf,
+      cases hf with hfc hxy,
+      cases hxy with x hxy,
+      cases hxy with y hxy,
+      apply hxy,
+      apply hfNc,
+      assumption,
+    }, {
+      existsi (λ x, if x ∈ U then (0: mynat) else 1),
+      split, {
+        have := disconnect_clopen _ _ _ hXdc.right.right,
+        apply gluing_lemma X _ U V, {
+          from this.left,
+        }, {
+          from this.right,
+        }, {
+          from hXdc.right.right.right.right.right,
+        }, {
+          suffices
+              hconst:
+              (λ (x : subtype U), ite (↑x ∈ U) (0: mynat) 1) =
+              (λ x, 0), {
+            rw hconst,
+            apply constant_continuous,
+          }, {
+            apply funext,
+            intro x,
+            have hxU: (↑x ∈ U) := x.property,
+            rw if_pos hxU,
+          },
+        }, {
+          suffices
+            hconst:
+            (λ (x : subtype V), ite (↑x ∈ U) (0: mynat) 1) =
+            (λ x, 1), {
+            rw hconst,
+            apply constant_continuous,
+          }, {
+            apply funext,
+            intro x,
+            have hxU: (↑x ∉ U), {
+              assume hxU,
+              have hUVx: ↑x ∈ U ∩ V, {
+                split, {
+                  assumption,
+                }, {
+                  from x.property,
+                },
+              },
+              rw hXdc.right.right.right.right.left at hUVx,
+              from hUVx,
+            },
+            rw if_neg hxU,
+          },
+        },
+      }, {
+        cases hXdc with hUne hXdc,
+        cases hXdc with hVne hXdc,
+        rw ←myset.exists_iff_neq_empty at hUne,
+        rw ←myset.exists_iff_neq_empty at hVne,
+        cases hUne with x hx,
+        cases hVne with y hy,
+        existsi x,
+        existsi y,
+        simp,
+        rw if_pos hx,
+        have hyU: y ∉ U, {
+          assume hyU,
+          have: y ∈ U ∩ V, {
+            split; assumption,
+          },
+          rw hXdc.right.right.left at this,
+          from this,
+        },
+        rw if_neg hyU,
+        from mynat.zero_ne_one,
+      },
+    },
+  },
 end
 
+-- so it gets it from the other equality for you
+private lemma transitivity' {α: Type} {x y z w: α}:
+y = z → x = y → z = w → x = w :=
+begin
+  assume hyz hxy hzw,
+  rw hxy,
+  rw hyz,
+  rw hzw,
+end
+
+-- does this even end up being faster (:
 theorem union_of_overlapping_connected
 (X: topological_space α)
 (S: myset (myset α))
@@ -227,10 +368,57 @@ theorem union_of_overlapping_connected
  U ∈ S → V ∈ S → U ∩ V ≠ ∅):
 is_connected (subspace_topology X (⋃₀ S)) :=
 begin
-  assume hdc,
-  cases hdc with W1 hdc,
-  cases hdc with W2 hdc,
-  sorry,
+  rw connected_iff_N_image_const,
+  intro f,
+  assume hfc,
+  intros x y,
+  cases x.property with U hU,
+  cases hU with hU hxU,
+  cases y.property with V hV,
+  cases hV with hV hxV,
+  have hUVdsj := hlap U V hU hV,
+  rw ←myset.exists_iff_neq_empty at hUVdsj,
+  cases hUVdsj with z hz,
+  have hUcon := hconn U hU,
+  have hVcon := hconn V hV,
+  rw connected_iff_N_image_const at hUcon,
+  rw connected_iff_N_image_const at hVcon,
+  transitivity f (⟨z, ⟨U, ⟨hU, hz.left⟩⟩⟩: subtype (⋃₀ S)), {
+    have step1 := hUcon (λ x: subtype U, f ⟨x, ⟨U, ⟨hU, x.property⟩⟩⟩),
+    let g := (λ x: subtype U, f ⟨x, ⟨U, ⟨hU, x.property⟩⟩⟩),
+    have h_elp_me:
+        @is_continuous (subtype U) mynat g
+        (subspace_topology X U) (discrete_topology mynat), {
+      sorry, -- this isn't technically the same as the
+      -- case for restriction_continuous apparently :(((
+    },
+    have step2 := step1 h_elp_me ⟨x.val, hxU⟩ ⟨z, hz.left⟩,
+    apply transitivity' step2, {
+      congr,
+      apply subtype.eq,
+      refl,
+    }, {
+      from rfl,
+    },
+  }, {
+    symmetry,
+    have step1 := hVcon (λ x: subtype V, f ⟨x, ⟨V, ⟨hV, x.property⟩⟩⟩),
+    let g := (λ x: subtype V, f ⟨x, ⟨V, ⟨hV, x.property⟩⟩⟩),
+    have h_elp_me:
+        @is_continuous (subtype V) mynat g
+        (subspace_topology X V) (discrete_topology mynat), {
+      sorry, -- this isn't technically the same as the
+      -- case for restriction_continuous apparently :(((
+    },
+    have step2 := step1 h_elp_me ⟨y.val, hxV⟩ ⟨z, hz.right⟩,
+    apply transitivity' step2, {
+      congr,
+      apply subtype.eq,
+      refl,
+    }, {
+      from rfl,
+    },
+  },
 end
 
 end topological_space

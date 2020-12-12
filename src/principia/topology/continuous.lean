@@ -331,6 +331,94 @@ begin
   },
 end
 
+theorem continuous_iff_closed_preimage
+(X: topological_space α) (Y: topological_space β)
+(f: α → β):
+@is_continuous _ _ f X Y ↔
+(∀ V : myset β, Y.is_closed V → X.is_closed (myset.inverse_image f V)) :=
+begin
+  split, {
+    assume hfc,
+    intro V,
+    assume hVcl,
+    change X.is_open (myset.inverse_image f V.compl),
+    apply hfc,
+    from hVcl,
+  }, {
+    assume hfc',
+    intro U,
+    assume hUo,
+    rw ←myset.compl_compl U,
+    change X.is_closed (myset.inverse_image f U.compl),
+    apply hfc',
+    unfold is_closed,
+    rw myset.compl_compl,
+    assumption,
+  },
+end
+
+theorem gluing_lemma
+(X: topological_space α) (Y: topological_space β)
+(U V: myset α) (hUc: X.is_closed U) (hVc: X.is_closed V)
+(hUVcov: U ∪ V = myset.univ) (f: α → β):
+@is_continuous (subtype U) _ (λ x, f x) (subspace_topology X U) Y →
+@is_continuous (subtype V) _ (λ x, f x) (subspace_topology X V) Y →
+@is_continuous _ _ f X Y :=
+begin
+  repeat {rw continuous_iff_closed_preimage},
+  assume hfUc hfVc,
+  intro W,
+  assume hWcl,
+  cases hfUc W hWcl with U' hU',
+  cases hfVc W hWcl with V' hV',
+  have:
+      (myset.inverse_image f W) =
+        (myset.subtype_unrestriction U
+          (@myset.inverse_image (subtype U) _ (λ x, f x) W)) ∪
+        (myset.subtype_unrestriction V
+          (@myset.inverse_image (subtype V) _ (λ x, f x) W)), {
+    apply funext,
+    intro x,
+    apply propext,
+    split, {
+      assume hfWx,
+      have: x ∈ U ∪ V, {
+        rw hUVcov,
+        trivial,
+      },
+      cases this with hU hV, {
+        left,
+        existsi hU,
+        from hfWx,
+      }, {
+        right,
+        existsi hV,
+        from hfWx,
+      },
+    }, {
+      assume hUVx,
+      cases hUVx with hU hV, {
+        cases hU with hxU hU,
+        from hU,
+      }, {
+        cases hV with hxV hV,
+        from hV,
+      },
+    },
+  },
+  rw this,
+  apply X.closed_union_closed, {
+    apply closed_in_closed X U hUc,
+    apply hfUc,
+    assumption,
+  }, {
+    apply closed_in_closed X V hVc,
+    apply hfVc,
+    assumption,
+  },
+end
+
+
 end topological_space
 
 end hidden

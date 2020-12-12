@@ -261,9 +261,30 @@ end
 def compl (s : myset α) : myset α :=
 {a | a ∉ s}
 
+theorem inverse_image_compl
+{α β: Type} (S: myset β) (f: α → β):
+inverse_image f S.compl = (inverse_image f S).compl :=
+begin
+  refl,
+end
+
+theorem compl_compl
+{α: Type} (S: myset α) [∀ x: α, decidable (x ∈ S)]:
+S.compl.compl = S :=
+begin
+  apply funext,
+  intro x,
+  apply propext,
+  from decidable.not_not_iff _,
+end
+
 -- Used to restrict some set to a subtype ("intersect" a set with a subtype)
 def subtype_restriction (Y : myset α) (U : myset α) : myset (subtype Y) :=
 { w | ↑w ∈ U }
+
+-- pffffff
+def subtype_unrestriction (Y: myset α) (U: myset (subtype Y)): myset α :=
+{x | ∃ hxS: x ∈ Y, (⟨x, hxS⟩: subtype Y) ∈ U}
 
 def function_restrict_to_image
 {α β: Type} (f: α → β): α → subtype (myset.image f myset.univ)

@@ -387,7 +387,7 @@ begin
   rw ←@drop_one_tail _ (drop n lst _),
   rw drop_drop,
   refl,
-  
+
   apply @le_cancel _ _ n,
   rw len_drop,
   rw add_comm,

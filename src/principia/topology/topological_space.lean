@@ -6,6 +6,7 @@
 import ..myset.basic
 import ..myset.finite
 import ..mylist.map
+import ..logic
 
 namespace hidden
 
@@ -476,6 +477,184 @@ begin
   },
 end
 
+theorem union_two_open
+(X: topological_space α) (U V: myset α)
+(hUo: X.is_open U) (hVo: X.is_open V):
+X.is_open (U ∪ V) :=
+begin
+  have: (U ∪ V) = ⋃₀ {S | S = U ∨ S = V}, {
+    apply funext,
+    intro x,
+    apply propext,
+    split, {
+      assume hUVx,
+      cases hUVx with hUx hVx, {
+        existsi U,
+        existsi (or.inl rfl),
+        assumption,
+      }, {
+        existsi V,
+        existsi (or.inr rfl),
+        assumption,
+      },
+    }, {
+      assume hUVx,
+      cases hUVx with S hS,
+      cases hS with hS hx,
+      cases hS with hU hV, {
+        left,
+        rw ←hU,
+        assumption,
+      }, {
+        right,
+        rw ←hV,
+        assumption,
+      },
+    },
+  },
+  rw this,
+  apply X.open_union_open,
+  intro S,
+  assume hUVS,
+  cases hUVS with h h; rw h; assumption,
+end
+
+theorem intersect_two_closed
+(X: topological_space α) (U V: myset α)
+(hUo: X.is_closed U) (hVo: X.is_closed V):
+X.is_closed (U ∩ V) :=
+begin
+  unfold is_closed,
+  -- should move into myset really
+  have: (U ∩ V).compl = U.compl ∪ V.compl, {
+    apply funext,
+    intro x,
+    apply propext,
+    apply decidable.not_and_iff_or_not,
+  },
+  rw this,
+  apply union_two_open; assumption,
+end
+
+-- if A ⊆ B is closed and B ⊆ C is closed,
+-- then A is closed in C. yuckkkkkkkkkk
+theorem closed_in_closed
+(X: topological_space α) (U: myset α)
+(hUcl: X.is_closed U)
+(V: myset (subtype U))
+(hVcl: (subspace_topology X U).is_closed V):
+X.is_closed (myset.subtype_unrestriction U V) :=
+begin
+  cases hVcl with V' hV',
+  cases hV' with hV'o hV',
+  unfold myset.subtype_restriction at hV',
+  have: (U.subtype_unrestriction V) = U ∩ V'.compl, {
+    apply funext,
+    intro x,
+    apply propext,
+    split, {
+      assume hx,
+      cases hx with hx hxV,
+      split, {
+        assumption,
+      }, {
+        assume hV'x,
+        suffices hcontr: (⟨x, hx⟩: subtype U) ∈ V.compl, {
+          contradiction,
+        }, {
+          rw hV',
+          from hV'x,
+        },
+      },
+    }, {
+      assume hx,
+      existsi hx.left,
+      have: V.compl.compl = {w : subtype U | ↑w ∈ V'.compl}, {
+        rw hV',
+        refl,
+      },
+      rw myset.compl_compl at this,
+      rw this,
+      from hx.right,
+    },
+  },
+  rw this,
+  apply X.intersect_two_closed, {
+    assumption,
+  }, {
+    unfold is_closed,
+    rw myset.compl_compl,
+    assumption,
+  },
+end
+
+theorem closed_union_closed
+(X: topological_space α) (U V: myset α)
+(hUo: X.is_closed U) (hVo: X.is_closed V):
+X.is_closed (U ∪ V) :=
+begin
+  unfold is_closed,
+  have: (U ∪ V).compl = U.compl ∩ V.compl, {
+    apply funext,
+    intro x,
+    apply propext,
+    apply decidable.not_or_iff_and_not,
+  },
+  rw this,
+  apply X.open_intersection_open; assumption,
+end
+
+theorem closed_intersection_closed
+(X: topological_space α) (σ: myset (myset α))
+(hSc: σ ⊆ X.is_closed):
+X.is_closed ⋂₀ σ :=
+begin
+  have: ⋂₀ σ = (⋃₀ {S | ∃ S': myset α, S = S'.compl ∧ S' ∈ σ}).compl, {
+    apply funext,
+    intro x,
+    apply propext,
+    split, {
+      assume hx,
+      assume hx',
+      cases hx' with S hS,
+      cases hS with hS hxS,
+      cases hS with S' hS',
+      have := hx S' hS'.right,
+      rw hS'.left at hxS,
+      from hxS this,
+    }, {
+      assume hx,
+      intro S,
+      assume hS,
+      have := not_exists.mp hx S.compl,
+      by_contradiction hxS,
+      apply this,
+      split, {
+        existsi S,
+        split, {
+          refl,
+        }, {
+          assumption,
+        },
+      }, {
+        assumption,
+      },
+    },
+  },
+  rw this,
+  unfold is_closed,
+  rw myset.compl_compl,
+  apply X.open_union_open,
+  intro S,
+  assume hS,
+  cases hS with S' hS',
+  rw ←myset.compl_compl S,
+  apply hSc,
+  rw hS'.left,
+  rw myset.compl_compl,
+  from hS'.right,
+end
+
 private lemma append_not_empty
 (lst: mylist α) (x: α): lst ++ [x] ≠ [] :=
 begin
@@ -655,7 +834,7 @@ begin
             symmetry,
             have := z.property,
             apply subtype.eq,
-            from this,            
+            from this,
           },
         },
         rw this at hy,
