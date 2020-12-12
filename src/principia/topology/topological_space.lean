@@ -708,8 +708,12 @@ theorem topological_space_eq
 (X: topological_space α) (Y: topological_space α):
 X.is_open = Y.is_open → X = Y :=
 begin
-  -- idk how to prove this
-  sorry,
+  assume hXYt,
+  cases X,
+  cases Y,
+  dsimp at hXYt,
+  simp,
+  assumption,
 end
 
 theorem discrete_subspace
