@@ -5,33 +5,36 @@ namespace hidden
 
 namespace myring
 
-structure ideal {α : Type} [myring α] (I : myset α) :=
+structure is_ideal {α : Type} [myring α] (I : myset α) : Prop :=
+intro ::
 (add_closure (a b : α) : a ∈ I → b ∈ I → a + b ∈ I)
 (neg_closure (a : α) : a ∈ I → -a ∈ I)
 (mul_closure (r x : α) : x ∈ I → r * x ∈ I)
 
 variables {α : Type} [myring α] (I J : myset α)
 
-def ideal_intersection (iI : ideal I) (iJ : ideal J) : ideal (I ∩ J) := ⟨
+theorem ideal_intersection (hI : is_ideal I) (hJ : is_ideal J) : is_ideal (I ∩ J) :=
 begin
-  intros a b,
-  assume haIJ hbIJ,
-  split,
-    apply iI.add_closure _ _ haIJ.left hbIJ.left,
-  apply iJ.add_closure _ _ haIJ.right hbIJ.right,
-end, begin
-  intro a,
-  assume haIJ,
-  split,
-    apply iI.neg_closure _ haIJ.left,
-  apply iJ.neg_closure _ haIJ.right,
-end, begin
-  intros r x,
-  assume h,
-  split,
-    apply iI.mul_closure _ _ h.left,
-  apply iJ.mul_closure _ _ h.right,
-end⟩
+  split, {
+    intros a b,
+    assume haIJ hbIJ,
+    split,
+      apply hI.add_closure _ _ haIJ.left hbIJ.left,
+    apply hJ.add_closure _ _ haIJ.right hbIJ.right,
+  }, {
+    intro a,
+    assume haIJ,
+    split,
+      apply hI.neg_closure _ haIJ.left,
+    apply hJ.neg_closure _ haIJ.right,
+  }, {
+    intros r x,
+    assume h,
+    split,
+      apply hI.mul_closure _ _ h.left,
+    apply hJ.mul_closure _ _ h.right,
+  },
+end
 
 variables {β : Type} [myring β]
 
@@ -61,27 +64,30 @@ begin
   rw [←neg_unique, ←respects_add hf, neg_add, respects_zero hf],
 end
 
-def kernel_ideal : ideal (ker f) := ⟨begin
-  intros a b,
-  assume ha hb,
-  change f (a + b) = 0,
-  change f a = 0 at ha,
-  change f b = 0 at hb,
-  rw [hf.respects_add, ha, hb, add_zero],
-end, begin
-  intro a,
-  assume ha,
-  change f (-a) = 0,
-  change f a = 0 at ha,
-  symmetry,
-  rw [hf.respects_neg, ←neg_unique, ha, zero_add],
-end, begin
-  intros r x,
-  assume hx,
-  change f (r * x) = 0,
-  change f x = 0 at hx,
-  rw [hf.respects_mul, hx, mul_zero],
-end⟩
+def kernel_ideal : is_ideal (ker f) :=
+begin
+  split, {
+    intros a b,
+    assume ha hb,
+    change f (a + b) = 0,
+    change f a = 0 at ha,
+    change f b = 0 at hb,
+    rw [hf.respects_add, ha, hb, add_zero],
+  }, {
+    intro a,
+    assume ha,
+    change f (-a) = 0,
+    change f a = 0 at ha,
+    symmetry,
+    rw [hf.respects_neg, ←neg_unique, ha, zero_add],
+  }, {
+    intros r x,
+    assume hx,
+    change f (r * x) = 0,
+    change f x = 0 at hx,
+    rw [hf.respects_mul, hx, mul_zero],
+  },
+end
 
 end is_homomorphism
 
