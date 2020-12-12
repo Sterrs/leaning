@@ -628,50 +628,16 @@ theorem closed_intersection_closed
 (hSc: σ ⊆ X.is_closed):
 X.is_closed ⋂₀ σ :=
 begin
-  have: ⋂₀ σ = (⋃₀ {S | ∃ S': myset α, S = S'.compl ∧ S' ∈ σ}).compl, {
-    apply funext,
-    intro x,
-    apply propext,
-    split, {
-      assume hx,
-      assume hx',
-      cases hx' with S hS,
-      cases hS with hS hxS,
-      cases hS with S' hS',
-      have := hx S' hS'.right,
-      rw hS'.left at hxS,
-      from hxS this,
-    }, {
-      assume hx,
-      intro S,
-      assume hS,
-      have := not_exists.mp hx S.compl,
-      by_contradiction hxS,
-      apply this,
-      split, {
-        existsi S,
-        split, {
-          refl,
-        }, {
-          assumption,
-        },
-      }, {
-        assumption,
-      },
-    },
-  },
-  rw this,
+  rw ←myset.compl_compl (⋂₀σ),
+  rw myset.compl_sIntersection,
   unfold is_closed,
   rw myset.compl_compl,
-  apply X.open_union_open,
-  intro S,
-  assume hS,
-  cases hS with S' hS',
-  rw ←myset.compl_compl S,
-  apply hSc,
-  rw hS'.left,
-  rw myset.compl_compl,
-  from hS'.right,
+  apply open_union_open,
+  intros S hS,
+  unfold myset.image at hS,
+  cases hS with T hT,
+  rw hT.right.symm,
+  from hSc _ hT.left,
 end
 
 -- finite intersections of open set are open,
