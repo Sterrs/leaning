@@ -382,8 +382,27 @@ def indiscrete_topology (α : Type) : topological_space α :=
 def interior (X : topological_space α) (A : myset α) : myset α :=
 ⋃₀ { U | is_open X U ∧ U ⊆ A }
 
+theorem interior_open (X : topological_space α) (A : myset α) : is_open X (interior X A) :=
+begin
+  apply X.open_union_open,
+  intros U hU,
+  from hU.left,
+end
+
 def closure (X : topological_space α) (A : myset α) : myset α :=
 ⋂₀ { F | is_closed X F ∧ A ⊆ F }
+
+theorem closure_closed (X : topological_space α) (A : myset α) : is_closed X (closure X A) :=
+begin
+  unfold closure,
+  unfold is_closed,
+  rw myset.compl_sIntersection,
+  apply open_union_open,
+  intros S hS,
+  cases hS with T hT,
+  rw ←hT.right,
+  from hT.left.left,
+end
 
 def is_dense (X : topological_space α) (A : myset α) : Prop :=
 closure X A = myset.univ

@@ -147,7 +147,7 @@ begin
   have step2 := step1 hcovX,
   cases step2 with 𝒱 hV,
   existsi mylist.map
-      (myset.subtype_restriction U) 
+      (myset.subtype_restriction U)
       (mylist.filter (≠ U.compl) 𝒱),
   split, {
     cases hV with hV disaster,

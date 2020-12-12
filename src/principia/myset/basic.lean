@@ -21,6 +21,15 @@ instance: has_mem α (myset α) := ⟨myset.mem⟩
 
 theorem mem_def {a : α} {s : myset α} : a ∈ s = s a := rfl
 
+theorem setext (A B : myset α) : (∀ x : α, x ∈ A ↔ x ∈ B) → A = B :=
+begin
+  assume h,
+  apply funext,
+  intro x,
+  apply propext,
+  from h x,
+end
+
 def subset (s : myset α) (t : myset α) : Prop :=
 ∀ a : α, s a → t a
 -- Use \subseteq
@@ -222,9 +231,8 @@ theorem inverse_image_empty
 U = ∅ → inverse_image f U = ∅ :=
 begin
   assume hUe,
-  apply funext,
+  apply setext,
   intro x,
-  apply propext,
   split; assume h, {
     rw hUe at h,
     from h,
@@ -252,9 +260,8 @@ theorem inverse_image_composition
 inverse_image (g ∘ f) U =
 inverse_image f (inverse_image g U) :=
 begin
-  apply funext,
+  apply setext,
   intro x,
-  apply propext,
   refl,
 end
 
@@ -281,11 +288,55 @@ theorem compl_compl
 {α: Type} (S: myset α) [∀ x: α, decidable (x ∈ S)]:
 S.compl.compl = S :=
 begin
-  apply funext,
+  apply setext,
   intro x,
-  apply propext,
   from decidable.not_not_iff _,
 end
+
+theorem compl_intersection {α : Type} (S T : myset α) :
+(S ∩ T).compl = S.compl ∪ T.compl :=
+begin
+  apply setext,
+  intro x,
+  from not_and_distrib,
+end
+
+-- Stronk decidability
+theorem compl_sIntersection {α : Type} (σ : myset (myset α)) [∀ (x : α) (S: myset α), decidable (x ∈ S)] :
+(⋂₀ σ).compl = ⋃₀ (image compl σ) :=
+begin
+  apply setext,
+  intro x,
+  split; assume h, {
+    change ¬(∀ S ∈ σ, x ∈ S) at h,
+    rw not_forall at h,
+    cases h with S hS,
+    rw not_imp at hS,
+    existsi S.compl,
+    suffices : S.compl ∈ image compl σ,
+      existsi this,
+      from hS.right,
+    existsi S,
+    split,
+      from hS.left,
+    refl,
+  }, {
+    change ¬(∀ S ∈ σ, x ∈ S),
+    rw not_forall,
+    change ∃ S ∈ (image compl σ), x ∈ S at h,
+    cases h with S hS,
+    cases hS with hS hxS,
+    existsi S.compl,
+    assume h,
+    apply h,
+      cases hS with T hT,
+      rw [hT.right.symm, compl_compl],
+      from hT.left,
+    from hxS,
+  },
+end
+
+#check image
 
 -- Used to restrict some set to a subtype ("intersect" a set with a subtype)
 def subtype_restriction (Y : myset α) (U : myset α) : myset (subtype Y) :=
