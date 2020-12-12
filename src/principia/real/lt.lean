@@ -46,6 +46,22 @@ begin
     },
 end
 
+theorem zero_npos : ¬positive 0 :=
+begin
+  assume h,
+  cases h with ε hε,
+  cases hε with hε hN,
+  cases hN with N hN,
+  suffices : (0 : myrat) < 0,
+    from myrat.lt_nrefl 0 this,
+  transitivity ε,
+    assumption,
+  have h₁ := hN N.succ,
+  rw ←@mynat.le_iff_lt_succ N N at h₁,
+  have h₂ := h₁ (@mynat.le_refl N),
+  assumption,
+end
+
 end cau_seq
 
 namespace real
@@ -56,6 +72,16 @@ quotient.lift cau_seq.positive cau_seq.positive_well_defined
 def lt (x y : real) := positive (x - y)
 
 instance: has_lt real := ⟨lt⟩
+
+theorem lt_impl_ne {x y : real} : x < y → x ≠ y :=
+begin
+  assume hxy hxeqy,
+  subst hxeqy,
+  change positive (x - x) at hxy, -- necessary, would otherwise require annoying theorem
+  rw real.sub_self at hxy,
+  apply cau_seq.zero_npos,
+  assumption,
+end
 
 end real
 
