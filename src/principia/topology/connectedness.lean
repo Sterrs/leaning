@@ -1,5 +1,5 @@
 import .topological_space
-import .continuous
+import .continuity
 
 namespace hidden
 

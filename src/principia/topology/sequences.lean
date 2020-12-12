@@ -1,5 +1,5 @@
 import ..mynat.max
-import .continuous
+import .continuity
 import ..sequence
 
 namespace hidden
