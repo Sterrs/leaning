@@ -404,6 +404,33 @@ begin
   from hT.left.left,
 end
 
+theorem compl_interior_compl_eq_closure (X : topological_space α) (A : myset α) :
+(X.interior A.compl).compl = X.closure A :=
+begin
+  unfold interior,
+  rw myset.compl_sUnion,
+  congr,
+  apply myset.setext,
+  intro S,
+  split; assume hS,
+    cases hS with T hT,
+    rw hT.right.symm,
+    split,
+      unfold is_closed,
+      rw myset.compl_compl,
+      from hT.left.left,
+    apply myset.subset_compl_symm,
+    from hT.left.right,
+  unfold myset.image,
+  existsi S.compl,
+  split,
+    split,
+      from hS.left,
+    rw myset.compl_subset_compl,
+    from hS.right,
+  rw myset.compl_compl,
+end
+
 def is_dense (X : topological_space α) (A : myset α) : Prop :=
 closure X A = myset.univ
 

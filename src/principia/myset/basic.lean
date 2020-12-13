@@ -86,6 +86,12 @@ notation U × V := set_prod U V
 instance : has_emptyc (myset α) :=
 ⟨λ a, false⟩
 
+theorem in_empty_false (x : α) : x ∈ (∅ : myset α) → false :=
+begin
+  assume hx,
+  assumption,
+end
+
 theorem empty_iff_eq_empty {s: myset α}: empty s ↔ s = ∅ :=
 begin
   split; assume h, {
@@ -293,6 +299,14 @@ begin
   from decidable.not_not_iff _,
 end
 
+theorem compl_cancel {α: Type} (S: myset α) (T: myset α) [∀ x: α, decidable (x ∈ S)]
+[∀ x: α, decidable (x ∈ T)]:
+S.compl = T.compl → S = T :=
+begin
+  assume h,
+  rw [←compl_compl S, ←compl_compl T, h],
+end
+
 theorem compl_intersection {α : Type} (S T : myset α) :
 (S ∩ T).compl = S.compl ∪ T.compl :=
 begin
@@ -336,7 +350,85 @@ begin
   },
 end
 
-#check image
+section
+
+open classical
+
+local attribute [instance] classical.prop_decidable
+
+theorem compl_sUnion {α : Type} (σ : myset (myset α)) :
+(⋃₀ σ).compl = ⋂₀ (image compl σ) :=
+begin
+  apply compl_cancel,
+  rw [compl_compl, compl_sIntersection],
+  congr,
+  apply setext,
+  intro S,
+  split; assume hS,
+    existsi S.compl,
+    split,
+      existsi S,
+      split,
+        assumption,
+      refl,
+    rw compl_compl,
+  cases hS with T hT,
+  rw hT.right.symm,
+  cases hT.left with U hU,
+  rw [hU.right.symm, compl_compl],
+  from hU.left,
+end
+
+theorem compl_subset_compl {α : Type}  (S T : myset α) :
+S.compl ⊆ T.compl ↔ T ⊆ S :=
+begin
+  split; assume h,
+    intros x hx,
+    by_contradiction,
+    from h _ a hx,
+  intros x hx,
+  assume hxT,
+  from hx (h _ hxT),
+end
+
+end
+
+theorem disjoint_iff_subset_compl {α : Type}  (S T : myset α) :
+S ∩ T = ∅ ↔ S ⊆ T.compl :=
+begin
+  split; assume h,
+    intros x hxS,
+    assume hx,
+    apply in_empty_false x, --??
+    rw ←h,
+    change x ∈ S ∧ x ∈ T,
+    split,
+      from hxS,
+    from hx,
+  apply setext,
+  intro x,
+  split; assume hx,
+    exfalso,
+    apply h _ hx.left,
+    from hx.right,
+  exfalso,
+  assumption,
+end
+
+theorem intersection_comm {α : Type}  (S T : myset α) :
+S ∩ T = T ∩ S :=
+begin
+  apply setext,
+  intro x,
+  split; from λ h, ⟨h.right, h.left⟩,
+end
+
+theorem subset_compl_symm {α : Type}  (S T : myset α) :
+S ⊆ T.compl → T ⊆ S.compl :=
+begin
+  assume h,
+  rwa [←disjoint_iff_subset_compl, intersection_comm, disjoint_iff_subset_compl],
+end
 
 -- Used to restrict some set to a subtype ("intersect" a set with a subtype)
 def subtype_restriction (Y : myset α) (U : myset α) : myset (subtype Y) :=
