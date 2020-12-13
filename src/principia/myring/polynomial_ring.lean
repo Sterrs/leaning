@@ -212,6 +212,26 @@ begin
   },
 end
 
+private lemma term_collection_distr (a b c : sequence α) (m n : mynat) :
+term_collection a (b + c) m n = term_collection a b m n + term_collection a c m n :=
+begin
+  induction n with n hn generalizing m, {
+    rw mynat.zz,
+    dsimp only [term_collection],
+    change a m * (b 0 + c 0)= a m * b 0 + a m * c 0,
+    rw mul_add,
+  }, {
+    dsimp only [term_collection],
+    rw hn m.succ,
+    conv {
+      congr, congr,
+      change a m * (b n.succ + c n.succ),
+      rw mul_add,
+    },
+    ac_refl,
+  },
+end
+
 variables a b c : polynomial α
 
 private theorem poly_add_assoc : a + b + c = a + (b + c) :=
@@ -238,6 +258,7 @@ begin
   rw add_neg,
 end
 
+-- Presumably impossible
 private theorem poly_mul_assoc : a * b * c = a * (b * c) :=
 begin
   sorry,
@@ -290,12 +311,14 @@ begin
   rw [if_pos rfl, one_mul],
 end
 
+-- Nice and easy :)
 private theorem poly_mul_add : a * (b + c) = a * b + a * c :=
 begin
   apply polyext,
   intro n,
-  change term_collection a.seq (b.seq + c.seq) 0 n = (a * b).seq n + (a * c).seq n,
-  sorry,
+  change term_collection a.seq (b.seq + c.seq) 0 n =
+  term_collection a.seq b.seq 0 n + term_collection a.seq c.seq 0 n,
+  rw term_collection_distr,
 end
 
 instance: myring (polynomial α) :=
