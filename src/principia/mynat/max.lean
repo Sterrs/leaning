@@ -70,16 +70,32 @@ begin
   },
 end
 
-theorem max_lt_cancel_left : max a b < c → a < c :=
+theorem max_le_cancel_left : max a b ≤ c → a ≤ c :=
 begin
-  apply le_lt_chain,
-  from max_le_left,
+  assume h,
+  transitivity a.max b,
+    from max_le_left,
+  assumption
+end
+
+theorem max_le_cancel_right : max a b ≤ c → b ≤ c :=
+begin
+  assume h,
+  transitivity a.max b,
+    from max_le_right,
+  assumption,
 end
 
 theorem max_lt_cancel_right : max a b < c → b < c :=
 begin
   apply le_lt_chain,
   from max_le_right,
+end
+
+theorem max_lt_cancel_left : max a b < c → a < c :=
+begin
+  apply le_lt_chain,
+  from max_le_left,
 end
 
 end mynat
