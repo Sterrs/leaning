@@ -106,17 +106,19 @@ begin
   rw [←neg_unique, mul_comm, ←mul_add, neg_add, mul_zero],
 end
 
-theorem neg_mul : -(a * b) = (-a) * b :=
+theorem neg_mul : (-a) * b = -(a * b) :=
 begin
-  symmetry,
   rw [←neg_unique, mul_comm (-a), mul_comm a, ←mul_add, neg_add, mul_zero],
 end
 
-theorem mul_neg : -(a * b) = a * (-b) :=
+theorem mul_neg : a * (-b) = -(a * b) :=
 begin
   rw [mul_comm a (-b), mul_comm a b],
   apply neg_mul,
 end
+
+theorem neg_mul_neg : (-a) * (-b) = a * b :=
+by rw [mul_neg, neg_mul, neg_neg]
 
 theorem neg_distr : -(a + b) = -a + -b :=
 by rw [neg_eq_mul_neg_one a, neg_eq_mul_neg_one b, ←mul_add, ←neg_eq_mul_neg_one]

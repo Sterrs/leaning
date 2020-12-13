@@ -1,6 +1,5 @@
 import .basic
 import .int_pair
-import .mul
 
 import ..mynat.sum
 import ..myring.order
@@ -9,7 +8,16 @@ namespace hidden
 
 namespace myint
 
-open mynat
+open myring
+
+def le: myint → myint → Prop :=
+quotient.lift₂ int_pair.le int_pair.le_well_defined
+
+instance: has_le myint := ⟨le⟩
+
+theorem le_eq_cls {x y: int_pair.int_pair} {n m: myint}:
+n = ⟦x⟧ → m = ⟦y⟧ → (n ≤ m ↔ x ≤ y) :=
+λ hnx hmy, by rw [hnx, hmy]; refl
 
 variables m n k x y z : myint
 variables a b c : mynat
@@ -96,7 +104,8 @@ begin
   split; assume h, {
     rw le_iff_exists_nat at h,
     cases h with a h,
-    rw [add_assoc, @add_comm k, ←add_assoc, add_cancel] at h,
+    rw [add_assoc, @add_comm k, ←add_assoc] at h,
+    have h := add_cancel_right _ _ _ h,
     rw le_iff_exists_nat,
     existsi a,
     assumption,

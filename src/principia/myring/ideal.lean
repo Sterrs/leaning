@@ -64,7 +64,7 @@ begin
   rw [←neg_unique, ←respects_add hf, neg_add, respects_zero hf],
 end
 
-def kernel_ideal : is_ideal (ker f) :=
+theorem kernel_ideal : is_ideal (ker f) :=
 begin
   split, {
     intros a b,
