@@ -91,7 +91,13 @@ begin
 end
 
 private lemma term_collection_succ (a b : sequence α) (m n : mynat) :
-term_collection a b m.succ n = term_collection a b m n.succ + -(a m * b n.succ) := sorry
+term_collection a b m.succ n = term_collection a b m n.succ + -(a m * b n.succ) :=
+begin
+  apply add_cancel_right _ _ (a m * b n.succ),
+  rw [add_assoc, neg_add, add_zero],
+  dsimp only [term_collection],
+  rw add_comm,
+end
 
 -- Formula for what happens if you swap a and b.
 private lemma term_collection_swap_args_lemma (a b : sequence α) (m n : mynat) :
@@ -187,6 +193,25 @@ instance: has_one (polynomial α) := ⟨⟨λ n, if n = 0 then 1 else 0, begin
   symmetry, assumption,
 end⟩⟩
 
+private lemma term_collection_one_zero (a : sequence α) (m n : mynat) :
+term_collection (1 : polynomial α).seq a m.succ n = 0 :=
+begin
+  induction n with n hn generalizing m, {
+    rw mynat.zz,
+    dsimp only [term_collection],
+    change (ite (m.succ = 0) 1 0) * a 0 = 0,
+    rw [if_neg mynat.succ_ne_zero, zero_mul],
+  }, {
+    dsimp only [term_collection],
+    conv {
+      congr, congr,
+      change (ite (m.succ = 0) 1 0) * a n.succ,
+    },
+    rw [if_neg (mynat.succ_ne_zero), zero_mul, zero_add],
+    apply hn,
+  },
+end
+
 variables a b c : polynomial α
 
 private theorem poly_add_assoc : a + b + c = a + (b + c) :=
@@ -243,7 +268,26 @@ end
 
 private theorem poly_mul_one : a * 1 = a :=
 begin
-  sorry,
+  apply polyext,
+  intro n,
+  change term_collection a.seq (1 : polynomial α).seq 0 n = a.seq n,
+  cases n,
+    rw mynat.zz,
+    dsimp only [term_collection],
+    change a.seq 0 * (ite (0 = 0) 1 0) = a.seq 0,
+    rw [if_pos rfl, mul_one],
+  dsimp only [term_collection],
+  rw [term_collection_swap_args],
+  conv {
+    congr, congr,
+    change a.seq 0 * (ite (n.succ = 0) 1 0),
+    rw [if_neg mynat.succ_ne_zero, mul_zero],
+  },
+  rw [zero_add, mynat.zero_add, term_collection_one_zero, neg_zero, add_zero],
+  dsimp only [term_collection],
+  rw [term_collection_one_zero, add_zero],
+  change (ite (0 = 0) 1 0) * a.seq n.succ = a.seq n.succ,
+  rw [if_pos rfl, one_mul],
 end
 
 private theorem poly_mul_add : a * (b + c) = a * b + a * c :=
