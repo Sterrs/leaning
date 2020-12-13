@@ -5,6 +5,7 @@ namespace hidden
 
 class myfield (α : Type) extends myring α, has_inv α :=
 (mul_inv (x : α): x ≠ 0 → x * x⁻¹ = 1)
+(nontrivial: (0: α) ≠ 1)
 
 namespace myfield
 

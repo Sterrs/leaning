@@ -2,6 +2,7 @@ import .basic
 
 namespace hidden
 
+-- nontriviality axiom?
 class integral_domain (α : Type) extends myring α :=
 (mul_integral_left (a b : α) : a ≠ 0 → b * a = 0 → b = 0) -- This form isn't that useful
 
