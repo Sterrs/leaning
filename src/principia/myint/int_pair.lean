@@ -155,10 +155,6 @@ def le (n m: int_pair): Prop := n.a + m.b ≤ m.a + n.b
 
 instance: has_le int_pair := ⟨le⟩
 
-def lt (n m: int_pair): Prop := ¬ m ≤ n
-
-instance: has_lt int_pair := ⟨lt⟩
-
 @[simp]
 theorem le_le (n m: int_pair): le n m ↔ n ≤ m := iff.rfl
 
@@ -168,16 +164,6 @@ theorem le_def (n m: int_pair): n ≤ m ↔ n.a + m.b ≤ m.a + n.b
 
 instance decidable_le: ∀ n m: int_pair, decidable (n ≤ m) :=
 λ m n, mynat.decidable_le _ _
-
-@[simp]
-theorem lt_lt (n m: int_pair): lt n m ↔ n < m := iff.rfl
-
-@[simp]
-theorem lt_def (n m: int_pair): n < m ↔ n.a + m.b < m.a + n.b
-:= iff.rfl
-
-instance decidable_lt: ∀ n m: int_pair, decidable (n < m) :=
-λ n m, not.decidable
 
 private theorem le_well_defined_right (n x m y: int_pair):
 n ≈ x → m ≈ y → (n ≤ m → x ≤ y) :=
@@ -211,60 +197,6 @@ begin
   apply propext,
   from iff.intro (le_well_defined_right _ _ _ _ hnx hmy)
                  (le_well_defined_right _ _ _ _ hnx.symm hmy.symm),
-end
-
-theorem lt_well_defined (n m x y: int_pair):
-n ≈ x → m ≈ y → ((n < m) = (x < y)) :=
-begin
-  assume hnx hmy,
-  have: n < m = ¬m ≤ n := rfl,
-  rw this,
-  rw le_well_defined m n y x hmy hnx,
-  refl,
-end
-
-def sign (n: int_pair): int_pair :=
-if 0 < n then 1
-  else if n < 0 then -1
-    else 0
-
-theorem sign_def (n: int_pair):
-sign n = if 0 < n then 1
-          else if n < 0 then -1
-            else 0 := rfl
-
-theorem sign_well_defined (n m: int_pair):
-n ≈ m → ⟦sign n⟧ = ⟦sign m⟧ :=
-begin
-  assume hnm,
-  have pos_equiv := lt_well_defined 0 n 0 m (setoid.refl _) hnm,
-  have neg_equiv := lt_well_defined n 0 m 0 hnm (setoid.refl _),
-  unfold sign,
-  by_cases h0n: 0 < n, {
-    rw if_pos h0n,
-    rw pos_equiv at h0n,
-    rw if_pos h0n,
-  }, {
-    rw if_neg h0n,
-    rw pos_equiv at h0n,
-    rw if_neg h0n,
-    by_cases hn0: n < 0, {
-      rw if_pos hn0,
-      rw neg_equiv at hn0,
-      rw if_pos hn0,
-    }, {
-      rw if_neg hn0,
-      rw neg_equiv at hn0,
-      rw if_neg hn0,
-    },
-  },
-end
-
--- is there an easier way?
-private lemma unpropext {p q: Prop}: p = q → (p ↔ q) :=
-begin
-  assume hpq,
-  rw hpq,
 end
 
 def mul (n m: int_pair): int_pair := ⟨n.a * m.a + n.b * m.b, n.a * m.b + n.b * m.a⟩

@@ -90,6 +90,20 @@ begin
   cases le_total_order a a; assumption,
 end
 
+theorem wlogle
+(p: α → α → Prop)
+(hsymm: ∀ m n: α, p m n → p n m):
+(∀ m n: α, m ≤ n → p m n) → (∀ m n: α, p m n) :=
+begin
+  assume hwlog,
+  intros m n,
+  cases le_total_order m n with hmn hnm, {
+    from hwlog m n hmn,
+  }, {
+    from hsymm _ _ (hwlog n m hnm),
+  },
+end
+
 -- not sure what the most optimal way to do this is
 @[trans]
 private lemma le_trans_lemma: a ≤ b → b ≤ c → a ≤ c :=
@@ -188,6 +202,14 @@ begin
   assume h,
   cases h with hxy hyx,
   cases le_total_order a b; contradiction,
+end
+
+-- still works without decidability, so not the same at lt_impl_le
+theorem lt_very_antisymm_impl: a < b → ¬(b < a) :=
+begin
+  assume hab hba,
+  apply lt_very_antisymmetric a b,
+  split; assumption,
 end
 
 theorem lt_neg_switch_iff: a < b ↔ -b < -a :=
@@ -414,6 +436,16 @@ end
 def abs [decidable_le: ∀ a b: α, decidable (a ≤ b)]:
 α → α := (λ a, if 0 ≤ a then a else -a)
 
+instance decidable_lt [decidable_le: ∀ a b: α, decidable (a ≤ b)]:
+∀ a b: α, decidable (a < b) :=
+λ a b, not.decidable
+
+def sign [decidable_le: ∀ a b: α, decidable (a ≤ b)]
+(a: α): α :=
+if 0 < a then 1
+  else if a < 0 then -1
+    else 0
+
 theorem abs_eq_plusminus
 [decidable_le: ∀ a b: α, decidable (a ≤ b)]:
 abs a = a ∨ abs a = -a :=
@@ -634,28 +666,25 @@ begin
   from abs_diff_lt_left _ _ _ h,
 end
 
+theorem pos_sign
+[decidable_le: ∀ a b: α, decidable (a ≤ b)]:
+0 < a → sign a = 1 :=
+begin
+  assume h0a,
+  unfold sign,
+  rw if_pos h0a,
+end
+
+theorem neg_sign
+[decidable_le: ∀ a b: α, decidable (a ≤ b)]:
+a < 0 → sign a = -1 :=
+begin
+  assume ha0,
+  unfold sign,
+  rw if_neg (lt_very_antisymm_impl _ _ ha0),
+  rw if_pos ha0,
+end
+
 end ordered_myring
 
 end hidden
-
--- -- Sign
-
--- def sign: myint → myint :=
--- quotient.lift (λ n, ⟦int_pair.sign n⟧) int_pair.sign_well_defined
-
--- theorem sign_eq_cls {a: int_pair.int_pair} {n: myint}:
--- n = ⟦a⟧ → sign n = ⟦int_pair.sign a⟧ :=
--- λ hnx, by rw hnx; refl
-
--- theorem sign_zero: sign 0 = 0 := rfl
-
--- -- °_° wtf
--- theorem sign_succ: sign ↑(succ a) = 1 := rfl
-
--- theorem zero_ne_one : (0 : myint) ≠ 1 :=
--- begin
---   rw [←one_nat, ←zero_nat],
---   assume h,
---   rw of_nat_cancel at h,
---   from zero_ne_one h,
--- end

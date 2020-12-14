@@ -141,8 +141,30 @@ begin
   rwa zero_add,
 end
 
+theorem add_cancel_left_to_zero_iff: a + b = b ↔ a = 0 :=
+begin
+  split, {
+    from add_cancel_left_to_zero _ _,
+  }, {
+    assume ha0,
+    rw ha0,
+    rw zero_add,
+  },
+end
+
 theorem add_cancel_right_to_zero : a + b = a → b = 0 :=
 λ h, add_cancel_left_to_zero b a (by rwa add_comm at h)
+
+theorem add_cancel_rihgt_to_zero_iff: a + b = a ↔ b = 0 :=
+begin
+  split, {
+    from add_cancel_right_to_zero _ _,
+  }, {
+    assume hb0,
+    rw hb0,
+    rw add_zero,
+  },
+end
 
 theorem one_eq_zero_impl_all_zero : (1 : α) = 0 → ∀ x : α, x = 0 :=
 begin
