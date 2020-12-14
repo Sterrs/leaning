@@ -616,7 +616,7 @@ private lemma exists_corresponding_subcov
 (X: topological_space α) (x: α)
 (U: myset α)
 (𝒱: mylist (myset α))
-(hVU: mylist.for_all 
+(hVU: mylist.for_all
   ({V :
      myset α | ∃ (y : α) (W : myset α),
      y ∈ U ∧ X.is_open V ∧ X.is_open W ∧ y ∈ V ∧ x ∈ W ∧ V ∩ W = ∅}) 𝒱):

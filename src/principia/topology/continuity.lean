@@ -10,8 +10,27 @@ open classical
 
 local attribute [instance] classical.prop_decidable
 
+-- Goal Of The Game: sort out the [topological_space] arguments
+-- just make it all ()
+
 def is_continuous (f : α → β) [X : topological_space α] [Y : topological_space β] : Prop :=
 ∀ V : myset β, is_open Y V → is_open X (myset.inverse_image f V)
+
+def is_open_map (X: topological_space α) (Y: topological_space β) (f: α → β): Prop :=
+∀ U: myset α, is_open X U → is_open Y (myset.image f U)
+
+-- is this right ???
+structure is_homeomorphism
+(X: topological_space α) (Y: topological_space β)
+(f: α → β) (g: β → α): Prop :=
+(f_continuous: @is_continuous _ _ f X Y)
+(g_continuous: @is_continuous _ _ g Y X)
+(right_inv: f ∘ g = id)
+(left_inv: g ∘ f = id)
+
+def homeomorphic (X: topological_space α) (Y: topological_space β): Prop :=
+∃ (f: α → β) (g: β → α),
+is_homeomorphism X Y f g
 
 theorem identity_continuous [X : topological_space α]:
 @is_continuous _ _ (id: α → α) X X :=
@@ -165,7 +184,7 @@ begin
   },
 end
 
--- a bit less mind-numbing than unironically also proving it for snd
+-- TODO: re-write this using base_continuous
 theorem swap_continuous
 [X : topological_space α] [Y: topological_space β]:
 @is_continuous (α × β) (β × α) (λ x, (x.snd, x.fst))
@@ -418,6 +437,28 @@ begin
   },
 end
 
+theorem base_open
+(B : myset (myset α)) (hB: is_base B)
+(Y: topological_space β) (f: α → β):
+is_open_map (space_from_base B hB) Y f ↔
+(∀ W: myset α, B W → Y.is_open (myset.image f W)) := sorry
+
+theorem projection_open
+(X : topological_space α) (Y: topological_space β):
+is_open_map (product_topology X Y) X prod.fst := sorry
+
+theorem to_indiscrete_continuous (X: topological_space α) (f: α → β):
+@is_continuous _ _  f X (indiscrete_topology β) := sorry
+
+theorem to_discrete_open (X: topological_space α) (f: α → β):
+is_open_map X (discrete_topology β) f := sorry
+
+theorem from_discrete_continuous (Y: topological_space β) (f: α → β):
+@is_continuous _ _  f (discrete_topology α) Y := sorry
+
+theorem from_indiscrete_open_to_image (Y: topological_space β) (f: α → β):
+is_open_map (indiscrete_topology α) (subspace_topology Y (myset.image f myset.univ))
+  (myset.function_restrict_to_image f) := sorry
 
 end topological_space
 

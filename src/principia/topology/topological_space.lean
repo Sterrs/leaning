@@ -431,7 +431,13 @@ begin
   rw myset.compl_compl,
 end
 
-def is_dense (X : topological_space α) (A : myset α) : Prop :=
+theorem closure_intersects_all_open
+(X: topological_space α) (A: myset α):
+X.closure A =
+{x : α | ∀ U: myset α, X.is_open U → U ∩ A ≠ ∅ → x ∈ U} := sorry
+
+def is_dense (X : topological_space α): Prop :=
+∃ A: myset α,
 closure X A = myset.univ
 
 def is_neighbourhood (X: topological_space α) (U: myset α) (x: α): Prop :=
@@ -708,8 +714,7 @@ begin
   intro X,
   apply propext,
   split; assume h, {
-    -- is this sensible ? ?
-    existsi λ x, ∃ hxS: x ∈ S, (⟨x, hxS⟩: subtype S) ∈ X,
+    existsi myset.subtype_unrestriction S X,
     split, {
       trivial,
     }, {
@@ -775,30 +780,31 @@ begin
   },
 end
 
-theorem empty_discrete: sorry := sorry
+theorem empty_discrete (X: topological_space α):
+discrete_topology (subtype (∅: myset α)) =
+subspace_topology X ∅ := sorry
 
-theorem empty_indiscrete: sorry := sorry
-
-theorem singleton_discrete: sorry := sorry
+theorem empty_indiscrete (X: topological_space α):
+indiscrete_topology (subtype (∅: myset α)) =
+subspace_topology X ∅ := sorry
 
 theorem singleton_indiscrete (X: topological_space α) (x: α):
-discrete_topology (subtype ({y | y = x})) =
-subspace_topology X ({y | y = x}) :=
+indiscrete_topology (subtype (myset.singleton x)) =
+subspace_topology X (myset.singleton x) := sorry
+
+theorem singleton_discrete (X: topological_space α) (x: α):
+discrete_topology (subtype (myset.singleton x)) =
+subspace_topology X (myset.singleton x) :=
 begin
-  apply topological_space.rec,
-  intros,
-  symmetry,
-  apply topological_space.rec,
-  intros,
-  simp, -- forgive me
+  apply topological_space_eq,
   apply funext,
   intro S,
   apply propext,
   by_cases hSe: S = ∅, {
     rw hSe,
     split; assume h,
-    assumption,
-    assumption,
+    from topological_space.empty_open _,
+    from topological_space.empty_open _,
   }, {
     change S ≠ ∅ at hSe,
     rw ←myset.exists_iff_neq_empty at hSe,
@@ -829,8 +835,8 @@ begin
     },
     rw this,
     split; assume h,
-    assumption,
-    assumption,
+    from topological_space.univ_open _,
+    from topological_space.univ_open _,
   },
 end
 

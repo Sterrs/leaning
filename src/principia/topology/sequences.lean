@@ -37,6 +37,13 @@ begin
   assumption,
 end
 
+theorem subsequence_converges
+(X: topological_space α) (x: α)
+(xn: sequence α) (k_n: mynat → mynat)
+(hk_incr: sequence.is_increasing k_n):
+X.converges_to x xn → X.converges_to x (sequence.subsequence xn k_n hk_incr) :=
+sorry
+
 theorem image_converges
 (X: topological_space α) (Y: topological_space β)
 (x: α) (xn: sequence α) (hxnconv: converges_to X x xn)

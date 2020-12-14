@@ -1,6 +1,7 @@
 import ..sequence
 import .basic
 import ..mynat.induction
+import ..mynat.nat_sub
 
 namespace hidden
 namespace myring

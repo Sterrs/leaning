@@ -1,4 +1,4 @@
-import .mynat.nat_sub
+import .mynat.lt
 
 namespace hidden
 
@@ -7,6 +7,14 @@ def sequence (α : Type) := mynat → α
 namespace sequence
 
 variable {α : Type}
+
+def is_increasing (k_n: mynat → mynat): Prop :=
+∀ m n: mynat, m < n → k_n m < k_n n
+
+def subsequence
+(a: sequence α) (k_n: mynat → mynat)
+(h_incr: is_increasing k_n): sequence α :=
+a ∘ k_n
 
 -- Coerce a value into a sequence of that value.
 -- e.g. ↑0 = 0, 0, 0, 0, ... = λ k, 0
@@ -45,7 +53,6 @@ variables [has_zero α] [has_one β]
 
 instance: has_zero (sequence α) := ⟨λ k, 0⟩
 instance: has_one (sequence β) := ⟨λ k, 1⟩
-
 
 -- sum from k = 0 to n - 1 of term(k)
 -- a bit unconventional, but this is the best way I could think of
