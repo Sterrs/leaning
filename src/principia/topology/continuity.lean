@@ -32,7 +32,7 @@ def homeomorphic (X: topological_space α) (Y: topological_space β): Prop :=
 ∃ (f: α → β) (g: β → α),
 is_homeomorphism X Y f g
 
-theorem identity_continuous [X : topological_space α]:
+theorem identity_continuous (X : topological_space α):
 @is_continuous _ _ (id: α → α) X X :=
 begin
   intro V,
@@ -122,8 +122,8 @@ begin
 end
 
 theorem composition_continuous
-[X : topological_space α] [Y : topological_space β]
-[Z: topological_space γ]
+(X: topological_space α) (Y: topological_space β)
+(Z: topological_space γ)
 (f: α → β) (g: β → γ)
 (hfc: @is_continuous _ _ f X Y)
 (hgc: @is_continuous _ _ g Y Z):
@@ -420,6 +420,23 @@ begin
   },
 end
 
+theorem homeomorphism_refl
+(X: topological_space α):
+is_homeomorphism X X id id :=
+begin
+  split, {
+    from identity_continuous X,
+  }, {
+    from identity_continuous X,
+  }, {
+    -- don't question it. I have no idea why this doesn't need
+    -- extensionality
+    refl,
+  }, {
+    refl,
+  },
+end
+
 theorem homeomorphism_symm
 (X: topological_space α) (Y: topological_space β)
 (f: α → β) (g: β → α) (h_omeom: is_homeomorphism X Y f g):
@@ -427,6 +444,33 @@ is_homeomorphism Y X g f :=
 begin
   cases h_omeom,
   split; assumption,
+end
+
+theorem homeomorphism_trans
+(X: topological_space α) (Y: topological_space β)
+(Z: topological_space γ) (f: α → β) (g: β → α)
+(f': β → γ) (g': γ → β)
+(hfghom: is_homeomorphism X Y f g)
+(hfg'hom: is_homeomorphism Y Z f' g'):
+is_homeomorphism X Z (f' ∘ f) (g ∘ g') :=
+begin
+  cases hfghom,
+  cases hfg'hom,
+  split, {
+    apply composition_continuous _ Y; assumption,
+  }, {
+    apply composition_continuous _ Y; assumption,
+  }, {
+    change f' ∘ (f ∘ g) ∘ g' = id,
+    rw hfghom_right_inv,
+    change f' ∘ g' = id,
+    assumption,
+  }, {
+    change g ∘ (g' ∘ f') ∘ f = id,
+    rw hfg'hom_left_inv,
+    change g ∘ f = id,
+    assumption,
+  },
 end
 
 theorem homeomorphism_open
