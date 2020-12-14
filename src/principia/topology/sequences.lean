@@ -42,7 +42,17 @@ theorem subsequence_converges
 (xn: sequence α) (k_n: mynat → mynat)
 (hk_incr: sequence.is_increasing k_n):
 X.converges_to x xn → X.converges_to x (sequence.subsequence xn k_n hk_incr) :=
-sorry
+begin
+  assume hxnconv,
+  intro U,
+  assume hUo hxU,
+  cases hxnconv U hUo hxU with N hN,
+  existsi N,
+  intro n,
+  assume hNn,
+  apply hN,
+  apply sequence.subsequence_eventual_growth; assumption,
+end
 
 theorem image_converges
 (X: topological_space α) (Y: topological_space β)

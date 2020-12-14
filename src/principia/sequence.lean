@@ -16,6 +16,72 @@ def subsequence
 (h_incr: is_increasing k_n): sequence α :=
 a ∘ k_n
 
+theorem subsequence_growth
+(k_n: mynat → mynat) (h_incr: is_increasing k_n) (n: mynat):
+n ≤ k_n n :=
+begin
+  induction n with n ih_n, {
+    from mynat.zero_le,
+  }, {
+    transitivity (k_n n).succ, {
+      apply mynat.le_add (1: mynat),
+      assumption,
+    }, {
+      rw ←mynat.lt_iff_succ_le,
+      apply h_incr,
+      apply @mynat.lt_to_add_succ n (0: mynat),
+    },
+  },
+end
+
+theorem subsequence_nonstrict
+(k_n: mynat → mynat) (h_incr: is_increasing k_n)
+(m n: mynat) (hmn: m ≤ n):
+k_n m ≤ k_n n :=
+begin
+  rw mynat.le_iff_lt_or_eq at hmn,
+  cases hmn with hmn hmn, {
+    apply mynat.lt_impl_le,
+    apply h_incr,
+    assumption,
+  }, {
+    rw hmn,
+  },
+end
+
+theorem subsequence_eventual_growth
+(k_n: mynat → mynat) (h_incr: is_increasing k_n)
+(m n: mynat) (hmn: m ≤ n):
+m ≤ k_n n :=
+begin
+  transitivity k_n m, {
+    apply subsequence_growth _ h_incr,
+  }, {
+    apply subsequence_nonstrict; assumption,
+  },
+end
+
+theorem locally_increasing_impl_increasing
+(k_n: mynat → mynat)
+(h_incr: ∀ n: mynat, k_n n < (k_n n.succ)):
+is_increasing k_n :=
+begin
+  intros m n,
+  assume hmn,
+  rw mynat.lt_iff_succ_le at hmn,
+  cases hmn with d hd,
+  rw hd, clear hd n,
+  induction d with d ih_d, {
+    apply h_incr,
+  }, {
+    transitivity k_n (m.succ + d), {
+      assumption,
+    }, {
+      apply h_incr,
+    },
+  },
+end
+
 -- Coerce a value into a sequence of that value.
 -- e.g. ↑0 = 0, 0, 0, 0, ... = λ k, 0
 -- This is probably bad so might remove this
@@ -23,10 +89,10 @@ a ∘ k_n
 instance: has_coe α (sequence α) := ⟨λ a, (λ k, a)⟩
 
 @[simp]
-theorem coe_seq (a : α) : (↑a:sequence α) = (λ k : mynat, a) := rfl
+theorem coe_seq (a : α) : (↑a: sequence α) = (λ k: mynat, a) := rfl
 
 @[simp]
-theorem coe_triv (a : α) (n :mynat): (↑a:sequence α) n = a := rfl
+theorem coe_triv (a : α) (n: mynat): (↑a: sequence α) n = a := rfl
 
 variables [has_add α] {β : Type} [has_mul β]
 
