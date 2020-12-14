@@ -123,13 +123,6 @@ private theorem add_two: ∀ k, k + 2 = mynat.succ (mynat.succ k) := (λ k, rfl)
 theorem sum_reverse:
 sum f n = sum (λ k, f (n - mynat.succ k)) n :=
 begin
-  have cancel_f:
-    ∀ n k: mynat, ∀ f: sequence α,
-      n = k → f n = f k, {
-    intros n k f,
-    assume h,
-    rw h,
-  },
   revert n f,
   -- easy way to access the n - 2 case of IH
   apply duo_induction
@@ -162,7 +155,7 @@ begin
     apply (sum_cancel_restricted _ _ _).mpr,
     intro m,
     assume hmn,
-    apply cancel_f,
+    congr,
     rw [mynat.sub_succ_succ, mynat.sub_succ_succ],
     cases mynat.sub_succ_converse hmn with d hd,
     symmetry,
@@ -171,42 +164,145 @@ begin
   },
 end
 
--- TODO: general theorem about sum f (n * m) as a double sum?
 theorem sum_split:
-sum f (2 * n) = sum f n + sum (λ k, f (n + k)) n :=
+sum f (n + m) = sum f n + sum (λ k, f (n + k)) m :=
 begin
-  induction n with n hn, {
-    rw [mynat.zz, mynat.mul_zero],
-    dsimp only [sequence.sum],
-    rw add_zero,
+  induction m with m hm, {
+    symmetry,
+    from add_zero _,
+  }, {
+    rw mynat.add_succ,
+    rw sum_succ,
+    rw hm,
+    rw sum_succ,
+    rw add_assoc,
+  },
+end
+
+theorem sum_split_lots:
+sum f (n * m) =
+sum (λ k, sum (λ ℓ, f (ℓ + k * n)) n) m :=
+begin
+  induction m with m ih_m generalizing f, {
+    refl,
   }, {
     rw mynat.mul_succ,
-    rw mynat.add_comm 2,
-    have: sum f (2 * n + 2) = sum f (2 * n) + f (2 * n) + f (2 * n + 1) := rfl,
-    rw this, clear this,
-    rw hn,
-    have: f (2 * n) + f (2 * n + 1) = f (n + n) + f (n + mynat.succ n), {
-      repeat {rw mynat.mul_comm 2},
+    rw sum_split,
+    conv {
+      to_lhs,
+      rw add_comm,
+      congr,
+      rw ih_m _,
+    },
+    rw sum_tail,
+    apply congr, {
+      apply congr, refl,
+      apply (sum_cancel _ _).mpr,
+      intro k,
+      apply (sum_cancel _ _).mpr,
+      intro ℓ,
+      rw mynat.succ_mul,
+      ac_refl,
+    }, {
+      apply (sum_cancel _ _).mpr,
+      intro ℓ,
+      rw mynat.zero_mul,
       refl,
     },
-    rw add_assoc,
-    rw this,
-    rw add_assoc,
+  },
+end
+
+theorem sum_square_limit_swap
+(f: mynat → mynat → α):
+sum (λ k, sum (λ ℓ, f k ℓ) n) m =
+sum (λ ℓ, sum (λ k, f k ℓ) m) n :=
+begin
+  induction m with m ih_m, {
     conv {
-      congr, congr, skip,
-      rw ←add_assoc,
-      rw ←sum_succ,
-      rw ←sum_succ,
-      rw sum_tail,
+      to_lhs,
+      change (0: α),
+    },
+    induction n with n ih_n, {
+      refl,
+    }, {
+      symmetry,
+      rw ih_n,
+      from add_zero _,
+    },
+  }, {
+    rw sum_succ,
+    rw ih_m,
+    clear ih_m,
+    induction n with n ih_n, {
+      from add_zero _,
+    }, {
+      conv {
+        to_rhs,
+        rw sum_succ,
+        rw ←ih_n,
+      },
+      repeat {rw sum_succ},
+      repeat {rw add_assoc},
+      apply congr, refl,
       rw add_comm,
+      repeat {rw add_assoc},
+      apply congr, refl,
+      from add_comm _ _,
     },
-    rw ←add_assoc,
-    rw mynat.add_zero,
-    rw ←sum_succ,
-    have: ∀ k, f (n + mynat.succ k) = f(mynat.succ n + k), {
-      simp,
+  },
+end
+
+theorem sum_triangle_limit_swap
+(f: mynat → mynat → α):
+sum (λ k, sum (λ ℓ, f k ℓ) k.succ) n =
+sum (λ ℓ, sum (λ k, f (k + ℓ) ℓ) (n - ℓ)) n :=
+begin
+  induction n with n ih_n, {
+    refl,
+  }, {
+    rw sum_succ,
+    rw ih_n, clear ih_n,
+    rw sum_succ,
+    rw sum_succ,
+    rw mynat.succ_sub_self,
+    repeat {rw ←add_assoc},
+    apply congr, {
+      apply congr, refl,
+      rw ←sum_distr,
+      apply (sum_cancel_restricted n _ _).mpr, {
+        intro ℓ,
+        assume hln,
+        have: n.succ - ℓ = (n - ℓ).succ, {
+          cases mynat.sub_succ_converse hln with w hw,
+          rw hw,
+          rw mynat.sub_succ_rearrange at hw,
+          rw hw,
+          rw ←mynat.succ_add,
+          rw mynat.add_sub,
+        },
+        rw this, clear this,
+        rw sum_succ,
+        dsimp only [],
+        conv {
+          to_lhs,
+          change (sum (λ (k : mynat), f (k + ℓ) ℓ) (n - ℓ) + f n ℓ),
+        },
+        apply congr, {
+          refl,
+        }, {
+          rw mynat.sub_add_condition.mpr (mynat.lt_impl_le hln),
+        },
+      }, {
+        refl,
+      },
+    }, {
+      conv {
+        to_rhs,
+        change 0 + f (0 + n) n,
+      },
+      rw zero_add,
+      rw mynat.zero_add,
     },
-    rw (sum_cancel _ _).mpr this,
   },
 end
 
@@ -239,43 +335,46 @@ begin
   },
 end
 
-theorem prod_split:
-product f (2 * n) = product f n * product (λ k, f (n + k)) n :=
-begin
-  induction n with n hn, {
-    rw [mynat.zz, mynat.mul_zero],
-    dsimp only [sequence.product],
-    rw mul_one,
-  }, {
-    rw mynat.mul_succ,
-    rw mynat.add_comm 2,
-    have: product f (2 * n + 2) = product f (2 * n) * f (2 * n) * f (2 * n + 1) := rfl,
-    rw this, clear this,
-    rw hn,
-    have: f (2 * n) * f (2 * n + 1) = f (n + n) * f (n + mynat.succ n), {
-      repeat {rw mynat.mul_comm 2},
-      refl,
-    },
-    rw mul_assoc,
-    rw this,
-    rw mul_assoc,
-    conv {
-      congr, congr, skip,
-      rw ←mul_assoc,
-      rw ←prod_succ,
-      rw ←prod_succ,
-      rw prod_tail,
-      rw mul_comm,
-    },
-    rw ←mul_assoc,
-    rw mynat.add_zero,
-    rw ←prod_succ,
-    have: ∀ k, f (n + mynat.succ k) = f(mynat.succ n + k), {
-      simp,
-    },
-    rw prod_congr _ _ this,
-  },
-end
+-- >:( make this more like sum_split
+-- or perhaps a general construction for reductions of commutative
+-- associative operations :))
+-- theorem prod_split:
+-- product f (2 * n) = product f n * product (λ k, f (n + k)) n :=
+-- begin
+--   induction n with n hn, {
+--     rw [mynat.zz, mynat.mul_zero],
+--     dsimp only [sequence.product],
+--     rw mul_one,
+--   }, {
+--     rw mynat.mul_succ,
+--     rw mynat.add_comm 2,
+--     have: product f (2 * n + 2) = product f (2 * n) * f (2 * n) * f (2 * n + 1) := rfl,
+--     rw this, clear this,
+--     rw hn,
+--     have: f (2 * n) * f (2 * n + 1) = f (n + n) * f (n + mynat.succ n), {
+--       repeat {rw mynat.mul_comm 2},
+--       refl,
+--     },
+--     rw mul_assoc,
+--     rw this,
+--     rw mul_assoc,
+--     conv {
+--       congr, congr, skip,
+--       rw ←mul_assoc,
+--       rw ←prod_succ,
+--       rw ←prod_succ,
+--       rw prod_tail,
+--       rw mul_comm,
+--     },
+--     rw ←mul_assoc,
+--     rw mynat.add_zero,
+--     rw ←prod_succ,
+--     have: ∀ k, f (n + mynat.succ k) = f(mynat.succ n + k), {
+--       simp,
+--     },
+--     rw prod_congr _ _ this,
+--   },
+-- end
 
 end myring
 end hidden
