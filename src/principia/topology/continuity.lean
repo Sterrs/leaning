@@ -152,100 +152,6 @@ begin
     (@inclusion_continuous _ X X') hfc,
 end
 
-theorem projection_continuous
-[X : topological_space α] [Y: topological_space β]:
-@is_continuous _ _ prod.fst (product_topology X Y) X :=
-begin
-  intro U,
-  assume hUo,
-  intro x,
-  assume hx,
-  existsi U × myset.univ,
-  split, {
-    existsi U,
-    existsi myset.univ,
-    split, {
-      refl,
-    }, split, {
-      assumption,
-    }, {
-      from Y.univ_open,
-    },
-  }, split, {
-    split, {
-      from hx,
-    }, {
-      trivial,
-    },
-  }, {
-    intro y,
-    assume hy,
-    from hy.left,
-  },
-end
-
--- TODO: re-write this using base_continuous
-theorem swap_continuous
-[X : topological_space α] [Y: topological_space β]:
-@is_continuous (α × β) (β × α) (λ x, (x.snd, x.fst))
- (product_topology X Y) (product_topology Y X) :=
-begin
-  intro U,
-  assume hUo,
-  intro x,
-  assume hx,
-  cases hUo (x.snd, x.fst) hx with V hV,
-  cases hV with hbox hV,
-  cases hbox with Vv hbox,
-  cases hbox with Vu hbox,
-  existsi Vu × Vv,
-  split, {
-    existsi Vu,
-    existsi Vv,
-    split, {
-      refl,
-    }, {
-      split, {
-        from hbox.right.right,
-      }, {
-        from hbox.right.left,
-      },
-    },
-  }, split, {
-    rw hbox.left at hV,
-    split, {
-      from hV.left.right,
-    }, {
-      from hV.left.left,
-    },
-  }, {
-    intro x',
-    assume hx',
-    apply hV.right,
-    rw hbox.left,
-    split, {
-      from hx'.right,
-    }, {
-      from hx'.left,
-    },
-  },
-end
-
-theorem projection_2_continuous
-[X : topological_space α] [Y: topological_space β]:
-@is_continuous _ _ prod.snd (product_topology X Y) Y :=
-begin
-  have: (prod.snd: α × β → β) = prod.fst ∘ (λ x, (x.snd, x.fst)), {
-    apply funext,
-    intro x,
-    refl,
-  },
-  rw this,
-  apply @composition_continuous _ _ _ (product_topology X Y) (product_topology Y X) Y,
-  from @swap_continuous _ _ X Y,
-  from @projection_continuous _ _ Y X,
-end
-
 theorem base_continuous
 [X: topological_space α]
 (B : myset (myset β)) (hB : is_base B)
@@ -292,6 +198,83 @@ begin
       assumption,
     },
   },
+end
+
+theorem projection_continuous
+[X : topological_space α] [Y: topological_space β]:
+@is_continuous _ _ prod.fst (product_topology X Y) X :=
+begin
+  intro U,
+  assume hUo,
+  intro x,
+  assume hx,
+  existsi U × myset.univ,
+  split, {
+    existsi U,
+    existsi myset.univ,
+    split, {
+      refl,
+    }, split, {
+      assumption,
+    }, {
+      from Y.univ_open,
+    },
+  }, split, {
+    split, {
+      from hx,
+    }, {
+      trivial,
+    },
+  }, {
+    intro y,
+    assume hy,
+    from hy.left,
+  },
+end
+
+theorem swap_continuous
+[X : topological_space α] [Y: topological_space β]:
+@is_continuous (α × β) (β × α) (λ x, (x.snd, x.fst))
+ (product_topology X Y) (product_topology Y X) :=
+begin
+  rw base_continuous,
+  intro W,
+  assume hWb,
+  intro x,
+  assume hx,
+  cases hWb with U hWb,
+  cases hWb with V hWVU,
+  existsi V × U,
+  split, {
+    existsi V,
+    existsi U,
+    split, refl,
+    split, from hWVU.right.right,
+    from hWVU.right.left,
+  }, split, {
+    rw hWVU.left at hx,
+    from and.comm.mp hx,
+  }, {
+    intro y,
+    assume hy,
+    rw hWVU.left,
+    from and.comm.mp hy,
+  },
+end
+
+theorem projection_2_continuous
+[X : topological_space α] [Y: topological_space β]:
+@is_continuous _ _ prod.snd (product_topology X Y) Y :=
+begin
+  have: (prod.snd: α × β → β) = prod.fst ∘ (λ x, (x.snd, x.fst)), {
+    apply funext,
+    intro x,
+    refl,
+  },
+  rw this,
+  apply @composition_continuous _ _ _ (product_topology X Y) (product_topology Y X) Y,
+  from @swap_continuous _ _ X Y,
+  from @projection_continuous _ _ Y X,
 end
 
 theorem continuous_iff_components_continuous
@@ -437,28 +420,239 @@ begin
   },
 end
 
+theorem homeomorphism_symm
+(X: topological_space α) (Y: topological_space β)
+(f: α → β) (g: β → α) (h_omeom: is_homeomorphism X Y f g):
+is_homeomorphism Y X g f :=
+begin
+  cases h_omeom,
+  split; assumption,
+end
+
+theorem homeomorphism_open
+(X: topological_space α) (Y: topological_space β)
+(f: α → β) (g: β → α) (h_omeom: is_homeomorphism X Y f g):
+is_open_map X Y f :=
+begin
+  intro U,
+  assume hUo,
+  -- candidate for myset theorem?
+  have: myset.image f U = myset.inverse_image g U, {
+    apply funext,
+    intro x,
+    apply propext,
+    split; assume h, {
+      cases h with y hy,
+      cases hy with hyU hxfy,
+      rw ←hxfy,
+      change id y ∈ U at hyU,
+      rw ←h_omeom.left_inv at hyU,
+      from hyU,
+    }, {
+      existsi g x,
+      split, {
+        from h,
+      }, {
+        change (f ∘ g) x = x,
+        rw h_omeom.right_inv,
+        refl,
+      },
+    },
+  },
+  rw this,
+  apply h_omeom.g_continuous,
+  assumption,
+end
+
+theorem swap_homeomorphism
+(X : topological_space α) (Y: topological_space β):
+is_homeomorphism (product_topology X Y) (product_topology Y X)
+  (λ x, (x.snd, x.fst))
+  (λ x', (x'.snd, x'.fst)) :=
+begin
+  split, {
+    apply swap_continuous,
+  }, {
+    apply swap_continuous,
+  }, {
+    apply funext,
+    intro x,
+    cases x,
+    refl,
+  }, {
+    apply funext,
+    intro x',
+    cases x',
+    refl,
+  },
+end
+
+theorem composition_open
+(X: topological_space α) (Y: topological_space β) (Z: topological_space γ)
+(f: α → β) (g: β → γ) (hfo: is_open_map X Y f) (hgo: is_open_map Y Z g):
+is_open_map X Z (g ∘ f) :=
+begin
+  intro U,
+  assume hUo,
+  rw myset.image_composition,
+  apply hgo,
+  apply hfo,
+  assumption,
+end
+
 theorem base_open
 (B : myset (myset α)) (hB: is_base B)
 (Y: topological_space β) (f: α → β):
 is_open_map (space_from_base B hB) Y f ↔
-(∀ W: myset α, B W → Y.is_open (myset.image f W)) := sorry
+(∀ W: myset α, W ∈ B → Y.is_open (myset.image f W)) :=
+begin
+  split; assume h, {
+    intro W,
+    assume hWB,
+    apply h,
+    -- maybe general theorem that basis sets are open
+    intro x,
+    assume hxW,
+    existsi W,
+    split, {
+      assumption,
+    }, split, {
+      assumption,
+    }, {
+      refl,
+    },
+  }, {
+    intro U,
+    assume hUo,
+    rw open_iff_neighbourhood_forall,
+    intro x,
+    assume hximf,
+    cases hximf with y hy,
+    cases hUo y hy.left with V hV,
+    existsi (myset.image f V),
+    split, {
+      apply h,
+      from hV.left,
+    }, split, {
+      existsi y,
+      split, {
+        from hV.right.left,
+      }, {
+        from hy.right,
+      },
+    }, {
+      apply myset.image_subset,
+      from hV.right.right,
+    },
+  },
+end
 
 theorem projection_open
 (X : topological_space α) (Y: topological_space β):
-is_open_map (product_topology X Y) X prod.fst := sorry
+is_open_map (product_topology X Y) X prod.fst :=
+begin
+  unfold product_topology,
+  rw base_open,
+  intro W,
+  assume hWB,
+  cases hWB with U hWB,
+  cases hWB with V hWUV,
+  -- so we don't have to worry about V being empty or not
+  rw open_iff_neighbourhood_forall,
+  intro x,
+  assume hxW,
+  existsi U,
+  split, {
+    from hWUV.right.left,
+  }, split, {
+    cases hxW with y hy,
+    rw ←hy.right,
+    rw hWUV.left at hy,
+    from hy.left.left,
+  }, {
+    intro y,
+    assume hUy,
+    rw hWUV.left,
+    cases hxW with z hz,
+    existsi (⟨y, z.snd⟩: α × β),
+    split, {
+      split, {
+        from hUy,
+      }, {
+        rw hWUV.left at hz,
+        from hz.left.right,
+      },
+    }, {
+      refl,
+    },
+  },
+end
+
+theorem projection_2_open
+(X : topological_space α) (Y: topological_space β):
+is_open_map (product_topology X Y) Y prod.snd :=
+begin
+  have :=
+    composition_open
+      (product_topology X Y) (product_topology Y X)
+      Y (λ x: α × β, ⟨x.snd, x.fst⟩) prod.fst
+      (homeomorphism_open _ _ _ _
+        (swap_homeomorphism _ _))
+      (projection_open _ _),
+  have hrw: (prod.fst ∘ λ (x : α × β), (x.snd, x.fst)) = prod.snd, {
+    apply funext,
+    intro x,
+    refl,
+  },
+  rw ←hrw,
+  assumption,
+end
 
 theorem to_indiscrete_continuous (X: topological_space α) (f: α → β):
-@is_continuous _ _  f X (indiscrete_topology β) := sorry
+@is_continuous _ _  f X (indiscrete_topology β) :=
+begin
+  intro U,
+  assume hUo,
+  cases hUo with hU hU; rw hU, {
+    from X.empty_open,
+  }, {
+    from X.univ_open,
+  },
+end
 
 theorem to_discrete_open (X: topological_space α) (f: α → β):
-is_open_map X (discrete_topology β) f := sorry
+is_open_map X (discrete_topology β) f :=
+begin
+  intro U,
+  assume hUo,
+  trivial,
+end
 
 theorem from_discrete_continuous (Y: topological_space β) (f: α → β):
-@is_continuous _ _  f (discrete_topology α) Y := sorry
+@is_continuous _ _  f (discrete_topology α) Y :=
+begin
+  intro U,
+  assume hUo,
+  trivial,
+end
 
 theorem from_indiscrete_open_to_image (Y: topological_space β) (f: α → β):
 is_open_map (indiscrete_topology α) (subspace_topology Y (myset.image f myset.univ))
-  (myset.function_restrict_to_image f) := sorry
+  (myset.function_restrict_to_image f) :=
+begin
+  intro U,
+  assume hUo,
+  cases hUo with hU hU, {
+    rw hU,
+    -- weird function signature, probably my fault
+    rw myset.image_empty (myset.function_restrict_to_image f) ∅ rfl,
+    apply topological_space.empty_open,
+  }, {
+    rw hU,
+    rw myset.to_image_surjective,
+    apply topological_space.univ_open,
+  },
+end
 
 end topological_space
 

@@ -271,6 +271,70 @@ begin
   refl,
 end
 
+theorem image_composition
+{α β γ: Type} (f: α → β) (g: β → γ) (U: myset α):
+image (g ∘ f) U =
+image g (image f U) :=
+begin
+  apply setext,
+  intro x,
+  split; assume h, {
+    cases h with y hy,
+    existsi f y,
+    split, {
+      existsi y, {
+        split, {
+          from hy.left,
+        }, {
+          refl,
+        },
+      },
+    }, {
+      from hy.right,
+    },
+  }, {
+    cases h with y hy,
+    cases hy with hy hgyx,
+    cases hy with z hz,
+    existsi z,
+    split, {
+      from hz.left,
+    }, {
+      change g (f z) = x,
+      rw hz.right,
+      assumption,
+    },
+  },
+end
+
+theorem image_subset
+{α β: Type} (f: α → β) (U V: myset α):
+U ⊆ V → image f U ⊆ image f V :=
+begin
+  assume hUV,
+  intro x,
+  assume hximf,
+  cases hximf with y hy,
+  existsi y,
+  split, {
+    apply hUV,
+    from hy.left,
+  }, {
+    from hy.right,
+  },
+end
+
+theorem inverse_image_subset
+{α β: Type} (f: α → β) (U V: myset β):
+U ⊆ V → inverse_image f U ⊆ inverse_image f V :=
+begin
+  assume hUV,
+  intro x,
+  assume hximf,
+  apply hUV,
+  from hximf,
+end
+
 theorem inverse_image_of_image_of_univ
 {α β : Type} (f: α → β):
 myset.univ = inverse_image f (image f myset.univ) :=
