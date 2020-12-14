@@ -319,13 +319,30 @@ begin
   },
 end
 
-instance: ordered_myring myint := ⟨λ a b c, (@le_add_right a b c).mp, λ a b ha hb,
-begin
-  rw ←mul_zero a,
-  apply le_mul_nonneg_left _ _,
+instance: ordered_myring myint := ⟨
+  λ a b c: myint,
+  begin
+    from (le_add_right c).mp,
+  end,
+  begin
+    intros a b,
+    assume h0a h0b,
+    have := @le_mul_nonneg_right 0 a b h0b h0a,
+    rw zero_mul at this,
     assumption,
-  assumption,
-end⟩
+  end,
+  begin
+    intros a b c,
+    from le_trans b,
+  end,
+  begin
+    intros a b,
+    from le_total_order a b,
+  end,
+  begin
+    intros a b,
+    from le_antisymm,
+  end⟩
 
 end myint
 end hidden
