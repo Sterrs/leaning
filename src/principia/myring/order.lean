@@ -1125,6 +1125,15 @@ begin
   },
 end
 
+theorem zero_lt_sign_mul_self [decidable_le: ∀ a b: α, decidable (a ≤ b)]:
+a ≠ 0 → 0 < sign a * a :=
+begin
+  assume han0,
+  rw mul_comm,
+  apply zero_lt_self_mul_sign,
+  assumption,
+end
+
 theorem abs_lt_iff_lt_both
 [decidable_le: ∀ a b: α, decidable (a ≤ b)]:
 abs a < b ↔ -b < a ∧ a < b :=

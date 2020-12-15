@@ -34,7 +34,7 @@ quotient.lift (λ n, ⟦-n⟧) int_pair.neg_well_defined
 
 instance: has_neg myint := ⟨neg⟩
 
-theorem neg_eq_cls {x: int_pair.int_pair} {n: myint}:
+private theorem neg_eq_cls {x: int_pair.int_pair} {n: myint}:
 n = ⟦x⟧ → -n = ⟦-x⟧ :=
 λ hnx, by rw hnx; refl
 
@@ -43,7 +43,7 @@ quotient.lift₂ (λ n m, ⟦n + m⟧) int_pair.add_well_defined
 
 instance: has_add myint := ⟨add⟩
 
-theorem add_eq_cls {x y: int_pair.int_pair} {n m: myint}:
+private theorem add_eq_cls {x y: int_pair.int_pair} {n m: myint}:
 n = ⟦x⟧ → m = ⟦y⟧ → n + m = ⟦x + y⟧ :=
 λ hnx hmy, by rw [hnx, hmy]; refl
 
@@ -58,7 +58,7 @@ quotient.lift₂ (λ n m, ⟦n * m⟧) int_pair.mul_well_defined
 
 instance: has_mul myint := ⟨mul⟩
 
-theorem mul_eq_cls {x y: int_pair.int_pair} {n m: myint}:
+private theorem mul_eq_cls {x y: int_pair.int_pair} {n m: myint}:
 n = ⟦x⟧ → m = ⟦y⟧ → n * m = ⟦x * y⟧ :=
 λ hnx hmy, by rw [hnx, hmy]; refl
 
@@ -115,58 +115,6 @@ theorem coe_succ: (↑(succ a): myint) = ↑a + 1 := rfl
 
 theorem add_one_succ: (↑a: myint) + 1 = ↑(succ a) := rfl
 
-theorem add_comm: m + n = n + m :=
-begin
-  cases quotient.exists_rep m with a ha, subst ha,
-  cases quotient.exists_rep n with b hb, subst hb,
-  repeat {rw add_eq_cls rfl rfl},
-  -- honestly this just happened to work
-  apply congr rfl,
-  rw int_pair.eq_iff_split,
-  simp,
-  split; ac_refl,
-end
-
-instance add_is_comm: is_commutative myint add :=
-⟨myint.add_comm⟩
-
-theorem add_zero: m + 0 = m :=
-begin
-  cases quotient.exists_rep m with a ha, subst ha,
-  rw int_zero,
-  rw add_eq_cls rfl rfl,
-  apply congr rfl,
-  rw int_pair.eq_iff_split,
-  simp,
-end
-
-theorem add_assoc: m + n + k = m + (n + k) :=
-begin
-  cases quotient.exists_rep m with a ha, subst ha,
-  cases quotient.exists_rep n with b hb, subst hb,
-  cases quotient.exists_rep k with c hc, subst hc,
-  repeat {rw add_eq_cls rfl rfl},
-  apply congr rfl,
-  rw int_pair.eq_iff_split,
-  simp,
-  split; ac_refl,
-end
-
-instance add_is_assoc: is_associative myint add :=
-⟨add_assoc⟩
-
-theorem add_neg: m + (-m) = 0 :=
-begin
-  cases quotient.exists_rep m with a ha, subst ha,
-  rw int_zero,
-  rw neg_eq_cls rfl,
-  rw add_eq_cls rfl rfl,
-  apply quotient.sound,
-  rw int_pair.setoid_equiv,
-  simp,
-  rw mynat.add_comm,
-end
-
 @[simp]
 theorem coe_coe_mul : (↑a : myint) * ↑b = ↑(a * b) :=
 begin
@@ -175,81 +123,6 @@ begin
   apply congr rfl,
   rw int_pair.eq_iff_split,
   simp, -- awsome :o
-end
-
-theorem mul_comm: m * n = n * m :=
-begin
-  cases quotient.exists_rep m with a ha, subst ha,
-  cases quotient.exists_rep n with b hb, subst hb,
-  repeat {rw mul_eq_cls rfl rfl},
-  apply congr rfl,
-  rw int_pair.eq_iff_split,
-  simp,
-  split; ac_refl,
-end
-
-@[simp]
-theorem mul_zero: m * 0 = 0 :=
-begin
-  cases quotient.exists_rep m with a ha, subst ha,
-  rw int_zero,
-  repeat {rw mul_eq_cls rfl rfl},
-  apply congr rfl,
-  rw int_pair.eq_iff_split,
-  simp,
-end
-
-@[simp]
-theorem mul_one: m * 1 = m :=
-begin
-  cases quotient.exists_rep m with a ha, subst ha,
-  rw int_one,
-  repeat {rw mul_eq_cls rfl rfl},
-  apply congr rfl,
-  rw int_pair.eq_iff_split,
-  simp,
-end
-
-instance mul_is_comm: is_commutative myint mul := ⟨mul_comm⟩
-
-theorem mul_assoc: m * n * k = m * (n * k) :=
-begin
-  have: ∀ a b: mynat, ∀ f: mynat → mynat, a = b → f a = f b, {
-    intros a b f,
-    assume hab,
-    rw hab,
-  },
-  cases quotient.exists_rep m with a ha, subst ha,
-  cases quotient.exists_rep n with b hb, subst hb,
-  cases quotient.exists_rep k with c hc, subst hc,
-  repeat {rw mul_eq_cls rfl rfl},
-  apply congr rfl,
-  rw int_pair.eq_iff_split,
-  simp,
-  split, { -- ac_refl takes too long without a little kick-start
-    repeat {rw mynat.add_assoc <|> rw mynat.mul_assoc},
-    apply this,
-    ac_refl,
-  }, {
-    repeat {rw mynat.add_assoc <|> rw mynat.mul_assoc},
-    apply this,
-    ac_refl,
-  },
-end
-
-instance mul_is_assoc: is_associative myint mul :=
-⟨mul_assoc⟩
-
-theorem mul_add : m * (n + k) = m * n + m * k :=
-begin
-  cases quotient.exists_rep m with a ha, subst ha,
-  cases quotient.exists_rep n with b hb, subst hb,
-  cases quotient.exists_rep k with c hc, subst hc,
-  repeat {rw mul_eq_cls rfl rfl <|> rw add_eq_cls rfl rfl},
-  apply congr rfl,
-  rw int_pair.eq_iff_split,
-  simp,
-  split; ac_refl,
 end
 
 private lemma neq_iff_not_eq: m ≠ n ↔ ¬(m = n) :=
@@ -268,11 +141,6 @@ begin
     from mynat.no_confusion h₁,
   from hsbn0 (mynat.mul_integral hsan0 h),
 end
-
--- it seems likely that these theorems will become easier to prove
--- given some theorems about <.
-
--- Particularly abs is very dependent on inequalities
 
 -- hmmmmmm
 private lemma mul_integral_biased {m n : myint}:
@@ -306,7 +174,6 @@ begin
   }, {
     rw hd at hab0,
     simp at hab0,
-
     conv at hab0 {
       to_rhs,
       rw mynat.add_comm,
@@ -325,6 +192,16 @@ begin
     simp,
     assumption,
   },
+end
+
+theorem nontrivial: (0: myint) ≠ 1 :=
+begin
+  assume h01,
+  rw int_zero at h01,
+  rw int_one at h01,
+  rw int_pair.sound_exact_iff at h01,
+  rw int_pair.setoid_equiv at h01,
+  cases h01,
 end
 
 -- theorem mul_nonzero_nonzero : m * n ≠ 0 ↔ m ≠ 0 ∧ n ≠ 0 :=
@@ -347,14 +224,87 @@ end
 --   },
 -- end
 
--- private lemma something_add_one (m : myint): ∃ n, m = n + 1 :=
--- by existsi (m + (-1)); rw [add_assoc, neg_self_add, add_zero]
-
--- private lemma something_sub_one (m : myint): ∃ n, m = n + -1 :=
--- by existsi (m + 1); rw [add_assoc, self_neg_add, add_zero]
-
-instance: myring myint :=
-⟨add_assoc, add_zero, add_neg, mul_assoc, mul_comm, mul_one, mul_add⟩
+instance: myring myint := ⟨
+  λ m n k: myint,
+  begin
+    cases quotient.exists_rep m with a ha, subst ha,
+    cases quotient.exists_rep n with b hb, subst hb,
+    cases quotient.exists_rep k with c hc, subst hc,
+    repeat {rw add_eq_cls rfl rfl},
+    apply congr rfl,
+    rw int_pair.eq_iff_split,
+    simp,
+    split; ac_refl,
+  end,
+  λ m: myint,
+  begin
+    cases quotient.exists_rep m with a ha, subst ha,
+    rw int_zero,
+    rw add_eq_cls rfl rfl,
+    apply congr rfl,
+    rw int_pair.eq_iff_split,
+    simp,
+  end,
+  λ m: myint,
+  begin
+    cases quotient.exists_rep m with a ha, subst ha,
+    rw int_zero,
+    rw neg_eq_cls rfl,
+    rw add_eq_cls rfl rfl,
+    apply quotient.sound,
+    rw int_pair.setoid_equiv,
+    simp,
+    rw mynat.add_comm,
+  end,
+  λ m n k: myint,
+  begin
+    cases quotient.exists_rep m with a ha, subst ha,
+    cases quotient.exists_rep n with b hb, subst hb,
+    cases quotient.exists_rep k with c hc, subst hc,
+    repeat {rw mul_eq_cls rfl rfl},
+    apply congr rfl,
+    rw int_pair.eq_iff_split,
+    simp,
+    split, { -- ac_refl takes too long without a little kick-start
+      repeat {rw mynat.add_assoc <|> rw mynat.mul_assoc},
+      apply congr rfl,
+      ac_refl,
+    }, {
+      repeat {rw mynat.add_assoc <|> rw mynat.mul_assoc},
+      apply congr rfl,
+      ac_refl,
+    },
+  end,
+  λ m n: myint,
+  begin
+    cases quotient.exists_rep m with a ha, subst ha,
+    cases quotient.exists_rep n with b hb, subst hb,
+    repeat {rw mul_eq_cls rfl rfl},
+    apply congr rfl,
+    rw int_pair.eq_iff_split,
+    simp,
+    split; ac_refl,
+  end,
+  λ m: myint,
+  begin
+    cases quotient.exists_rep m with a ha, subst ha,
+    rw int_one,
+    repeat {rw mul_eq_cls rfl rfl},
+    apply congr rfl,
+    rw int_pair.eq_iff_split,
+    simp,
+  end,
+  λ m n k: myint,
+  begin
+    cases quotient.exists_rep m with a ha, subst ha,
+    cases quotient.exists_rep n with b hb, subst hb,
+    cases quotient.exists_rep k with c hc, subst hc,
+    repeat {rw mul_eq_cls rfl rfl <|> rw add_eq_cls rfl rfl},
+    apply congr rfl,
+    rw int_pair.eq_iff_split,
+    simp,
+    split; ac_refl,
+  end⟩
 
 instance: integral_domain myint := ⟨begin
   intros a b ha h,
