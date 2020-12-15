@@ -56,11 +56,11 @@ begin
   dsimp only [] at h,
   -- This is disgusting. We need to hide the mynat theorems behind
   -- their own namespace.
-  rw [@myint.mul_assoc y.num, @myint.mul_comm x.denom,
-      ←@myint.mul_assoc y.num, hyz] at h,
+  rw [mul_assoc y.num, mul_comm x.denom,
+      ←mul_assoc y.num, hyz] at h,
   suffices : y.denom * (x.num * z.denom) = y.denom * (z.num * x.denom),
     from integral_domain.mul_cancel_left _ _ _ (lt_impl_ne _ _ y.denom_pos).symm this,
-  rw [←myint.mul_assoc, @myint.mul_comm y.denom, h],
+  rw [←mul_assoc, mul_comm y.denom, h],
   ac_refl,
 end
 
@@ -96,19 +96,6 @@ theorem neg_denom {x : frac} :
 (-x).denom = x.denom := rfl
 
 theorem frac_neg_neg {x: frac}: -x = neg x := rfl
-
-theorem neg_neg (x: frac): -(-x) = x :=
-begin
-  rw num_and_denom_eq,
-  split, {
-    rw neg_num,
-    rw neg_num,
-    rw neg_neg,
-  }, {
-    rw neg_denom,
-    rw neg_denom,
-  },
-end
 
 theorem neg_well_defined (x y : frac) :
 x ≈ y → ⟦-x⟧ = ⟦-y⟧ :=
@@ -153,51 +140,6 @@ begin
     ac_refl,
   rw [h₂, hab],
   ac_refl,
-end
-
-theorem add_assoc : x + y + z = x + (y + z) :=
-begin
-  rw num_and_denom_eq,
-  repeat { rw add_num <|> rw add_denom <|> rw myint.add_mul },
-  split; ac_refl,
-end
-
-theorem neg_add: -(x + y) = (-x) + (-y) :=
-begin
-  rw num_and_denom_eq,
-  split, {
-    rw neg_num,
-    rw add_num,
-    rw add_num,
-    rw neg_num,
-    rw neg_num,
-    rw neg_denom,
-    rw neg_denom,
-    rw myint.neg_distr,
-    rw myint.neg_mul,
-    rw myint.neg_mul,
-  }, {
-    rw neg_denom,
-    rw add_denom,
-    rw add_denom,
-    rw neg_denom,
-    rw neg_denom,
-  },
-end
-
-theorem sub_self: x + -x = ⟨0, x.denom * x.denom, zero_lt_mul _ _ x.denom_pos x.denom_pos⟩ :=
-begin
-  rw num_and_denom_eq,
-  split, {
-    rw add_num,
-    rw neg_num,
-    rw neg_denom,
-    rw myint.neg_mul,
-    rw myint.self_neg_add,
-  }, {
-    rw add_denom,
-    rw neg_denom,
-  },
 end
 
 def mul (x y : frac) : frac :=
@@ -293,11 +235,6 @@ begin
     ac_refl,
   },
 end
-
-
-
-
-
 
 end frac
 
