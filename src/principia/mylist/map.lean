@@ -36,6 +36,11 @@ reduce_d and true (map p lst)
 def for_some (p: T → Prop) (lst: mylist T): Prop :=
 reduce_d or false (map p lst)
 
+def contains (x: T3) (lst: mylist T3): Prop :=
+for_some (λ y, x = y) lst
+
+instance: has_mem T3 (mylist T3) := ⟨contains⟩
+
 def filter (p: T → Prop)
 [hpdec: ∀ t: T, decidable (p t)]: mylist T → mylist T
 | [] := []
@@ -50,6 +55,99 @@ def zeroes: mynat → mylist mynat
 def list_zero_to: mynat → mylist mynat
 | 0        := []
 | (succ n) := 0 :: map succ (list_zero_to n)
+
+theorem for_all_iff_forall (p: T3 → Prop) (lst: mylist T3):
+for_all p lst ↔ ∀ x: T3, contains x lst → p x :=
+begin
+  split, {
+    assume hfa,
+    induction lst with y ys ih_ys, {
+      intro x,
+      assume h,
+      exfalso, from h,
+    }, {
+      intro x,
+      assume h,
+      cases h with h h, {
+        rw h,
+        from hfa.left,
+      }, {
+        apply ih_ys, {
+          from hfa.right,
+        }, {
+          from h,
+        },
+      },
+    },
+  }, {
+    assume hfa,
+    induction lst with y ys ih_ys, {
+      trivial,
+    }, {
+      split, {
+        apply hfa,
+        left,
+        from rfl,
+      }, {
+        apply ih_ys,
+        intro x,
+        assume h,
+        apply hfa,
+        right,
+        from h,
+      },
+    },
+  },
+end
+
+theorem for_some_iff_exists (p: T3 → Prop) (lst: mylist T3):
+for_some p lst ↔ ∃ x: T3, contains x lst ∧ p x :=
+begin
+  split, {
+    assume hfs,
+    induction lst with y ys ih_ys, {
+      exfalso, from hfs,
+    }, {
+      cases hfs with hfs hfs, {
+        existsi y,
+        split, {
+          left,
+          from rfl,
+        }, {
+          assumption,
+        },
+      }, {
+        cases ih_ys hfs with x hx,
+        existsi x,
+        split, {
+          right,
+          from hx.left,
+        }, {
+          from hx.right,
+        },
+      },
+    },
+  }, {
+    assume hfs,
+    induction lst with y ys ih_ys, {
+      cases hfs with x hx,
+      exfalso, from hx.left,
+    }, {
+      cases hfs with x hx,
+      cases hx with hx hp,
+      cases hx with hx hx, {
+        left,
+        rw ←hx,
+        assumption,
+      }, {
+        right,
+        apply ih_ys,
+        existsi x,
+        split; assumption,
+      },
+    },
+  },
+end
 
 theorem len_zeroes: len (zeroes m) = m :=
 begin
@@ -115,7 +213,7 @@ begin
     cases hxl with hxl hxl, {
       rw hxl,
       left,
-      trivial,
+      from rfl,
     }, {
       right,
       apply ih_ys,
@@ -140,7 +238,8 @@ begin
           rw if_pos hpy at hx,
           cases hx with hx hx, {
             rw hx,
-            left, trivial,
+            left,
+            from rfl,
           }, {
             right,
             apply ih_ys,
@@ -187,7 +286,7 @@ begin
         cases hx.left with hxys hxys, {
           rw hxys,
           left,
-          refl,
+          from rfl,
         }, {
           right,
           apply ih_ys,

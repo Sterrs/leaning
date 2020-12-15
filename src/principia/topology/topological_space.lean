@@ -431,96 +431,53 @@ begin
   rw myset.compl_compl,
 end
 
-def is_dense (X : topological_space α) (A : myset α) : Prop :=
-closure X A = myset.univ
-
-def is_neighbourhood (X: topological_space α) (U: myset α) (x: α): Prop :=
-∃ V: myset α, X.is_open V ∧ x ∈ V ∧ V ⊆ U
-
--- turns out neighbourhoods are useful!!!
--- I like this theorem because it means I don't have to unironically write
--- down unions all the time
-theorem open_iff_neighbourhood_forall
-(X: topological_space α) (U: myset α):
-X.is_open U ↔ ∀ x: α, x ∈ U → is_neighbourhood X U x :=
+theorem closure_minimal_closed_superset
+(X: topological_space α) (A B: myset α):
+X.is_closed B → A ⊆ B → X.closure A ⊆ B :=
 begin
+  assume hBcl hAB,
+  intro x,
+  assume hxAcl,
+  from hxAcl B ⟨hBcl, hAB⟩,
+end
+
+theorem interior_maximal_open_subset
+(X: topological_space α) (U V: myset α):
+X.is_open V → V ⊆ U → V ⊆ X.interior U :=
+begin
+  assume hVo hVU,
+  intro x,
+  assume hVint,
+  existsi V,
   split, {
-    assume hUo,
-    intro x,
-    assume hxU,
-    existsi U,
-    split, {
-      assumption,
-    }, split, {
-      assumption,
-    }, {
-      refl,
-    },
+    split; assumption,
   }, {
-    assume hUnbhd,
-    have hunion := X.open_union_open
-      {V | X.is_open V ∧ V ⊆ U}
-      begin
-        intro V,
-        assume hV,
-        from hV.left,
-      end,
-    suffices heq: (⋃₀{V : myset α | X.is_open V ∧ V ⊆ U}) = U, {
-      rw ←heq,
-      assumption,
-    }, {
-      apply funext,
-      intro x,
-      apply propext,
-      split; assume h, {
-        cases h with V hV,
-        cases hV with hV hxV,
-        apply hV.right,
-        assumption,
-      }, {
-        cases hUnbhd x h with V hV,
-        existsi V,
-        split, split, {
-          from hV.left,
-        }, {
-          from hV.right.right,
-        }, {
-          from hV.right.left,
-        },
-      },
-    },
+    assumption,
   },
 end
 
-theorem hausdorff_point_closed
-(X: topological_space α) (h_ausdorff: is_hausdorff X)
-(x: α):
-is_closed X ({y: α | y = x}) :=
+theorem self_subset_closure
+(X: topological_space α) (A: myset α):
+A ⊆ X.closure A :=
 begin
-  apply (open_iff_neighbourhood_forall _ _).mpr,
-  intro y,
-  assume hynex,
-  cases h_ausdorff y x hynex with U hUV,
-  cases hUV with V hUV,
-  existsi U,
-  split, {
-    from hUV.left,
-  }, split, {
-    from hUV.right.right.left,
-  }, {
-    intro z,
-    assume hUz,
-    assume hzx,
-    rw ←myset.empty_iff_eq_empty at hUV,
-    apply hUV.right.right.right.right x,
-    split, {
-      have: z = x := hzx,
-      rw ←this,
-      assumption,
-    }, {
-      from hUV.right.right.right.left,
-    },
-  },
+  intro a,
+  assume hAa,
+  intro F,
+  assume hF,
+  apply hF.right,
+  assumption,
+end
+
+theorem interior_subset_self
+(X: topological_space α) (U: myset α):
+X.interior U ⊆ U :=
+begin
+  intro u,
+  assume hUu,
+  cases hUu with V hV,
+  cases hV with hV huV,
+  apply hV.right,
+  assumption,
 end
 
 theorem union_two_open
@@ -698,6 +655,166 @@ begin
   assumption,
 end
 
+theorem closure_intersects_all_open
+(X: topological_space α) (A: myset α):
+X.closure A =
+{x : α | ∀ U: myset α, X.is_open U → x ∈ U → U ∩ A ≠ ∅} :=
+begin
+  apply funext,
+  intro x,
+  apply propext,
+  split; assume hx, {
+    intro U,
+    assume hUo,
+    assume hxU,
+    assume hUAdisj,
+    suffices h: x ∈ X.closure A ∩ U.compl, {
+      from h.right hxU,
+    }, {
+      apply hx,
+      split, {
+        apply intersect_two_closed, {
+          from closure_closed _ _,
+        }, {
+          unfold is_closed,
+          rw myset.compl_compl,
+          assumption,
+        },
+      }, {
+        intro a,
+        assume haA,
+        split, {
+          intro A',
+          assume hA',
+          apply hA'.right,
+          assumption,
+        }, {
+          assume hUa,
+          have: a ∈ U ∩ A, {
+            split; assumption,
+          },
+          rw hUAdisj at this,
+          from this,
+        },
+      },
+    },
+  }, {
+    intro A',
+    assume hA',
+    by_contradiction h,
+    suffices hcontr: A'.compl ∩ A ≠ ∅, {
+      apply hcontr,
+      apply funext,
+      intro x,
+      apply propext,
+      split; assume hAx, {
+        cases hAx with hA'x hAx,
+        have := hA'.right x hAx,
+        contradiction,
+      }, {
+        exfalso, from hAx,
+      },
+    },
+    apply hx, {
+      from hA'.left,
+    }, {
+      from h,
+    },
+  },
+end
+
+def is_dense (X : topological_space α) (A: myset α): Prop :=
+closure X A = myset.univ
+
+def is_neighbourhood (X: topological_space α) (U: myset α) (x: α): Prop :=
+∃ V: myset α, X.is_open V ∧ x ∈ V ∧ V ⊆ U
+
+-- turns out neighbourhoods are useful!!!
+-- I like this theorem because it means I don't have to unironically write
+-- down unions all the time
+theorem open_iff_neighbourhood_forall
+(X: topological_space α) (U: myset α):
+X.is_open U ↔ ∀ x: α, x ∈ U → is_neighbourhood X U x :=
+begin
+  split, {
+    assume hUo,
+    intro x,
+    assume hxU,
+    existsi U,
+    split, {
+      assumption,
+    }, split, {
+      assumption,
+    }, {
+      refl,
+    },
+  }, {
+    assume hUnbhd,
+    have hunion := X.open_union_open
+      {V | X.is_open V ∧ V ⊆ U}
+      begin
+        intro V,
+        assume hV,
+        from hV.left,
+      end,
+    suffices heq: (⋃₀{V : myset α | X.is_open V ∧ V ⊆ U}) = U, {
+      rw ←heq,
+      assumption,
+    }, {
+      apply funext,
+      intro x,
+      apply propext,
+      split; assume h, {
+        cases h with V hV,
+        cases hV with hV hxV,
+        apply hV.right,
+        assumption,
+      }, {
+        cases hUnbhd x h with V hV,
+        existsi V,
+        split, split, {
+          from hV.left,
+        }, {
+          from hV.right.right,
+        }, {
+          from hV.right.left,
+        },
+      },
+    },
+  },
+end
+
+theorem hausdorff_point_closed
+(X: topological_space α) (h_ausdorff: is_hausdorff X)
+(x: α):
+is_closed X ({y: α | y = x}) :=
+begin
+  apply (open_iff_neighbourhood_forall _ _).mpr,
+  intro y,
+  assume hynex,
+  cases h_ausdorff y x hynex with U hUV,
+  cases hUV with V hUV,
+  existsi U,
+  split, {
+    from hUV.left,
+  }, split, {
+    from hUV.right.right.left,
+  }, {
+    intro z,
+    assume hUz,
+    assume hzx,
+    rw ←myset.empty_iff_eq_empty at hUV,
+    apply hUV.right.right.right.right x,
+    split, {
+      have: z = x := hzx,
+      rw ←this,
+      assumption,
+    }, {
+      from hUV.right.right.right.left,
+    },
+  },
+end
+
 theorem discrete_subspace
 (S: myset α):
 discrete_topology (subtype S) =
@@ -708,8 +825,7 @@ begin
   intro X,
   apply propext,
   split; assume h, {
-    -- is this sensible ? ?
-    existsi λ x, ∃ hxS: x ∈ S, (⟨x, hxS⟩: subtype S) ∈ X,
+    existsi myset.subtype_unrestriction S X,
     split, {
       trivial,
     }, {
@@ -775,30 +891,70 @@ begin
   },
 end
 
-theorem empty_discrete: sorry := sorry
+theorem empty_discrete (X: topological_space α):
+discrete_topology (subtype (∅: myset α)) =
+subspace_topology X ∅ :=
+begin
+  apply topological_space_eq,
+  apply funext,
+  intro U,
+  apply propext,
+  split; {
+    assume hUo,
+    have: U = ∅, {
+      apply funext,
+      intro x,
+      apply propext,
+      split; assume h, {
+        exfalso, from x.property,
+      }, {
+        exfalso, from h,
+      },
+    },
+    rw this,
+    apply topological_space.empty_open,
+  },
+end
 
-theorem empty_indiscrete: sorry := sorry
-
-theorem singleton_discrete: sorry := sorry
+-- lol same proof
+theorem empty_indiscrete (X: topological_space α):
+indiscrete_topology (subtype (∅: myset α)) =
+subspace_topology X ∅ :=
+begin
+  apply topological_space_eq,
+  apply funext,
+  intro U,
+  apply propext,
+  split; {
+    assume hUo,
+    have: U = ∅, {
+      apply funext,
+      intro x,
+      apply propext,
+      split; assume h, {
+        exfalso, from x.property,
+      }, {
+        exfalso, from h,
+      },
+    },
+    rw this,
+    apply topological_space.empty_open,
+  },
+end
 
 theorem singleton_indiscrete (X: topological_space α) (x: α):
-discrete_topology (subtype ({y | y = x})) =
-subspace_topology X ({y | y = x}) :=
+indiscrete_topology (subtype (myset.singleton x)) =
+subspace_topology X (myset.singleton x) :=
 begin
-  apply topological_space.rec,
-  intros,
-  symmetry,
-  apply topological_space.rec,
-  intros,
-  simp, -- forgive me
+  apply topological_space_eq,
   apply funext,
   intro S,
   apply propext,
   by_cases hSe: S = ∅, {
     rw hSe,
     split; assume h,
-    assumption,
-    assumption,
+    from topological_space.empty_open _,
+    from topological_space.empty_open _,
   }, {
     change S ≠ ∅ at hSe,
     rw ←myset.exists_iff_neq_empty at hSe,
@@ -829,8 +985,56 @@ begin
     },
     rw this,
     split; assume h,
-    assumption,
-    assumption,
+    from topological_space.univ_open _,
+    from topological_space.univ_open _,
+  },
+end
+
+theorem singleton_discrete (X: topological_space α) (x: α):
+discrete_topology (subtype (myset.singleton x)) =
+subspace_topology X (myset.singleton x) :=
+begin
+  apply topological_space_eq,
+  apply funext,
+  intro S,
+  apply propext,
+  by_cases hSe: S = ∅, {
+    rw hSe,
+    split; assume h,
+    from topological_space.empty_open _,
+    from topological_space.empty_open _,
+  }, {
+    change S ≠ ∅ at hSe,
+    rw ←myset.exists_iff_neq_empty at hSe,
+    cases hSe with y hy,
+    have: S = myset.univ, {
+      apply funext,
+      intro z,
+      apply propext,
+      split; assume h, {
+        trivial,
+      }, {
+        have: y = z, {
+          let x': subtype {y : α | y = x} := ⟨x, rfl⟩,
+          transitivity x', {
+            have := y.property,
+            apply subtype.eq,
+            from this,
+          }, {
+            symmetry,
+            have := z.property,
+            apply subtype.eq,
+            from this,
+          },
+        },
+        rw this at hy,
+        assumption,
+      },
+    },
+    rw this,
+    split; assume h,
+    from topological_space.univ_open _,
+    from topological_space.univ_open _,
   },
 end
 

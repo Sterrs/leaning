@@ -185,6 +185,20 @@ begin
   },
 end
 
+theorem add_left : a = b → c + a = c + b :=
+begin
+  assume h,
+  congr,
+  assumption,
+end
+
+theorem add_right : a = b → a + c = b + c :=
+begin
+  assume h,
+  congr,
+  assumption,
+end
+
 theorem one_eq_zero_impl_all_zero : (1 : α) = 0 → ∀ x : α, x = 0 :=
 begin
   assume h10,
@@ -221,6 +235,12 @@ begin
     rwa [neg_unique, neg_neg],
   },
 end
+
+instance add_is_assoc: is_associative α (+) := ⟨add_assoc⟩
+instance add_is_comm: is_commutative α (+) := ⟨add_comm⟩
+
+instance mul_is_assoc: is_associative α (*) := ⟨mul_assoc⟩
+instance mul_is_comm: is_commutative α (*) := ⟨mul_comm⟩
 
 end myring
 

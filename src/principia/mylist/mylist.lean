@@ -732,15 +732,6 @@ variable {T': Type u}
 variables {x' y' z': T'}
 variables {xs' ys' zs': mylist T'}
 
-def contains: T' → mylist T' → Prop
-| _ []           := false
-| x' (y' :: ys') := x' = y' ∨ contains x' ys'
-
-instance: has_mem T' (mylist T') := ⟨contains⟩
-
-theorem contains_cons: x' ∈ (cons y' ys') ↔ x' = y' ∨ x' ∈ ys' := iff.rfl
-theorem singleton_contains: x' ∈ [x'] := contains_cons.mpr (or.inl rfl)
-
 -- the well-founded relation "is one strictly shorter than the other"
 def shorter (lst1 lst2: mylist T) := len lst1 < len lst2
 

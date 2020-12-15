@@ -91,8 +91,6 @@ end
 
 end is_homomorphism
 
-
-
 end myring
 
 end hidden

@@ -63,6 +63,13 @@ begin
   exfalso, from hmn hnm,
 end
 
+theorem lt_impl_neq : m < n → m ≠ n :=
+begin
+  assume h heq,
+  apply @lt_nrefl n,
+  rwa heq at h,
+end
+
 -- pair of transformation theorems. Can be useful in a pinch
 theorem le_iff_lt_succ: m ≤ n ↔ m < succ n :=
 begin

@@ -21,23 +21,6 @@ open mynat
 
 open sequence
 
-section sum
-
--- sum from k = 0 to n - 1 of term(k)
--- a bit unconventional, but this is the best way I could think of
--- to not have to have weird special cases with 0
-def sum {α : Type} [has_add α] [has_zero α]
-(seq: sequence α): sequence α
-| 0        := 0
-| (succ n) := sum n + seq n
-
-def product {β : Type} [has_mul β] [has_one β]
-(term : sequence β) : sequence β
-| 0        := 1
-| (succ n) := product n * term n
-
-end sum
-
 namespace mynat
 
 variables a b c d m n k: mynat
