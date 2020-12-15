@@ -29,6 +29,16 @@ begin
   rw [←add_zero a, ←add_zero b, ←add_neg c, ←add_assoc, ←add_assoc, h],
 end
 
+theorem add_cancel_right_iff: a + c = b + c ↔ a = b :=
+begin
+  split, {
+    from add_cancel_right _ _ _,
+  }, {
+    assume hbc,
+    rw hbc,
+  },
+end
+
 theorem zero_add : 0 + a = a :=
 begin
   apply add_cancel_right _ _ (-a),
@@ -57,6 +67,15 @@ theorem add_cancel_left : a + b = a + c → b = c :=
 begin
   assume h,
   rw [←zero_add b, ←zero_add c, ←neg_add a, add_assoc, add_assoc, h],
+end
+
+theorem add_cancel_left_iff: a + b = a + c ↔ b = c :=
+begin
+  split, {
+    from add_cancel_left _ _ _,
+  }, {
+    assume hbc, rw hbc,
+  },
 end
 
 theorem neg_neg : -(-a) = a :=
@@ -155,7 +174,7 @@ end
 theorem add_cancel_right_to_zero : a + b = a → b = 0 :=
 λ h, add_cancel_left_to_zero b a (by rwa add_comm at h)
 
-theorem add_cancel_rihgt_to_zero_iff: a + b = a ↔ b = 0 :=
+theorem add_cancel_right_to_zero_iff: a + b = a ↔ b = 0 :=
 begin
   split, {
     from add_cancel_right_to_zero _ _,
