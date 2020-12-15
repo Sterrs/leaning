@@ -1,8 +1,11 @@
 import ..mynat.dvd
 import .max
+import .le
 
 namespace hidden
 namespace myint
+open myring
+open ordered_myring
 
 def dvd (m n : myint) := ∃ k : myint, n = k * m
 
@@ -106,16 +109,20 @@ theorem dvd_remainder (j m n k : myint):
 j ∣ m → j ∣ n → m + k = n → j ∣ k :=
 begin
   assume hjm hjn hmkn,
-  rw ←add_cancel (-m) at hmkn,
-  rw add_comm (m + k) at hmkn,
+  rw ←add_cancel_left_iff (-m) at hmkn,
   rw ←add_assoc at hmkn,
-  simp at hmkn,
+  rw neg_add at hmkn,
+  rw zero_add at hmkn,
   rw hmkn,
-  apply dvd_sum,
-  assumption,
-  rw ←neg_one_mul,
-  apply dvd_mul_right,
-  assumption,
+  apply dvd_sum, {
+    rw ←mul_one (-m),
+    rw neg_mul,
+    rw ←mul_neg,
+    apply dvd_mul,
+    assumption,
+  }, {
+    assumption,
+  },
 end
 
 theorem coe_coe_dvd {a b : mynat} : a ∣ b ↔ (↑a : myint) ∣ ↑b :=
@@ -138,8 +145,8 @@ begin
     },
     rw hl at this,
     apply coe_inj,
-    rw ←zero_le_abs _ hcb at this,
-    rw ←zero_le_abs _ hca at this,
+    rw abs_of_nonneg _ hcb at this,
+    rw abs_of_nonneg _ hca at this,
     rw ←coe_coe_mul,
     assumption,
   },
