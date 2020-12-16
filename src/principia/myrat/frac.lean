@@ -80,10 +80,6 @@ begin
   from myint.decidable_eq _ _,
 end
 
-
-
-
-
 def neg (x : frac) : frac :=
 ⟨-x.num, x.denom, x.denom_pos⟩
 

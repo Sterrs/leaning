@@ -31,6 +31,10 @@ quotient_decidable_rel int_pair.le int_pair.le_well_defined
 
 -- theorems leading up to ordered ring instance proof
 
+private theorem add_eq_cls {x y: int_pair.int_pair} {n m: myint}:
+n = ⟦x⟧ → m = ⟦y⟧ → n + m = ⟦x + y⟧ :=
+λ hnx hmy, by rw [hnx, hmy]; refl
+
 -- is this somewhere else?
 theorem coe_inj {m n: mynat}: (↑m: myint) = ↑n → m = n :=
 begin
@@ -182,7 +186,7 @@ begin
   },
 end
 
--- add this to myring
+-- add this to myring wherever it belongs
 theorem le_sqrt_nonneg {m n : myint} (hm : 0 ≤ m) (hn : 0 ≤ n) :
 m ≤ n ↔ m * m ≤ n * n :=
 begin

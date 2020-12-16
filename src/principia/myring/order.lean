@@ -84,6 +84,15 @@ begin
   from le_neg_switch_iff _ _,
 end
 
+theorem le_neg_switch_neg: a ≤ -b ↔ b ≤ -a :=
+begin
+  conv {
+    to_rhs,
+    rw ←neg_neg b,
+  },
+  from le_neg_switch_iff _ _,
+end
+
 theorem square_nonneg: 0 ≤ a * a :=
 begin
   cases le_total_order 0 a with ha ha, {
@@ -247,6 +256,15 @@ begin
   conv {
     to_rhs,
     rw ←neg_zero,
+  },
+  from lt_neg_switch_iff _ _,
+end
+
+theorem lt_neg_switch_neg: a < -b ↔ b < -a :=
+begin
+  conv {
+    to_rhs,
+    rw ←neg_neg b,
   },
   from lt_neg_switch_iff _ _,
 end
@@ -465,6 +483,62 @@ begin
       contradiction,
     },
   },
+end
+
+theorem zero_le_cancel_pos
+(hID: a * b = 0 → a = 0 ∨ b = 0):
+0 < b → 0 ≤ a * b → 0 ≤ a :=
+begin
+  assume h0b h0ab,
+  cases le_total_order (0: α) a with ha ha, {
+    assumption,
+  }, {
+    rw le_zero_neg_switch_iff at ha,
+    have := zero_le_mul _ _ ha (lt_impl_le _ _ h0b),
+    rw neg_mul at this,
+    rw ←le_zero_neg_switch_iff at this,
+    have habeq0 := le_antisymm _ _ this h0ab,
+    cases hID habeq0 with h h, {
+      rw h,
+    }, {
+      rw h at h0b,
+      exfalso,
+      from lt_nrefl _ h0b,
+    },
+  },
+end
+
+theorem le_mul_cancel_pos_left
+(hID: (b - a) * c = 0 → b - a = 0 ∨ c = 0):
+0 < c → (c * a ≤ c * b ↔ a ≤ b) :=
+begin
+  assume h0k,
+  split, {
+    assume hcacb,
+    rw le_iff_diff_nonneg at hcacb,
+    rw ←mul_sub at hcacb,
+    rw le_iff_diff_nonneg,
+    apply zero_le_cancel_pos _ _ hID, {
+      assumption,
+    }, {
+      rw mul_comm,
+      assumption,
+    }
+  }, {
+    assume hmn,
+    apply le_mul_nonneg_left,
+    from lt_impl_le _ _ h0k,
+    assumption,
+  },
+end
+
+theorem le_mul_cancel_pos_right
+(hID: (b - a) * c = 0 → b - a = 0 ∨ c = 0):
+0 < c → (a * c ≤ b * c ↔ a ≤ b) :=
+begin
+  assume h0k,
+  repeat {rw ←mul_comm c},
+  from le_mul_cancel_pos_left _ _ _ hID h0k,
 end
 
 section abs_max
