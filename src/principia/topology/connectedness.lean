@@ -65,7 +65,7 @@ end
 
 theorem image_connected
 (X: topological_space α) (Y: topological_space β)
-(f: α → β) (hfc: @is_continuous _ _ f X Y):
+(f: α → β) (hfc: is_continuous X Y f):
 is_connected X → is_connected (subspace_topology Y (myset.image f myset.univ)) :=
 begin
   assume hXc,
@@ -206,7 +206,7 @@ theorem connected_iff_N_image_const
 (X: topological_space α):
 is_connected X ↔
 ∀ f: α → mynat,
-  @is_continuous _ _ f X (discrete_topology mynat) →
+  is_continuous X (discrete_topology mynat) f →
   ∀ x y: α, f x = f y :=
 begin
   split, {
@@ -265,7 +265,7 @@ begin
     cases hXdc with V hXdc,
     suffices:
         ∃ (f : α → mynat),
-          @is_continuous _ _ f X (discrete_topology mynat) ∧
+          is_continuous X (discrete_topology mynat) f ∧
           ∃ (x y : α), f x ≠ f y, {
       cases this with f hf,
       cases hf with hfc hxy,
@@ -387,10 +387,21 @@ begin
     have step1 := hUcon (λ x: subtype U, f ⟨x, ⟨U, ⟨hU, x.property⟩⟩⟩),
     let g := (λ x: subtype U, f ⟨x, ⟨U, ⟨hU, x.property⟩⟩⟩),
     have h_elp_me:
-        @is_continuous (subtype U) mynat g
-        (subspace_topology X U) (discrete_topology mynat), {
-      sorry, -- this isn't technically the same as the
-      -- case for restriction_continuous apparently :(((
+        is_continuous (subspace_topology X U) (discrete_topology mynat) g, {
+      apply
+          composition_continuous
+            (subspace_topology X U) (X.subspace_topology (⋃₀ S))
+            (discrete_topology mynat), {
+        have: U ⊆ ⋃₀ S, {
+          intro u,
+          assume hUu,
+          existsi U,
+          from ⟨hU, hUu⟩,
+        },
+        apply s_inclusion_continuous X U (⋃₀ S) this,
+      }, {
+        from hfc,
+      },
     },
     have step2 := step1 h_elp_me ⟨x.val, hxU⟩ ⟨z, hz.left⟩,
     apply transitivity' step2, {
@@ -405,11 +416,21 @@ begin
     have step1 := hVcon (λ x: subtype V, f ⟨x, ⟨V, ⟨hV, x.property⟩⟩⟩),
     let g := (λ x: subtype V, f ⟨x, ⟨V, ⟨hV, x.property⟩⟩⟩),
     have h_elp_me:
-        @is_continuous (subtype V) mynat g
-        (subspace_topology X V) (discrete_topology mynat), {
-      sorry, -- this isn't technically the same as the
-      -- case for restriction_continuous apparently :(((
-    },
+        is_continuous (subspace_topology X V) (discrete_topology mynat) g, {
+      apply
+          composition_continuous
+            (subspace_topology X V) (X.subspace_topology (⋃₀ S))
+            (discrete_topology mynat), {
+        have: V ⊆ ⋃₀ S, {
+          intro v,
+          assume hVv,
+          existsi V,
+          from ⟨hV, hVv⟩,
+        },
+        apply s_inclusion_continuous X V (⋃₀ S) this,
+      }, {
+        from hfc,
+      },    },
     have step2 := step1 h_elp_me ⟨y.val, hxV⟩ ⟨z, hz.right⟩,
     apply transitivity' step2, {
       congr,

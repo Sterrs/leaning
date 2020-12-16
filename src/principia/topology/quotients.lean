@@ -1,4 +1,5 @@
 import .topological_space
+import .continuity
 
 namespace hidden
 
@@ -42,14 +43,14 @@ topological_space (quotient R) := {
   begin
     intros U V,
     assume hUo hVo,
-    have: {x : α | ⟦x⟧ ∈ U ∩ V} = {x | ⟦x⟧ ∈ U} ∩ {x | ⟦x⟧ ∈ V}, {
-      from myset.inverse_image_intersection _ _ _,
-    },
-    change X.is_open {x : α | ⟦x⟧ ∈ U ∩ V},
-    rw this,
     apply X.open_intersection_open; assumption,
   end,
 }
+
+theorem quotient_map_continuous
+(X: topological_space α) (R: setoid α):
+is_continuous X (quotient_topology X R) quotient.mk :=
+λ U, iff.rfl.mp
 
 end topological_space
 

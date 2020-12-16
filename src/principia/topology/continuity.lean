@@ -10,10 +10,9 @@ open classical
 
 local attribute [instance] classical.prop_decidable
 
--- Goal Of The Game: sort out the [topological_space] arguments
--- just make it all ()
-
-def is_continuous (f : α → β) [X : topological_space α] [Y : topological_space β] : Prop :=
+def is_continuous
+(X: topological_space α) (Y: topological_space β)
+(f: α → β): Prop :=
 ∀ V : myset β, is_open Y V → is_open X (myset.inverse_image f V)
 
 def is_open_map (X: topological_space α) (Y: topological_space β) (f: α → β): Prop :=
@@ -23,8 +22,8 @@ def is_open_map (X: topological_space α) (Y: topological_space β) (f: α → �
 structure is_homeomorphism
 (X: topological_space α) (Y: topological_space β)
 (f: α → β) (g: β → α): Prop :=
-(f_continuous: @is_continuous _ _ f X Y)
-(g_continuous: @is_continuous _ _ g Y X)
+(f_continuous: is_continuous X Y f)
+(g_continuous: is_continuous Y X g)
 (right_inv: f ∘ g = id)
 (left_inv: g ∘ f = id)
 
@@ -33,7 +32,7 @@ def homeomorphic (X: topological_space α) (Y: topological_space β): Prop :=
 is_homeomorphism X Y f g
 
 theorem identity_continuous (X : topological_space α):
-@is_continuous _ _ (id: α → α) X X :=
+is_continuous X X id :=
 begin
   intro V,
   assume hoV,
@@ -45,7 +44,7 @@ end
 theorem constant_continuous
 [X : topological_space α] [Y : topological_space β]
 (y: β):
-@is_continuous α β (λ x, y) X Y :=
+is_continuous X Y (λ x, y) :=
 begin
   intro V,
   assume hoV,
@@ -79,8 +78,8 @@ begin
 end
 
 theorem inclusion_continuous
-[X : topological_space α] (Y: myset α):
-@is_continuous (subtype Y) α (λ x, x) (subspace_topology X Y) X :=
+(X : topological_space α) (Y: myset α):
+is_continuous (subspace_topology X Y) X (λ x, x) :=
 begin
   intro V,
   assume hoV,
@@ -92,12 +91,40 @@ begin
   },
 end
 
+theorem s_inclusion_continuous
+(X: topological_space α)
+(Y: myset α) (Z: myset α) (hYZ: Y ⊆ Z):
+is_continuous
+  (X.subspace_topology Y) (X.subspace_topology Z)
+  (λ y, ⟨y.val, hYZ y y.property⟩) :=
+begin
+  intro U,
+  assume hUo,
+  cases hUo with V hV,
+  existsi V,
+  split, {
+    from hV.left,
+  }, {
+    apply funext,
+    intro x,
+    apply propext,
+    split; assume hx, {
+      unfold myset.subtype_restriction,
+      rw hV.right at hx,
+      from hx,
+    }, {
+      rw hV.right,
+      from hx,
+    },
+  },
+end
+
 theorem continuous_to_image
-[X : topological_space α] [Y : topological_space β]
+(X : topological_space α) (Y : topological_space β)
 (f: α → β):
-@is_continuous _ _ f X Y →
-@is_continuous _ _ (myset.function_restrict_to_image f)
-               X (subspace_topology Y (myset.image f myset.univ)) :=
+is_continuous X Y f →
+is_continuous X (subspace_topology Y (myset.image f myset.univ))
+  (myset.function_restrict_to_image f) :=
 begin
   assume hfc,
   intro U,
@@ -125,9 +152,9 @@ theorem composition_continuous
 (X: topological_space α) (Y: topological_space β)
 (Z: topological_space γ)
 (f: α → β) (g: β → γ)
-(hfc: @is_continuous _ _ f X Y)
-(hgc: @is_continuous _ _ g Y Z):
-@is_continuous _ _ (g ∘ f) X Z :=
+(hfc: is_continuous X Y f)
+(hgc: is_continuous Y Z g):
+is_continuous X Z (g ∘ f) :=
 begin
   intro U,
   assume hUo,
@@ -139,8 +166,8 @@ end
 
 theorem restriction_continuous
 [X : topological_space α] [Y: topological_space β] (X': myset α)
-(f: α → β) (hfc: @is_continuous _ _ f X Y):
-@is_continuous (subtype X') _ (λ x, f x) (subspace_topology X X') Y :=
+(f: α → β) (hfc: is_continuous X Y f):
+is_continuous (subspace_topology X X') Y (λ x, f x) :=
 begin
   have: ((λ x, f x): (subtype X') → β) = f ∘ ((λ x, x): (subtype X' → α)), {
     apply funext,
@@ -156,7 +183,7 @@ theorem base_continuous
 [X: topological_space α]
 (B : myset (myset β)) (hB : is_base B)
 (f: α → β):
-@is_continuous _ _ f X (space_from_base B hB) ↔
+is_continuous X (space_from_base B hB) f ↔
 (∀ W: myset β, B W → X.is_open (myset.inverse_image f W)) :=
 begin
   split, {
@@ -202,7 +229,7 @@ end
 
 theorem projection_continuous
 [X : topological_space α] [Y: topological_space β]:
-@is_continuous _ _ prod.fst (product_topology X Y) X :=
+is_continuous (product_topology X Y) X prod.fst :=
 begin
   intro U,
   assume hUo,
@@ -234,9 +261,10 @@ end
 
 theorem swap_continuous
 [X : topological_space α] [Y: topological_space β]:
-@is_continuous (α × β) (β × α) (λ x, (x.snd, x.fst))
- (product_topology X Y) (product_topology Y X) :=
+is_continuous (product_topology X Y) (product_topology Y X)
+  (λ x, (x.snd, x.fst)) :=
 begin
+  unfold product_topology,
   rw base_continuous,
   intro W,
   assume hWb,
@@ -264,7 +292,7 @@ end
 
 theorem projection_2_continuous
 [X : topological_space α] [Y: topological_space β]:
-@is_continuous _ _ prod.snd (product_topology X Y) Y :=
+is_continuous (product_topology X Y) Y prod.snd :=
 begin
   have: (prod.snd: α × β → β) = prod.fst ∘ (λ x, (x.snd, x.fst)), {
     apply funext,
@@ -280,9 +308,9 @@ end
 theorem continuous_iff_components_continuous
 [X : topological_space α] [Y: topological_space β]
 [Z: topological_space γ] (f: α → β × γ):
-@is_continuous _ _ f X (product_topology Y Z) ↔
-(@is_continuous _ _ (prod.fst ∘ f) X Y ∧
- @is_continuous _ _ (prod.snd ∘ f) X Z) :=
+is_continuous X (product_topology Y Z) f ↔
+(is_continuous X Y (prod.fst ∘ f) ∧
+ is_continuous X Z (prod.snd ∘ f)) :=
 begin
   split, {
     assume hcf,
@@ -298,6 +326,7 @@ begin
   }, {
     assume hc,
     cases hc with hc1 hc2,
+    unfold product_topology,
     rw base_continuous,
     intro W,
     assume hW,
@@ -336,7 +365,7 @@ end
 theorem continuous_iff_closed_preimage
 (X: topological_space α) (Y: topological_space β)
 (f: α → β):
-@is_continuous _ _ f X Y ↔
+is_continuous X Y f ↔
 (∀ V : myset β, Y.is_closed V → X.is_closed (myset.inverse_image f V)) :=
 begin
   split, {
@@ -363,9 +392,9 @@ theorem gluing_lemma
 (X: topological_space α) (Y: topological_space β)
 (U V: myset α) (hUc: X.is_closed U) (hVc: X.is_closed V)
 (hUVcov: U ∪ V = myset.univ) (f: α → β):
-@is_continuous (subtype U) _ (λ x, f x) (subspace_topology X U) Y →
-@is_continuous (subtype V) _ (λ x, f x) (subspace_topology X V) Y →
-@is_continuous _ _ f X Y :=
+is_continuous (subspace_topology X U) Y (λ x, f x) →
+is_continuous (subspace_topology X V) Y (λ x, f x) →
+is_continuous X Y f :=
 begin
   repeat {rw continuous_iff_closed_preimage},
   assume hfUc hfVc,
@@ -653,7 +682,7 @@ begin
 end
 
 theorem to_indiscrete_continuous (X: topological_space α) (f: α → β):
-@is_continuous _ _  f X (indiscrete_topology β) :=
+is_continuous X (indiscrete_topology β) f :=
 begin
   intro U,
   assume hUo,
@@ -673,7 +702,7 @@ begin
 end
 
 theorem from_discrete_continuous (Y: topological_space β) (f: α → β):
-@is_continuous _ _  f (discrete_topology α) Y :=
+is_continuous (discrete_topology α) Y f :=
 begin
   intro U,
   assume hUo,

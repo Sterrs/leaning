@@ -764,6 +764,14 @@ begin
   },
 end
 
+theorem image_compact
+(X: topological_space α) (Y: topological_space β)
+(hXcpct: is_compact X) (f: α → β):
+is_compact (subspace_topology Y (myset.image f myset.univ)) :=
+begin
+  sorry,
+end
+
 end topological_space
 
 end hidden
