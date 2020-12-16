@@ -15,19 +15,19 @@ variables {lst' lst1' lst2': mylist T2}
 
 -- classic map function
 def map (f: T → T2): mylist T → mylist T2
-| []        := []
+| empty        := empty
 | (x :: xs) := f x :: map xs
 
 -- aka foldl
 -- this form looks yuckier but I think it's nicer to prove things with
-def reduce (f: T → T → T): Π lst: mylist T, lst ≠ [] → T
-| [] h             := absurd rfl h
-| (x :: []) h      := x
+def reduce (f: T → T → T): Π lst: mylist T, lst ≠ empty → T
+| empty h             := absurd rfl h
+| (x :: empty) h      := x
 | (x :: y :: xs) h := f x (reduce (y :: xs) cons_not_empty)
 
 -- reduce with a "default" value for empty lists
 def reduce_d (f: T → T → T) (default: T): mylist T → T
-| [] := default
+| empty := default
 | (x :: xs) := f x (reduce_d xs)
 
 def for_all (p: T → Prop) (lst: mylist T): Prop :=
@@ -43,17 +43,17 @@ instance: has_mem T3 (mylist T3) := ⟨contains⟩
 
 def filter (p: T → Prop)
 [hpdec: ∀ t: T, decidable (p t)]: mylist T → mylist T
-| [] := []
+| empty := empty
 | (x :: xs) := if p x then x :: filter xs else filter xs
 
 -- make n zeroes
 def zeroes: mynat → mylist mynat
-| 0        := []
+| 0        := empty
 | (succ n) := 0 :: zeroes n
 
 -- list 0, 1, 2, ..., n - 1
 def list_zero_to: mynat → mylist mynat
-| 0        := []
+| 0        := empty
 | (succ n) := 0 :: map succ (list_zero_to n)
 
 theorem for_all_iff_forall (p: T3 → Prop) (lst: mylist T3):
@@ -381,8 +381,8 @@ end
 
 private lemma concat_nempty_left
 {lst1 lst2: mylist T}
-(h1: lst1 ≠ []):
-lst1 ++ lst2 ≠ [] :=
+(h1: lst1 ≠ empty):
+lst1 ++ lst2 ≠ empty :=
 begin
   rw nonempty_iff_len_nonzero at *,
   rw nzero_iff_zero_lt at *,
@@ -392,8 +392,8 @@ end
 
 private lemma concat_nempty_right
 {lst1 lst2: mylist T}
-(h2: lst2 ≠ []):
-lst1 ++ lst2 ≠ [] :=
+(h2: lst2 ≠ empty):
+lst1 ++ lst2 ≠ empty :=
 begin
   rw nonempty_iff_len_nonzero at *,
   rw nzero_iff_zero_lt at *,
@@ -406,7 +406,7 @@ theorem reduce_assoc_concat
 (f: mynat → mynat → mynat)
 (hassoc: is_associative _ f)
 (lst1 lst2: mylist mynat)
-(h1ne: lst1 ≠ []) (h2ne: lst2 ≠ []):
+(h1ne: lst1 ≠ empty) (h2ne: lst2 ≠ empty):
 reduce f (lst1 ++ lst2) (concat_nempty_left h1ne) = f (reduce f lst1 h1ne) (reduce f lst2 h2ne) :=
 begin
   induction lst1 with x xs hxs, {
@@ -447,7 +447,7 @@ theorem reduce_comm_assoc_concat_comm
 (hcomm: is_commutative _ f)
 (hassoc: is_associative _ f)
 (lst1 lst2: mylist mynat)
-(h1ne: lst1 ≠ []):
+(h1ne: lst1 ≠ empty):
 reduce f (lst1 ++ lst2) (concat_nempty_left h1ne) = reduce f (lst2 ++ lst1) (concat_nempty_right h1ne) :=
 begin
   cases lst1 with x xs, {
@@ -468,7 +468,7 @@ theorem reduce_comm_assoc_concat_transpose
 (hcomm: is_commutative _ f)
 (hassoc: is_associative _ f)
 (lst1 lst2 lst3: mylist mynat)
-(h1ne: lst1 ≠ []):
+(h1ne: lst1 ≠ empty):
 reduce f (lst1 ++ lst2 ++ lst3) (concat_nempty_left (concat_nempty_left h1ne)) = reduce f (lst2 ++ lst1 ++ lst3) (concat_nempty_left (concat_nempty_right h1ne)) :=
 begin
   cases lst3 with z zs, {
@@ -493,7 +493,7 @@ private lemma reduce_comm_assoc_concat_interchange
 (hcomm: is_commutative _ f)
 (hassoc: is_associative _ f)
 (a b c d e: mylist mynat)
-(hb: b ≠ []) (hd: d ≠ []):
+(hb: b ≠ empty) (hd: d ≠ empty):
 reduce f (a ++ b ++ c ++ d ++ e) (concat_nempty_left (concat_nempty_right hd)) = reduce f (a ++ d ++ c ++ b ++ e) (concat_nempty_left (concat_nempty_right hb)) :=
 begin
   -- tragically we aren't allowed to clear these hypotheses
@@ -633,7 +633,7 @@ end
 theorem reduce_congr
 (f: mynat → mynat → mynat)
 (x: mynat) (xs ys: mylist mynat)
-(hxs: xs ≠ []) (hys: ys ≠ []):
+(hxs: xs ≠ empty) (hys: ys ≠ empty):
 reduce f xs hxs = reduce f ys hys
 → reduce f (x :: xs) cons_not_empty = reduce f (x :: ys) cons_not_empty :=
 begin
@@ -657,7 +657,7 @@ theorem reduce_comm_assoc_perm
 (hcomm: is_commutative _ f)
 (hassoc: is_associative _ f)
 (lst1 lst2: mylist mynat)
-(h1ne: lst1 ≠ []) (h2ne: lst2 ≠ [])
+(h1ne: lst1 ≠ empty) (h2ne: lst2 ≠ empty)
 (hperm: is_perm lst1 lst2):
 reduce f lst1 h1ne = reduce f lst2 h2ne :=
 begin
@@ -764,8 +764,7 @@ begin
               rw nzero_iff_zero_lt,
               rw len_concat_add,
               rw len_concat_add,
-              unfold len,
-              repeat {rw add_succ <|> rw succ_add},
+              rw add_comm,
               from zero_lt_succ,
             }
           },

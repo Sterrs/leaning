@@ -28,13 +28,7 @@ variables {m n: mynat}
 -- I'm really just sort of making this up as I go along
 -- It would be nice to have notation like [1, 2, 3]
 notation h :: t := cons h t
-notation `[]` := empty
-def singleton (x: T) := x :: ([]: mylist T)
--- is this bad practice? Am I overriding some important other
--- notation??
-notation `[`x`]` := singleton x
-
-@[simp] theorem singleton_cons_empty: [x] = x :: [] := rfl
+def singleton (x: T) := x :: (empty: mylist T)
 
 theorem cons_injective_1: x :: xs = y :: ys → x = y :=
 begin
@@ -55,17 +49,17 @@ end
 -- recursion on the first argument, so you should generally induct on
 -- the first argument.
 def concat: mylist T → mylist T → mylist T
-| []        lst := lst
+| empty        lst := lst
 | (x :: xs) lst := x :: (concat xs lst)
 
 notation lst1 ++ lst2 := concat lst1 lst2
 
-@[simp] theorem empty_concat: ([]: mylist T) ++ lst = lst := rfl
+@[simp] theorem empty_concat: (empty: mylist T) ++ lst = lst := rfl
 @[simp]
 theorem cons_concat: (x :: xs) ++ lst = x :: (xs ++ lst) := rfl
 
 @[simp]
-theorem concat_empty: lst ++ ([]: mylist T) = lst :=
+theorem concat_empty: lst ++ (empty: mylist T) = lst :=
 begin
   induction lst with lst_head lst_tail lst_ih, {
     simp,
@@ -75,10 +69,10 @@ begin
 end
 
 @[simp]
-theorem singleton_concat_cons: [x] ++ lst = x :: lst := rfl
+theorem singleton_concat_cons: singleton x ++ lst = x :: lst := rfl
 
 @[simp]
-theorem cons_not_empty: x :: xs ≠ [] :=
+theorem cons_not_empty: x :: xs ≠ empty :=
 begin
   assume h,
   cases h,
@@ -98,17 +92,17 @@ instance concat_is_assoc (T: Type u): is_associative (mylist T) concat :=
 ⟨λ a b c, concat_assoc⟩
 
 def len: mylist T → mynat
-| []        := 0
+| empty        := 0
 | (_ :: xs) := succ (len xs)
 
 @[simp]
-theorem empty_len: len ([]: mylist T) = 0 := rfl
+theorem empty_len: len (empty: mylist T) = 0 := rfl
 
 @[simp]
 theorem len_cons_succ: len (x :: xs) = succ (len xs) := rfl
 
 @[simp]
-theorem len_singleton: len [x] = 1 := len_cons_succ
+theorem len_singleton: len (singleton x) = 1 := len_cons_succ
 
 theorem len_of_refl: lst1 = lst2 → len lst1 = len lst2 :=
 begin
@@ -127,28 +121,30 @@ begin
 end
 
 def rev: mylist T → mylist T
-| []        := []
-| (x :: xs) := (rev xs) ++ [x]
+| empty        := empty
+| (x :: xs) := (rev xs) ++ singleton x
 
-@[simp] theorem rev_empty: rev ([]: mylist T) = [] := rfl
-@[simp] theorem rev_cons: rev (x :: xs) = (rev xs) ++ [x] := rfl
-@[simp] theorem rev_singleton: rev [x] = [x] := rfl
+@[simp] theorem rev_empty: rev (empty: mylist T) = empty := rfl
+@[simp] theorem rev_cons: rev (x :: xs) = (rev xs) ++ singleton x := rfl
+@[simp] theorem rev_singleton: rev (singleton x) = singleton x := rfl
 
 @[simp]
-theorem rev_append: rev (lst ++ [x]) = x :: rev lst :=
+theorem rev_append: rev (lst ++ singleton x) = x :: rev lst :=
 begin
   induction lst with lst_head lst_tail lst_ih, {
-    simp,
+    refl,
   }, {
     rw [cons_concat, rev_cons, lst_ih],
-    simp,
+    refl,
   },
 end
 
 theorem rev_concat: rev (lst1 ++ lst2) = rev lst2 ++ rev lst1 :=
 begin
   induction lst1 with lst1_head lst1_tail lst1_ih, {
-    simp,
+    rw rev_empty,
+    rw concat_empty,
+    refl,
   }, {
     rw [cons_concat, rev_cons, lst1_ih, rev_cons, concat_assoc],
   },
@@ -174,7 +170,7 @@ begin
   },
 end
 
-theorem empty_iff_len_zero: lst = [] ↔ len lst = 0 :=
+theorem empty_iff_len_zero: lst = empty ↔ len lst = 0 :=
 begin
   split, {
     assume h,
@@ -191,10 +187,10 @@ begin
   },
 end
 
-theorem nonempty_iff_len_nonzero: lst ≠ [] ↔ len lst ≠ 0 :=
+theorem nonempty_iff_len_nonzero: lst ≠ empty ↔ len lst ≠ 0 :=
 iff_to_contrapositive empty_iff_len_zero
 
-theorem rev_not_empty: lst ≠ [] → rev lst ≠ [] :=
+theorem rev_not_empty: lst ≠ empty → rev lst ≠ empty :=
 begin
   repeat {rw nonempty_iff_len_nonzero},
   rw rev_len,
@@ -207,41 +203,45 @@ end
 -- which is a dependent type thing. Maybe they're supposed to be Πs
 
 -- first element
-def head: Π lst: mylist T, lst ≠ [] → T
-| []       h := absurd rfl h
+def head: Π lst: mylist T, lst ≠ empty → T
+| empty       h := absurd rfl h
 | (x :: _) _ := x
 
-@[simp] theorem first_cons (h: x :: xs ≠ []): head (x :: xs) h = x := rfl
+@[simp] theorem first_cons (h: x :: xs ≠ empty): head (x :: xs) h = x := rfl
 
 -- everything except first element
-def tail: Π lst: mylist T, lst ≠ [] → mylist T
-| []        h := absurd rfl h
+def tail: Π lst: mylist T, lst ≠ empty → mylist T
+| empty        h := absurd rfl h
 | (_ :: xs) _ := xs
 
-@[simp] theorem tail_cons (h: x :: xs ≠ []): tail (x :: xs) h = xs := rfl
+@[simp] theorem tail_cons (h: x :: xs ≠ empty): tail (x :: xs) h = xs := rfl
 
 -- everything except last element
-def init: Π lst: mylist T, lst ≠ [] → mylist T
-| []             h := absurd rfl h
-| (x :: [])      _ := []
+def init: Π lst: mylist T, lst ≠ empty → mylist T
+| empty             h := absurd rfl h
+| (x :: empty)      _ := empty
 | (x :: y :: xs) _ := x :: init (y :: xs) cons_not_empty
 
 @[simp]
-theorem init_singleton (h: [x] ≠ []): init [x] h = [] := rfl
+theorem init_singleton (h: singleton x ≠ empty):
+init (singleton x) h = empty := rfl
+
 @[simp]
-theorem init_ccons (h: x :: y :: xs ≠ []):
+theorem init_ccons (h: x :: y :: xs ≠ empty):
 init (x :: y :: xs) h = x :: init (y :: xs) cons_not_empty := rfl
 
 -- last element
-def last: Π lst: mylist T, lst ≠ [] → T
-| []             h := absurd rfl h
-| (x :: [])      _ := x
+def last: Π lst: mylist T, lst ≠ empty → T
+| empty             h := absurd rfl h
+| (x :: empty)      _ := x
 | (x :: y :: xs) h := last (y :: xs) cons_not_empty
 
 @[simp]
-theorem last_singleton (h: [x] ≠ []): last [x] h = x := rfl
+theorem last_singleton (h: singleton x ≠ empty):
+last (singleton x) h = x := rfl
+
 @[simp]
-theorem last_ccons (h: x :: y :: xs ≠ []):
+theorem last_ccons (h: x :: y :: xs ≠ empty):
 last (x :: y :: xs) h = last (y :: xs) cons_not_empty := rfl
 
 private theorem len_cons_succ_cancel1 (h: succ n ≤ len (x :: xs)): n ≤ len xs :=
@@ -259,11 +259,11 @@ end
 
 -- the first n elements
 def take: Π n: mynat, Π lst: mylist T, n ≤ len lst → mylist T
-| 0        _         _ := []
-| (succ n) []        h := absurd h absurd_succ_le_zero
+| 0        _         _ := empty
+| (succ n) empty        h := absurd h absurd_succ_le_zero
 | (succ n) (x :: xs) h := x :: take n xs (len_cons_succ_cancel1 h)
 
-@[simp] theorem take_zero (h: 0 ≤ len lst): take 0 lst h = [] := rfl
+@[simp] theorem take_zero (h: 0 ≤ len lst): take 0 lst h = empty := rfl
 
 @[simp]
 theorem take_succ_cons
@@ -274,7 +274,7 @@ take (succ n) (x :: xs) h
 -- everything except the first n elements
 def drop: Π n: mynat, Π lst: mylist T, n ≤ len lst → mylist T
 | 0        lst       _ := lst
-| (succ n) []        h := absurd h absurd_succ_le_zero
+| (succ n) empty        h := absurd h absurd_succ_le_zero
 | (succ n) (_ :: xs) h := drop n xs (len_cons_succ_cancel1 h)
 
 @[simp] theorem drop_zero (h: 0 ≤ len lst): drop 0 lst h = lst := rfl
@@ -292,7 +292,7 @@ end
 
 -- the nth element
 def get: Π n: mynat, Π lst: mylist T, n < len lst → T
-| n        []        h := absurd h lt_nzero
+| n        empty        h := absurd h lt_nzero
 | 0        (x :: _)  _ := x
 | (succ n) (x :: xs) h := get n xs (len_cons_succ_cancel2 h)
 
@@ -322,7 +322,7 @@ begin
   },
 end
 
-theorem cons_head_tail (h: lst ≠ []): head lst h :: tail lst h = lst :=
+theorem cons_head_tail (h: lst ≠ empty): head lst h :: tail lst h = lst :=
 begin
   cases lst, {
     contradiction,
@@ -331,7 +331,7 @@ begin
   },
 end
 
-theorem len_tail (h: lst ≠ []): len lst = succ (len (tail lst h)) :=
+theorem len_tail (h: lst ≠ empty): len lst = succ (len (tail lst h)) :=
 begin
   cases lst, {
     contradiction,
@@ -341,36 +341,30 @@ begin
 end
 
 -- I didn't really think this one through
-theorem len_init (h: lst ≠ []): len lst = succ (len (init lst h)) :=
+theorem len_init (h: lst ≠ empty): len lst = succ (len (init lst h)) :=
 begin
   induction lst, {
     contradiction,
   }, {
-    simp,
     cases lst_tail, {
-      have hi := init_singleton h,
-      simp at hi,
-      rw hi,
+      refl,
     }, {
-      apply lst_ih,
+      have := lst_ih cons_not_empty,
+      dsimp [len] at this,
+      dsimp [len],
+      rw this,
     },
   },
 end
 
-theorem append_init_last (h: lst ≠ []):
-init lst h ++ [last lst h] = lst :=
+theorem append_init_last (h: lst ≠ empty):
+init lst h ++ (singleton (last lst h)) = lst :=
 begin
   induction lst, {
     from absurd rfl h,
   }, {
     cases lst_tail, {
-      have hi := init_singleton h,
-      simp at hi,
-      rw hi,
-      have hl := last_singleton h,
-      simp at hl,
-      rw hl,
-      simp,
+      refl,
     }, {
       rw init_ccons h,
       rw last_ccons h,
@@ -539,7 +533,7 @@ begin
 end
 
 @[simp]
-theorem drop_all (h: len lst ≤ len lst): drop (len lst) lst h = [] :=
+theorem drop_all (h: len lst ≤ len lst): drop (len lst) lst h = empty :=
 begin
   induction lst with lst_head lst_tail lst_ih, {
     refl,
@@ -643,8 +637,8 @@ begin
 end
 
 theorem take_init
-(hnl: len xs ≤ len (xs ++ [x])):
-take (len xs) (xs ++ [x]) hnl = xs :=
+(hnl: len xs ≤ len (xs ++ singleton x)):
+take (len xs) (xs ++ singleton x) hnl = xs :=
 begin
   induction xs, {
     refl,
@@ -656,7 +650,7 @@ end
 
 theorem take_ignore
 (hnl: n ≤ len xs):
-take n (xs ++ [x]) (
+take n (xs ++ singleton x) (
   begin
     rw len_concat_add,
     from le_add_rhs hnl,
@@ -664,8 +658,8 @@ take n (xs ++ [x]) (
   ) = take n xs hnl :=
 begin
   suffices h:
-      take n (take (len xs) (xs ++ [x]) _) _ = take n xs hnl, {
-    rw @take_take _ (xs ++ [x]) (len xs) n _ _ at h,
+      take n (take (len xs) (xs ++ singleton x) _) _ = take n xs hnl, {
+    rw @take_take _ (xs ++ singleton x) (len xs) n _ _ at h,
     from h,
   }, {
     conv {
@@ -779,7 +773,7 @@ end lwf
 -- attempts at defining things that recurse on the init
 
 -- private def lst_is_odd: mylist T → Prop
--- | [] := false
+-- | empty := false
 -- | (x :: xs) := have shorter (init (x :: xs) (cons_not_empty)) (x :: xs),
 --                from begin
 --                       rw shorter_lt,
@@ -793,8 +787,8 @@ end lwf
 
 -- TODO: make this work
 -- def palindrome: mylist T → Prop
--- | []             := true
--- | (x :: [])      := true
+-- | empty             := true
+-- | (x :: empty)      := true
 -- | (x :: y :: xs) := x = last (y :: xs) (cons_not_empty _ _)
 --                   ∧ palindrome (init (y :: xs) (cons_not_empty _ _))
 

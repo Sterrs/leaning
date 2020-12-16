@@ -57,7 +57,7 @@ end
 theorem image_converges
 (X: topological_space α) (Y: topological_space β)
 (x: α) (xn: sequence α) (hxnconv: converges_to X x xn)
-(f: α → β) (hfc: @is_continuous _ _ f X Y):
+(f: α → β) (hfc: is_continuous X Y f):
 converges_to Y (f x) (λ n, f (xn n)) :=
 begin
   intro U,

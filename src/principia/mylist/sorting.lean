@@ -27,7 +27,7 @@ def is_sorted (lst: mylist mynat): Prop :=
         get b lst hbl
 
 def count [decidable_eq T]: T → mylist T → mynat
-| _ []        := 0
+| _ empty        := 0
 | x (y :: ys) := if x = y then
                  succ (count x ys) else
                  count x ys
@@ -70,7 +70,7 @@ begin
   },
 end
 
-theorem empty_sorted: is_sorted [] :=
+theorem empty_sorted: is_sorted empty :=
 begin
   intros a b,
   assume hbl hab,
@@ -78,12 +78,12 @@ begin
   from lt_nzero hbl,
 end
 
-theorem singleton_sorted: is_sorted [x] :=
+theorem singleton_sorted: is_sorted (singleton x) :=
 begin
   intros a b,
   assume hbl hab,
   exfalso,
-  dsimp [len] at hbl,
+  change b < 1 at hbl,
   rw [←one_eq_succ_zero, ←le_iff_lt_succ] at hbl,
   rw le_zero hbl at hab,
   from lt_nzero hab,
@@ -106,7 +106,7 @@ begin
   },
 end
 
-theorem duo_sorted: x ≤ y → is_sorted (x :: y :: []) :=
+theorem duo_sorted: x ≤ y → is_sorted (x :: y :: empty) :=
 (λ h, cons_sorted h singleton_sorted)
 
 theorem tail_sorted: is_sorted (x :: xs) → is_sorted xs :=
@@ -120,10 +120,7 @@ begin
   from this, -- too lazy to change indentation
 end
 
-theorem empty_perm: is_perm [] [] := (λ _, rfl)
-
-theorem singleton_perm: is_perm [x] [x] := (λ _, rfl)
-
+@[refl]
 theorem perm_refl: is_perm lst lst := (λ _, rfl)
 
 theorem perm_symm:
@@ -147,10 +144,10 @@ begin
   from eq.trans (hp12 m) (hp23 m),
 end
 
-theorem count_empty: count x [] = 0 := rfl
+theorem count_empty: count x empty = 0 := rfl
 
 theorem empty_perm_is_empty:
-is_perm lst [] → lst = [] :=
+is_perm lst empty → lst = empty :=
 begin
   assume hple,
   cases lst, {
@@ -192,7 +189,7 @@ begin
 end
 
 theorem duo_perm:
-is_perm (x :: y :: []) (y :: x :: []) :=
+is_perm (x :: y :: empty) (y :: x :: empty) :=
 begin
   intro m,
   dsimp [count],
@@ -218,13 +215,13 @@ end
 -- insertion sort
 
 def insert_aux: mynat → mylist mynat → mylist mynat
-| x []        := [x]
+| x empty        := singleton x
 | x (y :: ys) := if x ≤ y then
                  x :: y :: ys else
                  y :: insert_aux x ys
 
 def insertion_sort: mylist mynat → mylist mynat
-| []        := []
+| empty        := empty
 | (x :: xs) := insert_aux x (insertion_sort xs)
 
 -- ew
@@ -297,12 +294,11 @@ theorem insertion_is_perm:
 is_perm (x :: xs) (insert_aux x xs) :=
 begin
   induction xs with x' xs h_ih, {
-    from singleton_perm,
+    refl,
   }, {
     dsimp [insert_aux],
     by_cases hxx': x ≤ x', {
       rw if_pos hxx',
-      from perm_refl,
     }, {
       rw if_neg hxx',
       apply perm_trans _ (cons_perm h_ih),
@@ -315,7 +311,7 @@ theorem insertion_sort_is_perm:
 is_perm lst (insertion_sort lst) :=
 begin
   induction lst with head tail h_ih, {
-    from empty_perm,
+    refl,
   }, {
     dsimp [insertion_sort],
     have := @cons_perm head _ _ h_ih,
@@ -343,11 +339,11 @@ end
 theorem rev_perm: is_perm lst (rev lst) :=
 begin
   induction lst with head tail h_ih, {
-    from empty_perm,
+    refl,
   }, {
     from perm_trans
           (cons_perm h_ih)
-          (@perm_concat_swap [head] (rev tail)),
+          (@perm_concat_swap (singleton head) (rev tail)),
   },
 end
 
@@ -382,10 +378,10 @@ def swap_elems:
 Π (m n: mynat) (lst: mylist T), m < n → n < len lst → mylist T
 := (λ m n lst hmn hnl,
     take m lst (lt_impl_le (lt_trans hmn hnl))
-    ++ [get n lst hnl]
+    ++ singleton (get n lst hnl)
     ++ slice (succ m) n lst (lt_iff_succ_le.mp hmn)
                             (lt_impl_le hnl)
-    ++ [get m lst (lt_trans hmn hnl)]
+    ++ singleton (get m lst (lt_trans hmn hnl))
     ++ drop (succ n) lst (lt_iff_succ_le.mp hnl))
 
 theorem len_slice
@@ -442,7 +438,7 @@ begin
   },
   repeat {rw concat_assoc},
   apply perm_concat perm_refl,
-  have hdmlne: drop m lst hml_ns ≠ [], {
+  have hdmlne: drop m lst hml_ns ≠ empty, {
     assume h,
     have h2: len lst = m, {
       rw ←@len_drop _ _ m,
@@ -462,7 +458,7 @@ begin
   apply perm_trans _ perm_concat_swap,
   apply
     @perm_trans _
-      (tail (drop m lst hml_ns) hdmlne ++ [get m lst hml])
+      (tail (drop m lst hml_ns) hdmlne ++ singleton (get m lst hml))
       _ perm_concat_swap,
   unfold slice,
   rw ←@drop_one_tail _ (drop m lst hml_ns)
@@ -513,7 +509,7 @@ begin
     congr,
     rw hrw,
   },
-  have hdnlne: drop n lst hnl_ns ≠ [], {
+  have hdnlne: drop n lst hnl_ns ≠ empty, {
     assume h,
     have h2: len lst = n, {
       rw ←@len_drop _ _ n,
@@ -535,7 +531,7 @@ begin
   rw concat_assoc,
   apply perm_concat perm_refl,
   apply perm_trans _ perm_concat_swap,
-  apply @perm_concat _ _ [get n lst hnl] _ perm_refl,
+  apply @perm_concat _ _ (singleton (get n lst hnl)) _ perm_refl,
   rw ←@drop_one_tail _ (drop n lst hnl_ns)
     begin
       cases hl: drop n lst hnl_ns, {
@@ -547,7 +543,7 @@ begin
       },
     end,
   rw @drop_drop _ _ n 1 _ _,
-  from perm_refl,
+  refl,
 end
 
 -- TODO: swap involutive, get_swap
@@ -563,7 +559,7 @@ end
 -- also this kind of signals how useless ∈ was
 def index:
 Π (n: mynat) (lst: mylist mynat), count n lst ≠ 0 → mynat
-| n []        h := absurd count_empty h
+| n empty        h := absurd count_empty h
 | n (x :: xs) h := if hnx: n = x then
                    0 else
                    succ (index n xs

@@ -156,9 +156,9 @@ private def is_raised_seq
      myset (subtype Y) | (X.subspace_topology Y).is_open W ∧
      ∃ (U : myset α), Y.subtype_restriction U = W ∧ U ∈ 𝒰}) 𝒱),
 mylist (myset α) → Prop
-| [] _ [] := true
-| [] _ (V' :: V's) := false
-| (V :: Vs) _ [] := false
+| mylist.empty _ mylist.empty := true
+| mylist.empty _ (V' :: V's) := false
+| (V :: Vs) _ mylist.empty := false
 | (V :: Vs) h (V' :: V's) :=
   V' ∈ 𝒰 ∧
   (subspace_topology X Y).is_open V ∧
@@ -176,7 +176,7 @@ private lemma raised_seq_exists
   is_raised_seq X Y 𝒰 𝒱 hWV 𝒱' :=
 begin
   induction 𝒱 with V Vs ih_V, {
-    existsi [],
+    existsi mylist.empty,
     trivial,
   }, {
     cases ih_V hWV.right hVo.right with V's hV's,
@@ -475,9 +475,9 @@ private def is_corresponding_subcov
 (U: myset α):
 Π (𝒱: mylist (myset α)),
 mylist (myset α) → Prop
-| [] [] := true
-| (V :: Vs) [] := false
-| [] (V' :: V's) := false
+| mylist.empty mylist.empty := true
+| (V :: Vs) mylist.empty := false
+| mylist.empty (V' :: V's) := false
 | (V :: Vs) (V' :: V's) :=
   is_corresponding_subcov Vs V's ∧
   ∃ (y : α),
@@ -624,7 +624,7 @@ private lemma exists_corresponding_subcov
   is_corresponding_subcov X x U 𝒱 𝒱' :=
 begin
   induction 𝒱 with V Vs ih_Vs, {
-    existsi [],
+    existsi mylist.empty,
     trivial,
   }, {
     cases ih_Vs hVU.right with V's hV's,
