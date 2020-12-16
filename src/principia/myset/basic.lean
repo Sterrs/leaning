@@ -261,6 +261,203 @@ begin
   refl,
 end
 
+theorem inverse_image_sUnion
+{α β : Type} (f: α → β) (S: myset (myset β)):
+inverse_image f ⋃₀ S = ⋃₀ image (inverse_image f) S :=
+begin
+  apply setext,
+  intro x,
+  split; assume hx, {
+    cases hx with U hU,
+    cases hU with hU hxU,
+    existsi (inverse_image f U),
+    split, {
+      existsi U,
+      split, {
+        assumption,
+      }, {
+        refl,
+      },
+    }, {
+      assumption,
+    },
+  }, {
+    cases hx with U hU,
+    cases hU with hU hxU,
+    cases hU with V hV,
+    existsi V,
+    split, {
+      from hV.left,
+    }, {
+      rw ←hV.right at hxU,
+      from hxU,
+    },
+  },
+end
+
+theorem inverse_image_sIntersection
+{α β : Type} (f: α → β) (S: myset (myset β)):
+inverse_image f ⋂₀ S = ⋂₀ image (inverse_image f) S :=
+begin
+  apply setext,
+  intro x,
+  split; assume hx, {
+    intro U,
+    assume hUS,
+    cases hUS with V hV,
+    rw ←hV.right,
+    from hx V hV.left,
+  }, {
+    intro U,
+    assume hUs,
+    apply hx,
+    existsi U,
+    split, {
+      assumption,
+    }, {
+      refl,
+    },
+  },
+end
+
+theorem image_intersection
+{α β : Type} (f: α → β) (U V: myset α):
+image f (U ∩ V) ⊆ image f U ∩ image f V :=
+begin
+  intro x,
+  assume hx,
+  cases hx with y hy,
+  split, {
+    existsi y,
+    split, {
+      from hy.left.left,
+    }, {
+      from hy.right,
+    },
+  }, {
+    existsi y,
+    split, {
+      from hy.left.right,
+    }, {
+      from hy.right,
+    },
+  },
+end
+
+theorem image_union
+{α β : Type} (f: α → β) (U V: myset α):
+image f (U ∪ V) = image f U ∪ image f V :=
+begin
+  apply setext,
+  intro x,
+  split; assume hx, {
+    cases hx with y hy,
+    cases hy with hyUV hfyx,
+    rw ←hfyx,
+    cases hyUV with hyU hyV, {
+      left,
+      existsi y,
+      split, {
+        assumption,
+      }, {
+        refl,
+      },
+    }, {
+      right,
+      existsi y,
+      split, {
+        assumption,
+      }, {
+        refl,
+      },
+    },
+  }, {
+    cases hx with hxfU hxfV, {
+      cases hxfU with y hy,
+      existsi y,
+      split, {
+        left,
+        from hy.left,
+      }, {
+        from hy.right,
+      },
+    }, {
+      cases hxfV with y hy,
+      existsi y,
+      split, {
+        right,
+        from hy.left,
+      }, {
+        from hy.right,
+      },
+    },
+  },
+end
+
+theorem image_sUnion
+{α β : Type} (f: α → β) (S: myset (myset α)):
+image f ⋃₀ S = ⋃₀ image (image f) S :=
+begin
+  apply setext,
+  intro x,
+  split; assume hx, {
+    cases hx with y hy,
+    cases hy with hy hfyx,
+    cases hy with U hU,
+    cases hU with hU hyU,
+    existsi image f U,
+    split, {
+      existsi U,
+      split, {
+        assumption,
+      }, {
+        refl,
+      },
+    }, {
+      existsi y,
+      split; assumption,
+    },
+  }, {
+    cases hx with U hU,
+    cases hU with hU hxU,
+    cases hU with V hV,
+    rw ←hV.right at hxU,
+    cases hxU with y hy,
+    existsi y,
+    split, {
+      existsi V,
+      split, {
+        from hV.left,
+      }, {
+        from hy.left,
+      },
+    }, {
+      from hy.right,
+    },
+  },
+end
+
+theorem image_sIntersection
+{α β : Type} (f: α → β) (S: myset (myset α)):
+image f ⋂₀ S ⊆ ⋂₀ image (image f) S :=
+begin
+  intro x,
+  assume hx,
+  intro U,
+  assume hU,
+  cases hU with V hV,
+  cases hx with y hy,
+  rw ←hy.right,
+  rw ←hV.right,
+  existsi y,
+  split, {
+    apply hy.left,
+    from hV.left,
+  }, {
+    refl,
+  },
+end
+
 theorem inverse_image_composition
 {α β γ: Type} (f: α → β) (g: β → γ) (U: myset γ):
 inverse_image (g ∘ f) U =
