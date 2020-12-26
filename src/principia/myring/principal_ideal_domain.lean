@@ -13,17 +13,14 @@ theorem principal_ideal_ideal : ∀ r : α, is_ideal (principal_ideal r) :=
 begin
   intro r,
   split, {
+    existsi (0: α),
+    rw mul_zero,
+  }, {
     intros a b ha hb,
     cases ha with s hs,
     cases hb with t ht,
     rw [←ht, ←hs, ←mul_add],
     existsi (s + t),
-    refl,
-  }, {
-    intros a ha,
-    cases ha with s hs,
-    rw [←hs, ←mul_neg],
-    existsi -s,
     refl,
   }, {
     intros s a ha,
