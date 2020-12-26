@@ -115,7 +115,7 @@ end
 theorem zero_mul : 0 * a = 0 :=
 by rw [mul_comm, mul_zero]
 
-private theorem neg_eq_mul_neg_one : -a = -1 * a :=
+theorem neg_eq_mul_neg_one : -a = -1 * a :=
 begin
   symmetry,
   conv {

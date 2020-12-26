@@ -22,7 +22,7 @@ begin
   }, {
     intros a ha,
     cases ha with s hs,
-    rw [←hs, mul_neg],
+    rw [←hs, ←mul_neg],
     existsi -s,
     refl,
   }, {

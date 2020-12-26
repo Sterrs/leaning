@@ -7,26 +7,34 @@ namespace myring
 
 structure is_ideal {α : Type} [myring α] (I : myset α) : Prop :=
 intro ::
+(contains_zero: (0: α) ∈ I)
 (add_closure (a b : α) : a ∈ I → b ∈ I → a + b ∈ I)
-(neg_closure (a : α) : a ∈ I → -a ∈ I)
 (mul_closure (r x : α) : x ∈ I → r * x ∈ I)
 
 variables {α : Type} [myring α] (I J : myset α)
 
+theorem neg_closure {I: myset α} (hI: is_ideal I) (a: α) (ha: a ∈ I):
+-a ∈ I :=
+begin
+  have := hI.mul_closure (-1: α) a ha,
+  rw ←neg_eq_mul_neg_one at this,
+  from this,
+end
+
 theorem ideal_intersection (hI : is_ideal I) (hJ : is_ideal J) : is_ideal (I ∩ J) :=
 begin
   split, {
+    split, {
+      from hI.contains_zero,
+    }, {
+      from hJ.contains_zero,
+    },
+  }, {
     intros a b,
     assume haIJ hbIJ,
     split,
       apply hI.add_closure _ _ haIJ.left hbIJ.left,
     apply hJ.add_closure _ _ haIJ.right hbIJ.right,
-  }, {
-    intro a,
-    assume haIJ,
-    split,
-      apply hI.neg_closure _ haIJ.left,
-    apply hJ.neg_closure _ haIJ.right,
   }, {
     intros r x,
     assume h,
@@ -67,19 +75,14 @@ end
 theorem kernel_ideal : is_ideal (ker f) :=
 begin
   split, {
+    from hf.respects_zero,
+  }, {
     intros a b,
     assume ha hb,
     change f (a + b) = 0,
     change f a = 0 at ha,
     change f b = 0 at hb,
     rw [hf.respects_add, ha, hb, add_zero],
-  }, {
-    intro a,
-    assume ha,
-    change f (-a) = 0,
-    change f a = 0 at ha,
-    symmetry,
-    rw [hf.respects_neg, ←neg_unique, ha, zero_add],
   }, {
     intros r x,
     assume hx,
