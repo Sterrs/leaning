@@ -1,4 +1,5 @@
 import .topological_space
+import .continuity
 
 namespace hidden
 
@@ -233,6 +234,13 @@ private lemma raised_subset
 (hxV: (⟨x, hYx⟩: subtype Y) ∈ mylist.reduce_d myset.union ∅ 𝒱):
 x ∈ mylist.reduce_d myset.union ∅ 𝒱' :=
 begin
+  rw list_union,
+  rw list_union at hxV,
+  cases hxV with V hV,
+  cases hV with hV hxV,
+  have hWV' := hWV,
+  rw mylist.for_all_iff_forall at hWV,
+  cases (hWV V hV).right with V' hV',
   sorry,
 end
 
@@ -766,9 +774,51 @@ end
 
 theorem image_compact
 (X: topological_space α) (Y: topological_space β)
-(hXcpct: is_compact X) (f: α → β):
-is_compact (subspace_topology Y (myset.image f myset.univ)) :=
+(hXcpct: is_compact X)
+(f: α → β) (hcf: is_continuous X Y f) (hsurj: function.surjective f):
+is_compact Y :=
 begin
+  intro 𝒰,
+  assume hUcov,
+  have step1 := hXcpct (myset.image (myset.inverse_image f) 𝒰),
+  have step2: X.is_open_cover (myset.image (myset.inverse_image f) 𝒰), {
+    split, {
+      intro V,
+      assume hV,
+      cases hV with V' hV',
+      rw ←hV'.right,
+      apply hcf,
+      apply hUcov.left,
+      from hV'.left,
+    }, {
+      apply funext,
+      intro x,
+      apply propext,
+      split; assume hx, {
+        trivial,
+      }, {
+        have: f x ∈ ⋃₀ 𝒰, {
+          rw hUcov.right,
+          trivial,
+        },
+        cases this with U hU,
+        cases hU with hU hfxU,
+        existsi myset.inverse_image f U,
+        split, {
+          existsi U,
+          split, {
+            from hU,
+          }, {
+            refl,
+          },
+        }, {
+          from hfxU,
+        },
+      },
+    },
+  },
+  have step3 := step1 step2,
+  cases step3 with 𝒱' hV',
   sorry,
 end
 
