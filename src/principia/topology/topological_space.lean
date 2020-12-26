@@ -1038,5 +1038,55 @@ begin
   },
 end
 
+theorem hausdorff_subspace
+(X: topological_space α)
+(h_ausdorff: is_hausdorff X)
+(Y: myset α):
+is_hausdorff (X.subspace_topology Y) :=
+begin
+  intros x y,
+  assume hxney,
+  have := h_ausdorff x.val y.val
+    begin
+      assume hxy,
+      apply hxney,
+      apply subtype.eq,
+      assumption,
+    end,
+  cases this with U hUV,
+  cases hUV with V hUV,
+  existsi Y.subtype_restriction U,
+  existsi Y.subtype_restriction V,
+  split, {
+    existsi U,
+    split, {
+      from hUV.left,
+    }, {
+      refl,
+    },
+  }, split, {
+    existsi V,
+    split, {
+      from hUV.right.left,
+    }, {
+      refl,
+    },
+  }, split, {
+    from hUV.right.right.left,
+  }, split, {
+    from hUV.right.right.right.left,
+  }, {
+    rw ←myset.empty_iff_eq_empty,
+    intro z,
+    assume hz,
+    apply myset.empty_iff_eq_empty.mpr hUV.right.right.right.right z.val,
+    split, {
+      from hz.left,
+    }, {
+      from hz.right,
+    },
+  },
+end
+
 end topological_space
 end hidden
