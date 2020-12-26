@@ -13,6 +13,8 @@ intro ::
 
 variables {α : Type} [myring α] (I J : myset α)
 
+namespace is_ideal
+
 theorem neg_closure {I: myset α} (hI: is_ideal I) (a: α) (ha: a ∈ I):
 -a ∈ I :=
 begin
@@ -20,6 +22,8 @@ begin
   rw ←neg_eq_mul_neg_one at this,
   from this,
 end
+
+end is_ideal
 
 theorem ideal_intersection (hI : is_ideal I) (hJ : is_ideal J) : is_ideal (I ∩ J) :=
 begin

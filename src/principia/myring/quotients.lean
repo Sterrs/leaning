@@ -24,7 +24,7 @@ setoid.mk (λ a b, a - b ∈ I)
     }, split, {
       intros a b,
       assume habI,
-      have := neg_closure hIi _ habI,
+      have := hIi.neg_closure _ habI,
       change -(a + -b) ∈ I at this,
       rw neg_distr at this,
       rw add_comm at this,
@@ -107,7 +107,7 @@ q_ideal hIi → q_ideal hIi :=
     assume haa',
     change a - a' ∈ I at haa',
     apply quotient.sound,
-    have := neg_closure hIi _ haa',
+    have := hIi.neg_closure _ haa',
     change -(a + -a') ∈ I at this,
     rw neg_distr at this,
     from this,
