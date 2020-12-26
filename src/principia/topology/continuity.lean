@@ -123,7 +123,7 @@ theorem continuous_to_image
 (X : topological_space α) (Y : topological_space β)
 (f: α → β):
 is_continuous X Y f →
-is_continuous X (subspace_topology Y (myset.image f myset.univ))
+is_continuous X (subspace_topology Y (myset.imageu f))
   (myset.function_restrict_to_image f) :=
 begin
   assume hfc,
@@ -178,6 +178,12 @@ begin
   from @composition_continuous _ _ _ (subspace_topology X X') X Y _ f
     (@inclusion_continuous _ X X') hfc,
 end
+
+theorem restrict_set_to_image_continuous
+(X : topological_space α) (Y : topological_space β)
+(f: α → β) (hfc: is_continuous X Y f) (U: myset α):
+(X.subspace_topology U).is_continuous (Y.subspace_topology (myset.image f U))
+    (myset.function_restrict_to_set_image f U)
 
 theorem base_continuous
 [X: topological_space α]
@@ -710,7 +716,7 @@ begin
 end
 
 theorem from_indiscrete_open_to_image (Y: topological_space β) (f: α → β):
-is_open_map (indiscrete_topology α) (subspace_topology Y (myset.image f myset.univ))
+is_open_map (indiscrete_topology α) (subspace_topology Y (myset.imageu f))
   (myset.function_restrict_to_image f) :=
 begin
   intro U,

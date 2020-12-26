@@ -146,6 +146,9 @@ end
 
 def image {α β : Type} (f : α → β) (U : myset α) := {b | ∃ a, a ∈ U ∧ f a = b}
 
+-- comes up often in algebra & topology etc
+def imageu {α β: Type} (f: α → β) := {b: β | ∃ a: α, f a = b}
+
 def inverse_image {α β : Type} (f : α → β) (V : myset β) := {a | f a ∈ V}
 
 theorem inverse_image_of_image
@@ -700,8 +703,29 @@ def subtype_unrestriction (Y: myset α) (U: myset (subtype Y)): myset α :=
 {x | ∃ hxS: x ∈ Y, (⟨x, hxS⟩: subtype Y) ∈ U}
 
 def function_restrict_to_image
-{α β: Type} (f: α → β): α → subtype (myset.image f myset.univ)
-:= λ x, ⟨f x, ⟨x, ⟨true.intro, rfl⟩⟩⟩
+{α β: Type} (f: α → β): α → subtype (myset.imageu f)
+:= λ x, ⟨f x, ⟨x, rfl⟩⟩
+
+def function_restrict_to_set_image
+{α β: Type} (f: α → β) (U: myset α): (subtype U) → subtype (myset.image f U)
+:= λ x, ⟨f x, ⟨x.val, ⟨x.property, rfl⟩⟩⟩
+
+theorem restrict_to_set_image_composition
+{α β: Type} (f: α → β) (U: myset α):
+function_restrict_to_set_image f U =
+(λ y: subtype (imageu (λ x: subtype U, f x.val)), ⟨y.val,
+  begin
+    cases y.property with u hu,
+    rw ←hu,
+    existsi u.val,
+    split, {
+      from u.property,
+    }, {
+      refl,
+    },
+  end⟩) ∘
+function_restrict_to_image (λ x: subtype U, f x.val) :=
+rfl
 
 theorem to_image_surjective
 {α β: Type} (f: α → β):
@@ -720,14 +744,14 @@ begin
       trivial,
     }, {
       apply subtype.eq,
-      rw ←hy.right,
+      rw ←hy,
       refl,
     },
   },
 end
 
 theorem nonempty_inverse_image_surjective
-{α β: Type} (f: α → β) (U: myset (subtype (image f univ))):
+{α β: Type} (f: α → β) (U: myset (subtype (imageu f))):
 U ≠ ∅ →
 inverse_image (function_restrict_to_image f) U ≠ ∅ :=
 begin
@@ -741,9 +765,9 @@ begin
   cases x.property with y hy,
   apply hpreUe y,
   unfold inverse_image,
-  have: x = ⟨f y, begin rw hy.right, from x.property end⟩, {
+  have: x = ⟨f y, begin rw hy, from x.property end⟩, {
     apply subtype.eq,
-    from hy.right.symm,
+    from hy.symm,
   },
   rw this at hx, clear this,
   from hx,

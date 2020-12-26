@@ -772,7 +772,7 @@ begin
   },
 end
 
-theorem image_compact
+theorem surjective_image_compact
 (X: topological_space α) (Y: topological_space β)
 (hXcpct: is_compact X)
 (f: α → β) (hcf: is_continuous X Y f) (hsurj: function.surjective f):
@@ -820,6 +820,112 @@ begin
   have step3 := step1 step2,
   cases step3 with 𝒱' hV',
   sorry,
+end
+
+theorem image_compact
+(X: topological_space α) (Y: topological_space β)
+(hXcpct: is_compact X)
+(f: α → β) (hcf: is_continuous X Y f):
+is_compact (Y.subspace_topology (myset.imageu f)) :=
+begin
+  apply surjective_image_compact X _ hXcpct (myset.function_restrict_to_image f), {
+    apply continuous_to_image,
+    from hcf,
+  }, {
+    intro y,
+    cases y.property with x hx,
+    existsi x,
+    apply subtype.eq,
+    from hx,
+  },
+end
+
+-- could do with some theorems about preimages and images
+-- of inverses
+theorem topological_inverse_function_theorem
+(X: topological_space α) (Y: topological_space β)
+(hXcpct: is_compact X) (h_ausdorff: is_hausdorff Y)
+(f: α → β) (g: β → α) (hcf: is_continuous X Y f)
+(right_inv: f ∘ g = id)
+(left_inv: g ∘ f = id):
+is_continuous Y X g :=
+begin
+  rw continuous_iff_closed_preimage,
+  intro U,
+  assume hUo,
+  have: myset.inverse_image g U = myset.image f U, {
+    apply funext,
+    intro x,
+    apply propext,
+    split; assume hx, {
+      existsi g x,
+      split, {
+        from hx,
+      }, {
+        change (f ∘ g) x = x,
+        rw right_inv,
+        refl,
+      },
+    }, {
+      cases hx with y hy,
+      have: g x = y, {
+        rw ←hy.right,
+        change (g ∘ f) y = y,
+        rw left_inv,
+        refl,
+      },
+      rw ←this at hy,
+      from hy.left,
+    },
+  },
+  rw this, clear this,
+  apply compact_in_hausdorff, {
+    apply surjective_image_compact
+        (X.subspace_topology U)
+        (Y.subspace_topology (myset.image f U)) _
+        (myset.function_restrict_to_set_image f U), {
+      rw myset.restrict_to_set_image_composition,
+      apply composition_continuous
+          (X.subspace_topology U)
+          (Y.subspace_topology (myset.imageu (λ x: subtype U, f x.val)))
+          (Y.subspace_topology (myset.image f U)), {
+        apply continuous_to_image,
+        apply composition_continuous
+            _ _ _ _ _ (inclusion_continuous _ _),
+        from hcf,
+      }, {
+        intro U,
+        assume hUo,
+        cases hUo with V' hV',
+        existsi V',
+        split, {
+          from hV'.left,
+        }, {
+          rw hV'.right,
+          refl, -- thank the lord
+        },
+      },
+    }, {
+      intro y,
+      cases y.property with y' hy',
+      existsi (⟨y', hy'.left⟩: subtype U),
+      apply subtype.eq,
+      -- rw won't play ball >:(
+      transitivity (f y'), {
+        refl,
+      }, {
+        from hy'.right,
+      },
+    }, {
+      apply closed_in_compact, {
+        from hXcpct,
+      }, {
+        from hUo,
+      },
+    },
+  }, {
+    from h_ausdorff,
+  },
 end
 
 end topological_space

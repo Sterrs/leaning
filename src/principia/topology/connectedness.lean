@@ -63,10 +63,10 @@ begin
   split; assumption,
 end
 
-theorem image_connected
+theorem surjective_image_connected
 (X: topological_space α) (Y: topological_space β)
-(f: α → β) (hfc: is_continuous X Y f):
-is_connected X → is_connected (subspace_topology Y (myset.image f myset.univ)) :=
+(f: α → β) (hfc: is_continuous X Y f) (hsurj: function.surjective f):
+is_connected X → is_connected Y :=
 begin
   assume hXc,
   assume himdc,
@@ -77,25 +77,33 @@ begin
   cases himdc with hUo himdc,
   cases himdc with hVo himdc,
   cases himdc with hUVdj hUVcov,
-  have hpreUo := @continuous_to_image _ _ X Y f hfc U hUo,
-  have hpreVo := @continuous_to_image _ _ X Y f hfc V hVo,
+  have hpreUo := hfc U hUo,
+  have hpreVo := hfc V hVo,
   apply hXc,
-  existsi (myset.inverse_image (myset.function_restrict_to_image f) U),
-  existsi (myset.inverse_image (myset.function_restrict_to_image f) V),
+  existsi (myset.inverse_image f U),
+  existsi (myset.inverse_image f V),
   split, {
     assume hpreUe,
-    have := myset.nonempty_inverse_image_surjective f U hUne,
-    contradiction,
+    rw ←myset.exists_iff_neq_empty at hUne,
+    rw ←myset.empty_iff_eq_empty at hpreUe,
+    cases hUne with y hy,
+    cases hsurj y with x hx,
+    apply hpreUe x,
+    rw ←hx at hy,
+    from hy,
   }, split, {
     assume hpreVe,
-    have := myset.nonempty_inverse_image_surjective f V hVne,
-    contradiction,
+    rw ←myset.exists_iff_neq_empty at hVne,
+    rw ←myset.empty_iff_eq_empty at hpreVe,
+    cases hVne with y hy,
+    cases hsurj y with x hx,
+    apply hpreVe x,
+    rw ←hx at hy,
+    from hy,
   }, split, {
-    have := @continuous_to_image _ _ X Y f hfc U hUo,
-    assumption,
+    from hfc U hUo,
   }, split, {
-    have := @continuous_to_image _ _ X Y f hfc V hVo,
-    assumption,
+    from hfc V hVo,
   }, split, {
     rw ←myset.inverse_image_intersection,
     rw hUVdj,
@@ -108,6 +116,26 @@ begin
     rw myset.to_image_surjective at this,
     from this.symm,
   },
+end
+
+theorem image_connected
+(X: topological_space α) (Y: topological_space β)
+(f: α → β) (hfc: is_continuous X Y f)
+(hconn: is_connected X):
+is_connected (Y.subspace_topology (myset.imageu f)) :=
+begin
+  apply surjective_image_connected X _ (myset.function_restrict_to_image f), {
+    apply continuous_to_image,
+    from hfc,
+  }, {
+    intro y,
+    cases y.property with x hx,
+    existsi x,
+    apply subtype.eq,
+    from hx,
+  }, {
+    from hconn,
+  }
 end
 
 theorem empty_connected
