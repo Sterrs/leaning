@@ -84,15 +84,7 @@ instance add_is_comm: is_commutative mynat add :=
 @[simp] theorem add_one_succ: m + 1 = succ m := rfl
 
 theorem succ_inj: succ m = succ n → m = n :=
-begin
-  assume hmn,
-  -- jeez this is some magic inductive type stuff
-  -- it seems that given a hypothesis of the form
-  -- cons₁ x = cons₂ y,
-  -- cases can use injectivity to check possible values of x, y
-  cases hmn,
-  refl,
-end
+succ.inj
 
 @[simp]
 theorem one_eq_succ_zero: succ 0 = 1 := rfl

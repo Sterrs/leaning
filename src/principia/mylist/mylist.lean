@@ -31,18 +31,10 @@ notation h :: t := cons h t
 def singleton (x: T) := x :: (empty: mylist T)
 
 theorem cons_injective_1: x :: xs = y :: ys → x = y :=
-begin
-  assume h,
-  cases h,
-  refl,
-end
+λ h, (cons.inj h).left
 
 theorem cons_injective_2: x :: xs = y :: ys → xs = ys :=
-begin
-  assume h,
-  cases h,
-  refl,
-end
+λ h, (cons.inj h).right
 
 -- we don't define append explicitly, since lists are define by
 -- recursion on the tail. Also note that concat is defined by
