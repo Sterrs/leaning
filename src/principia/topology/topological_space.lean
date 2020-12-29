@@ -643,17 +643,10 @@ begin
   },
 end
 
-theorem topological_space_eq
-(X: topological_space α) (Y: topological_space α):
-X.is_open = Y.is_open → X = Y :=
-begin
-  assume hXYt,
-  cases X,
-  cases Y,
-  dsimp at hXYt,
-  simp,
-  assumption,
-end
+theorem topological_space_eq:
+∀ (X: topological_space α) (Y: topological_space α),
+X.is_open = Y.is_open → X = Y
+| ⟨Xo, _, _, _, _⟩ ⟨Yo, _, _, _, _⟩ rfl := rfl
 
 theorem closure_intersects_all_open
 (X: topological_space α) (A: myset α):
