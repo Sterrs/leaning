@@ -87,6 +87,18 @@ More general tips/useful things not to forget:
   commutativity and associativity of operations.
 - If h is an equality, try using `subst h` to rewrite everything using
   it and then delete it.
+- If you are trying to prove a goal of the form `f a = f b` and you know you can
+  prove `a = b`, use `apply congr_arg,`. If it somehow doesn't get the right
+  `f`, you can explicitly supply a function to `congr_arg`.
+
+  (If you are trying to prove `f a = g b` and you can prove both
+  `f = g` and `a = b` then use `apply congr,`. So `apply congr_arg,` is the same
+  as `apply congr rfl,`).
+- If you want to force lean to write the goal as a definitional equivalent, you
+  can use the tactic `change <new equivalent goal>,`. This can be useful if `rw`
+  is being boneheaded.
+- If you are doing `rw h at h1 h2 ...,`, you can add "`⊢`" to the list to also
+  target the current goal.
 
 ## Implicit vs Explicit Arguments
 

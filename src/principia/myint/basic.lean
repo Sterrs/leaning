@@ -33,19 +33,25 @@ def neg: myint → myint :=
 quotient.lift (λ n, ⟦-n⟧) int_pair.neg_well_defined
 
 instance: has_neg myint := ⟨neg⟩
+instance has_neg2: has_neg (quotient int_pair.int_pair.setoid) := ⟨neg⟩
 
-private theorem neg_eq_cls {x: int_pair.int_pair} {n: myint}:
-n = ⟦x⟧ → -n = ⟦-x⟧ :=
-λ hnx, by rw hnx; refl
+private theorem neg_eq_cls {x: int_pair.int_pair}:
+-⟦x⟧ = ⟦-x⟧ := rfl
 
 def add: myint → myint → myint :=
 quotient.lift₂ (λ n m, ⟦n + m⟧) int_pair.add_well_defined
 
 instance: has_add myint := ⟨add⟩
+-- so that lean knows what ⟦x⟧ + ⟦y⟧ is
+instance has_add2: has_add (quotient int_pair.int_pair.setoid) := ⟨add⟩
 
-private theorem add_eq_cls {x y: int_pair.int_pair} {n m: myint}:
-n = ⟦x⟧ → m = ⟦y⟧ → n + m = ⟦x + y⟧ :=
-λ hnx hmy, by rw [hnx, hmy]; refl
+-- this theorem is a bit of an antique. Really
+-- it and theorems like it can just be replaced
+-- with invocations of `change`, but it can be
+-- nice (and stabler) sometimes to not have to write
+-- out the entire target all the time
+private theorem add_eq_cls {x y: int_pair.int_pair}:
+⟦x⟧ + ⟦y⟧ = ⟦x + y⟧ := rfl
 
 def sub (n m: myint): myint := n + -m
 
@@ -57,10 +63,10 @@ def mul: myint → myint → myint :=
 quotient.lift₂ (λ n m, ⟦n * m⟧) int_pair.mul_well_defined
 
 instance: has_mul myint := ⟨mul⟩
+instance has_mul2: has_mul (quotient int_pair.int_pair.setoid) := ⟨mul⟩
 
-private theorem mul_eq_cls {x y: int_pair.int_pair} {n m: myint}:
-n = ⟦x⟧ → m = ⟦y⟧ → n * m = ⟦x * y⟧ :=
-λ hnx hmy, by rw [hnx, hmy]; refl
+private theorem mul_eq_cls {x y: int_pair.int_pair}:
+⟦x⟧ * ⟦y⟧ = ⟦x * y⟧ := rfl
 
 theorem nat_nat_mul {x y: mynat}:
 (↑x: myint) * ↑y = ↑(x * y) :=
@@ -119,8 +125,8 @@ theorem add_one_succ: (↑a: myint) + 1 = ↑(succ a) := rfl
 theorem coe_coe_mul : (↑a : myint) * ↑b = ↑(a * b) :=
 begin
   repeat { rw coe_nat_def, },
-  rw mul_eq_cls rfl rfl,
-  apply congr rfl,
+  rw mul_eq_cls,
+  apply congr_arg,
   rw int_pair.eq_iff_split,
   simp, -- awsome :o
 end
@@ -148,7 +154,7 @@ m ≠ 0 → m * n = 0 → n = 0 :=
 begin
   cases quotient.exists_rep m with a ha, subst ha,
   cases quotient.exists_rep n with b hb, subst hb,
-  repeat {rw mul_eq_cls rfl rfl <|> rw int_zero},
+  repeat {rw mul_eq_cls <|> rw int_zero},
   assume haneq0 hab0,
   rw int_pair.sound_exact_iff at hab0,
   rw int_pair.setoid_equiv at hab0,
@@ -230,8 +236,7 @@ instance: myring myint := ⟨
     cases quotient.exists_rep m with a ha, subst ha,
     cases quotient.exists_rep n with b hb, subst hb,
     cases quotient.exists_rep k with c hc, subst hc,
-    repeat {rw add_eq_cls rfl rfl},
-    apply congr rfl,
+    apply congr_arg quotient.mk,
     rw int_pair.eq_iff_split,
     simp,
     split; ac_refl,
@@ -240,8 +245,7 @@ instance: myring myint := ⟨
   begin
     cases quotient.exists_rep m with a ha, subst ha,
     rw int_zero,
-    rw add_eq_cls rfl rfl,
-    apply congr rfl,
+    apply congr_arg quotient.mk,
     rw int_pair.eq_iff_split,
     simp,
   end,
@@ -249,8 +253,8 @@ instance: myring myint := ⟨
   begin
     cases quotient.exists_rep m with a ha, subst ha,
     rw int_zero,
-    rw neg_eq_cls rfl,
-    rw add_eq_cls rfl rfl,
+    rw neg_eq_cls,
+    rw add_eq_cls,
     apply quotient.sound,
     rw int_pair.setoid_equiv,
     simp,
@@ -261,17 +265,16 @@ instance: myring myint := ⟨
     cases quotient.exists_rep m with a ha, subst ha,
     cases quotient.exists_rep n with b hb, subst hb,
     cases quotient.exists_rep k with c hc, subst hc,
-    repeat {rw mul_eq_cls rfl rfl},
-    apply congr rfl,
+    apply congr_arg quotient.mk,
     rw int_pair.eq_iff_split,
     simp,
     split, { -- ac_refl takes too long without a little kick-start
       repeat {rw mynat.add_assoc <|> rw mynat.mul_assoc},
-      apply congr rfl,
+      apply congr_arg,
       ac_refl,
     }, {
       repeat {rw mynat.add_assoc <|> rw mynat.mul_assoc},
-      apply congr rfl,
+      apply congr_arg,
       ac_refl,
     },
   end,
@@ -279,8 +282,7 @@ instance: myring myint := ⟨
   begin
     cases quotient.exists_rep m with a ha, subst ha,
     cases quotient.exists_rep n with b hb, subst hb,
-    repeat {rw mul_eq_cls rfl rfl},
-    apply congr rfl,
+    apply congr_arg quotient.mk,
     rw int_pair.eq_iff_split,
     simp,
     split; ac_refl,
@@ -289,8 +291,7 @@ instance: myring myint := ⟨
   begin
     cases quotient.exists_rep m with a ha, subst ha,
     rw int_one,
-    repeat {rw mul_eq_cls rfl rfl},
-    apply congr rfl,
+    apply congr_arg quotient.mk,
     rw int_pair.eq_iff_split,
     simp,
   end,
@@ -299,8 +300,7 @@ instance: myring myint := ⟨
     cases quotient.exists_rep m with a ha, subst ha,
     cases quotient.exists_rep n with b hb, subst hb,
     cases quotient.exists_rep k with c hc, subst hc,
-    repeat {rw mul_eq_cls rfl rfl <|> rw add_eq_cls rfl rfl},
-    apply congr rfl,
+    apply congr_arg quotient.mk,
     rw int_pair.eq_iff_split,
     simp,
     split; ac_refl,

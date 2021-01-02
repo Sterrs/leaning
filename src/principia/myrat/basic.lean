@@ -30,10 +30,10 @@ def neg : myrat → myrat :=
 quotient.lift (λ x, ⟦-x⟧) frac.neg_well_defined
 
 instance: has_neg myrat := ⟨neg⟩
+instance has_neg2: has_neg (quotient frac.frac.setoid) := ⟨neg⟩
 
-theorem neg_eq_cls {x: frac} {a: myrat}:
-a = ⟦x⟧ → -a = ⟦-x⟧ :=
-λ hax, by rw hax; refl
+private theorem neg_eq_cls {x: frac}:
+-⟦x⟧ = ⟦-x⟧ := rfl
 
 private lemma one_pos: (0: myint) < 1 := nontrivial_zero_lt_one myint.nontrivial
 
@@ -74,10 +74,10 @@ def add : myrat → myrat → myrat :=
 quotient.lift₂ (λ x y, ⟦x + y⟧) frac.add_well_defined
 
 instance: has_add myrat := ⟨add⟩
+instance has_add2: has_add (quotient frac.frac.setoid) := ⟨add⟩
 
-theorem add_eq_cls {x y: frac} {a b: myrat}:
-a = ⟦x⟧ → b = ⟦y⟧ → a + b = ⟦x + y⟧ :=
-λ hax hay, by rw [hax, hay]; refl
+private theorem add_eq_cls {x y: frac}:
+⟦x⟧ + ⟦y⟧ = ⟦x + y⟧ := rfl
 
 theorem two_nzero: (2: myrat) ≠ 0 :=
 begin
@@ -91,10 +91,10 @@ def sub (x y : myrat) : myrat :=
 x + -y
 
 instance: has_sub myrat := ⟨sub⟩
+instance has_sub2: has_sub (quotient frac.frac.setoid) := ⟨sub⟩
 
-theorem sub_eq_cls {x y: frac} {a b: myrat}:
-a = ⟦x⟧ → b = ⟦y⟧ → a - b = ⟦x + -y⟧ :=
-λ hax hay, by rw [hax, hay]; refl
+private theorem sub_eq_cls {x y: frac}:
+⟦x⟧ - ⟦y⟧ = ⟦x + -y⟧ := rfl
 
 variables {x y z : myrat}
 variables {m n k : myint}
@@ -102,19 +102,17 @@ variables {m n k : myint}
 theorem add_coe: (↑m : myrat) + ↑n = ↑(m + n) :=
 begin
   repeat { rw coe_int, },
-  rw [add_eq_cls rfl rfl, ←frac.frac_add_add],
+  apply congr_arg quotient.mk,
+  rw ←frac.frac_add_add,
   dsimp [frac.add],
-  repeat {rw myint.mul_one},
-  rw frac.sound_exact_iff,
-  rw frac.setoid_equiv,
-  dsimp only [],
   repeat {rw mul_one},
+  refl,
 end
 
 theorem neg_coe: -(↑m : myrat) = ↑(-m) :=
 begin
   repeat { rw coe_int, },
-  rw [neg_eq_cls rfl, frac.frac_neg_neg],
+  rw [neg_eq_cls, frac.frac_neg_neg],
   dsimp [frac.neg],
   refl,
 end
@@ -123,11 +121,13 @@ def mul : myrat → myrat → myrat :=
 quotient.lift₂ (λ x y, ⟦x * y⟧) frac.mul_well_defined
 
 instance: has_mul myrat := ⟨mul⟩
+instance has_mul2: has_mul (quotient frac.frac.setoid) := ⟨mul⟩
 
 def inv : myrat → myrat :=
 quotient.lift (λ x, ⟦x⁻¹⟧) frac.inv_well_defined
 
 instance: has_inv myrat := ⟨inv⟩
+instance has_inv2: has_inv (quotient frac.frac.setoid) := ⟨inv⟩
 
 def div : myrat → myrat → myrat := λ x y, x * y⁻¹
 
@@ -137,28 +137,23 @@ theorem div_eq_mul_inv : x / y = x * y⁻¹ := rfl
 
 -- Multiplication
 
-theorem mul_eq_cls {x y : frac} {a b : myrat} :
-a = ⟦x⟧ → b = ⟦y⟧ → a * b = ⟦x * y⟧ :=
-λ hax hby, by rw [hax, hby]; refl
+private theorem mul_eq_cls {x y : frac}:
+⟦x⟧ * ⟦y⟧ = ⟦x * y⟧ := rfl
 
 -- Reciprocal "inv"
 
-theorem inv_eq_cls {a : myrat} {x : frac}: a = ⟦x⟧ → a⁻¹ = ⟦x⁻¹⟧ :=
-λ h, by rw h; refl
+private theorem inv_eq_cls {x : frac}:
+⟦x⟧⁻¹ = ⟦x⁻¹⟧ := rfl
 
 @[simp]
 theorem zero_inv : 0⁻¹ = (0 : myrat) :=
-begin
-  rw [rat_zero, @inv_eq_cls _ ⟨0, 1, one_pos⟩ rfl],
-  rw [class_equiv, frac.inv_zero],
-  refl,
-end
+rfl
 
 theorem inv_self_mul : x ≠ 0 → x * x⁻¹ = 1 :=
 begin
   cases quotient.exists_rep x with a ha, subst ha,
   assume hx,
-  rw [inv_eq_cls rfl, mul_eq_cls rfl rfl, rat_one],
+  rw [inv_eq_cls, mul_eq_cls, rat_one],
   rw class_equiv,
   dsimp only [],
   rw [frac.mul_num, frac.mul_denom],
@@ -179,8 +174,7 @@ instance: myring myrat := ⟨
     cases quotient.exists_rep x with a ha, subst ha,
     cases quotient.exists_rep y with b hb, subst hb,
     cases quotient.exists_rep z with c hc, subst hc,
-    repeat {rw add_eq_cls rfl rfl},
-    apply congr rfl,
+    apply congr_arg quotient.mk,
     rw frac.num_and_denom_eq,
     repeat { rw frac.add_num <|> rw frac.add_denom <|> rw myring.add_mul },
     split; ac_refl,
@@ -188,7 +182,7 @@ instance: myring myrat := ⟨
   λ x: myrat,
   begin
     cases quotient.exists_rep x with a ha, subst ha,
-    rw [rat_zero, add_eq_cls rfl rfl],
+    rw [rat_zero, add_eq_cls],
     rw frac.sound_exact_iff,
     rw frac.setoid_equiv,
     rw frac.add_denom,
@@ -201,8 +195,8 @@ instance: myring myrat := ⟨
   λ x: myrat,
   begin
     cases quotient.exists_rep x with a ha, subst ha,
-    rw neg_eq_cls rfl,
-    rw add_eq_cls rfl rfl,
+    rw neg_eq_cls,
+    rw add_eq_cls,
     apply quotient.sound,
     rw frac.setoid_equiv,
     dsimp only [],
@@ -220,7 +214,7 @@ instance: myring myrat := ⟨
     cases quotient.exists_rep y with b hb,
     cases quotient.exists_rep z with c hc,
     rw [←ha, ←hb, ←hc],
-    repeat { rw mul_eq_cls rfl rfl, },
+    repeat {rw mul_eq_cls,},
     rw class_equiv,
     repeat { rw frac.mul_num <|> rw frac.mul_denom, },
     ac_refl,
@@ -230,7 +224,7 @@ instance: myring myrat := ⟨
     cases quotient.exists_rep x with a ha,
     cases quotient.exists_rep y with b hb,
     rw [←ha, ←hb],
-    repeat { rw mul_eq_cls rfl rfl, },
+    repeat {rw mul_eq_cls,},
     rw class_equiv,
     repeat { rw frac.mul_num <|> rw frac.mul_denom, },
     ac_refl,
@@ -239,7 +233,7 @@ instance: myring myrat := ⟨
   begin
     cases quotient.exists_rep x with a ha,
     rw [←ha, rat_one],
-    rw mul_eq_cls rfl rfl,
+    rw mul_eq_cls,
     rw class_equiv,
     rw [frac.mul_num, frac.mul_denom],
     dsimp only [],
@@ -250,7 +244,7 @@ instance: myring myrat := ⟨
     cases quotient.exists_rep x with a ha, subst ha,
     cases quotient.exists_rep y with b hb, subst hb,
     cases quotient.exists_rep z with c hc, subst hc,
-    repeat { rw mul_eq_cls rfl rfl <|> rw add_eq_cls rfl rfl, },
+    repeat { rw mul_eq_cls <|> rw add_eq_cls, },
     rw class_equiv,
     repeat { rw frac.mul_num <|> rw frac.mul_denom <|> rw frac.add_num <|> rw frac.add_denom, },
     -- ac_refl can't expand brackets
