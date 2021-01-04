@@ -139,6 +139,16 @@ instance quotient_ring_has_neg
 has_neg (q_ideal hIi) :=
 ⟨quotient_ring_neg hIi⟩
 
+-- notational convenience
+-- could introduce proper symbolic notation?
+def coset
+{I: myset α} (hIi: is_ideal I): α → q_ideal hIi :=
+(@quotient.mk α (setoid_from_ideal hIi))
+
+def coset_exists_rep
+{I: myset α} (hIi: is_ideal I) :=
+@quotient.exists_rep _ (setoid_from_ideal hIi)
+
 -- can't quite figure out how to make congr work here without
 -- spelling out what needs to happen with change anyway.
 -- nor can I figure out how to make lean infer the setoid we're
@@ -149,60 +159,46 @@ myring (q_ideal hIi) :=
 begin
   split, {
     intros a b c,
-    cases @quotient.exists_rep _ (setoid_from_ideal hIi) a with x hx, subst hx,
-    cases @quotient.exists_rep _ (setoid_from_ideal hIi) b with y hy, subst hy,
-    cases @quotient.exists_rep _ (setoid_from_ideal hIi) c with z hz, subst hz,
-    change
-        @quotient.mk α (setoid_from_ideal hIi) (x + y + z) =
-        @quotient.mk α (setoid_from_ideal hIi) (x + (y + z)),
-    rw add_assoc,
+    cases coset_exists_rep hIi a with x hx, subst hx,
+    cases coset_exists_rep hIi b with y hy, subst hy,
+    cases coset_exists_rep hIi c with z hz, subst hz,
+    apply congr_arg (coset hIi),
+    apply add_assoc,
   }, {
     intro a,
-    cases @quotient.exists_rep _ (setoid_from_ideal hIi) a with x hx, subst hx,
-    change
-        @quotient.mk α (setoid_from_ideal hIi) (x + 0) =
-        @quotient.mk α (setoid_from_ideal hIi) x,
-    rw add_zero,
+    cases coset_exists_rep hIi a with x hx, subst hx,
+    apply congr_arg (coset hIi),
+    apply add_zero,
   }, {
     intro a,
-    cases @quotient.exists_rep _ (setoid_from_ideal hIi) a with x hx, subst hx,
-    change
-        @quotient.mk α (setoid_from_ideal hIi) (x + -x) =
-        @quotient.mk α (setoid_from_ideal hIi) 0,
-    rw add_neg,
+    cases coset_exists_rep hIi a with x hx, subst hx,
+    apply congr_arg (coset hIi),
+    apply add_neg,
   }, {
     intros a b c,
-    cases @quotient.exists_rep _ (setoid_from_ideal hIi) a with x hx, subst hx,
-    cases @quotient.exists_rep _ (setoid_from_ideal hIi) b with y hy, subst hy,
-    cases @quotient.exists_rep _ (setoid_from_ideal hIi) c with z hz, subst hz,
-    change
-        @quotient.mk α (setoid_from_ideal hIi) (x * y * z) =
-        @quotient.mk α (setoid_from_ideal hIi) (x * (y * z)),
-    rw mul_assoc,
+    cases coset_exists_rep hIi a with x hx, subst hx,
+    cases coset_exists_rep hIi b with y hy, subst hy,
+    cases coset_exists_rep hIi c with z hz, subst hz,
+    apply congr_arg (coset hIi),
+    apply mul_assoc,
   }, {
     intros a b,
-    cases @quotient.exists_rep _ (setoid_from_ideal hIi) a with x hx, subst hx,
-    cases @quotient.exists_rep _ (setoid_from_ideal hIi) b with y hy, subst hy,
-    change
-        @quotient.mk α (setoid_from_ideal hIi) (x * y) =
-        @quotient.mk α (setoid_from_ideal hIi) (y * x),
-    rw mul_comm,
+    cases coset_exists_rep hIi a with x hx, subst hx,
+    cases coset_exists_rep hIi b with y hy, subst hy,
+    apply congr_arg (coset hIi),
+    apply mul_comm,
   }, {
     intro a,
-    cases @quotient.exists_rep _ (setoid_from_ideal hIi) a with x hx, subst hx,
-    change
-        @quotient.mk α (setoid_from_ideal hIi) (x * 1) =
-        @quotient.mk α (setoid_from_ideal hIi) x,
-    rw mul_one,
+    cases coset_exists_rep hIi a with x hx, subst hx,
+    apply congr_arg (coset hIi),
+    apply mul_one,
   }, {
     intros a b c,
-    cases @quotient.exists_rep _ (setoid_from_ideal hIi) a with x hx, subst hx,
-    cases @quotient.exists_rep _ (setoid_from_ideal hIi) b with y hy, subst hy,
-    cases @quotient.exists_rep _ (setoid_from_ideal hIi) c with z hz, subst hz,
-    change
-        @quotient.mk α (setoid_from_ideal hIi) (x * (y + z)) =
-        @quotient.mk α (setoid_from_ideal hIi) (x * y + x * z),
-    rw mul_add,
+    cases coset_exists_rep hIi a with x hx, subst hx,
+    cases coset_exists_rep hIi b with y hy, subst hy,
+    cases coset_exists_rep hIi c with z hz, subst hz,
+    apply congr_arg (coset hIi),
+    apply mul_add,
   },
 end
 
