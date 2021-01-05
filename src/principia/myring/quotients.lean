@@ -46,12 +46,22 @@ setoid.mk (λ a b, a - b ∈ I)
 def q_ideal {I: myset α} (hIi: is_ideal I) :=
 quotient (setoid_from_ideal hIi)
 
+-- notational convenience
+-- could introduce proper symbolic notation?
+def coset
+{I: myset α} (hIi: is_ideal I): α → q_ideal hIi :=
+(@quotient.mk α (setoid_from_ideal hIi))
+
+def coset_exists_rep
+{I: myset α} (hIi: is_ideal I) :=
+@quotient.exists_rep _ (setoid_from_ideal hIi)
+
 private def quotient_ring_add
 {I: myset α} (hIi: is_ideal I):
 q_ideal hIi → q_ideal hIi → q_ideal hIi :=
 @quotient.lift₂
-  _ _ (q_ideal hIi) (setoid_from_ideal hIi) (setoid_from_ideal hIi)
-  (λ a b, @quotient.mk α (setoid_from_ideal hIi) (a + b))
+  _ _ _ (setoid_from_ideal hIi) (setoid_from_ideal hIi)
+  (λ a b, coset hIi (a + b))
   begin
     intros a b a' b',
     assume haa' hbb',
@@ -73,8 +83,8 @@ private def quotient_ring_mul
 {I: myset α} (hIi: is_ideal I):
 q_ideal hIi → q_ideal hIi → q_ideal hIi :=
 @quotient.lift₂
-  _ _ (q_ideal hIi) (setoid_from_ideal hIi) (setoid_from_ideal hIi)
-  (λ a b, @quotient.mk α (setoid_from_ideal hIi) (a * b))
+  _ _ _ (setoid_from_ideal hIi) (setoid_from_ideal hIi)
+  (λ a b, coset hIi (a * b))
   begin
     intros a b a' b',
     assume haa' hbb',
@@ -100,8 +110,8 @@ private def quotient_ring_neg
 {I: myset α} (hIi: is_ideal I):
 q_ideal hIi → q_ideal hIi :=
 @quotient.lift
-  _ (q_ideal hIi) (setoid_from_ideal hIi)
-  (λ a, @quotient.mk α (setoid_from_ideal hIi) (-a))
+  _ _ (setoid_from_ideal hIi)
+  (λ a, coset hIi (-a))
   begin
     intros a a',
     assume haa',
@@ -139,20 +149,6 @@ instance quotient_ring_has_neg
 has_neg (q_ideal hIi) :=
 ⟨quotient_ring_neg hIi⟩
 
--- notational convenience
--- could introduce proper symbolic notation?
-def coset
-{I: myset α} (hIi: is_ideal I): α → q_ideal hIi :=
-(@quotient.mk α (setoid_from_ideal hIi))
-
-def coset_exists_rep
-{I: myset α} (hIi: is_ideal I) :=
-@quotient.exists_rep _ (setoid_from_ideal hIi)
-
--- can't quite figure out how to make congr work here without
--- spelling out what needs to happen with change anyway.
--- nor can I figure out how to make lean infer the setoid we're
--- working in
 instance quotient_ring_is_ring
 {I: myset α} [hIi: is_ideal I]:
 myring (q_ideal hIi) :=
