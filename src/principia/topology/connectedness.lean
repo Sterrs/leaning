@@ -138,24 +138,6 @@ begin
   }
 end
 
-theorem empty_connected
-(X: topological_space α):
-is_connected (subspace_topology X ∅) :=
-begin
-  assume hXdc,
-  cases hXdc with U hXdc,
-  cases hXdc with V hXdc,
-  apply hXdc.left,
-  apply funext,
-  intro x,
-  apply propext,
-  split; assume h, {
-    from x.property,
-  }, {
-    exfalso, from h,
-  },
-end
-
 theorem discrete_disconnected
 (x y: α) (hxy: x ≠ y):
 is_disconnected (discrete_topology α) :=
@@ -227,6 +209,22 @@ begin
       },
     },
   },
+end
+
+theorem empty_connected
+(X: topological_space α):
+is_connected (subspace_topology X ∅) :=
+begin
+  rw ←empty_indiscrete,
+  apply indiscrete_connected,
+end
+
+theorem singleton_connected
+(X: topological_space α) (x: α):
+is_connected (subspace_topology X (myset.singleton x)) :=
+begin
+  rw ←singleton_indiscrete,
+  apply indiscrete_connected,
 end
 
 -- maybe split up more to avoid cpu stress
@@ -381,13 +379,13 @@ private lemma transitivity' {α: Type} {x y z w: α}:
 y = z → x = y → z = w → x = w :=
 begin
   assume hyz hxy hzw,
-  rw hxy,
-  rw hyz,
-  rw hzw,
+  transitivity z,
+  transitivity y,
+  all_goals {assumption},
 end
 
 -- does this even end up being faster (:
-theorem union_of_overlapping_connected
+theorem s_union_of_overlapping_connected
 (X: topological_space α)
 (S: myset (myset α))
 (hconn: ∀ U: myset α, U ∈ S →
@@ -458,7 +456,8 @@ begin
         apply s_inclusion_continuous X V (⋃₀ S) this,
       }, {
         from hfc,
-      },    },
+      },
+    },
     have step2 := step1 h_elp_me ⟨y.val, hxV⟩ ⟨z, hz.right⟩,
     apply transitivity' step2, {
       congr,
@@ -468,6 +467,126 @@ begin
       from rfl,
     },
   },
+end
+
+theorem union_of_two_overlapping_connected
+(X: topological_space α)
+(U V: myset α)
+(hUcn: is_connected (X.subspace_topology U))
+(hVcn: is_connected (X.subspace_topology V))
+(hlap: U ∩ V ≠ ∅):
+is_connected (subspace_topology X (U ∪ V)) :=
+begin
+  rw myset.union_two_sUnion,
+  apply s_union_of_overlapping_connected, {
+    intro W,
+    assume hW,
+    cases hW; {rw hW, assumption},
+  }, {
+    intros W1 W2,
+    assume hW1 hW2,
+    rw ←myset.exists_iff_neq_empty at hlap ⊢,
+    cases hlap with x hx,
+    existsi x,
+    cases hx with hUx hVx,
+    split, {
+      cases hW1; {rw hW1, assumption},
+    }, {
+      cases hW2; {rw hW2, assumption},
+    },
+  },
+end
+
+private lemma line_connected
+(X: topological_space α) (Y: topological_space β)
+(hYcn: is_connected Y) (x: α):
+is_connected ((product_topology X Y).subspace_topology
+  {xy | xy.fst = x}) :=
+begin
+  have: {xy : α × β | xy.fst = x}
+      = myset.imageu (λ y: β, (x, y)), {
+    apply funext,
+    intro z,
+    apply propext,
+    split; assume hx, {
+      existsi z.snd,
+      cases z,
+      apply congr,
+      apply congr_arg prod.mk,
+      from hx.symm,
+      refl,
+    }, {
+      cases hx with y hy,
+      rw ←hy,
+      from rfl,
+    },
+  },
+  rw this, clear this,
+  apply image_connected Y _ (λ (y : β), (x, y)), {
+    rw continuous_iff_components_continuous,
+    split, {
+      apply constant_continuous _ _ x,
+    }, {
+      apply identity_continuous,
+    },
+  }, {
+    assumption,
+  },
+end
+
+private lemma cross_connected
+(X: topological_space α) (Y: topological_space β)
+(hXcn: is_connected X) (hYcn: is_connected Y)
+(x: α) (y: β):
+is_connected
+  ((product_topology X Y).subspace_topology
+    (λ xy', xy'.fst = x ∨ xy'.snd = y)) :=
+begin
+  apply union_of_two_overlapping_connected, {
+    apply line_connected,
+    assumption,
+  }, {
+    have homeom := swap_homeomorphism X Y,
+    have hlcn := line_connected Y X hXcn y,
+    have himcn :=
+        image_connected _ _ _
+          (restriction_continuous _ _ _ _ homeom.g_continuous) hlcn,
+    have:
+        (λ a : α × β, a.snd = y)
+        = myset.imageu
+          (λ (x : subtype {xy : β × α | xy.fst = y}), (x.val.snd, x.val.fst)), {
+      apply funext,
+      intro z,
+      apply propext,
+      split; assume hz, {
+        existsi (⟨(z.snd, z.fst), hz⟩: subtype {xy : β × α | xy.fst = y}),
+        cases z,
+        refl,
+      }, {
+        cases hz with z' hz',
+        rw ←hz',
+        from z'.property,
+      },
+    },
+    rw this, clear this,
+    assumption,
+  }, {
+    rw ←myset.exists_iff_neq_empty,
+    existsi (x, y),
+    split, {
+      from rfl,
+    }, {
+      from rfl,
+    },
+  },
+end
+
+theorem product_connected
+(X: topological_space α) (Y: topological_space β)
+(hXcn: is_connected X) (hYcn: is_connected Y):
+is_connected (product_topology X Y) :=
+begin
+  sorry,
 end
 
 end topological_space

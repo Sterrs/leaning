@@ -485,37 +485,7 @@ theorem union_two_open
 (hUo: X.is_open U) (hVo: X.is_open V):
 X.is_open (U ∪ V) :=
 begin
-  have: (U ∪ V) = ⋃₀ {S | S = U ∨ S = V}, {
-    apply funext,
-    intro x,
-    apply propext,
-    split, {
-      assume hUVx,
-      cases hUVx with hUx hVx, {
-        existsi U,
-        existsi (or.inl rfl),
-        assumption,
-      }, {
-        existsi V,
-        existsi (or.inr rfl),
-        assumption,
-      },
-    }, {
-      assume hUVx,
-      cases hUVx with S hS,
-      cases hS with hS hx,
-      cases hS with hU hV, {
-        left,
-        rw ←hU,
-        assumption,
-      }, {
-        right,
-        rw ←hV,
-        assumption,
-      },
-    },
-  },
-  rw this,
+  rw myset.union_two_sUnion,
   apply X.open_union_open,
   intro S,
   assume hUVS,

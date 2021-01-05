@@ -132,6 +132,63 @@ def sIntersection (s : myset (myset α)) : myset α :=
 {t | ∀ a ∈ s, t ∈ a}
 prefix `⋂₀`:120 := sIntersection
 
+theorem union_two_sUnion
+{α: Type u} (U V: myset α):
+(U ∪ V) = ⋃₀ {S | S = U ∨ S = V} :=
+begin
+  apply funext,
+  intro x,
+  apply propext,
+  split, {
+    assume hUVx,
+    cases hUVx with hUx hVx, {
+      existsi U,
+      existsi (or.inl rfl),
+      assumption,
+    }, {
+      existsi V,
+      existsi (or.inr rfl),
+      assumption,
+    },
+  }, {
+    assume hUVx,
+    cases hUVx with S hS,
+    cases hS with hS hx,
+    cases hS with hU hV, {
+      left,
+      rw ←hU,
+      assumption,
+    }, {
+      right,
+      rw ←hV,
+      assumption,
+    },
+  },
+end
+
+theorem intersect_two_sIntersection
+{α: Type u} (U V: myset α):
+(U ∩ V) = ⋂₀ {S | S = U ∨ S = V} :=
+begin
+  apply funext,
+  intro x,
+  apply propext,
+  split, {
+    assume hUVx,
+    cases hUVx with hUx hVx,
+    intro S,
+    assume hS,
+    cases hS; {rw hS; assumption},
+  }, {
+    assume hUVx,
+    split, {
+      from hUVx U (or.inl rfl),
+    }, {
+      from hUVx V (or.inr rfl),
+    },
+  },
+end
+
 def univ : myset α :=
 λ a, true
 

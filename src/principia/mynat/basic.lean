@@ -128,8 +128,6 @@ theorem nzero_iff_succ: m ≠ 0 ↔ ∃ n, m = succ n :=
 begin
   split; assume h, {
     cases m,
-      rw zz at h,
-      have : 0 = 0, refl,
       contradiction,
     existsi m,
     refl,
