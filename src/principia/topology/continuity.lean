@@ -133,16 +133,8 @@ begin
   cases hV with hVo hVU,
   have: (myset.inverse_image (myset.function_restrict_to_image f) U)
         = myset.inverse_image f V, {
-    apply funext,
-    intro x,
-    apply propext,
-    split; assume h, {
-      rw hVU at h,
-      from h,
-    }, {
-      rw hVU,
-      from h,
-    },
+    rw hVU,
+    refl,
   },
   rw this,
   from hfc V hVo,
