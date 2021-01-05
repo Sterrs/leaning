@@ -42,7 +42,7 @@ begin
 end
 
 theorem constant_continuous
-[X : topological_space α] [Y : topological_space β]
+(X: topological_space α) (Y: topological_space β)
 (y: β):
 is_continuous X Y (λ x, y) :=
 begin
@@ -165,7 +165,7 @@ begin
 end
 
 theorem restriction_continuous
-[X : topological_space α] [Y: topological_space β] (X': myset α)
+(X : topological_space α) (Y: topological_space β) (X': myset α)
 (f: α → β) (hfc: is_continuous X Y f):
 is_continuous (subspace_topology X X') Y (λ x, f x) :=
 begin
@@ -175,18 +175,32 @@ begin
     refl,
   },
   rw this,
-  from @composition_continuous _ _ _ (subspace_topology X X') X Y _ f
-    (@inclusion_continuous _ X X') hfc,
+  from composition_continuous (subspace_topology X X') X Y _ f
+    (inclusion_continuous X X') hfc,
 end
 
+-- couldn't quite figure out if this is a composition
+-- of things we already know about
 theorem restrict_set_to_image_continuous
 (X : topological_space α) (Y : topological_space β)
 (f: α → β) (hfc: is_continuous X Y f) (U: myset α):
 (X.subspace_topology U).is_continuous (Y.subspace_topology (myset.image f U))
-    (myset.function_restrict_to_set_image f U)
+    (myset.function_restrict_to_set_image f U) :=
+begin
+  intro V',
+  assume hV'o,
+  cases hV'o with V hV,
+  existsi myset.inverse_image f V,
+  split, {
+    from hfc _ hV.left,
+  }, {
+    rw hV.right,
+    refl, -- god bless america
+  },
+end
 
 theorem base_continuous
-[X: topological_space α]
+(X: topological_space α)
 (B : myset (myset β)) (hB : is_base B)
 (f: α → β):
 is_continuous X (space_from_base B hB) f ↔
@@ -234,7 +248,7 @@ begin
 end
 
 theorem projection_continuous
-[X : topological_space α] [Y: topological_space β]:
+(X : topological_space α) (Y: topological_space β):
 is_continuous (product_topology X Y) X prod.fst :=
 begin
   intro U,
@@ -266,7 +280,7 @@ begin
 end
 
 theorem swap_continuous
-[X : topological_space α] [Y: topological_space β]:
+(X : topological_space α) (Y: topological_space β):
 is_continuous (product_topology X Y) (product_topology Y X)
   (λ x, (x.snd, x.fst)) :=
 begin
@@ -297,7 +311,7 @@ begin
 end
 
 theorem projection_2_continuous
-[X : topological_space α] [Y: topological_space β]:
+(X : topological_space α) (Y: topological_space β):
 is_continuous (product_topology X Y) Y prod.snd :=
 begin
   have: (prod.snd: α × β → β) = prod.fst ∘ (λ x, (x.snd, x.fst)), {
@@ -306,14 +320,14 @@ begin
     refl,
   },
   rw this,
-  apply @composition_continuous _ _ _ (product_topology X Y) (product_topology Y X) Y,
-  from @swap_continuous _ _ X Y,
-  from @projection_continuous _ _ Y X,
+  apply composition_continuous (product_topology X Y) (product_topology Y X) Y,
+  from swap_continuous X Y,
+  from projection_continuous Y X,
 end
 
 theorem continuous_iff_components_continuous
-[X : topological_space α] [Y: topological_space β]
-[Z: topological_space γ] (f: α → β × γ):
+(X : topological_space α) (Y: topological_space β)
+(Z: topological_space γ) (f: α → β × γ):
 is_continuous X (product_topology Y Z) f ↔
 (is_continuous X Y (prod.fst ∘ f) ∧
  is_continuous X Z (prod.snd ∘ f)) :=
@@ -321,13 +335,13 @@ begin
   split, {
     assume hcf,
     split, {
-      apply @composition_continuous _ _ _ X (product_topology Y Z) Y,
+      apply composition_continuous X (product_topology Y Z) Y,
       assumption,
-      from @projection_continuous _ _ Y Z,
+      from projection_continuous Y Z,
     }, {
-      apply @composition_continuous _ _ _ X (product_topology Y Z) Z,
+      apply composition_continuous X (product_topology Y Z) Z,
       assumption,
-      from @projection_2_continuous _ _ Y Z,
+      from projection_2_continuous Y Z,
     },
   }, {
     assume hc,
