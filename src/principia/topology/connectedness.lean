@@ -584,10 +584,52 @@ begin
     existsi (⟨a, trivial⟩: subtype myset.univ),
     refl,
   }, {
-    by_cases hXe: (myset.univ: myset α) = ∅, {
-      sorry,
+    by_cases hXe: (myset.univ: myset (α × β)) = ∅, {
+      rw hXe,
+      apply empty_connected,
     }, {
-      sorry,
+      cases myset.exists_iff_neq_empty.mpr hXe with xy hxy,
+      suffices h: ⋃₀ myset.imageu (λ y: β, (λ xy': α × β, xy'.fst = xy.fst ∨ xy'.snd = y)) = myset.univ, {
+        rw ←h,
+        apply s_union_of_overlapping_connected, {
+          intro U,
+          assume hUc,
+          cases hUc with y hy,
+          rw ←hy,
+          apply cross_connected; assumption,
+        }, {
+          intros U V,
+          assume hUc hVc,
+          rw ←myset.exists_iff_neq_empty,
+          existsi xy,
+          split, {
+            cases hUc with _ hUc,
+            rw ←hUc,
+            left,
+            refl,
+          }, {
+            cases hVc with _ hVc,
+            rw ←hVc,
+            left,
+            refl,
+          },
+        },
+      }, {
+        apply myset.setext,
+        intro xy'',
+        split; assume hx, {
+          trivial,
+        }, {
+          existsi λ (xy' : α × β), xy'.fst = xy.fst ∨ xy'.snd = xy''.snd,
+          split, {
+            existsi xy''.snd,
+            refl,
+          }, {
+            right,
+            refl,
+          },
+        },
+      },
     },
   },
 end
