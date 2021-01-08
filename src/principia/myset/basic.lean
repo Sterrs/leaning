@@ -35,14 +35,29 @@ def subset (s : myset α) (t : myset α) : Prop :=
 -- Use \subseteq
 instance: has_subset (myset α) := ⟨myset.subset⟩
 
+theorem setext_subs (A B: myset α): A ⊆ B → B ⊆ A → A = B :=
+begin
+  assume hAB hBA,
+  apply setext,
+  intro x,
+  split; assume hx, {
+    apply hAB,
+    assumption,
+  }, {
+    apply hBA,
+    assumption,
+  },
+end
+
 @[refl]
 theorem subset_refl (s: myset α):
 s ⊆ s :=
-begin
-  intro x,
-  assume h,
-  assumption,
-end
+λ x hxs, hxs
+
+@[trans]
+theorem subset_trans (A B C: myset α):
+A ⊆ B → B ⊆ C → A ⊆ C :=
+λ hAB hBC x hx, hBC x (hAB x hx)
 
 def power_set (s : myset α) : myset (myset α) :=
 λ t, t ⊆ s
@@ -95,10 +110,9 @@ end
 theorem empty_iff_eq_empty {s: myset α}: empty s ↔ s = ∅ :=
 begin
   split; assume h, {
-    apply funext,
+    apply setext,
     intro a,
     have := h a,
-    apply propext,
     split, {
       assume hs, contradiction,
     }, {
@@ -136,9 +150,8 @@ theorem union_two_sUnion
 {α: Type u} (U V: myset α):
 (U ∪ V) = ⋃₀ {S | S = U ∨ S = V} :=
 begin
-  apply funext,
+  apply setext,
   intro x,
-  apply propext,
   split, {
     assume hUVx,
     cases hUVx with hUx hVx, {
@@ -170,9 +183,8 @@ theorem intersect_two_sIntersection
 {α: Type u} (U V: myset α):
 (U ∩ V) = ⋂₀ {S | S = U ∨ S = V} :=
 begin
-  apply funext,
+  apply setext,
   intro x,
-  apply propext,
   split, {
     assume hUVx,
     cases hUVx with hUx hVx,
@@ -201,12 +213,15 @@ begin
   from hyx,
 end
 
-def image {α β : Type} (f : α → β) (U : myset α) := {b | ∃ a, a ∈ U ∧ f a = b}
+def image {α β : Type u} (f : α → β) (U : myset α) := {b | ∃ a, a ∈ U ∧ f a = b}
 
 -- comes up often in algebra & topology etc
-def imageu {α β: Type} (f: α → β) := {b: β | ∃ a: α, f a = b}
+def imageu {α β: Type u} (f: α → β) := {b: β | ∃ a: α, f a = b}
 
-def inverse_image {α β : Type} (f : α → β) (V : myset β) := {a | f a ∈ V}
+def inverse_image {α β : Type u} (f : α → β) (V : myset β) := {a | f a ∈ V}
+
+def cartprod {α: Type u} (I: Type u) (sets: I → myset α): Type u :=
+{f: I → α // ∀ i: I, f i ∈ sets i}
 
 theorem inverse_image_of_image
 {α β : Type} (f: α → β) (U : myset α):
@@ -234,9 +249,8 @@ theorem subset_empty_impl_empty
 U ⊆ ∅ → U = ∅ :=
 begin
   assume hUe,
-  apply funext,
+  apply setext,
   intro x,
-  apply propext,
   split; assume h, {
     from hUe _ h,
   }, {
@@ -249,9 +263,8 @@ theorem univ_subset_impl_univ
 myset.univ ⊆ U → U = myset.univ :=
 begin
   assume h,
-  apply funext,
+  apply setext,
   intro x,
-  apply propext,
   split; assume hux, {
     trivial,
   }, {
@@ -280,9 +293,8 @@ theorem image_empty
 U = ∅ → image f U = ∅ :=
 begin
   assume hUe,
-  apply funext,
+  apply setext,
   intro x,
-  apply propext,
   split; assume h, {
     cases h with y hy,
     rw hUe at hy,
@@ -788,9 +800,8 @@ theorem to_image_surjective
 {α β: Type} (f: α → β):
 (image (function_restrict_to_image f) univ) = univ :=
 begin
-  apply funext,
+  apply setext,
   intro x,
-  apply propext,
   split; assume h, {
     trivial,
   }, {

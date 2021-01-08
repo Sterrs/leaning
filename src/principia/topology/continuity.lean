@@ -50,9 +50,8 @@ begin
   assume hoV,
   by_cases hy: y ∈ V, {
     have: (myset.inverse_image (λ (x : α), y) V) = myset.univ,  {
-      apply funext,
+      apply myset.setext,
       intro x,
-      apply propext,
       split; assume h, {
         trivial,
       }, {
@@ -63,9 +62,8 @@ begin
     from X.univ_open,
   }, {
     have: (myset.inverse_image (λ (x : α), y) V) = ∅, {
-      apply funext,
+      apply myset.setext,
       intro x,
-      apply propext,
       split; assume h, {
         trivial,
       }, {
@@ -79,7 +77,7 @@ end
 
 theorem inclusion_continuous
 (X : topological_space α) (Y: myset α):
-is_continuous (subspace_topology X Y) X (λ x, x) :=
+is_continuous (subspace_topology X Y) X subtype.val :=
 begin
   intro V,
   assume hoV,
@@ -105,9 +103,8 @@ begin
   split, {
     from hV.left,
   }, {
-    apply funext,
+    apply myset.setext,
     intro x,
-    apply propext,
     split; assume hx, {
       unfold myset.subtype_restriction,
       rw hV.right at hx,
@@ -347,9 +344,8 @@ begin
     have: (myset.inverse_image f W)
         = myset.inverse_image (prod.fst ∘ f) U ∩
           myset.inverse_image (prod.snd ∘ f) V, {
-      apply funext,
+      apply myset.setext,
       intro x,
-      apply propext,
       split; assume h, {
         split, {
           rw hW.left at h,
@@ -400,6 +396,148 @@ begin
   },
 end
 
+-- question 8 from M&T sheet 1
+theorem continuous_iff_closure_subset
+(X: topological_space α) (Y: topological_space β)
+(f: α → β):
+is_continuous X Y f ↔
+∀ A: myset α, myset.image f (X.closure A) ⊆ Y.closure (myset.image f A) :=
+begin
+  split, {
+    assume hfc,
+    intro A,
+    -- transitivity myset.image f (myset.inverse_image f (Y.closure (myset.image f A))),
+    -- wtf is its problem
+    -- I think it has something to do with metavariables depending on each other
+    apply myset.subset_trans _
+        (myset.image f (myset.inverse_image f (Y.closure (myset.image f A))))
+        (Y.closure (myset.image f A)), {
+      apply myset.image_subset,
+      -- should be inferable
+      apply closure_minimal_closed_superset X A (myset.inverse_image f (Y.closure (myset.image f A))), {
+        unfold closure,
+        rw myset.inverse_image_sIntersection,
+        apply closed_intersection_closed,
+        intro B,
+        assume hB,
+        cases hB with B' hB',
+        rw ←hB'.right,
+        rw continuous_iff_closed_preimage at hfc,
+        apply hfc,
+        from hB'.left.left,
+      }, {
+        -- transitivity (myset.inverse_image f (myset.image f A)).
+        apply myset.subset_trans _
+            (myset.inverse_image f (myset.image f A))
+            (myset.inverse_image f (Y.closure (myset.image f A))), {
+          apply myset.inverse_image_of_image,
+        }, {
+          -- should be inferable
+          apply myset.inverse_image_subset f (myset.image f A) ((Y.closure (myset.image f A))),
+          apply self_subset_closure,
+        },
+      },
+    }, {
+      -- should be inferable
+      apply myset.image_of_inverse_image f (Y.closure (myset.image f A)),
+    },
+  }, {
+    assume hclosure_subset,
+    rw continuous_iff_closed_preimage,
+    intro A,
+    assume hAc,
+    rw ←closure_idem_iff_closed,
+    apply myset.setext_subs, {
+      transitivity myset.inverse_image f (myset.image f (X.closure (myset.inverse_image f A))), {
+        apply myset.inverse_image_of_image,
+      }, {
+        apply myset.inverse_image_subset,
+        apply myset.subset_trans _ _ A (hclosure_subset _),
+        conv {
+          to_rhs,
+          rw ←(closure_idem_iff_closed Y A).mpr hAc,
+        },
+        apply closure_subset,
+        apply myset.image_of_inverse_image,
+      },
+    }, {
+      apply self_subset_closure,
+    },
+  },
+end
+
+theorem surjective_image_dense
+(X: topological_space α) (Y: topological_space β)
+(A: myset α) (hAd: X.is_dense A)
+(f: α → β) (hfc: is_continuous X Y f)
+(hsurj: function.surjective f):
+Y.is_dense (myset.image f A) :=
+begin
+  apply myset.setext_subs, {
+    from λ _ _, trivial,
+  }, {
+    intro y,
+    assume hyt, clear hyt,
+    apply (continuous_iff_closure_subset X Y f).mp hfc,
+    unfold is_dense at hAd,
+    rw hAd,
+    cases hsurj y with x hx,
+    rw ←hx,
+    existsi x,
+    split, {
+      trivial,
+    }, {
+      refl,
+    },
+  },
+end
+
+theorem hausdorff_dense_determinism
+(X: topological_space α) (Y: topological_space β)
+(haus: is_hausdorff Y)
+(A: myset α) (hAd: X.is_dense A)
+(f g: α → β) (hfc: is_continuous X Y f) (hgc: is_continuous X Y g)
+(hagree: ∀ a: α, a ∈ A → f a = g a):
+f = g :=
+begin
+  have hagreecl: X.is_closed {x | f x = g x}, {
+    have: is_continuous X (product_topology Y Y) (λ x, (f x, g x)), {
+      rw continuous_iff_components_continuous,
+      split, {
+        from hfc,
+      }, {
+        from hgc,
+      },
+    },
+    rw continuous_iff_closed_preimage at this,
+    apply this {yy | yy.fst = yy.snd},
+    rw hausdorff_iff_diagonal_closed at haus,
+    from haus,
+  },
+  rw ←closure_idem_iff_closed at hagreecl,
+  have heverywhere: {x : α | f x = g x} = myset.univ, {
+    apply myset.setext_subs, {
+      from λ _ _, trivial,
+    }, {
+      transitivity X.closure A, {
+        unfold is_dense at hAd,
+        rw hAd,
+      }, {
+        rw ←hagreecl,
+        apply closure_subset,
+        intro a,
+        assume ha,
+        from hagree a ha,
+      },
+    },
+  },
+  apply funext,
+  intro x,
+  change x ∈ {x : α | f x = g x},
+  rw heverywhere,
+  trivial,
+end
+
 theorem gluing_lemma
 (X: topological_space α) (Y: topological_space β)
 (U V: myset α) (hUc: X.is_closed U) (hVc: X.is_closed V)
@@ -420,9 +558,8 @@ begin
           (@myset.inverse_image (subtype U) _ (λ x, f x) W)) ∪
         (myset.subtype_unrestriction V
           (@myset.inverse_image (subtype V) _ (λ x, f x) W)), {
-    apply funext,
+    apply myset.setext,
     intro x,
-    apply propext,
     split, {
       assume hfWx,
       have: x ∈ U ∪ V, {
@@ -523,9 +660,8 @@ begin
   assume hUo,
   -- candidate for myset theorem?
   have: myset.image f U = myset.inverse_image g U, {
-    apply funext,
+    apply myset.setext,
     intro x,
-    apply propext,
     split; assume h, {
       cases h with y hy,
       cases hy with hyU hxfy,
@@ -595,17 +731,8 @@ begin
     intro W,
     assume hWB,
     apply h,
-    -- maybe general theorem that basis sets are open
-    intro x,
-    assume hxW,
-    existsi W,
-    split, {
-      assumption,
-    }, split, {
-      assumption,
-    }, {
-      refl,
-    },
+    apply basis_set_open,
+    assumption,
   }, {
     intro U,
     assume hUo,
@@ -736,6 +863,30 @@ begin
     rw hU,
     rw myset.to_image_surjective,
     apply topological_space.univ_open,
+  },
+end
+
+theorem univ_homeomorphism
+(X : topological_space α):
+is_homeomorphism X (X.subspace_topology myset.univ)
+  (λ x, ⟨x, trivial⟩) subtype.val :=
+begin
+  split, {
+    -- is this a theorem already? idc anymore
+    intro U,
+    assume hUo,
+    cases hUo with V hV,
+    rw hV.right,
+    from hV.left,
+  }, {
+    apply inclusion_continuous,
+  }, {
+    apply funext,
+    intro x,
+    apply subtype.eq,
+    refl,
+  }, {
+    refl,
   },
 end
 

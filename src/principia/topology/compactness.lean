@@ -25,9 +25,8 @@ theorem list_union (𝒰: mylist (myset α)):
 mylist.reduce_d myset.union ∅ 𝒰 =
 ⋃₀ (λ x, 𝒰.contains x) :=
 begin
-  apply funext,
+  apply myset.setext,
   intro x,
-  apply propext,
   split; assume hx, {
     induction 𝒰 with U Us ih_U, {
       exfalso, from hx,
@@ -270,9 +269,8 @@ begin
       assume hWW,
       from hWW.left,
     }, {
-      apply funext,
+      apply myset.setext,
       intro x,
-      apply propext,
       split; assume hx, {
         trivial,
       }, {
@@ -366,9 +364,8 @@ begin
         from hS.left,
       },
     }, {
-      apply funext,
+      apply myset.setext,
       intro x,
-      apply propext,
       split; assume hx, {
         trivial,
       }, {
@@ -447,9 +444,8 @@ begin
     rw list_union,
     unfold is_cover_l at hV,
     rw list_union at hV,
-    apply funext,
+    apply myset.setext,
     intro x,
-    apply propext,
     split; assume hx, {
       trivial,
     }, {
@@ -791,9 +787,8 @@ begin
       apply hUcov.left,
       from hV'.left,
     }, {
-      apply funext,
+      apply myset.setext,
       intro x,
-      apply propext,
       split; assume hx, {
         trivial,
       }, {
@@ -854,9 +849,8 @@ begin
   intro U,
   assume hUo,
   have: myset.inverse_image g U = myset.image f U, {
-    apply funext,
+    apply myset.setext,
     intro x,
-    apply propext,
     split; assume hx, {
       existsi g x,
       split, {

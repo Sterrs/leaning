@@ -29,9 +29,8 @@ begin
   cases h with hUVdsj hUVcov,
   -- also a candidate for myset
   have: U.compl = V, {
-    apply funext,
+    apply myset.setext,
     intro x,
-    apply propext,
     split, {
       assume hx,
       have: x ∈ U ∪ V, {
@@ -158,18 +157,16 @@ begin
   }, split, {
     trivial,
   }, split, {
-    apply funext,
+    apply myset.setext,
     intro z,
-    apply propext,
     split; assume h, {
       cases h, contradiction,
     }, {
       exfalso, from h,
     },
   }, {
-    apply funext,
+    apply myset.setext,
     intro z,
-    apply propext,
     split; assume h, {
       trivial,
     }, {
@@ -262,9 +259,8 @@ begin
     }, split, {
       rw ←myset.inverse_image_intersection,
       apply myset.inverse_image_empty,
-      apply funext,
+      apply myset.setext,
       intro z,
-      apply propext,
       split, {
         assume h,
         cases h,
@@ -274,9 +270,8 @@ begin
         exfalso, from h,
       },
     }, {
-      apply funext,
+      apply myset.setext,
       intro z,
-      apply propext,
       split, {
         assume h, trivial,
       }, {
@@ -505,9 +500,8 @@ is_connected ((product_topology X Y).subspace_topology
 begin
   have: {xy : α × β | xy.fst = x}
       = myset.imageu (λ y: β, (x, y)), {
-    apply funext,
+    apply myset.setext,
     intro z,
-    apply propext,
     split; assume hx, {
       existsi z.snd,
       cases z,
@@ -555,9 +549,8 @@ begin
         (λ a : α × β, a.snd = y)
         = myset.imageu
           (λ (x : subtype {xy : β × α | xy.fst = y}), (x.val.snd, x.val.fst)), {
-      apply funext,
+      apply myset.setext,
       intro z,
-      apply propext,
       split; assume hz, {
         existsi (⟨(z.snd, z.fst), hz⟩: subtype {xy : β × α | xy.fst = y}),
         cases z,
@@ -586,7 +579,17 @@ theorem product_connected
 (hXcn: is_connected X) (hYcn: is_connected Y):
 is_connected (product_topology X Y) :=
 begin
-  sorry,
+  apply surjective_image_connected _ _ _ (univ_homeomorphism _).g_continuous, {
+    intro a,
+    existsi (⟨a, trivial⟩: subtype myset.univ),
+    refl,
+  }, {
+    by_cases hXe: (myset.univ: myset α) = ∅, {
+      sorry,
+    }, {
+      sorry,
+    },
+  },
 end
 
 end topological_space
