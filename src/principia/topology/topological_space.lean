@@ -29,10 +29,18 @@ local attribute [instance] classical.prop_decidable
 variables {α β : Type}
 -- include X Y
 
+structure sets_separate_points
+(X: topological_space α) (x y: α) (U V: myset α): Prop :=
+(open_left: X.is_open U)
+(open_right: X.is_open V)
+(contains_left: x ∈ U)
+(contains_right: y ∈ V)
+(disjoint: U ∩ V = ∅)
+
 def is_hausdorff (X : topological_space α) : Prop :=
 ∀ x y : α, x ≠ y →
   ∃ (U V : myset α),
-    is_open X U ∧ is_open X V ∧ x ∈ U ∧ y ∈ V ∧ U ∩ V = ∅
+    sets_separate_points X x y U V
 
 def is_closed (X : topological_space α) (A : myset α) : Prop :=
 is_open X (myset.compl A)
@@ -224,8 +232,15 @@ def space_from_base (B : myset (myset α)) (hB : is_base B) : topological_space 
   end
 }
 
+structure is_box_of
+(X: topological_space α) (Y: topological_space β)
+(U: myset α) (V: myset β) (B: myset (α × β)): Prop :=
+(eq: B = (U × V))
+(open_left: X.is_open U)
+(open_right: Y.is_open V)
+
 def product_base (X : topological_space α) (Y : topological_space β) : myset (myset (α × β)) :=
-{ b | ∃ (U : myset α) (V : myset β), b = (U × V) ∧ is_open X U ∧ is_open Y V }
+{ B | ∃ (U : myset α) (V : myset β), is_box_of X Y U V B}
 
 theorem is_base_product_base (X : topological_space α) (Y : topological_space β) :
 is_base (product_base X Y) :=
@@ -239,7 +254,6 @@ begin
       split; assume h,
       split; trivial,
       trivial,
-    split,
       from X.univ_open,
     from Y.univ_open,
   intros b₁ b₂,
@@ -247,11 +261,9 @@ begin
   cases hb₁ with U₁ this,
   cases this with V₁ this,
   cases this with hb₁ this,
-  cases this with hU₁ hV₁,
   cases hb₂ with U₂ this,
   cases this with V₂ this,
   cases this with hb₂ this,
-  cases this with hU₂ hV₂,
   existsi U₁ ∩ U₂,
   existsi V₁ ∩ V₂,
   split,
@@ -268,7 +280,6 @@ begin
     cases hU with hxU₁ hxU₂,
     cases hV with hxV₁ hxV₂,
     split; split; assumption,
-  split,
     apply X.open_intersection_open; assumption,
   apply Y.open_intersection_open; assumption,
 end
@@ -768,8 +779,15 @@ end
 def is_dense (X : topological_space α) (A: myset α): Prop :=
 closure X A = myset.univ
 
+structure is_open_enclosure
+(X: topological_space α) (U: myset α) (x: α)
+(V: myset α): Prop :=
+(is_open: X.is_open V)
+(contains: x ∈ V)
+(is_subset: V ⊆ U)
+
 def is_neighbourhood (X: topological_space α) (U: myset α) (x: α): Prop :=
-∃ V: myset α, X.is_open V ∧ x ∈ V ∧ V ⊆ U
+∃ V: myset α, is_open_enclosure X U x V
 
 -- turns out neighbourhoods are useful!!!
 -- I like this theorem because it means I don't have to unironically write
@@ -785,7 +803,7 @@ begin
     existsi U,
     split, {
       assumption,
-    }, split, {
+    }, {
       assumption,
     }, {
       refl,
@@ -814,11 +832,11 @@ begin
         cases hUnbhd x h with V hV,
         existsi V,
         split, split, {
-          from hV.left,
+          from hV.is_open,
         }, {
-          from hV.right.right,
+          from hV.is_subset,
         }, {
-          from hV.right.left,
+          from hV.contains,
         },
       },
     },
@@ -861,23 +879,24 @@ begin
       existsi V,
       split, {
         refl,
-      }, split, {
-        from hUV.left,
       }, {
-        from hUV.right.left,
+        from hUV.open_left,
+      }, {
+        from hUV.open_right,
       },
-    }, split, {
+    }, {
       split, {
-        from hUV.right.right.left,
+        from hUV.contains_left,
       }, {
-        from hUV.right.right.right.left,
+        from hUV.contains_right,
       },
     }, {
       intro uv,
       assume huvUV,
       assume huvint,
-      rw ←myset.empty_iff_eq_empty at hUV,
-      apply hUV.right.right.right.right uv.fst,
+      have := hUV.disjoint,
+      rw ←myset.empty_iff_eq_empty at this,
+      apply this uv.fst,
       split, {
         from huvUV.left,
       }, {
@@ -896,14 +915,14 @@ begin
     cases hUV with V hUV,
     existsi U,
     existsi V,
-    rw hUV.left at hW,
+    rw hUV.eq at hW,
     split, {
-      from hUV.right.left,
-    }, split, {
-      from hUV.right.right,
-    }, split, {
+      from hUV.open_left,
+    }, {
+      from hUV.open_right,
+    }, {
       from hW.left.left,
-    }, split, {
+    }, {
       from hW.left.right,
     }, {
       rw ←myset.empty_iff_eq_empty,
@@ -930,21 +949,22 @@ begin
   cases hUV with V hUV,
   existsi U,
   split, {
-    from hUV.left,
-  }, split, {
-    from hUV.right.right.left,
+    from hUV.open_left,
+  }, {
+    from hUV.contains_left,
   }, {
     intro z,
     assume hUz,
     assume hzx,
-    rw ←myset.empty_iff_eq_empty at hUV,
-    apply hUV.right.right.right.right x,
+    have := hUV.disjoint,
+    rw ←myset.empty_iff_eq_empty at this,
+    apply this x,
     split, {
       have: z = x := hzx,
       rw ←this,
       assumption,
     }, {
-      from hUV.right.right.right.left,
+      from hUV.contains_right,
     },
   },
 end
@@ -1183,26 +1203,26 @@ begin
   split, {
     existsi U,
     split, {
-      from hUV.left,
+      from hUV.open_left,
     }, {
       refl,
     },
-  }, split, {
+  }, {
     existsi V,
     split, {
-      from hUV.right.left,
+      from hUV.open_right,
     }, {
       refl,
     },
-  }, split, {
-    from hUV.right.right.left,
-  }, split, {
-    from hUV.right.right.right.left,
+  }, {
+    from hUV.contains_left,
+  }, {
+    from hUV.contains_right,
   }, {
     rw ←myset.empty_iff_eq_empty,
     intro z,
     assume hz,
-    apply myset.empty_iff_eq_empty.mpr hUV.right.right.right.right z.val,
+    apply myset.empty_iff_eq_empty.mpr hUV.disjoint z.val,
     split, {
       from hz.left,
     }, {

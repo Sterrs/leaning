@@ -677,17 +677,16 @@ begin
       end with V1 hVy,
     cases hVy with V2 hVy,
     existsi V2,
+    cases hVy,
     split, {
       existsi y,
       existsi V1,
       split, assumption,
-      repeat {split, cc},
-      rw ←hVy.right.right.right.right,
-      apply myset.setext,
-      intro x,
-      from ⟨and.symm, and.symm⟩,
+      rw myset.intersection_comm,
+      repeat {split},
+      all_goals {assumption},
     }, {
-      cc,
+      assumption,
     },
   },
   cases step1 step2 step3 with 𝒱 hV,
@@ -703,7 +702,7 @@ begin
     rw mylist.for_all_iff_forall at hV'fa,
     cases hV'fa V' hV'inV with _ h,
     from h.right.left,
-  }, split, {
+  }, {
     cases hV with hV garbage,
     clear garbage,
     revert 𝒱,

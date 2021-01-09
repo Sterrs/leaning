@@ -225,7 +225,7 @@ begin
     split, {
       apply hWpre,
       from hV.left,
-    }, split, {
+    }, {
       from hV.right.left,
     }, {
       intro x',
@@ -250,7 +250,7 @@ begin
     existsi myset.univ,
     split, {
       refl,
-    }, split, {
+    }, {
       assumption,
     }, {
       from Y.univ_open,
@@ -286,15 +286,15 @@ begin
     existsi V,
     existsi U,
     split, refl,
-    split, from hWVU.right.right,
-    from hWVU.right.left,
+    from hWVU.open_right,
+    from hWVU.open_left,
   }, split, {
-    rw hWVU.left at hx,
+    rw hWVU.eq at hx,
     from and.comm.mp hx,
   }, {
     intro y,
     assume hy,
-    rw hWVU.left,
+    rw hWVU.eq,
     from and.comm.mp hy,
   },
 end
@@ -346,26 +346,16 @@ begin
           myset.inverse_image (prod.snd ∘ f) V, {
       apply myset.setext,
       intro x,
-      split; assume h, {
-        split, {
-          rw hW.left at h,
-          from h.left,
-        }, {
-          rw hW.left at h,
-          from h.right,
-        },
-      }, {
-        rw hW.left,
-        from h,
-      },
+      rw hW.eq,
+      refl,
     },
     rw this,
     apply X.open_intersection_open, {
       apply hc1,
-      from hW.right.left,
+      from hW.open_left,
     }, {
       apply hc2,
-      from hW.right.right,
+      from hW.open_right,
     },
   },
 end
@@ -745,7 +735,7 @@ begin
     split, {
       apply h,
       from hV.left,
-    }, split, {
+    }, {
       existsi y,
       split, {
         from hV.right.left,
@@ -775,23 +765,23 @@ begin
   assume hxW,
   existsi U,
   split, {
-    from hWUV.right.left,
-  }, split, {
+    from hWUV.open_left,
+  }, {
     cases hxW with y hy,
     rw ←hy.right,
-    rw hWUV.left at hy,
+    rw hWUV.eq at hy,
     from hy.left.left,
   }, {
     intro y,
     assume hUy,
-    rw hWUV.left,
+    rw hWUV.eq,
     cases hxW with z hz,
     existsi (⟨y, z.snd⟩: α × β),
     split, {
       split, {
         from hUy,
       }, {
-        rw hWUV.left at hz,
+        rw hWUV.eq at hz,
         from hz.left.right,
       },
     }, {

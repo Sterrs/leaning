@@ -11,22 +11,24 @@ open classical
 
 local attribute [instance] classical.prop_decidable
 
--- Goal Of The Game: product of connected spaces is connected
+structure disconnects (X : topological_space α) (U V: myset α): Prop :=
+(neq_empty_left: U ≠ ∅) (neq_empty_right: V ≠ ∅)
+(open_left: X.is_open U) (open_right: X.is_open V)
+(disjoint: U ∩ V = ∅)
+(cover: U ∪ V = myset.univ)
 
-def is_disconnected (X : topological_space α) : Prop :=
-∃ U V : myset α, U ≠ ∅ ∧ V ≠ ∅ ∧ is_open X U ∧ is_open X V ∧ U ∩ V = ∅ ∧ U ∪ V = myset.univ
+def is_disconnected (X: topological_space α): Prop :=
+∃ U V: myset α, disconnects X U V
 
 def is_connected (X : topological_space α) : Prop :=
 ¬is_disconnected X
 
 theorem disconnect_clopen (X: topological_space α) (U V: myset α):
-X.is_open U ∧ X.is_open V ∧ U ∩ V = ∅ ∧ U ∪ V = myset.univ →
+disconnects X U V →
 X.is_closed U ∧ X.is_closed V :=
 begin
   assume h,
-  cases h with hUo h,
-  cases h with hVo h,
-  cases h with hUVdsj hUVcov,
+  cases h with _ _ hUo hVo hUVdsj hUVcov,
   -- also a candidate for myset
   have: U.compl = V, {
     apply myset.setext,
@@ -71,18 +73,14 @@ begin
   assume himdc,
   cases himdc with U himdc,
   cases himdc with V himdc,
-  cases himdc with hUne himdc,
-  cases himdc with hVne himdc,
-  cases himdc with hUo himdc,
-  cases himdc with hVo himdc,
-  cases himdc with hUVdj hUVcov,
-  have hpreUo := hfc U hUo,
-  have hpreVo := hfc V hVo,
+  have hpreUo := hfc U himdc.open_left,
+  have hpreVo := hfc V himdc.open_right,
   apply hXc,
   existsi (myset.inverse_image f U),
   existsi (myset.inverse_image f V),
   split, {
     assume hpreUe,
+    have hUne := himdc.neq_empty_left,
     rw ←myset.exists_iff_neq_empty at hUne,
     rw ←myset.empty_iff_eq_empty at hpreUe,
     cases hUne with y hy,
@@ -90,7 +88,8 @@ begin
     apply hpreUe x,
     rw ←hx at hy,
     from hy,
-  }, split, {
+  }, {
+    have hVne := himdc.neq_empty_right,
     assume hpreVe,
     rw ←myset.exists_iff_neq_empty at hVne,
     rw ←myset.empty_iff_eq_empty at hpreVe,
@@ -99,18 +98,17 @@ begin
     apply hpreVe x,
     rw ←hx at hy,
     from hy,
-  }, split, {
-    from hfc U hUo,
-  }, split, {
-    from hfc V hVo,
-  }, split, {
+  }, {
+    from hfc U himdc.open_left,
+  }, {
+    from hfc V himdc.open_right,
+  }, {
     rw ←myset.inverse_image_intersection,
-    rw hUVdj,
-    rw myset.inverse_image_empty,
+    rw himdc.disjoint,
     refl,
   }, {
     rw ←myset.inverse_image_union,
-    rw hUVcov,
+    rw himdc.cover,
     have := myset.inverse_image_of_image_of_univ (myset.function_restrict_to_image f),
     rw myset.to_image_surjective at this,
     from this.symm,
@@ -147,16 +145,16 @@ begin
     rw ←myset.exists_iff_neq_empty,
     existsi x,
     from rfl,
-  }, split, {
+  }, {
     rw ←myset.exists_iff_neq_empty,
     existsi y,
     change ¬(x = y) at hxy,
     from λ h, hxy h.symm,
-  }, split, {
+  }, {
     trivial,
-  }, split, {
+  }, {
     trivial,
-  }, split, {
+  }, {
     apply myset.setext,
     intro z,
     split; assume h, {
@@ -181,10 +179,7 @@ begin
   assume hdc,
   cases hdc with U hdc,
   cases hdc with V hdc,
-  cases hdc with hUne hdc,
-  cases hdc with hVne hdc,
-  cases hdc with hUo hdc,
-  cases hdc with hVo hdc,
+  cases hdc with hUne hVne hUo hVo hUVdj hUVcov,
   cases hUo with hU hU, {
     contradiction,
   }, {
@@ -195,7 +190,6 @@ begin
       rw ←myset.exists_iff_neq_empty at hVne,
       cases hUne with x hxU,
       cases hVne with y hyU,
-      cases hdc with hUVdj hUVcov,
       rw ←myset.empty_iff_eq_empty at hUVdj,
       apply hUVdj x,
       split, {
@@ -240,23 +234,23 @@ begin
     by_contradiction hfxfy,
     apply hXc,
     existsi myset.inverse_image f {n | n = f x},
-    existsi myset.inverse_image f ({n | n ≠ f x}),
+    existsi myset.inverse_image f {n | n ≠ f x},
     split, {
       rw ←myset.exists_iff_neq_empty,
       existsi x,
       from rfl,
-    }, split, {
+    }, {
       rw ←myset.exists_iff_neq_empty,
       existsi y,
       assume h,
       from hfxfy h.symm,
-    }, split, {
+    }, {
       apply hfc,
       trivial,
-    }, split, {
+    }, {
       apply hfc,
       trivial,
-    }, split, {
+    }, {
       rw ←myset.inverse_image_intersection,
       apply myset.inverse_image_empty,
       apply myset.setext,
@@ -298,13 +292,13 @@ begin
     }, {
       existsi (λ x, if x ∈ U then (0: mynat) else 1),
       split, {
-        have := disconnect_clopen _ _ _ hXdc.right.right,
+        have := disconnect_clopen _ _ _ hXdc,
         apply gluing_lemma X _ U V, {
           from this.left,
         }, {
           from this.right,
         }, {
-          from hXdc.right.right.right.right.right,
+          from hXdc.cover,
         }, {
           suffices
               hconst:
@@ -337,15 +331,14 @@ begin
                   from x.property,
                 },
               },
-              rw hXdc.right.right.right.right.left at hUVx,
+              rw hXdc.disjoint at hUVx,
               from hUVx,
             },
             rw if_neg hxU,
           },
         },
       }, {
-        cases hXdc with hUne hXdc,
-        cases hXdc with hVne hXdc,
+        cases hXdc with hUne hVne _ _ hUVdisj,
         rw ←myset.exists_iff_neq_empty at hUne,
         rw ←myset.exists_iff_neq_empty at hVne,
         cases hUne with x hx,
@@ -359,7 +352,7 @@ begin
           have: y ∈ U ∩ V, {
             split; assumption,
           },
-          rw hXdc.right.right.left at this,
+          rw hUVdisj at this,
           from this,
         },
         rw if_neg hyU,
