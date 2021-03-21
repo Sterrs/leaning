@@ -2,6 +2,7 @@ namespace hidden
 
 -- Commutative Unitary Ring
 class myring (α : Type) extends has_add α, has_zero α, has_neg α, has_mul α, has_one α :=
+(decidable_eq : ∀ a b : α, decidable (a = b))
 (add_assoc (a b c : α) : a + b + c = a + (b + c))
 (add_zero (a : α) : a + 0 = a)
 (add_neg (a : α) : a + -a = 0)
@@ -13,6 +14,8 @@ class myring (α : Type) extends has_add α, has_zero α, has_neg α, has_mul α
 namespace myring
 
 variables {α : Type} [myring α] (a b c : α)
+
+instance (a b : α) : decidable (a = b) := decidable_eq a b
 
 theorem one_mul : 1 * a = a :=
 begin
