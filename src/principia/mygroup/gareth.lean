@@ -28,6 +28,36 @@ begin
   rw exists_inv,
 end
 
+theorem inv_cancel : x⁻¹ = y⁻¹ ↔ x = y :=
+begin
+  split; assume h, {
+    rw ←inv_inv y,
+    apply inv_unique,
+    rw ←h,
+    conv {
+      to_lhs, congr, congr, skip,
+      rw ←inv_inv x,
+    },
+    apply exists_inv,
+  }, {
+    rw h,
+  },
+end
+
+theorem right_mul : x = y → x * z = y * z :=
+begin
+  assume h,
+  congr,
+  assumption,
+end
+
+theorem left_mul : x = y → z * x = z * y :=
+begin
+  assume h,
+  congr,
+  assumption,
+end
+
 theorem id_inv : (x * x⁻¹)⁻¹ = x * x⁻¹ :=
 begin
   symmetry,
@@ -39,34 +69,201 @@ begin
   rw [←mul_assoc, exists_inv],
 end
 
-theorem id_swap : x * x⁻¹ = x⁻¹ * x := sorry
+-- We consider the following relation on α
+def R := x * x⁻¹ = y * y⁻¹
+infix ` ≅ `:50 := R
 
-theorem id_unique : x * x⁻¹ = y * y⁻¹ :=
+theorem cong_def : x ≅ y ↔ x * x⁻¹ = y * y⁻¹ := by refl
+
+-- It's an equivalence relation
+@[refl]
+theorem cong_refl : x ≅ x := by from rfl
+
+@[symm]
+theorem cong_symm : x ≅ y → y ≅ x :=
 begin
-  transitivity (x * y) * (x * y)⁻¹, {
-    rw ←id_inv (x * y),
-    apply inv_unique,
-    conv {
-      congr,
-      rw mul_assoc,
-      congr, skip,
-      rw [←mul_assoc, ←mul_assoc, exists_inv],
-    },
-    suffices : (x * y) * (x * y)⁻¹ * (x * y) = x * y,
-      rw [←mul_assoc, this],
+  assume h,
+  rw cong_def,
+  symmetry,
+  assumption,
+end
+
+@[trans]
+theorem cong_trans : x ≅ y → y ≅ z → x ≅ z :=
+begin
+  assume hxy hyz,
+  rw cong_def at ⊢ hxy,
+  rw hxy,
+  assumption,
+end
+
+lemma cong_iff_right_multiple : x ≅ y ↔ ∃ z, x = y * z :=
+begin
+  split; assume h, {
+    rw cong_def at h,
+    existsi y⁻¹ * x,
+    rw [←mul_assoc, ←h],
+    symmetry,
     apply exists_inv,
   }, {
-    rw [←id_inv (x * y), id_swap (x * y)],
+    cases h with z h,
+    rw [cong_def, ←id_inv],
     symmetry,
     apply inv_unique,
     conv {
+      to_lhs,
+      rw mul_assoc,
+      congr, skip,
+      rw ←mul_assoc,
       congr,
-      congr,
-      rw [mul_assoc, mul_assoc x, id_swap y, ←mul_assoc y, exists_inv y],
+      rw [h, ←mul_assoc, exists_inv, ←h],
     },
-    rw [←id_swap (x * y), ←mul_assoc, exists_inv],
+    rw [←mul_assoc, exists_inv],
   },
 end
+
+lemma invs_cong_iff_left_multiple : x⁻¹ ≅ y⁻¹ ↔ ∃ z, x = z * y :=
+begin
+  split; assume h, {
+    rw [cong_def, inv_inv x, inv_inv y] at h,
+    existsi x * y⁻¹,
+    rw [mul_assoc, ←h, ←mul_assoc, exists_inv],
+  }, {
+    cases h with z h,
+    rw cong_def,
+    rw ←id_inv,
+    symmetry,
+    apply inv_unique,
+    rw inv_inv x,
+    rw inv_inv y,
+    conv {
+      to_lhs,
+      congr,
+      rw mul_assoc,
+      congr, skip,
+      rw h,
+      rw mul_assoc,
+      congr, skip,
+      rw ←mul_assoc,
+      rw exists_inv,
+    },
+    rw ←h,
+    rw mul_assoc,
+    rw ←mul_assoc x,
+    rw exists_inv,
+  },
+end
+
+lemma useful : x⁻¹ * x = (x * x)⁻¹ * x * x :=
+begin
+  suffices : x⁻¹ ≅ (x * x)⁻¹,
+    rwa [cong_def, inv_inv x, inv_inv (x * x), ←mul_assoc] at this,
+  symmetry,
+  rw invs_cong_iff_left_multiple,
+  existsi x,
+  refl,
+end
+
+theorem cong_inv : x ≅ x⁻¹ :=
+begin
+  rw cong_iff_right_multiple,
+  existsi x * x,
+  symmetry,
+  rw ←inv_cancel,
+  apply inv_unique,
+  conv { to_rhs, rw ←exists_inv x, rw mul_assoc },
+  rw mul_assoc,
+  apply left_mul,
+  rw useful,
+  apply right_mul,
+  symmetry,
+  apply inv_unique,
+  conv {
+    to_lhs,
+    rw mul_assoc,
+    congr, skip,
+    rw mul_assoc,
+    congr, skip,
+    rw [←mul_assoc, ←mul_assoc, exists_inv],
+  },
+  rw mul_assoc,
+  conv {
+    to_lhs,
+    congr, skip,
+    rw [←mul_assoc, exists_inv],
+  },
+end
+
+theorem id_swap : x * x⁻¹ = x⁻¹ * x :=
+begin
+  conv {
+    to_rhs,
+    congr, skip,
+    rw ←inv_inv x,
+  },
+  apply cong_inv,
+end
+
+-- Could this be earlier?
+lemma cong_inv_iff_left_multiple : x ≅ y⁻¹ ↔ ∃ z, x = z * y :=
+begin
+  split; assume h, {
+    rw cong_def at h,
+    rw inv_inv at h,
+    existsi x * y⁻¹,
+    rw [mul_assoc, ←h, id_swap, ←mul_assoc, exists_inv],
+  }, {
+    cases h with z h,
+    rw [cong_def, inv_inv, ←id_swap, ←id_inv],
+    symmetry,
+    apply inv_unique,
+    rw [id_swap, id_swap y],
+    conv {
+      to_lhs,
+      congr,
+      rw mul_assoc,
+      congr, skip,
+      rw [h, mul_assoc],
+      congr, skip,
+      rw [←mul_assoc, exists_inv],
+    },
+    rw [←h, mul_assoc, ←mul_assoc x, exists_inv],
+  },
+end
+
+theorem cong_comm : x * y ≅ y * x :=
+begin
+  transitivity x, {
+    rw cong_iff_right_multiple,
+    existsi y,
+    refl,
+  },
+  transitivity x⁻¹, apply cong_inv,
+  symmetry,
+  rw cong_inv_iff_left_multiple,
+  existsi y,
+  refl,
+end
+
+-- It turns out everything is related
+theorem cong_trivial : x ≅ y :=
+begin
+  transitivity x * y, {
+    symmetry,
+    rw cong_iff_right_multiple,
+    existsi y,
+    refl,
+  }, {
+    transitivity y * x,
+      apply cong_comm,
+    rw cong_iff_right_multiple,
+    existsi x,
+    refl,
+  },
+end
+
+-- So set the identitiy to be this unique value
+theorem id_unique : x * x⁻¹ = y * y⁻¹ := cong_trivial x y
 
 -- Instantiate it as a mygroup class
 instance: hidden.mygroup α := {
