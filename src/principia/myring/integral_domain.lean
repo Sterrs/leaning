@@ -29,6 +29,13 @@ begin
   apply mul_integral_right a; assumption,
 end
 
+theorem mul_nzero {a b : α}: a ≠ 0 → b ≠ 0 → a * b ≠ 0 :=
+begin
+  intros ha hb hab,
+  apply ha,
+  apply mul_integral_left b; assumption,
+end
+
 theorem mul_cancel_right : b ≠ 0 → a * b = c * b → a = c :=
 begin
   assume hb h,

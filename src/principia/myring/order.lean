@@ -19,8 +19,7 @@ open myring
 
 variables {α : Type} [ordered_myring α] (a b c d: α)
 
-def lt : α → α → Prop := λ a b, ¬(b ≤ a)
-instance: has_lt α := ⟨lt⟩
+-- ≤ THEOREMS
 
 theorem le_add_cancel_right: a ≤ b ↔ a + c ≤ b + c :=
 begin
@@ -196,6 +195,11 @@ end
 
 theorem le_mul_nonpos_right : c ≤ 0 → a ≤ b → b * c ≤ a * c :=
 λ hc hab, by rw [mul_comm, mul_comm a]; from le_mul_nonpos_left _ _ _ hc hab
+
+-- < THEOREMS
+
+def lt : α → α → Prop := λ a b, ¬(b ≤ a)
+instance: has_lt α := ⟨lt⟩
 
 -- probably not needed with `change` etc
 theorem lt_iff_nle: a < b ↔ ¬b ≤ a := iff.rfl

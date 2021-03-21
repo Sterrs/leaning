@@ -1,4 +1,5 @@
 import .frac
+import ..myfield.basic
 
 namespace hidden
 
@@ -11,9 +12,6 @@ def myrat := quotient frac.frac.setoid
 namespace myrat
 
 instance: decidable_eq myrat := quotient.decidable_eq
-
-def f: myrat → myrat :=
-λ x, if x = x then x else x
 
 private lemma class_setoid (x y : frac) :
 ⟦x⟧ = ⟦y⟧ ↔ x ≈ y := iff.intro quotient.exact quotient.sound
@@ -47,7 +45,7 @@ theorem rat_one: (1: myrat) = ⟦⟨1, 1, one_pos⟩⟧ := rfl
 
 instance: has_coe myint myrat := ⟨λ m, ⟦⟨m, 1, one_pos⟩⟧⟩
 
-theorem nontrivial: (1: myrat) ≠ 0 :=
+private theorem nontrivial: (0: myrat) ≠ 1 :=
 begin
   assume hydroxide,
   have := quotient.exact hydroxide,
@@ -79,7 +77,8 @@ instance has_add2: has_add (quotient frac.frac.setoid) := ⟨add⟩
 private theorem add_eq_cls {x y: frac}:
 ⟦x⟧ + ⟦y⟧ = ⟦x + y⟧ := rfl
 
-theorem two_nzero: (2: myrat) ≠ 0 :=
+-- Posterity
+private theorem two_nzero: (2: myrat) ≠ 0 :=
 begin
   assume water,
   have := quotient.exact water,
@@ -129,12 +128,6 @@ quotient.lift (λ x, ⟦x⁻¹⟧) frac.inv_well_defined
 instance: has_inv myrat := ⟨inv⟩
 instance has_inv2: has_inv (quotient frac.frac.setoid) := ⟨inv⟩
 
-def div : myrat → myrat → myrat := λ x y, x * y⁻¹
-
-instance: has_div myrat := ⟨div⟩
-
-theorem div_eq_mul_inv : x / y = x * y⁻¹ := rfl
-
 -- Multiplication
 
 private theorem mul_eq_cls {x y : frac}:
@@ -149,7 +142,7 @@ private theorem inv_eq_cls {x : frac}:
 theorem zero_inv : 0⁻¹ = (0 : myrat) :=
 rfl
 
-theorem inv_self_mul : x ≠ 0 → x * x⁻¹ = 1 :=
+private theorem inv_self_mul : x ≠ 0 → x * x⁻¹ = 1 :=
 begin
   cases quotient.exists_rep x with a ha, subst ha,
   assume hx,
@@ -251,6 +244,22 @@ instance: myring myrat := ⟨
     repeat { rw myring.add_mul <|> rw myring.mul_add, },
     ac_refl,
   end⟩
+
+instance: myfield myrat := {
+  mul_inv := λ x hx, inv_self_mul hx,
+  nontrivial := nontrivial
+}
+
+-- Moved here as they might be useful
+-- theorem one_plus_one : 1 + 1 = (2 : myrat):= rfl
+
+-- theorem double_eq_add_self : 2 * x = x + x :=
+-- by rw [←one_plus_one, add_mul, one_mul]
+
+-- theorem half_plus_half {ε : myrat} : ε / 2 + ε / 2 = ε :=
+-- begin
+--   rw [←double_eq_add_self, mul_comm, div_mul_cancel two_nzero],
+-- end
 
 end myrat
 
