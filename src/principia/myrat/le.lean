@@ -1,6 +1,7 @@
 import ..myint.le
 import .basic
 import ..myint.basic
+import ..myfield.order
 
 namespace hidden
 
@@ -182,6 +183,8 @@ instance: ordered_myring myrat := ⟨
     rw frac.setoid_equiv,
     from le_antisymm _ _ hxy hyx,
   end⟩
+
+instance: ordered_myfield myrat := ⟨⟩ -- lol
 
 theorem archimedes (x: myrat): ∃ n: myint.myint, x ≤ ↑n :=
 begin

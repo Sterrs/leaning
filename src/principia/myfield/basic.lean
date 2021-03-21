@@ -102,7 +102,7 @@ instance: has_div α := ⟨div⟩
 
 -- -- Division
 
-theorem div_def : x / y = x * y⁻¹ := rfl 
+theorem div_def : x / y = x * y⁻¹ := rfl
 
 @[simp] theorem div_one : x / 1 = x :=
 begin
@@ -136,7 +136,7 @@ begin
   rw [mul_assoc, inv_mul hy, mul_one],
 end
 
-theorem div_self : x ≠ 0 → x / x = 1 :=
+theorem div_self {x : α} : x ≠ 0 → x / x = 1 :=
 begin
   intro hx,
   change x * x⁻¹ = 1,
@@ -153,6 +153,14 @@ theorem add_div : (x + y) / z = x / z + y / z :=
 begin
   change (x + y) * z⁻¹ = x * z⁻¹ + y * z⁻¹,
   apply add_mul,
+end
+
+-- Handy
+theorem half_plus_half (water : 2 ≠ (0 : α)) (ε : α) : ε / 2 + ε / 2 = ε :=
+begin
+  rw [div_def, ←mul_add, ←one_div, ←add_div],
+  change ε * (2 / 2) = ε,
+  rw [div_self water, mul_one],
 end
 
 end myfield

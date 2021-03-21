@@ -384,7 +384,7 @@ begin
   from lt_nrefl _ hab,
 end
 
-theorem le_lt_chain: a ≤ b → b < c → a < c :=
+theorem le_lt_chain {a : α} (b : α) {c : α}: a ≤ b → b < c → a < c :=
 begin
   assume hab hbc hac,
   have := le_trans _ _ _ hab (lt_impl_le _ _ hbc),
@@ -399,7 +399,7 @@ end
 theorem lt_le_comb {a b c d: α}: a < b → c ≤ d → a + c < b + d :=
 begin
   assume hab hcd,
-  apply le_lt_chain _ (a + d),
+  apply le_lt_chain (a + d),
   rw ←le_add_cancel_left,
   assumption,
   rw ←lt_add_cancel_right,
@@ -421,6 +421,15 @@ begin
   change (0: α) < 1 + 1,
   rw ←add_zero (0: α),
   apply lt_comb; from nontrivial_zero_lt_one nontrivial,
+end
+
+-- Water
+theorem nontrivial_zero_ne_two : (0 : α) ≠ 1 → (0 : α) ≠ 2 :=
+begin
+  assume nontrivial,
+  apply lt_impl_ne,
+  apply nontrivial_zero_lt_two,
+  assumption,
 end
 
 -- can't figure out hot to make decidability a typeclass thing
@@ -793,6 +802,13 @@ begin
   }, {
     assumption,
   },
+end
+
+theorem abs_one [decidable_le: ∀ a b: α, decidable (a ≤ b)]:
+abs (1 : α) = 1 :=
+begin
+  apply abs_of_nonneg,
+  exact zero_le_one,
 end
 
 theorem abs_of_pos [decidable_le: ∀ a b: α, decidable (a ≤ b)]:
@@ -1220,14 +1236,14 @@ begin
     split, {
       rw lt_neg_switch_iff,
       rw neg_neg,
-      apply le_lt_chain _ (abs a), {
+      apply le_lt_chain (abs a), {
         rw ←abs_neg,
         from self_le_abs _,
       }, {
         assumption,
       },
     }, {
-      apply le_lt_chain _ (abs a), {
+      apply le_lt_chain (abs a), {
         from self_le_abs _,
       }, {
         assumption,

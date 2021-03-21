@@ -45,7 +45,7 @@ theorem rat_one: (1: myrat) = ⟦⟨1, 1, one_pos⟩⟧ := rfl
 
 instance: has_coe myint myrat := ⟨λ m, ⟦⟨m, 1, one_pos⟩⟧⟩
 
-private theorem nontrivial: (0: myrat) ≠ 1 :=
+theorem nontrivial: (0: myrat) ≠ 1 :=
 begin
   assume hydroxide,
   have := quotient.exact hydroxide,
@@ -77,8 +77,7 @@ instance has_add2: has_add (quotient frac.frac.setoid) := ⟨add⟩
 private theorem add_eq_cls {x y: frac}:
 ⟦x⟧ + ⟦y⟧ = ⟦x + y⟧ := rfl
 
--- Posterity
-private theorem two_nzero: (2: myrat) ≠ 0 :=
+theorem two_nzero: (2: myrat) ≠ 0 :=
 begin
   assume water,
   have := quotient.exact water,
