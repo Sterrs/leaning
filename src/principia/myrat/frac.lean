@@ -6,6 +6,7 @@ namespace hidden
 open myint
 open myring
 open ordered_myring
+open ordered_integral_domain
 
 structure frac :=
 -- Numerator
@@ -54,10 +55,7 @@ begin
   unfold frac_eq,
   have h := congr_arg (λ x : myint, x * z.denom) hxy,
   dsimp only [] at h,
-  -- This is disgusting. We need to hide the mynat theorems behind
-  -- their own namespace.
-  rw [mul_assoc y.num, mul_comm x.denom,
-      ←mul_assoc y.num, hyz] at h,
+  rw [mul_assoc y.num, mul_comm x.denom, ←mul_assoc y.num, hyz] at h,
   suffices : y.denom * (x.num * z.denom) = y.denom * (z.num * x.denom),
     from integral_domain.mul_cancel_left _ _ _ (lt_impl_ne _ _ y.denom_pos).symm this,
   rw [←mul_assoc, mul_comm y.denom, h],
@@ -106,7 +104,7 @@ end
 
 def add (x y: frac) : frac :=
 ⟨x.num * y.denom + y.num * x.denom, x.denom * y.denom,
-by from zero_lt_mul _ _ (integral_domain.mul_integral _ _) x.denom_pos y.denom_pos⟩
+by from zero_lt_mul _ _ x.denom_pos y.denom_pos⟩
 
 instance: has_add frac := ⟨add⟩
 
@@ -140,7 +138,7 @@ end
 
 def mul (x y : frac) : frac :=
 ⟨x.num * y.num, x.denom * y.denom,
-by from zero_lt_mul _ _ (integral_domain.mul_integral _ _) x.denom_pos y.denom_pos⟩
+by from zero_lt_mul _ _ x.denom_pos y.denom_pos⟩
 
 instance: has_mul frac := ⟨mul⟩
 

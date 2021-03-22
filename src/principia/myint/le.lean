@@ -87,7 +87,8 @@ begin
   },
 end
 
-instance: ordered_myring myint := ⟨
+instance: ordered_integral_domain myint := ⟨
+  by apply_instance,
   λ a b c: myint,
   begin
     cases quotient.exists_rep a with n hn, subst hn,

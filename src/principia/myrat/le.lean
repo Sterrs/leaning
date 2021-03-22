@@ -7,6 +7,7 @@ namespace hidden
 
 open myring
 open ordered_myring
+open ordered_integral_domain
 
 namespace frac
 
@@ -27,9 +28,9 @@ begin
   rw le_def,
   rw le_def at halx,
   have : 0 < x.denom * a.denom, {
-    from zero_lt_mul _ _ (integral_domain.mul_integral _ _) x.denom_pos a.denom_pos,
+    from zero_lt_mul _ _ x.denom_pos a.denom_pos,
   },
-  rw ←le_mul_cancel_pos_right _ _ (x.denom * a.denom) (integral_domain.mul_integral _ _) this,
+  rw ←le_mul_cancel_pos_right _ _ (x.denom * a.denom) this,
   conv {
     congr,
     rw mul_assoc,
@@ -66,7 +67,6 @@ begin
   }, {
     assumption,
   },
-  apply myint.decidable_eq,
 end
 
 theorem le_well_defined (a x b y : frac) :
@@ -110,7 +110,8 @@ private theorem mul_eq_cls {x y : frac}:
 
 variables x y z : myrat
 
-instance: ordered_myring myrat := ⟨
+instance: ordered_myfield myrat := ⟨
+  by apply_instance,
   λ x y z: myrat,
   begin
     -- turn into z + x ≤ z + y ↔ x ≤ y for copy/paste purposes
@@ -131,8 +132,8 @@ instance: ordered_myring myrat := ⟨
     have : b.num * c.denom * (c.denom * a.denom) = b.num * a.denom * c.denom * c.denom,
       ac_refl,
     rw this, clear this,
-    rw le_mul_cancel_pos_right _ _ c.denom (integral_domain.mul_integral _ _) c.denom_pos,
-    rw le_mul_cancel_pos_right _ _ c.denom (integral_domain.mul_integral _ _) c.denom_pos,
+    rw le_mul_cancel_pos_right _ _ c.denom c.denom_pos,
+    rw le_mul_cancel_pos_right _ _ c.denom c.denom_pos,
     from iff.rfl.mp,
     all_goals {apply myint.decidable_eq},
   end,
@@ -164,8 +165,7 @@ instance: ordered_myring myrat := ⟨
     rw this at h, clear this,
     have : a.denom * (c.num * b.denom) = b.denom * (c.num * a.denom), ac_refl,
     rw this at h, clear this,
-    rwa le_mul_cancel_pos_left _ _ b.denom (integral_domain.mul_integral _ _) b.denom_pos at h,
-    apply myint.decidable_eq,
+    rwa le_mul_cancel_pos_left _ _ b.denom b.denom_pos at h,
   end,
   λ x y: myrat,
   begin
@@ -184,9 +184,7 @@ instance: ordered_myring myrat := ⟨
     from le_antisymm _ _ hxy hyx,
   end⟩
 
-instance: ordered_myfield myrat := ⟨⟩ -- lol
-
-theorem archimedes (x: myrat): ∃ n: myint.myint, x ≤ ↑n :=
+theorem archimedes (x: myrat): ∃ n: myint, x ≤ ↑n :=
 begin
   cases quotient.exists_rep x with a ha, subst ha,
   existsi abs a.num,

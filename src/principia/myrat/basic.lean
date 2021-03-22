@@ -6,12 +6,13 @@ namespace hidden
 open myint
 open myring
 open ordered_myring
+open ordered_integral_domain
 
 def myrat := quotient frac.frac.setoid
 
 namespace myrat
 
-instance: decidable_eq myrat := quotient.decidable_eq
+instance deceq: decidable_eq myrat := quotient.decidable_eq
 
 private lemma class_setoid (x y : frac) :
 ⟦x⟧ = ⟦y⟧ ↔ x ≈ y := iff.intro quotient.exact quotient.sound
@@ -161,6 +162,7 @@ begin
 end
 
 instance: myring myrat := ⟨
+  by apply_instance,
   λ x y z: myrat,
   begin
     cases quotient.exists_rep x with a ha, subst ha,

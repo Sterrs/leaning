@@ -78,8 +78,7 @@ begin
   rw this, clear this,
   apply le_lt_chain (abs (a.val n - b.val n) + abs (x.val n - y.val n)),
     rw [sub_def, sub_def],
-    -- WHY THE FUCK
-    from @triangle_ineq _ _ (a.val n + -b.val n) (x.val n + -y.val n) myrat.decidable_le,
+    from @triangle_ineq _ _ (a.val n + -b.val n) (x.val n + -y.val n),
     assumption,
   from myrat.two_nzero,
 end
@@ -107,7 +106,7 @@ instance add_is_assoc : is_associative real add := ⟨add_assoc⟩
 private theorem add_zero (x : real) : x + 0 = x :=
 begin
   cases quotient.exists_rep x with f hf, subst hf,
-  rw real_zero,
+  rw [real_zero, coe_def],
   rw add_eq_cls rfl rfl,
   apply seq_eq_imp_real_eq rfl rfl,
   intro n,

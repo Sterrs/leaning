@@ -3,7 +3,14 @@ import .basic
 namespace hidden
 
 -- Can't extend field and ordered_myring as they both extend myring >:(
-class ordered_myfield (α : Type) [has_le α] [ordered_myring α] extends myfield α
+class ordered_myfield (α : Type) extends myfield α, has_le α:=
+-- NOTE: Theses are the ordered_myring axioms
+(f_decidable_le: ∀ a b: α, decidable (a ≤ b))
+(f_le_add_right (a b c : α) : a ≤ b → a + c ≤ b + c)
+(f_zero_le_mul (a b : α) : 0 ≤ a → 0 ≤ b → 0 ≤ a * b)
+(f_le_trans (a b c: α): a ≤ b → b ≤ c → a ≤ c)
+(f_le_total_order (a b: α): a ≤ b ∨ b ≤ a)
+(f_le_antisymm (a b: α): a ≤ b → b ≤ a → a = b)
 
 namespace ordered_myfield
 
@@ -11,8 +18,17 @@ open myfield
 open myring
 open ordered_myring
 
-variables {α : Type} [has_le α] [ordered_myring α] [ordered_myfield α] (x y z : α)
-variables (s t : α) -- Try to use s, t when non-zero
+variables {α : Type} [ordered_myfield α] (x y z : α)
+
+-- This is peak L∃∀N
+instance : ordered_integral_domain α := {
+  oid_decidable_le := f_decidable_le,
+  oid_le_add_right := f_le_add_right,
+  oid_zero_le_mul := f_zero_le_mul,
+  oid_le_trans := f_le_trans,
+  oid_le_total_order := f_le_total_order,
+  oid_le_antisymm := f_le_antisymm
+}
 
 theorem half_pos {ε : α} : 0 < ε → 0 < ε / 2 := sorry
 -- assume h, by rwa [lt_mul_pos_right zero_lt_two, zero_mul, div_mul_cancel two_nzero]

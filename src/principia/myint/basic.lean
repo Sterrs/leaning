@@ -10,9 +10,9 @@ import ..myring.integral_domain
 namespace hidden
 open mynat
 
-namespace myint
-open myint
 def myint := quotient int_pair.int_pair.setoid
+
+namespace myint
 
 instance: decidable_eq myint := quotient.decidable_eq
 
@@ -231,6 +231,7 @@ end
 -- end
 
 instance: myring myint := ⟨
+  by apply_instance,
   λ m n k: myint,
   begin
     cases quotient.exists_rep m with a ha, subst ha,
