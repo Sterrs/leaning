@@ -334,6 +334,13 @@ begin
   assumption,
 end
 
+theorem le_lt_comb {a b c d: α}: a ≤ b → c < d → a + c < b + d :=
+begin
+  assume hab hcd,
+  rw [add_comm, add_comm b],
+  apply lt_le_comb; assumption,
+end
+
 -- worth a different type class?
 -- condition is necessary since = makes
 -- the trivial ring into an ordered ring
@@ -358,6 +365,12 @@ begin
   apply lt_impl_ne,
   apply nontrivial_zero_lt_two,
   assumption,
+end
+
+-- Doesn't need ordering
+theorem nontrivial_one_ne_two : (0 : α) ≠ 1 → (1 : α) ≠ 2 :=
+begin
+  sorry,
 end
 
 -- can't figure out hot to make decidability a typeclass thing
@@ -639,6 +652,9 @@ begin
   from max_comm _ _,
 end
 
+theorem abs_sub_switch : abs (a - b) = abs (b - a) :=
+by rw [sub_def, ←abs_neg, neg_distr, neg_neg, add_comm, ←sub_def]
+
 theorem abs_of_nonneg (h : 0 ≤ a): abs a = a :=
 begin
   unfold abs,
@@ -757,6 +773,22 @@ begin
   unfold abs,
   rw neg_distr,
   from max_sum_le _ _ _ _,
+end
+
+theorem neg_max : -max a b = max (-a) (-b) :=
+begin
+  sorry,
+end
+
+theorem abs_abs : abs (abs a) = abs a :=
+begin
+  unfold abs,
+  rw [max_comm, neg_max, neg_neg, max_comm (-a), max_self],
+end
+
+theorem triangle_ineq_sub : abs (abs a - abs b) ≤ abs (a - b) :=
+begin
+  sorry,
 end
 
 theorem abs_eq_plusminus : abs a = a ∨ abs a = -a := max_eq_either a (-a)

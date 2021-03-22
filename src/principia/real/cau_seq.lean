@@ -121,18 +121,72 @@ instance: has_zero cau_seq := ⟨⟨λ n, 0, constant_cauchy 0⟩⟩
 
 instance: has_one cau_seq := ⟨⟨λ n, 1, constant_cauchy 1⟩⟩
 
--- TODO bounded_above and bounded_below
-
 theorem abs_bounded_above (f : cau_seq) :
 ∃ (u : myrat), 0 < u ∧ ∀ n, abs (f.val n) < u:=
 begin
   sorry,
 end
 
-theorem nzero_impl_abs_eventually_bounded_below (f : cau_seq) (hf : ¬f ≈ 0) :
-∃ (C : myrat) (N : mynat), 0 < C ∧ ∀ n : mynat, N < n → C < abs (f.val n) :=
+-- Why was this so hard ffs
+theorem nzero_impl_abs_eventually_bounded_below (f : cau_seq) (hnf0 : ¬f ≈ 0) :
+∃ (δ : myrat) (N : mynat), 0 < δ ∧ ∀ n : mynat, N < n → δ  < abs (f.val n) :=
 begin
-  sorry,
+  change ¬(f.equivalent 0) at hnf0,
+  unfold cau_seq.equivalent at hnf0,
+  rw not_forall at hnf0,
+  cases hnf0 with ε hnf0,
+  rw not_imp at hnf0,
+  cases hnf0 with hε hnf0,
+  rw not_exists at hnf0,
+  have hfcau := f.property (ε / 2) (half_pos hε),
+  cases hfcau with N hfcau,
+  existsi (ε / 2),
+  existsi N,
+  split,
+    exact half_pos hε,
+  intros n hn,
+  have hfN := hnf0 N,
+  rw not_forall at hfN,
+  cases hfN with m hm,
+  rw not_imp at hm,
+  cases hm with hNm hm,
+  change ¬abs (f.val m - 0) < ε at hm,
+  rw [sub_def, neg_zero, myring.add_zero] at hm,
+  have := hfcau _ _ hn hNm,
+  change ¬¬ε ≤ abs (f.val m) at hm,
+  rw not_not at hm,
+  clear hnf0 hn hNm hfcau,
+  -- This is why P ≠ NP
+  rw ←abs_abs,
+  rw ←myring.add_zero (abs (f.val n)),
+  rw ←myring.neg_add (abs (f.val m)),
+  rw ←myring.add_assoc,
+  rw ←neg_neg (abs (f.val n)),
+  rw add_comm _ (-abs _),
+  rw ←abs_neg,
+  rw neg_distr,
+  rw neg_distr,
+  rw neg_neg,
+  rw neg_neg,
+  rw ←sub_def,
+  rw ←sub_def,
+  apply lt_le_chain (abs (abs (abs (f.val m) - abs (f.val n)) - abs (abs (f.val m)))), {
+    rw abs_abs,
+    rw abs_sub_switch,
+    apply lt_le_chain (abs (f.val m) - abs (abs (f.val m) - abs (f.val n))), {
+      rw sub_def,
+      rw ←minus_half,
+      rw sub_def,
+      apply le_lt_comb, assumption, {
+        rw ←lt_neg_switch_iff,
+        apply le_lt_chain (abs (f.val m - f.val n)),
+          exact triangle_ineq_sub _ _,
+        assumption,
+      },
+    },
+    exact self_le_abs _,
+  },
+  exact triangle_ineq_sub _ _,
 end
 
 end cau_seq

@@ -163,6 +163,8 @@ begin
   rw [div_self water, mul_one],
 end
 
+theorem minus_half (water : 2 ≠ (0 : α)) (ε : α) : ε - ε /2 = ε / 2 := sorry
+
 end myfield
 
 end hidden

@@ -508,21 +508,7 @@ end
 
 -- Reciprocal "inv"
 
--- Not sure what this was supposed to be, might be useful
--- theorem  : ¬x = 0 → x = ⟦a⟧ → x⁻¹ = sorry := sorry
-
-@[simp]
-theorem one_inv : 1⁻¹ = (1 : real) :=
-begin
-  rw real_one,
-  have h : (1 : real)⁻¹ = ⟦1⁻¹⟧,
-    apply inv_eq_cls real_one,
-  apply seq_eq_imp_real_eq h real_one,
-  intro n,
-  dsimp only [],
-  sorry,
-end
-
+-- We can't actually prove this in general fields so why not
 @[simp]
 theorem zero_inv : 0⁻¹ = (0 : real) :=
 begin
@@ -535,9 +521,44 @@ begin
   apply @setoid.refl _ _ _,
 end
 
+-- FML
+private theorem not_equiv_zero_impl_eventually_nzero (f : cau_seq) :
+¬f ≈ 0 → ∃ N : mynat, ∀ n, N < n → f.val n ≠ 0 :=
+begin
+  intros hnf0,
+  cases cau_seq.nzero_impl_abs_eventually_bounded_below f hnf0 with δ h,
+  cases h with N h,
+  cases h with hδ h,
+  existsi N,
+  intros n hn,
+  have := h n hn,
+  intro hfval0,
+  have habsfval : abs (f.val n) = 0,
+    rw [hfval0, abs_zero],
+  suffices : 0 < abs (f.val n),
+    exact lt_impl_ne this habsfval.symm,
+  transitivity δ; assumption,
+end
+
 private theorem mul_inv : x ≠ 0 → x * x⁻¹ = 1 :=
 begin
-  sorry,
+  intro hx0,
+  cases quotient.exists_rep x with f hf,
+  rw [inv_eq_cls hf.symm, ←hf, @mul_eq_cls f f⁻¹ ⟦f⟧ _ (by refl) (by refl)],
+  rw [real_one, coe_def, cau_seq.class_equiv],
+  unfold cau_seq.equivalent,
+  intros ε hε,
+  have hnf0 : ¬f ≈ 0,
+    assume hf0,
+    apply hx0,
+    rwa [←hf, real_zero, coe_def, cau_seq.class_equiv],
+  cases not_equiv_zero_impl_eventually_nzero f hnf0 with N hN,
+  existsi N,
+  intros n hn,
+  dsimp,
+  have := hN n hn,
+  rwa [cau_seq.mul_val, cau_seq.inv_val, if_neg hnf0, myfield.mul_inv this,
+      sub_self, abs_zero],
 end
 
 local attribute [instance] prop_decidable
