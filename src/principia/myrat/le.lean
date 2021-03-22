@@ -28,7 +28,7 @@ begin
   rw le_def,
   rw le_def at halx,
   have : 0 < x.denom * a.denom, {
-    from zero_lt_mul _ _ x.denom_pos a.denom_pos,
+    from zero_lt_mul x.denom_pos a.denom_pos,
   },
   rw ←le_mul_cancel_pos_right _ _ (x.denom * a.denom) this,
   conv {
@@ -146,7 +146,7 @@ instance: ordered_myfield myrat := ⟨
     repeat {rw le_cls},
     dsimp only [],
     repeat {rw zero_mul <|> rw mul_one},
-    from zero_le_mul _ _,
+    from zero_le_mul,
   end,
   λ x y z: myrat,
   begin
@@ -154,8 +154,8 @@ instance: ordered_myfield myrat := ⟨
     cases quotient.exists_rep x with a ha, subst ha,
     cases quotient.exists_rep y with b hb, subst hb,
     cases quotient.exists_rep z with c hc, subst hc,
-    have hxy₁ := le_mul_nonneg_left _ _ _ (lt_impl_le _ _ c.denom_pos) hxy,
-    have hyz₁ := le_mul_nonneg_left _ _ _ (lt_impl_le _ _ a.denom_pos) hyz,
+    have hxy₁ := le_mul_nonneg_left _ _ _ (lt_impl_le c.denom_pos) hxy,
+    have hyz₁ := le_mul_nonneg_left _ _ _ (lt_impl_le a.denom_pos) hyz,
     have : c.denom * (b.num * a.denom) = a.denom * (b.num * c.denom), ac_refl,
     rw this at hxy₁,
     have h : c.denom * (a.num * b.denom) ≤ a.denom * (c.num * b.denom),
@@ -181,7 +181,7 @@ instance: ordered_myfield myrat := ⟨
     rw le_cls at hxy hyx,
     apply quotient.sound,
     rw frac.setoid_equiv,
-    from le_antisymm _ _ hxy hyx,
+    from le_antisymm hxy hyx,
   end⟩
 
 theorem archimedes (x: myrat): ∃ n: myint, x ≤ ↑n :=
@@ -191,7 +191,7 @@ begin
   rw coe_int,
   rw le_cls,
   simp,
-  apply le_trans _ _ _ (self_le_abs _),
+  apply le_trans _ (self_le_abs _),
   conv {
     congr,
     rw mul_one,

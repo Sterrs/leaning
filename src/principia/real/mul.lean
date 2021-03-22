@@ -180,7 +180,7 @@ begin
   rw [lt_mul_pos_left _ hmpos, ←abs_mul, mul_add, mul_one, ←mul_assoc,
       myring.mul_comm, neg_mul, ←mul_assoc, inv_mul hmzero, one_mul, ←sub_def],
   suffices: A * (A * ε) ≤ abs (f.val m) * ((abs (f.val n)) * ε),
-    apply lt_le_chain _ (A * (A * ε)),
+    apply lt_le_chain (A * (A * ε)),
     apply hM,
       from mynat.max_lt_cancel_left hn,
       from mynat.max_lt_cancel_left hm,
@@ -386,7 +386,7 @@ begin
         mul_add, mul_one, mul_neg, mul_neg, add_comm,
         mul_comm (a.val n), ←mul_assoc, mul_inv hbnzero,
         one_mul, ←abs_neg, neg_distr, neg_neg, ←sub_def],
-    apply lt_le_chain _ (A * (B * ε)) _, {
+    apply lt_le_chain (A * (B * ε)), {
       apply hN₃ n,
       apply mynat.max_lt_cancel_right hn,
     }, {

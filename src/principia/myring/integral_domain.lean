@@ -20,7 +20,7 @@ begin
 end
 
 -- This requires decidability
-theorem mul_integral : a * b = 0 → a = 0 ∨ b = 0 :=
+theorem mul_integral {a b : α} : a * b = 0 → a = 0 ∨ b = 0 :=
 begin
   assume hab,
   by_cases a = 0,
@@ -90,14 +90,14 @@ theorem zero_lt_mul {a b : α} : 0 < a → 0 < b → 0 < a * b :=
 begin
   assume hapos hbpos,
   assume hab0,
-  have := le_mul_nonneg_right _ _ _ (lt_impl_le _ a hapos) (lt_impl_le _ _ hbpos),
+  have := le_mul_nonneg_right _ _ _ (lt_impl_le hapos) (lt_impl_le hbpos),
   rw zero_mul at this,
   rw mul_comm at this,
-  have h0 := le_antisymm _ _ hab0 this,
-  cases (mul_integral _ _ h0) with ha hb,
-  have hc := lt_impl_ne _ _ hapos,
+  have h0 := le_antisymm hab0 this,
+  cases (mul_integral h0) with ha hb,
+  have hc := lt_impl_ne hapos,
   from hc ha.symm,
-  have hc := lt_impl_ne _ _ hbpos,
+  have hc := lt_impl_ne hbpos,
   from hc hb.symm,
 end
 

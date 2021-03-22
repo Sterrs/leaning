@@ -5,13 +5,16 @@ namespace hidden
 
 class ordered_myring (α : Type) extends myring α, has_le α :=
 (decidable_le: ∀ a b: α, decidable (a ≤ b))
-(le_add_right (a b c : α) : a ≤ b → a + c ≤ b + c)
-(zero_le_mul (a b : α) : 0 ≤ a → 0 ≤ b → 0 ≤ a * b)
-(le_trans (a b c: α): a ≤ b → b ≤ c → a ≤ c)
+(le_add_right {a b} (c : α) : a ≤ b → a + c ≤ b + c)
+(zero_le_mul {a b : α} : 0 ≤ a → 0 ≤ b → 0 ≤ a * b)
+(le_trans {a} (b : α) {c}: a ≤ b → b ≤ c → a ≤ c)
 (le_total_order (a b: α): a ≤ b ∨ b ≤ a)
-(le_antisymm (a b: α): a ≤ b → b ≤ a → a = b)
+(le_antisymm {a b: α}: a ≤ b → b ≤ a → a = b)
 
 namespace ordered_myring
+
+-- Add the [trans] attribute to le_trans
+attribute [trans] le_trans
 
 open myring
 
@@ -21,28 +24,28 @@ instance: ∀ a b: α, decidable (a ≤ b) := decidable_le
 
 -- ≤ THEOREMS
 
-theorem le_add_cancel_right: a ≤ b ↔ a + c ≤ b + c :=
+theorem le_add_cancel_right : a ≤ b ↔ a + c ≤ b + c :=
 begin
-  apply iff.intro (le_add_right _ _ _),
+  apply iff.intro (le_add_right _),
   assume hacbc,
-  have := le_add_right _ _ (-c) hacbc,
+  have := le_add_right (-c) hacbc,
   repeat {rw [myring.add_assoc, myring.add_neg, myring.add_zero] at this},
   assumption,
 end
 
-theorem le_add_left: a ≤ b → c + a ≤ c + b :=
+theorem le_add_left {a b} (c : α): a ≤ b → c + a ≤ c + b :=
 begin
   repeat {rw add_comm c},
-  from le_add_right _ _ _,
+  from le_add_right _,
 end
 
 theorem le_add_cancel_left: a ≤ b ↔ c + a ≤ c + b :=
 begin
   repeat {rw add_comm c},
-  from le_add_cancel_right _ _ _,
+  rw le_add_cancel_right,
 end
 
-theorem le_neg_switch: a ≤ b → -b ≤ -a :=
+theorem le_neg_switch {a b : α}: a ≤ b → -b ≤ -a :=
 begin
   assume hab,
   rw le_add_cancel_right _ _ (a + b),
@@ -58,11 +61,11 @@ end
 
 theorem le_neg_switch_iff: a ≤ b ↔ -b ≤ -a :=
 begin
-  apply iff.intro (le_neg_switch _ _),
+  apply iff.intro le_neg_switch,
   assume hba,
   rw ←neg_neg a,
   rw ←neg_neg b,
-  from le_neg_switch _ _ hba,
+  from le_neg_switch hba,
 end
 
 theorem zero_le_neg_switch_iff: 0 ≤ a ↔ -a ≤ 0 :=
@@ -71,7 +74,7 @@ begin
     to_rhs,
     rw ←neg_zero,
   },
-  from le_neg_switch_iff _ _,
+  rw le_neg_switch_iff,
 end
 
 theorem le_zero_neg_switch_iff: a ≤ 0 ↔ 0 ≤ -a :=
@@ -80,7 +83,7 @@ begin
     to_rhs,
     rw ←neg_zero,
   },
-  from le_neg_switch_iff _ _,
+  rw le_neg_switch_iff,
 end
 
 theorem le_neg_switch_neg: a ≤ -b ↔ b ≤ -a :=
@@ -89,13 +92,13 @@ begin
     to_rhs,
     rw ←neg_neg b,
   },
-  from le_neg_switch_iff _ _,
+  rw le_neg_switch_iff,
 end
 
 theorem square_nonneg: 0 ≤ a * a :=
 begin
   cases le_total_order 0 a with ha ha, {
-    from zero_le_mul a a ha ha,
+    from zero_le_mul ha ha,
   }, {
     rw ←neg_mul_neg a a,
     rw le_neg_switch_iff at ha,
@@ -129,11 +132,6 @@ begin
   },
 end
 
--- not sure what the most optimal way to do this is
-@[trans]
-private lemma le_trans_lemma: a ≤ b → b ≤ c → a ≤ c :=
-le_trans _ _ _
-
 theorem le_iff_diff_nonneg: a ≤ b ↔ 0 ≤ b - a :=
 begin
   have := le_add_cancel_right a b (-a),
@@ -145,9 +143,9 @@ theorem le_add_comb: a ≤ b → c ≤ d → a + c ≤ b + d :=
 begin
   assume hab hcd,
   transitivity (a + d), {
-    from le_add_left _ _ _ hcd,
+    from le_add_left _ hcd,
   }, {
-    from le_add_right _ _ _ hab,
+    from le_add_right _ hab,
   },
 end
 
@@ -232,7 +230,7 @@ begin
 end
 
 -- still works without decidability, so not the same at lt_impl_le
-theorem lt_very_antisymm_impl: a < b → ¬(b < a) :=
+theorem lt_very_antisymm_impl {a b : α}: a < b → ¬(b < a) :=
 begin
   assume hab hba,
   apply lt_very_antisymmetric a b,
@@ -260,7 +258,7 @@ begin
   from lt_neg_switch_iff _ _,
 end
 
-theorem lt_neg_switch_neg: a < -b ↔ b < -a :=
+theorem lt_neg_switch_neg {a b : α}: a < -b ↔ b < -a :=
 begin
   conv {
     to_rhs,
@@ -270,11 +268,11 @@ begin
 end
 
 @[trans]
-theorem lt_trans: a < b → b < c → a < c :=
+theorem lt_trans {a} (b : α) {c}: a < b → b < c → a < c :=
 begin
   assume hab hbc hac,
-  have := le_trans _ _ _ (lt_impl_le hab) (lt_impl_le hbc),
-  have h := le_antisymm _ _ hac this,
+  have := le_trans _ (lt_impl_le hab) (lt_impl_le hbc),
+  have h := le_antisymm hac this,
   subst h,
   from lt_very_antisymmetric _ _ ⟨hbc, hab⟩,
 end
@@ -302,14 +300,14 @@ begin
   assumption,
 end
 
-theorem lt_le_chain: a < b → b ≤ c → a < c :=
+theorem lt_le_chain {a} (b : α) {c}: a < b → b ≤ c → a < c :=
 begin
   assume hab hbc hac,
-  have := le_trans _ _ _ (lt_impl_le hab) hbc,
-  have h := le_antisymm  _ _ this hac,
+  have := le_trans _ (lt_impl_le hab) hbc,
+  have h := le_antisymm this hac,
   subst h,
   clear hac this,
-  have := le_antisymm _ _ (lt_impl_le hab) hbc,
+  have := le_antisymm (lt_impl_le hab) hbc,
   subst this,
   from lt_nrefl _ hab,
 end
@@ -317,11 +315,11 @@ end
 theorem le_lt_chain {a : α} (b : α) {c : α}: a ≤ b → b < c → a < c :=
 begin
   assume hab hbc hac,
-  have := le_trans _ _ _ hab (lt_impl_le hbc),
-  have h := le_antisymm _ _ this hac,
+  have := le_trans _ hab (lt_impl_le hbc),
+  have h := le_antisymm this hac,
   subst h,
   clear hac this,
-  have := le_antisymm _ _ (lt_impl_le hbc) hab,
+  have := le_antisymm (lt_impl_le hbc) hab,
   subst this,
   from lt_nrefl _ hbc,
 end
@@ -342,7 +340,7 @@ end
 theorem nontrivial_zero_lt_one: (0: α) ≠ 1 → (0: α) < 1 :=
 begin
   assume nontrivial h,
-  from nontrivial (le_antisymm _ _ zero_le_one h),
+  from nontrivial (le_antisymm zero_le_one h),
 end
 
 theorem nontrivial_zero_lt_two: (0: α) ≠ 1 → (0: α) < 2 :=
@@ -371,7 +369,7 @@ begin
     assume hxy,
     by_cases h: b ≤ a, {
       right,
-      from  le_antisymm _ _ hxy h,
+      from  le_antisymm hxy h,
     }, {
       left,
       assumption,
@@ -457,7 +455,7 @@ theorem le_impl_max_left
 (hnm: b ≤ a): max a b = a :=
 begin
   by_cases a ≤ b, {
-    rw [le_antisymm _ _ h hnm, max_self],
+    rw [le_antisymm h hnm, max_self],
   }, {
     unfold max,
     rw if_neg h,
@@ -551,12 +549,12 @@ begin
     rw if_neg hmmxnk,
     have hmk: ¬a ≤ c, {
       assume hmk,
-      have := le_trans _ _ _ hmk (le_max_right b c),
+      have := le_trans _ hmk (le_max_right b c),
       from hmmxnk this,
     },
     have hmn: ¬a ≤ b, {
       assume hmk,
-      have := le_trans _ _ _ hmk (le_max_left b c),
+      have := le_trans _ hmk (le_max_left b c),
       from hmmxnk this,
     },
     repeat {rw if_neg hmk <|> rw if_neg hmn},
@@ -588,7 +586,7 @@ begin
     rw le_impl_max_right _ _ (lt_impl_le h),
     by_cases h': a ≤ c, {
       rw le_impl_max_right _ _ h',
-      have := le_trans _ _ _ (lt_impl_le h) h',
+      have := le_trans _ (lt_impl_le h) h',
       rw le_impl_max_right _ _ this,
       rw le_impl_max_right _ _ h',
     }, {
@@ -807,7 +805,7 @@ theorem sign_of_neg : a < 0 → sign a = -1 :=
 begin
   assume ha0,
   unfold sign,
-  rw if_neg (lt_very_antisymm_impl _ _ ha0),
+  rw if_neg (lt_very_antisymm_impl ha0),
   rw if_pos ha0,
 end
 
@@ -877,7 +875,7 @@ begin
     }, {
       change ¬¬0 ≤ a at ha',
       rw decidable.not_not_iff at ha',
-      have ha0 := le_antisymm _ _ ha ha',
+      have ha0 := le_antisymm ha ha',
       rw ha0,
       rw sign_zero,
       rw zero_mul,
