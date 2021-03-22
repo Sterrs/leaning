@@ -33,6 +33,8 @@ instance : ordered_integral_domain α := {
 theorem half_pos {ε : α} : 0 < ε → 0 < ε / 2 := sorry
 -- assume h, by rwa [lt_mul_pos_right zero_lt_two, zero_mul, div_mul_cancel two_nzero]
 
+theorem pos_impl_inv_pos {x : α} : 0 < x → 0 < x⁻¹ := sorry
+
 theorem exists_between (a c : α) :
 a < c → ∃ b : α, a < b ∧ b < c :=
 begin

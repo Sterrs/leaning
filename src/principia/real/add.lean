@@ -88,7 +88,7 @@ instance : has_add real := ⟨add⟩
 theorem add_eq_cls {x y : real} {f g : cau_seq}: x = ⟦f⟧ → y = ⟦g⟧ → x + y = ⟦f + g⟧ :=
 λ hxf hyg, by rw [hxf, hyg]; refl
 
-private theorem add_assoc (x y z : real) : x + y + z = x + (y + z) :=
+theorem add_assoc (x y z : real) : x + y + z = x + (y + z) :=
 begin
   cases quotient.exists_rep x with f hf, subst hf,
   cases quotient.exists_rep y with g hg, subst hg,
@@ -100,10 +100,7 @@ begin
   ac_refl,
 end
 
-instance add_is_assoc : is_associative real add := ⟨add_assoc⟩
-
-@[simp]
-private theorem add_zero (x : real) : x + 0 = x :=
+@[simp] theorem add_zero (x : real) : x + 0 = x :=
 begin
   cases quotient.exists_rep x with f hf, subst hf,
   rw [real_zero, coe_def],
@@ -115,8 +112,7 @@ begin
   rw add_zero,
 end
 
-@[simp]
-private theorem add_neg (x : real) : x + -x = 0 :=
+@[simp] theorem add_neg (x : real) : x + -x = 0 :=
 begin
   cases quotient.exists_rep x with f hf, subst hf,
   rw [neg_eq_cls rfl, add_eq_cls rfl rfl],

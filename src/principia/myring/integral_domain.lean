@@ -1,5 +1,5 @@
 import .order
-
+#check le_antisymm
 namespace hidden
 
 -- nontriviality axiom?
@@ -59,24 +59,25 @@ end integral_domain
 
 class ordered_integral_domain (α : Type) extends integral_domain α, has_le α :=
 -- NOTE: Theses are the ordered_myring axioms
-(decidable_le: ∀ a b: α, decidable (a ≤ b))
-(le_add_right (a b c : α) : a ≤ b → a + c ≤ b + c)
-(zero_le_mul (a b : α) : 0 ≤ a → 0 ≤ b → 0 ≤ a * b)
-(le_trans (a b c: α): a ≤ b → b ≤ c → a ≤ c)
-(le_total_order (a b: α): a ≤ b ∨ b ≤ a)
-(le_antisymm (a b: α): a ≤ b → b ≤ a → a = b)
+-- NOTE: Added `oid_` to avoid name clash when opening alongside ordered_myring
+(oid_decidable_le: ∀ a b: α, decidable (a ≤ b))
+(oid_le_add_right (a b c : α) : a ≤ b → a + c ≤ b + c)
+(oid_zero_le_mul (a b : α) : 0 ≤ a → 0 ≤ b → 0 ≤ a * b)
+(oid_le_trans (a b c: α): a ≤ b → b ≤ c → a ≤ c)
+(oid_le_total_order (a b: α): a ≤ b ∨ b ≤ a)
+(oid_le_antisymm (a b: α): a ≤ b → b ≤ a → a = b)
 
 namespace ordered_integral_domain
 
 variables {α : Type} [ordered_integral_domain α] (a b c : α)
 
 instance : ordered_myring α := {
-  decidable_le := decidable_le,
-  le_add_right := le_add_right,
-  zero_le_mul := zero_le_mul,
-  le_trans := le_trans,
-  le_total_order := le_total_order,
-  le_antisymm := le_antisymm,
+  decidable_le := oid_decidable_le,
+  le_add_right := oid_le_add_right,
+  zero_le_mul := oid_zero_le_mul,
+  le_trans := oid_le_trans,
+  le_total_order := oid_le_total_order,
+  le_antisymm := oid_le_antisymm,
 }
 
 open myring
@@ -169,7 +170,7 @@ begin
         rw h,
         repeat {rw mul_zero <|> rw sign_zero},
       }, {
-        apply le_antisymm, {
+        apply ordered_myring.le_antisymm, {
           from decidable.of_not_not h0b,
         }, {
           from decidable.of_not_not hb0,
@@ -198,7 +199,7 @@ begin
         rw h,
         repeat {rw zero_mul <|> rw sign_zero},
       }, {
-        apply le_antisymm, {
+        apply ordered_myring.le_antisymm, {
           from decidable.of_not_not h0a,
         }, {
           from decidable.of_not_not ha0,
@@ -206,6 +207,29 @@ begin
       }
     },
   },
+end
+
+theorem le_mul_cancel_pos_right : 0 < c → (a * c ≤ b * c ↔ a ≤ b) :=
+begin
+  assume hc,
+  split; assume h, {
+    sorry,
+  }, {
+    sorry,
+  },
+end
+
+theorem le_mul_cancel_pos_left : 0 < c → (c * a ≤ c * b ↔ a ≤ b) :=
+begin
+  rw [mul_comm, mul_comm c],
+  exact le_mul_cancel_pos_right _ _ _,
+end
+
+theorem lt_mul_comb_nonneg {a b c d : α}
+(hx : 0 ≤ a) (hz : 0 ≤ c) (hxy : a < b) (hzw : c < d):
+ a * c < b * d :=
+begin
+  sorry,
 end
 
 end ordered_integral_domain
