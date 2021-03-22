@@ -104,7 +104,7 @@ end
 
 def add (x y: frac) : frac :=
 ⟨x.num * y.denom + y.num * x.denom, x.denom * y.denom,
-by from zero_lt_mul _ _ x.denom_pos y.denom_pos⟩
+by from zero_lt_mul x.denom_pos y.denom_pos⟩
 
 instance: has_add frac := ⟨add⟩
 
@@ -138,7 +138,7 @@ end
 
 def mul (x y : frac) : frac :=
 ⟨x.num * y.num, x.denom * y.denom,
-by from zero_lt_mul _ _ x.denom_pos y.denom_pos⟩
+by from zero_lt_mul x.denom_pos y.denom_pos⟩
 
 instance: has_mul frac := ⟨mul⟩
 

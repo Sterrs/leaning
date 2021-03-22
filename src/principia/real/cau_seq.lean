@@ -88,6 +88,14 @@ equivalent_trans⟩
 theorem setoid_equiv (f g : cau_seq) :
 f ≈ g ↔ equivalent f g := iff.rfl
 
+theorem seq_eq_impl_eq (f g : cau_seq) : (∀ n, f.val n = g.val n) → f = g :=
+begin
+  cases f, cases g,
+  dsimp only [],
+  intros h,
+  sorry,
+end
+
 theorem seq_eq_impl_cau_seq_equiv (f g : cau_seq) : (∀ n, f.val n = g.val n) → f ≈ g :=
 begin
   assume h,

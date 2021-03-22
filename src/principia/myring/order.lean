@@ -118,8 +118,7 @@ end
 
 theorem wlogle
 (p: α → α → Prop)
-(hsymm: ∀ a b: α, p a b → p b a):
-(∀ a b: α, a ≤ b → p a b) → (∀ a b: α, p a b) :=
+(hsymm: ∀ a b: α, p a b → p b a) : (∀ a b: α, a ≤ b → p a b) → (∀ a b: α, p a b) :=
 begin
   assume hwlog,
   intros a b,
@@ -135,16 +134,14 @@ end
 private lemma le_trans_lemma: a ≤ b → b ≤ c → a ≤ c :=
 le_trans _ _ _
 
-theorem le_iff_diff_nonneg:
-a ≤ b ↔ 0 ≤ b - a :=
+theorem le_iff_diff_nonneg: a ≤ b ↔ 0 ≤ b - a :=
 begin
   have := le_add_cancel_right a b (-a),
   rw add_neg at this,
   from this,
 end
 
-theorem le_add_comb:
-a ≤ b → c ≤ d → a + c ≤ b + d :=
+theorem le_add_comb: a ≤ b → c ≤ d → a + c ≤ b + d :=
 begin
   assume hab hcd,
   transitivity (a + d), {
@@ -172,8 +169,7 @@ theorem le_mul_nonneg_right: 0 ≤ c → a ≤ b → a * c ≤ b * c :=
 λ hc hab, by rw [mul_comm, mul_comm b]; from le_mul_nonneg_left _ _ _ hc hab
 
 theorem le_mul_comb_nonneg
-(hx : 0 ≤ a) (hz : 0 ≤ c) (hxy : a ≤ b) (hzw : c ≤ d):
- a * c ≤ b * d :=
+(hx : 0 ≤ a) (hz : 0 ≤ c) (hxy : a ≤ b) (hzw : c ≤ d):  a * c ≤ b * d :=
 begin
   transitivity (b * c),
     apply le_mul_nonneg_right; assumption,
@@ -204,7 +200,7 @@ instance: has_lt α := ⟨lt⟩
 -- probably not needed with `change` etc
 theorem lt_iff_nle: a < b ↔ ¬b ≤ a := iff.rfl
 
-theorem lt_impl_ne: a < b → a ≠ b :=
+theorem lt_impl_ne {a b : α}: a < b → a ≠ b :=
 begin
   assume hxy hxeqy,
   subst hxeqy,
@@ -215,10 +211,10 @@ end
 theorem lt_nrefl: ¬(a < a) :=
 begin
   assume h,
-  from lt_impl_ne _ _ h rfl,
+  from lt_impl_ne h rfl,
 end
 
-theorem lt_impl_le: a < b → a ≤ b :=
+theorem lt_impl_le {a b : α}: a < b → a ≤ b :=
 begin
   assume hxy,
   cases le_total_order a b with h h, {
@@ -277,7 +273,7 @@ end
 theorem lt_trans: a < b → b < c → a < c :=
 begin
   assume hab hbc hac,
-  have := le_trans _ _ _ (lt_impl_le _ _ hab) (lt_impl_le _ _ hbc),
+  have := le_trans _ _ _ (lt_impl_le hab) (lt_impl_le hbc),
   have h := le_antisymm _ _ hac this,
   subst h,
   from lt_very_antisymmetric _ _ ⟨hbc, hab⟩,
@@ -309,11 +305,11 @@ end
 theorem lt_le_chain: a < b → b ≤ c → a < c :=
 begin
   assume hab hbc hac,
-  have := le_trans _ _ _ (lt_impl_le _ _ hab) hbc,
+  have := le_trans _ _ _ (lt_impl_le hab) hbc,
   have h := le_antisymm  _ _ this hac,
   subst h,
   clear hac this,
-  have := le_antisymm _ _ (lt_impl_le _ _ hab) hbc,
+  have := le_antisymm _ _ (lt_impl_le hab) hbc,
   subst this,
   from lt_nrefl _ hab,
 end
@@ -321,11 +317,11 @@ end
 theorem le_lt_chain {a : α} (b : α) {c : α}: a ≤ b → b < c → a < c :=
 begin
   assume hab hbc hac,
-  have := le_trans _ _ _ hab (lt_impl_le _ _ hbc),
+  have := le_trans _ _ _ hab (lt_impl_le hbc),
   have h := le_antisymm _ _ this hac,
   subst h,
   clear hac this,
-  have := le_antisymm _ _ (lt_impl_le _ _ hbc) hab,
+  have := le_antisymm _ _ (lt_impl_le hbc) hab,
   subst this,
   from lt_nrefl _ hbc,
 end
@@ -369,8 +365,7 @@ end
 -- can't figure out hot to make decidability a typeclass thing
 -- if we do a separate typeclass for decidably ordered rings
 -- eg so we can do max/abs, move this there
-theorem le_iff_lt_or_eq :
-a ≤ b ↔ a < b ∨ a = b :=
+theorem le_iff_lt_or_eq : a ≤ b ↔ a < b ∨ a = b :=
 begin
   split, {
     assume hxy,
@@ -384,15 +379,14 @@ begin
   }, {
     assume h,
     cases h with h1 h2, {
-      from lt_impl_le _ _ h1,
+      from lt_impl_le h1,
     }, {
       rw h2,
     },
   },
 end
 
-theorem lt_trichotomy :
-a = b ∨ a < b ∨ b < a :=
+theorem lt_trichotomy : a = b ∨ a < b ∨ b < a :=
 begin
   by_cases h: a ≤ b, {
     rw le_iff_lt_or_eq at h,
@@ -407,15 +401,14 @@ begin
 end
 
 -- basically de Morgan
-theorem lt_iff_le_and_neq :
-a < b ↔ a ≤ b ∧ a ≠ b :=
+theorem lt_iff_le_and_neq : a < b ↔ a ≤ b ∧ a ≠ b :=
 begin
   split, {
     assume h,
     split, {
-      from lt_impl_le _ _ h,
+      from lt_impl_le h,
     }, {
-      from lt_impl_ne _ _ h,
+      from lt_impl_ne h,
     },
   }, {
     assume h,
@@ -440,8 +433,7 @@ if a ≤ b then a else b
 def abs (a: α) :=
 max a (-a)
 
-instance decidable_lt :
-∀ a b: α, decidable (a < b) :=
+instance decidable_lt : ∀ a b: α, decidable (a < b) :=
 λ a b, not.decidable
 
 def sign
@@ -451,8 +443,7 @@ if 0 < a then 1
     else 0
 
 @[simp]
-theorem max_self :
-max a a = a :=
+theorem max_self : max a a = a :=
 by apply if_pos; refl
 
 theorem le_impl_max_right
@@ -475,14 +466,13 @@ end
 
 theorem lt_impl_max_right
 (hmn: a < b): max a b = b :=
-le_impl_max_right _ _ (lt_impl_le _ _ hmn)
+le_impl_max_right _ _ (lt_impl_le hmn)
 
 theorem lt_impl_max_left
 (hnm: b < a): max a b = a :=
-le_impl_max_left _ _ (lt_impl_le _ _ hnm)
+le_impl_max_left _ _ (lt_impl_le hnm)
 
-theorem le_iff_max :
-a ≤ b ↔ max a b = b :=
+theorem le_iff_max : a ≤ b ↔ max a b = b :=
 begin
   split; assume h, {
     from le_impl_max_right _ _ h,
@@ -492,12 +482,11 @@ begin
     rw ←lt_iff_nle at hmn,
     rw lt_impl_max_left _ _ hmn at h,
     exfalso,
-    from lt_impl_ne _ _ hmn h.symm,
+    from lt_impl_ne hmn h.symm,
   },
 end
 
-theorem max_comm :
-max a b = max b a :=
+theorem max_comm : max a b = max b a :=
 begin
   by_cases a ≤ b,
     rw [le_impl_max_right _ _ h, le_impl_max_left _ _ h],
@@ -505,15 +494,13 @@ begin
   rw [lt_impl_max_right _ _ h, lt_impl_max_left _ _ h],
 end
 
-theorem le_iff_max_reverse :
-b ≤ a ↔ max a b = a :=
+theorem le_iff_max_reverse : b ≤ a ↔ max a b = a :=
 begin
   rw max_comm,
   from le_iff_max _ _,
 end
 
-theorem le_max_right :
-b ≤ max a b :=
+theorem le_max_right : b ≤ max a b :=
 begin
   by_cases b ≤ a,
     have := (le_iff_max _ _).mp h,
@@ -523,16 +510,13 @@ begin
   rw lt_impl_max_right _ _ h,
 end
 
-theorem le_max_left :
-a ≤ max a b :=
+theorem le_max_left : a ≤ max a b :=
 by rw max_comm; from le_max_right _ _
 
-instance :
-is_commutative α max := ⟨λ a b, max_comm _ _⟩
+instance : is_commutative α max := ⟨λ a b, max_comm _ _⟩
 
 -- Max distributes over itself
-theorem max_max :
-max a (max b c) = max (max a b) (max a c) :=
+theorem max_max : max a (max b c) = max (max a b) (max a c) :=
 begin
   unfold max,
   by_cases hmmxnk: a ≤ (max b c); unfold max at hmmxnk, {
@@ -580,8 +564,7 @@ begin
   },
 end
 
-theorem max_eq_either :
-max a b = a ∨ max a b = b :=
+theorem max_eq_either : max a b = a ∨ max a b = b :=
 begin
   by_cases a ≤ b,
     right, rwa le_impl_max_right,
@@ -590,8 +573,7 @@ begin
   rwa lt_impl_max_left,
 end
 
-theorem max_assoc :
-max (max a b) c = max a (max b c) :=
+theorem max_assoc : max (max a b) c = max a (max b c) :=
 begin
   by_cases a ≤ b, {
     rw le_impl_max_right _ _ h,
@@ -603,30 +585,28 @@ begin
   }, {
     rw ←lt_iff_nle at h,
     rw max_comm a b,
-    rw le_impl_max_right _ _ (lt_impl_le _ _ h),
+    rw le_impl_max_right _ _ (lt_impl_le h),
     by_cases h': a ≤ c, {
       rw le_impl_max_right _ _ h',
-      have := le_trans _ _ _ (lt_impl_le _ _ h) h',
+      have := le_trans _ _ _ (lt_impl_le h) h',
       rw le_impl_max_right _ _ this,
       rw le_impl_max_right _ _ h',
     }, {
       rw ←lt_iff_nle at h',
       rw max_comm a c,
-      rw le_impl_max_right _ _ (lt_impl_le _ _ h'),
+      rw le_impl_max_right _ _ (lt_impl_le h'),
       cases max_eq_either b c with h h; rw h; clear h,
       rw max_comm a b,
-      rw le_impl_max_right _ _ (lt_impl_le _ _ h),
+      rw le_impl_max_right _ _ (lt_impl_le h),
       rw max_comm a c,
-      rw le_impl_max_right _ _ (lt_impl_le _ _ h'),
+      rw le_impl_max_right _ _ (lt_impl_le h'),
     },
   },
 end
 
-instance :
-is_associative α max := ⟨λ a b c, max_assoc _ _ _⟩
+instance : is_associative α max := ⟨λ a b c, max_assoc _ _ _⟩
 
-theorem max_sum_le :
-max (a + c) (b + d) ≤ max a b + max c d :=
+theorem max_sum_le : max (a + c) (b + d) ≤ max a b + max c d :=
 begin
   cases max_eq_either (a + c) (b + d) with h; rw h; clear h, {
     from le_add_comb _ _ _ _ (le_max_left _  _) (le_max_left _ _),
@@ -636,8 +616,7 @@ begin
 end
 
 -- yes it takes longer this way abut it's a matter of principle
-theorem nonneg_mul_max :
-0 ≤ a → a * max b c = max (a * b) (a * c) :=
+theorem nonneg_mul_max : 0 ≤ a → a * max b c = max (a * b) (a * c) :=
 begin
   assume h0m,
   revert b c,
@@ -655,16 +634,14 @@ begin
   },
 end
 
-theorem abs_neg :
-abs (-b) = abs b :=
+theorem abs_neg : abs (-b) = abs b :=
 begin
   unfold abs,
   rw neg_neg,
   from max_comm _ _,
 end
 
-theorem abs_of_nonneg 
-(h : 0 ≤ a): abs a = a :=
+theorem abs_of_nonneg (h : 0 ≤ a): abs a = a :=
 begin
   unfold abs,
   rw max_comm,
@@ -679,24 +656,21 @@ begin
   },
 end
 
-theorem abs_one :
-abs (1 : α) = 1 :=
+theorem abs_one : abs (1 : α) = 1 :=
 begin
   apply abs_of_nonneg,
   exact zero_le_one,
 end
 
-theorem abs_of_pos :
-0 < a → abs a = a :=
+theorem abs_of_pos : 0 < a → abs a = a :=
 begin
   assume h,
   apply abs_of_nonneg,
-  apply lt_impl_le _ _,
+  apply lt_impl_le,
   assumption,
 end
 
-theorem abs_of_neg :
-a < 0 → abs a = -a :=
+theorem abs_of_neg : a < 0 → abs a = -a :=
 begin
   assume ha0,
   rw ←abs_neg,
@@ -705,8 +679,7 @@ begin
   rw abs_of_pos _ ha0,
 end
 
-theorem abs_of_nonpos :
-a ≤ 0 → abs a = -a :=
+theorem abs_of_nonpos : a ≤ 0 → abs a = -a :=
 begin
   assume ha0,
   rw ←abs_neg,
@@ -715,8 +688,7 @@ begin
   rw abs_of_nonneg _ ha0,
 end
 
-theorem abs_nonneg :
-0 ≤ abs a :=
+theorem abs_nonneg : 0 ≤ abs a :=
 begin
   by_cases h0a: 0 ≤ a, {
     rw abs_of_nonneg _ h0a,
@@ -731,8 +703,7 @@ begin
   },
 end
 
-private theorem abs_cancel_abs_mul_within:
-abs (abs a * b) = abs (a * b) :=
+private theorem abs_cancel_abs_mul_within: abs (abs a * b) = abs (a * b) :=
 begin
   unfold abs,
   by_cases h: -a ≤ a,
@@ -742,8 +713,7 @@ begin
 end
 
 -- Short lemma above avoids any casework
-theorem abs_mul :
-abs (a * b) = abs a * abs b :=
+theorem abs_mul : abs (a * b) = abs a * abs b :=
 begin
   have: abs a * abs b = abs (abs a * abs b),
     have : 0 ≤ abs a * abs b,
@@ -757,8 +727,7 @@ begin
 end
 
 -- The following three theorems are practically equivalent, needs reorganising a bit
-theorem abs_nonneg_mul :
-0 ≤ a → ∀ b, a * abs b = abs (a * b) :=
+theorem abs_nonneg_mul : 0 ≤ a → ∀ b, a * abs b = abs (a * b) :=
 begin
   assume h0m,
   intro b,
@@ -771,8 +740,7 @@ begin
 end
 
 -- le_sqrt_nonneg?
--- theorem abs_le_square :
--- abs a ≤ abs b ↔ a * a ≤ b * b :=
+-- theorem abs_le_square : -- abs a ≤ abs b ↔ a * a ≤ b * b :=
 -- begin
 --   split; assume h, {
 --     have := le_mul_comb_nonneg _ _ _ _ (abs_nonneg _) (abs_nonneg _) h h,
@@ -784,24 +752,18 @@ end
 --   },
 -- end
 
-theorem self_le_abs :
-a ≤ abs a :=
-le_max_left _ _
+theorem self_le_abs : a ≤ abs a := le_max_left _ _
 
-theorem triangle_ineq :
-abs (a + b) ≤ abs a + abs b :=
+theorem triangle_ineq : abs (a + b) ≤ abs a + abs b :=
 begin
   unfold abs,
   rw neg_distr,
   from max_sum_le _ _ _ _,
 end
 
-theorem abs_eq_plusminus :
-abs a = a ∨ abs a = -a :=
-max_eq_either a (-a)
+theorem abs_eq_plusminus : abs a = a ∨ abs a = -a := max_eq_either a (-a)
 
-theorem abs_zero :
-abs (0: α) = 0 :=
+theorem abs_zero : abs (0: α) = 0 :=
 begin
   cases abs_eq_plusminus (0: α) with h h, {
     assumption,
@@ -811,8 +773,7 @@ begin
   },
 end
 
-theorem zero_iff_abs_zero :
-a = 0 ↔ abs a = 0 :=
+theorem zero_iff_abs_zero : a = 0 ↔ abs a = 0 :=
 begin
   split, {
     assume hm0,
@@ -835,16 +796,14 @@ begin
   },
 end
 
-theorem sign_of_pos:
-0 < a → sign a = 1 :=
+theorem sign_of_pos: 0 < a → sign a = 1 :=
 begin
   assume h0a,
   unfold sign,
   rw if_pos h0a,
 end
 
-theorem sign_of_neg :
-a < 0 → sign a = -1 :=
+theorem sign_of_neg : a < 0 → sign a = -1 :=
 begin
   assume ha0,
   unfold sign,
@@ -852,16 +811,14 @@ begin
   rw if_pos ha0,
 end
 
-theorem sign_zero :
-sign (0: α) = 0 :=
+theorem sign_zero : sign (0: α) = 0 :=
 begin
   unfold sign,
   rw if_neg (lt_nrefl _),
   rw if_neg (lt_nrefl _),
 end
 
-theorem sign_mul_self_abs :
-a * sign a = abs a :=
+theorem sign_mul_self_abs : a * sign a = abs a :=
 begin
   by_cases h0m: 0 < a, {
     rw sign_of_pos _ h0m,
@@ -889,8 +846,7 @@ begin
   },
 end
 
-theorem sign_zero_iff_zero :
-sign a = 0 ↔ a = 0 :=
+theorem sign_zero_iff_zero : sign a = 0 ↔ a = 0 :=
 begin
   split, {
     assume hsgnm,
@@ -904,8 +860,7 @@ begin
   },
 end
 
-theorem sign_abs_mul :
-sign a * abs a = a :=
+theorem sign_abs_mul : sign a * abs a = a :=
 begin
   by_cases ha: 0 < a, {
     rw sign_of_pos _ ha,
@@ -930,8 +885,7 @@ begin
   },
 end
 
-theorem sign_neg :
-sign (-a) = -sign a :=
+theorem sign_neg : sign (-a) = -sign a :=
 begin
   by_cases h0a: 0 < a, {
     rw sign_of_pos _ h0a,
@@ -956,15 +910,13 @@ begin
   },
 end
 
-theorem zero_le_self_mul_sign :
-0 ≤ a * sign a :=
+theorem zero_le_self_mul_sign : 0 ≤ a * sign a :=
 begin
   rw sign_mul_self_abs,
   from abs_nonneg _,
 end
 
-theorem zero_lt_self_mul_sign :
-a ≠ 0 → 0 < a * sign a :=
+theorem zero_lt_self_mul_sign : a ≠ 0 → 0 < a * sign a :=
 begin
   assume han0,
   unfold sign,
@@ -994,8 +946,7 @@ begin
   },
 end
 
-theorem zero_lt_sign_mul_self :
-a ≠ 0 → 0 < sign a * a :=
+theorem zero_lt_sign_mul_self : a ≠ 0 → 0 < sign a * a :=
 begin
   assume han0,
   rw mul_comm,
@@ -1003,8 +954,7 @@ begin
   assumption,
 end
 
-theorem abs_lt_iff_lt_both :
-abs a < b ↔ -b < a ∧ a < b :=
+theorem abs_lt_iff_lt_both : abs a < b ↔ -b < a ∧ a < b :=
 begin
   split; assume h, {
     split, {
@@ -1037,12 +987,10 @@ end
 theorem abs_lt_left : abs a < b → -b < a :=
 λ h, by rw abs_lt_iff_lt_both at h; from h.left
 
-theorem abs_lt_right :
-abs a < b → a < b :=
+theorem abs_lt_right : abs a < b → a < b :=
 λ h, by rw abs_lt_iff_lt_both at h; from h.right
 
-theorem lt_abs_impl_lt_either :
-a < abs b → b < -a ∨ a < b :=
+theorem lt_abs_impl_lt_either : a < abs b → b < -a ∨ a < b :=
 begin
   assume hab,
   cases abs_eq_plusminus b with h h, {
@@ -1059,8 +1007,7 @@ end
 
 -- abs_diff refers to the pattern `abs (a - b) < c` which often shows up in analysis
 
-theorem abs_diff_lt_left :
-abs (a - b) < c → b - c < a :=
+theorem abs_diff_lt_left : abs (a - b) < c → b - c < a :=
 begin
   assume h,
   have habs := abs_lt_left _ _ h,
@@ -1078,8 +1025,7 @@ begin
   from habs,
 end
 
-theorem abs_diff_lt_right :
-abs (a - b) < c → a < b + c :=
+theorem abs_diff_lt_right :abs (a - b) < c → a < b + c :=
 begin
   assume h,
   rw lt_neg_switch_iff,

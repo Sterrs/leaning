@@ -86,7 +86,7 @@ open integral_domain
 
 -- only works in ordered integral domain
 -- (consider lexicographic order on ℤ × ℤ)
-theorem zero_lt_mul : 0 < a → 0 < b → 0 < a * b :=
+theorem zero_lt_mul {a b : α} : 0 < a → 0 < b → 0 < a * b :=
 begin
   assume hapos hbpos,
   assume hab0,
@@ -151,7 +151,7 @@ begin
   rw sign_of_pos _ h0a,
   by_cases h0b: 0 < b, {
     rw sign_of_pos _ h0b,
-    rw sign_of_pos _ (zero_lt_mul _ _ h0a h0b),
+    rw sign_of_pos _ (zero_lt_mul h0a h0b),
     rw mul_one,
   }, {
     by_cases hb0: b < 0, {
@@ -160,7 +160,7 @@ begin
       rw neg_eq,
       rw ←sign_neg,
       rw ←mul_neg,
-      rw sign_of_pos _ (zero_lt_mul _ _ h0a hb0), {
+      rw sign_of_pos _ (zero_lt_mul h0a hb0), {
         rw mul_neg,
         rw neg_neg,
         rw mul_one,

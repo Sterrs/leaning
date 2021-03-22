@@ -78,11 +78,11 @@ begin
   -- Needed for rearranging
   have huf0 : uf ≠ 0,
     assume hufeq0,
-    from lt_impl_ne _ _ hufpos hufeq0.symm,
+    from lt_impl_ne hufpos hufeq0.symm,
   -- hug0 is frying right now
   have hug0 : ug ≠ 0,
     assume hugeq0,
-    from lt_impl_ne _ _ hugpos hugeq0.symm,
+    from lt_impl_ne hugpos hugeq0.symm,
   -- We juggle a bit so we can simply apply lt_comb
   conv {
     to_rhs,
@@ -113,6 +113,13 @@ end⟩
 instance: has_mul cau_seq := ⟨mul⟩
 
 theorem mul_val {a b : cau_seq} {n : mynat} : (a * b).val n = a.val n * b.val n := rfl
+
+theorem mul_comm (a b : cau_seq) : a * b = b * a :=
+begin
+  apply cau_seq.seq_eq_impl_eq,
+  intro n,
+  rw [mul_val, mul_val, myring.mul_comm],
+end
 
 open classical
 
@@ -171,8 +178,7 @@ begin
     assumption,
   },
   rw [lt_mul_pos_left _ hmpos, ←abs_mul, mul_add, mul_one, ←mul_assoc,
-      mul_comm, neg_mul, ←mul_assoc, inv_mul hmzero, one_mul,
-      ←sub_def],
+      myring.mul_comm, neg_mul, ←mul_assoc, inv_mul hmzero, one_mul, ←sub_def],
   suffices: A * (A * ε) ≤ abs (f.val m) * ((abs (f.val n)) * ε),
     apply lt_le_chain _ (A * (A * ε)),
     apply hM,
@@ -180,25 +186,25 @@ begin
       from mynat.max_lt_cancel_left hm,
     assumption,
   apply le_mul_comb_nonneg, {
-    from lt_impl_le 0 A hN.left,
+    from lt_impl_le hN.left,
   }, {
     rw ←zero_mul (0 : myrat),
     apply le_mul_comb_nonneg,
     refl, refl,
-    from lt_impl_le 0 A hN.left,
-    from lt_impl_le 0 ε hε,
+    from lt_impl_le hN.left,
+    from lt_impl_le hε,
   }, {
     have := hN.right m (mynat.max_lt_cancel_right hm),
-    apply lt_impl_le _ _,
+    apply lt_impl_le,
     assumption,
   },
   apply le_mul_comb_nonneg, {
-    from lt_impl_le 0 A hN.left,
+    from lt_impl_le hN.left,
   }, {
-    from lt_impl_le 0 ε hε,
+    from lt_impl_le hε,
   }, {
     have := hN.right n (mynat.max_lt_cancel_right hn),
-    apply lt_impl_le _ _,
+    apply lt_impl_le,
     assumption,
   },
   refl,
@@ -224,17 +230,69 @@ end cau_seq
 
 namespace real
 
+private theorem mul_equiv (a b x : cau_seq) (hab : a ≈ b) : a * x ≈ b * x :=
+begin
+  rw cau_seq.setoid_equiv at *,
+  intros q hq,
+  cases cau_seq.abs_bounded_above x with u hu,
+  cases hu with hu h,
+  have hqu : 0 < q * u⁻¹,
+    apply zero_lt_mul,
+      assumption,
+    apply pos_impl_inv_pos,
+    assumption,
+  cases hab (q * u⁻¹) hqu with N hN,
+  existsi N,
+  intros n hn,
+  rw [cau_seq.mul_val, cau_seq.mul_val, ←sub_mul, abs_mul,
+     lt_mul_pos_right u⁻¹ (pos_impl_inv_pos hu)],
+  apply le_lt_chain (abs (a.val n - b.val n)), {
+    conv {
+      to_rhs,
+      rw ←mul_one (abs (a.val n - b.val n)),
+    },
+    rw mul_assoc,
+    apply le_mul_comb_nonneg, {
+      exact abs_nonneg _,
+    }, {
+      apply zero_le_mul,
+        exact abs_nonneg _,
+      apply lt_impl_le,
+      apply pos_impl_inv_pos,
+      assumption,
+    }, {
+      refl,
+    }, {
+      have this : u ≠ 0,
+        assume hu0,
+        apply lt_impl_ne hu,
+        symmetry, assumption,
+      rw ←mul_inv this,
+      have huinv : 0 ≤ u⁻¹,
+        apply lt_impl_le,
+        apply pos_impl_inv_pos,
+        assumption,
+      apply le_mul_nonneg_right _ _ u⁻¹ huinv,
+      apply lt_impl_le,
+      exact h n,
+    },
+  }, {
+    exact hN n hn,
+  },
+end
+
 def mul : real → real → real :=
 quotient.lift₂ (λ f g, ⟦f * g⟧)
 begin
   intros a x b y hab hxy,
   dsimp only [],
-  rw cau_seq.class_equiv,
-  rw cau_seq.setoid_equiv at *,
-  dsimp only [cau_seq.equivalent] at *,
-  intros ε hε,
-  -- Proof basically identical to the above...?
-  sorry,
+  rw [cau_seq.class_equiv, ←cau_seq.setoid_equiv],
+  apply @setoid.trans _ _ _ (b * x),
+    apply mul_equiv a b x,
+    assumption,
+  rw [cau_seq.mul_comm b, cau_seq.mul_comm b],
+  apply mul_equiv x y b,
+  assumption,
 end
 
 instance: has_mul real := ⟨mul⟩
@@ -334,25 +392,25 @@ begin
     }, {
       rw [←mul_assoc (abs (b.val n)), mul_comm (abs (b.val n)), mul_assoc (abs (a.val n))],
       apply le_mul_comb_nonneg, {
-        from lt_impl_le _ _ hN₁.left,
+        from lt_impl_le hN₁.left,
       }, {
         rw ←zero_mul (0 : myrat),
         apply @le_mul_comb_nonneg _ _ (0 : myrat) _ _ _ (by refl) (by refl),
-        from lt_impl_le _ _ hN₂.left,
-        from lt_impl_le _ _ hε,
+        from lt_impl_le hN₂.left,
+        from lt_impl_le hε,
       }, {
-        apply lt_impl_le _ _,
+        apply lt_impl_le,
         apply hN₁.right n,
         apply @mynat.max_lt_cancel_left _ N₂ _,
         apply @mynat.max_lt_cancel_left _ N₃ _,
         assumption,
       },
       apply le_mul_comb_nonneg, {
-        from lt_impl_le _ _ hN₂.left,
+        from lt_impl_le hN₂.left,
       }, {
-        from lt_impl_le _ _ hε,
+        from lt_impl_le hε,
       }, {
-        apply lt_impl_le _ _,
+        apply lt_impl_le,
         apply hN₂.right n,
         apply @mynat.max_lt_cancel_right N₁ _ _,
         apply @mynat.max_lt_cancel_left _ N₃ _,
