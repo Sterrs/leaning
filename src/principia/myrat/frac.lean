@@ -1,5 +1,4 @@
-import ..myint.lt
-import ..myint.max
+import ..myint.le
 
 namespace hidden
 
@@ -57,7 +56,7 @@ begin
   dsimp only [] at h,
   rw [mul_assoc y.num, mul_comm x.denom, ←mul_assoc y.num, hyz] at h,
   suffices : y.denom * (x.num * z.denom) = y.denom * (z.num * x.denom),
-    from integral_domain.mul_cancel_left _ _ _ (lt_impl_ne _ _ y.denom_pos).symm this,
+    from integral_domain.mul_cancel_left _ _ _ (lt_impl_ne y.denom_pos).symm this,
   rw [←mul_assoc, mul_comm y.denom, h],
   ac_refl,
 end
@@ -202,18 +201,18 @@ begin
   rw setoid_equiv,
   by_cases x.num = 0, {
     rw [h, zero_mul] at hxy,
-    have hzero := integral_domain.mul_integral _ _ hxy.symm,
+    have hzero := integral_domain.mul_integral hxy.symm,
     cases hzero, {
       rw [inv_zero h, inv_zero hzero],
     }, {
-      exfalso, from (lt_impl_ne _ _ x.denom_pos) hzero.symm,
+      exfalso, from (lt_impl_ne x.denom_pos) hzero.symm,
     },
   }, {
     have hydn0 : y.denom ≠ 0,
-      from (lt_impl_ne _ _ y.denom_pos).symm,
+      from (lt_impl_ne y.denom_pos).symm,
     have hlhsn0 : x.num * y.denom ≠ 0,
       assume hz,
-      cases integral_domain.mul_integral _ _ hz; contradiction,
+      cases integral_domain.mul_integral hz; contradiction,
     have : y.num ≠ 0,
       rw hxy at hlhsn0,
       assume hy0,

@@ -1,4 +1,3 @@
-import ..myint.le
 import .basic
 import ..myint.basic
 import ..myfield.order
