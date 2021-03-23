@@ -232,6 +232,17 @@ begin
   sorry,
 end
 
+theorem pos_mul_pos : 0 < a → 0 < b → 0 < a * b :=
+begin
+  assume ha hb,
+  rw ←zero_mul (0 : α),
+  apply lt_mul_comb_nonneg,
+  all_goals { refl <|> assumption, },
+end
+
+-- Convenience
+theorem pos_impl_square_pos {a : α}: 0 < a → 0 < a * a := λ ha, pos_mul_pos _ _ ha ha
+
 end ordered_integral_domain
 
 end hidden

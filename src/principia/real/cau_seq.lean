@@ -12,7 +12,7 @@ open ordered_myfield
 
 def is_cau_seq (f : sequence myrat) : Prop :=
 ∀ ε : myrat, 0 < ε → ∃ N : mynat, ∀ n m : mynat,
-N < n → N < m → abs (f m - f n) < ε
+N ≤ n → N ≤ m → abs (f m - f n) < ε
 
 -- Create the type of Cauchy sequences
 def cau_seq := {f : sequence myrat // is_cau_seq f}
@@ -23,7 +23,7 @@ namespace cau_seq
 -- tends to zero
 def equivalent (f g : cau_seq) : Prop :=
 ∀ ε : myrat, 0 < ε → ∃ N : mynat,
-∀ n : mynat, N < n → abs (f.val n - g.val n) < ε
+∀ n : mynat, N ≤ n → abs (f.val n - g.val n) < ε
 
 private theorem equivalent_refl: reflexive equivalent :=
 begin
@@ -61,8 +61,8 @@ begin
     existsi mynat.max N1 N2,
     intro n,
     assume hN1N2n,
-    have hN1e := hN1 n (mynat.max_lt_cancel_left hN1N2n),
-    have hN2e := hN2 n (mynat.max_lt_cancel_right hN1N2n),
+    have hN1e := hN1 n (mynat.max_le_cancel_left hN1N2n),
+    have hN2e := hN2 n (mynat.max_le_cancel_right hN1N2n),
     have := triangle_ineq (f.val n - g.val n) (g.val n - h.val n),
     conv at this {
       congr,
@@ -129,7 +129,7 @@ end
 
 -- Why was this so hard ffs
 theorem nzero_impl_abs_eventually_bounded_below (f : cau_seq) (hnf0 : ¬f ≈ 0) :
-∃ (δ : myrat) (N : mynat), 0 < δ ∧ ∀ n : mynat, N < n → δ  < abs (f.val n) :=
+∃ (δ : myrat) (N : mynat), 0 < δ ∧ ∀ n : mynat, N ≤ n → δ  < abs (f.val n) :=
 begin
   change ¬(f.equivalent 0) at hnf0,
   unfold cau_seq.equivalent at hnf0,
@@ -175,7 +175,7 @@ begin
     rw abs_sub_switch,
     apply lt_le_chain (abs (f.val m) - abs (abs (f.val m) - abs (f.val n))), {
       rw sub_def,
-      rw ←minus_half,
+      rw ←minus_half myrat.two_nzero,
       rw sub_def,
       apply le_lt_comb, assumption, {
         rw ←lt_neg_switch_iff,

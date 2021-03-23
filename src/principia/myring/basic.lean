@@ -220,6 +220,12 @@ begin
   apply add_neg,
 end
 
+theorem sub_zero : a - 0 = a :=
+by rw [sub_def, neg_zero, add_zero]
+
+theorem zero_sub : 0 - a = -a :=
+by rw [sub_def, zero_add]
+
 theorem mul_sub : a * (b - c) = a * b - a * c :=
 begin
   change a * (b + (-c)) = a * b + -(a * c),
@@ -233,6 +239,7 @@ theorem sub_mul : (a - b) * c = a * c - b * c:=
 by rw [mul_comm, mul_sub, mul_comm a, mul_comm b]
 
 -- This is handy imo
+-- Imma have to firmly agree, bro
 theorem sub_to_zero_iff_eq : a - b = 0 ↔ a = b :=
 begin
   split; assume h, {

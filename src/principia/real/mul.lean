@@ -47,10 +47,10 @@ begin
   -- Obvious facts are obvious
   existsi mynat.max M N,
   intros m n hm hn,
-  have hMm : M < m, from mynat.max_lt_cancel_left hm,
-  have hMn : M < n, from mynat.max_lt_cancel_left hn,
-  have hNm : N < m, from mynat.max_lt_cancel_right hm,
-  have hNn : N < n, from mynat.max_lt_cancel_right hn,
+  have hMm : M ≤ m, from mynat.max_le_cancel_left hm,
+  have hMn : M ≤ n, from mynat.max_le_cancel_left hn,
+  have hNm : N ≤ m, from mynat.max_le_cancel_right hm,
+  have hNn : N ≤ n, from mynat.max_le_cancel_right hn,
   clear hm hn,
   -- Now we need to use the "trick"
   have : f.val n * g.val n - f.val m * g.val m =
@@ -153,7 +153,7 @@ begin
     transitivity A,
       from hN.left,
     apply hN.right n,
-    from mynat.max_lt_cancel_right hn,
+    from mynat.max_le_cancel_right hn,
   },
   have hnzero: f.val n ≠ 0, {
     assume this,
@@ -168,7 +168,7 @@ begin
     transitivity A,
       from hN.left,
     apply hN.right m,
-    from mynat.max_lt_cancel_right hm,
+    from mynat.max_le_cancel_right hm,
   },
   have hmzero: f.val m ≠ 0, {
     assume this,
@@ -182,8 +182,8 @@ begin
   suffices: A * (A * ε) ≤ abs (f.val m) * ((abs (f.val n)) * ε),
     apply lt_le_chain (A * (A * ε)),
     apply hM,
-      from mynat.max_lt_cancel_left hn,
-      from mynat.max_lt_cancel_left hm,
+      from mynat.max_le_cancel_left hn,
+      from mynat.max_le_cancel_left hm,
     assumption,
   apply le_mul_comb_nonneg, {
     from lt_impl_le hN.left,
@@ -194,7 +194,7 @@ begin
     from lt_impl_le hN.left,
     from lt_impl_le hε,
   }, {
-    have := hN.right m (mynat.max_lt_cancel_right hm),
+    have := hN.right m (mynat.max_le_cancel_right hm),
     apply lt_impl_le,
     assumption,
   },
@@ -203,7 +203,7 @@ begin
   }, {
     from lt_impl_le hε,
   }, {
-    have := hN.right n (mynat.max_lt_cancel_right hn),
+    have := hN.right n (mynat.max_le_cancel_right hn),
     apply lt_impl_le,
     assumption,
   },
@@ -354,16 +354,16 @@ begin
       transitivity A,
         from hN₁.left,
       apply hN₁.right n,
-      apply @mynat.max_lt_cancel_left _ N₂ _,
-      apply @mynat.max_lt_cancel_left _ N₃ _,
+      apply @mynat.max_le_cancel_left _ N₂ _,
+      apply @mynat.max_le_cancel_left _ N₃ _,
       assumption,
     },
     have hbnpos : 0 < abs (b.val n), {
       transitivity B,
         from hN₂.left,
       apply hN₂.right n,
-      apply @mynat.max_lt_cancel_right N₁ _ _,
-      apply @mynat.max_lt_cancel_left _ N₃ _,
+      apply @mynat.max_le_cancel_right N₁ _ _,
+      apply @mynat.max_le_cancel_left _ N₃ _,
       assumption,
     },
     have hanzero : a.val n ≠ 0, {
@@ -388,7 +388,7 @@ begin
         one_mul, ←abs_neg, neg_distr, neg_neg, ←sub_def],
     apply lt_le_chain (A * (B * ε)), {
       apply hN₃ n,
-      apply mynat.max_lt_cancel_right hn,
+      apply mynat.max_le_cancel_right hn,
     }, {
       rw [←mul_assoc (abs (b.val n)), mul_comm (abs (b.val n)), mul_assoc (abs (a.val n))],
       apply le_mul_comb_nonneg, {
@@ -401,8 +401,8 @@ begin
       }, {
         apply lt_impl_le,
         apply hN₁.right n,
-        apply @mynat.max_lt_cancel_left _ N₂ _,
-        apply @mynat.max_lt_cancel_left _ N₃ _,
+        apply @mynat.max_le_cancel_left _ N₂ _,
+        apply @mynat.max_le_cancel_left _ N₃ _,
         assumption,
       },
       apply le_mul_comb_nonneg, {
@@ -412,8 +412,8 @@ begin
       }, {
         apply lt_impl_le,
         apply hN₂.right n,
-        apply @mynat.max_lt_cancel_right N₁ _ _,
-        apply @mynat.max_lt_cancel_left _ N₃ _,
+        apply @mynat.max_le_cancel_right N₁ _ _,
+        apply @mynat.max_le_cancel_left _ N₃ _,
         assumption,
       },
       refl,
@@ -521,9 +521,8 @@ begin
   apply @setoid.refl _ _ _,
 end
 
--- FML
 private theorem not_equiv_zero_impl_eventually_nzero (f : cau_seq) :
-¬f ≈ 0 → ∃ N : mynat, ∀ n, N < n → f.val n ≠ 0 :=
+¬f ≈ 0 → ∃ N : mynat, ∀ n, N ≤ n → f.val n ≠ 0 :=
 begin
   intros hnf0,
   cases cau_seq.nzero_impl_abs_eventually_bounded_below f hnf0 with δ h,
