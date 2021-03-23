@@ -2,6 +2,11 @@ import .basic
 
 namespace hidden
 
+open myring
+open ordered_myring
+open myfield
+open ordered_myfield
+
 namespace cau_seq
 
 -- We have to prove that it actually gives a cau_seq
@@ -12,30 +17,30 @@ begin
   have hg := g.property,
   dsimp only [is_cau_seq] at *,
   intros ε hε,
-  have hfε := hf (ε / 2) (myrat.half_pos hε),
-  have hgε := hg (ε / 2) (myrat.half_pos hε),
+  have hfε := hf (ε / 2) (half_pos hε),
+  have hgε := hg (ε / 2) (half_pos hε),
   clear hf hg,
   cases hfε with M hM,
   cases hgε with N hN,
   existsi mynat.max M N,
   intros m n hm hn,
   have : f.val n + g.val n - (f.val m + g.val m) = (f.val n - f.val m) + (g.val n - g.val m),
-    rw [←myrat.sub_add_neg, myrat.neg_add],
+    rw [sub_def, neg_distr],
     have : f.val n + g.val n + (-f.val m + -g.val m) = (f.val n + -f.val m) + (g.val n + -g.val m),
       ac_refl,
     rw this, clear this,
-    rw [myrat.sub_add_neg, myrat.sub_add_neg],
+    rw [←sub_def, ←sub_def],
   rw this, clear this,
-  have : myrat.abs (f.val n - f.val m + (g.val n - g.val m)) ≤
-         myrat.abs (f.val n - f.val m) + myrat.abs (g.val n - g.val m),
-    apply myrat.triangle_ineq,
-  apply myrat.le_lt_chain ((f.val n - f.val m).abs + (g.val n - g.val m).abs),
+  have : abs (f.val n - f.val m + (g.val n - g.val m)) ≤
+         abs (f.val n - f.val m) + abs (g.val n - g.val m),
+    apply triangle_ineq,
+  apply le_lt_chain (abs (f.val n - f.val m) + abs (g.val n - g.val m)),
     assumption,
-  have hN₁ := hN m n (mynat.max_lt_cancel_right hm) (mynat.max_lt_cancel_right hn),
-  have hM₁ := hM m n (mynat.max_lt_cancel_left hm) (mynat.max_lt_cancel_left hn),
+  have hN₁ := hN m n (mynat.max_le_cancel_right hm) (mynat.max_le_cancel_right hn),
+  have hM₁ := hM m n (mynat.max_le_cancel_left hm) (mynat.max_le_cancel_left hn),
   clear this hM hN,
-  have := myrat.lt_comb hM₁ hN₁,
-  rw myrat.half_plus_half at this,
+  have := lt_comb hM₁ hN₁,
+  rw [div_def, ←mul_add, ←one_div, half_plus_half (myrat.two_nzero), mul_one] at this,
   assumption,
 end⟩
 
@@ -58,50 +63,32 @@ begin
   rw cau_seq.setoid_equiv at *,
   dsimp only [cau_seq.equivalent] at *,
   intros ε hε,
-  cases hab (ε / 2) (myrat.half_pos hε) with M hM,
-  cases hxy (ε / 2) (myrat.half_pos hε) with N hN,
+  cases hab (ε / 2) (half_pos hε) with M hM,
+  cases hxy (ε / 2) (half_pos hε) with N hN,
   existsi mynat.max M N,
   intros n hn,
-  have hMn := hM n (mynat.max_lt_cancel_left hn),
-  have hNn := hN n (mynat.max_lt_cancel_right hn),
+  have hMn := hM n (mynat.max_le_cancel_left hn),
+  have hNn := hN n (mynat.max_le_cancel_right hn),
   clear hM hN hxy hab,
-  have h := myrat.lt_comb hMn hNn,
-  rw myrat.half_plus_half at h,
-  rw [cau_seq.add_val, cau_seq.add_val, ←myrat.sub_add_neg, myrat.neg_add],
+  have h := lt_comb hMn hNn,
+  rw half_plus_half at h,
+  rw [cau_seq.add_val, cau_seq.add_val, sub_def, neg_distr],
   have : a.val n + x.val n + (-b.val n + -y.val n) = a.val n + -b.val n + (x.val n + -y.val n),
     ac_refl,
   rw this, clear this,
-  apply myrat.le_lt_chain (myrat.abs (a.val n - b.val n) + myrat.abs (x.val n - y.val n)),
-    from myrat.triangle_ineq _ _,
-  assumption,
+  apply le_lt_chain (abs (a.val n - b.val n) + abs (x.val n - y.val n)),
+    rw [sub_def, sub_def],
+    from @triangle_ineq _ _ (a.val n + -b.val n) (x.val n + -y.val n),
+    assumption,
+  from myrat.two_nzero,
 end
 
 instance : has_add real := ⟨add⟩
 
-variables x y z w : real
-
-def sub := x + -y
-
-instance : has_sub real := ⟨sub⟩
-
-theorem sub_add_neg : x - y = x + -y := rfl
-
 theorem add_eq_cls {x y : real} {f g : cau_seq}: x = ⟦f⟧ → y = ⟦g⟧ → x + y = ⟦f + g⟧ :=
 λ hxf hyg, by rw [hxf, hyg]; refl
 
-theorem add_comm : x + y = y + x :=
-begin
-  cases quotient.exists_rep x with f hf, subst hf,
-  cases quotient.exists_rep y with g hg, subst hg,
-  repeat { rw [add_eq_cls rfl rfl] },
-  apply seq_eq_imp_real_eq rfl rfl,
-  intro n,
-  rw [add_val, add_val, myrat.add_comm],
-end
-
-instance add_is_comm : is_commutative real add := ⟨add_comm⟩
-
-theorem add_assoc : x + y + z = x + (y + z) :=
+theorem add_assoc (x y z : real) : x + y + z = x + (y + z) :=
 begin
   cases quotient.exists_rep x with f hf, subst hf,
   cases quotient.exists_rep y with g hg, subst hg,
@@ -113,39 +100,19 @@ begin
   ac_refl,
 end
 
-instance add_is_assoc : is_associative real add := ⟨add_assoc⟩
-
-@[simp]
-theorem add_zero : x + 0 = x :=
+@[simp] theorem add_zero (x : real) : x + 0 = x :=
 begin
   cases quotient.exists_rep x with f hf, subst hf,
-  rw real_zero,
+  rw [real_zero, coe_def],
   rw add_eq_cls rfl rfl,
   apply seq_eq_imp_real_eq rfl rfl,
   intro n,
   rw add_val,
   dsimp only [],
-  rw myrat.add_zero,
+  rw add_zero,
 end
 
-@[simp]
-theorem zero_add : 0 + x = x :=
-by rw [add_comm, add_zero]
-
-@[simp]
-theorem neg_add : -(x + y) = -x + -y :=
-begin
-  cases quotient.exists_rep x with f hf, subst hf,
-  cases quotient.exists_rep y with g hg, subst hg,
-  repeat { rw add_eq_cls rfl rfl <|> rw neg_eq_cls rfl, },
-  apply seq_eq_imp_real_eq rfl rfl,
-  intro n,
-  repeat { rw neg_val <|> rw add_val, },
-  rw myrat.neg_add,
-end
-
-@[simp]
-theorem neg_self_add : -x + x = 0 :=
+@[simp] theorem add_neg (x : real) : x + -x = 0 :=
 begin
   cases quotient.exists_rep x with f hf, subst hf,
   rw [neg_eq_cls rfl, add_eq_cls rfl rfl],
@@ -153,18 +120,33 @@ begin
   apply seq_eq_imp_real_eq rfl rfl,
   intro n,
   dsimp only [],
-  rw [add_val, neg_val, myrat.neg_self_add],
+  rw [add_val, neg_val, ←sub_def, sub_self],
 end
 
-@[simp]
-theorem self_neg_add : x + -x = 0 :=
-by rw [add_comm, neg_self_add]
+theorem coe_add (a b : myrat) : ↑(a + b) = ↑a + (↑b : real) :=
+begin
+  repeat { rw coe_def, },
+  rw add_eq_cls rfl rfl,
+  rw cau_seq.class_equiv,
+  apply seq_eq_impl_cau_seq_equiv,
+  intros n,
+  rw cau_seq.add_val,
+end
 
-@[simp]
-theorem sub_self : x - x = 0 :=
-by rw [sub_add_neg, self_neg_add]
+theorem real_two : (2 : real) = ↑(2 : myrat) :=
+begin
+  change 1 + (1 : real) = ↑(1 + (1 : myrat)),
+  rw coe_add,
+  rw real_one,
+end
 
-theorem two_nzero : (2 : real) ≠ 0 := sorry
+theorem two_nzero : (2 : real) ≠ 0 :=
+begin
+  rw [real_two, real_zero],
+  assume water,
+  rw eq_iff_coe_eq at water,
+  exact myrat.two_nzero water,
+end
 
 end real
 

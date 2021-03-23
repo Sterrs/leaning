@@ -2,6 +2,7 @@ namespace hidden
 
 -- Commutative Unitary Ring
 class myring (α : Type) extends has_add α, has_zero α, has_neg α, has_mul α, has_one α :=
+(decidable_eq : ∀ a b : α, decidable (a = b))
 (add_assoc (a b c : α) : a + b + c = a + (b + c))
 (add_zero (a : α) : a + 0 = a)
 (add_neg (a : α) : a + -a = 0)
@@ -13,6 +14,8 @@ class myring (α : Type) extends has_add α, has_zero α, has_neg α, has_mul α
 namespace myring
 
 variables {α : Type} [myring α] (a b c : α)
+
+instance (a b : α) : decidable (a = b) := decidable_eq a b
 
 theorem one_mul : 1 * a = a :=
 begin
@@ -27,6 +30,16 @@ theorem add_cancel_right : a + c = b + c → a = b :=
 begin
   assume h,
   rw [←add_zero a, ←add_zero b, ←add_neg c, ←add_assoc, ←add_assoc, h],
+end
+
+theorem add_cancel_right_iff: a + c = b + c ↔ a = b :=
+begin
+  split, {
+    from add_cancel_right _ _ _,
+  }, {
+    assume hbc,
+    rw hbc,
+  },
 end
 
 theorem zero_add : 0 + a = a :=
@@ -57,6 +70,15 @@ theorem add_cancel_left : a + b = a + c → b = c :=
 begin
   assume h,
   rw [←zero_add b, ←zero_add c, ←neg_add a, add_assoc, add_assoc, h],
+end
+
+theorem add_cancel_left_iff: a + b = a + c ↔ b = c :=
+begin
+  split, {
+    from add_cancel_left _ _ _,
+  }, {
+    assume hbc, rw hbc,
+  },
 end
 
 theorem neg_neg : -(-a) = a :=
@@ -96,7 +118,7 @@ end
 theorem zero_mul : 0 * a = 0 :=
 by rw [mul_comm, mul_zero]
 
-private theorem neg_eq_mul_neg_one : -a = -1 * a :=
+theorem neg_eq_mul_neg_one : -a = -1 * a :=
 begin
   symmetry,
   conv {
@@ -106,17 +128,19 @@ begin
   rw [←neg_unique, mul_comm, ←mul_add, neg_add, mul_zero],
 end
 
-theorem neg_mul : -(a * b) = (-a) * b :=
+theorem neg_mul : (-a) * b = -(a * b) :=
 begin
-  symmetry,
   rw [←neg_unique, mul_comm (-a), mul_comm a, ←mul_add, neg_add, mul_zero],
 end
 
-theorem mul_neg : -(a * b) = a * (-b) :=
+theorem mul_neg : a * (-b) = -(a * b) :=
 begin
   rw [mul_comm a (-b), mul_comm a b],
   apply neg_mul,
 end
+
+theorem neg_mul_neg : (-a) * (-b) = a * b :=
+by rw [mul_neg, neg_mul, neg_neg]
 
 theorem neg_distr : -(a + b) = -a + -b :=
 by rw [neg_eq_mul_neg_one a, neg_eq_mul_neg_one b, ←mul_add, ←neg_eq_mul_neg_one]
@@ -139,8 +163,30 @@ begin
   rwa zero_add,
 end
 
+theorem add_cancel_left_to_zero_iff: a + b = b ↔ a = 0 :=
+begin
+  split, {
+    from add_cancel_left_to_zero _ _,
+  }, {
+    assume ha0,
+    rw ha0,
+    rw zero_add,
+  },
+end
+
 theorem add_cancel_right_to_zero : a + b = a → b = 0 :=
 λ h, add_cancel_left_to_zero b a (by rwa add_comm at h)
+
+theorem add_cancel_right_to_zero_iff: a + b = a ↔ b = 0 :=
+begin
+  split, {
+    from add_cancel_right_to_zero _ _,
+  }, {
+    assume hb0,
+    rw hb0,
+    rw add_zero,
+  },
+end
 
 theorem add_left : a = b → c + a = c + b :=
 begin
@@ -166,11 +212,19 @@ end
 def sub : α → α → α := λ a b, a + (-b)
 instance: has_sub α := ⟨sub⟩
 
+theorem sub_def : a - b = a + -b := rfl
+
 theorem sub_self : a - a = 0 :=
 begin
   change a + -a = 0,
   apply add_neg,
 end
+
+theorem sub_zero : a - 0 = a :=
+by rw [sub_def, neg_zero, add_zero]
+
+theorem zero_sub : 0 - a = -a :=
+by rw [sub_def, zero_add]
 
 theorem mul_sub : a * (b - c) = a * b - a * c :=
 begin
@@ -178,10 +232,14 @@ begin
   rw [mul_add, ←mul_neg],
 end
 
+theorem neg_sub : -(a - b) = b - a :=
+by rw [sub_def, sub_def, neg_distr, neg_neg, add_comm]
+
 theorem sub_mul : (a - b) * c = a * c - b * c:=
 by rw [mul_comm, mul_sub, mul_comm a, mul_comm b]
 
 -- This is handy imo
+-- Imma have to firmly agree, bro
 theorem sub_to_zero_iff_eq : a - b = 0 ↔ a = b :=
 begin
   split; assume h, {

@@ -1,6 +1,12 @@
 import .cau_seq
+import ..logic
 
 namespace hidden
+
+open myring
+open ordered_myring
+open myfield
+open ordered_myfield
 
 namespace cau_seq
 
@@ -28,8 +34,7 @@ begin
   intros n m,
   assume hn hm,
   have h := hN n m hn hm,
-  rwa [←myrat.sub_add_neg, myrat.neg_neg, myrat.add_comm,
-      myrat.sub_add_neg, myrat.abs_sub_switch],
+  rwa [sub_def, neg_neg, add_comm, ←sub_def, ←abs_neg, neg_sub],
 end
 
 def neg : cau_seq → cau_seq :=
@@ -51,8 +56,7 @@ begin
   intros n hn,
   have h := hN n hn,
   rw [neg_val, neg_val],
-  rwa [←myrat.sub_add_neg, myrat.neg_neg, myrat.add_comm,
-      myrat.sub_add_neg, myrat.abs_sub_switch],
+  rwa [sub_def, neg_neg, add_comm, ←sub_def, ←abs_neg, neg_sub],
 end
 
 end cau_seq
@@ -61,15 +65,19 @@ def real := quotient cau_seq.real_setoid
 
 namespace real
 
-instance : has_zero real := ⟨⟦0⟧⟩
+def coe_myrat (a : myrat) : real := ⟦⟨λ n, a, cau_seq.constant_cauchy a⟩⟧
 
-theorem real_zero : (0 : real) = ⟦⟨λ n, 0, cau_seq.constant_cauchy 0⟩⟧ := rfl
+instance : has_coe myrat real := ⟨coe_myrat⟩
 
-instance : has_one real := ⟨⟦1⟧⟩
+theorem coe_def (a : myrat) : (↑a : real) = ⟦⟨λ n, a, cau_seq.constant_cauchy a⟩⟧ := rfl
 
-theorem real_one : (1 : real) = ⟦⟨λ n, 1, cau_seq.constant_cauchy 1⟩⟧ := rfl
+instance : has_zero real := ⟨↑(0 : myrat)⟩
 
-instance : has_coe myrat real := ⟨λ q, ⟦⟨λ n, q, cau_seq.constant_cauchy q⟩⟧⟩
+theorem real_zero : (0 : real) = ↑(0 : myrat) := rfl
+
+instance : has_one real := ⟨↑(1 : myrat)⟩
+
+theorem real_one : (1 : real) = ↑(1 : myrat) := rfl
 
 def neg : real → real := quotient.lift (λ f, ⟦-f⟧) cau_seq.neg_well_defined
 
@@ -94,13 +102,48 @@ begin
   assumption,
 end
 
-theorem neg_neg (x : real) : -(-x) = x :=
+theorem coe_neg (a : myrat) : -↑a = (↑(-a) : real) :=
 begin
-  cases quotient.exists_rep x with f hf, subst hf,
-  repeat { rw neg_eq_cls rfl, },
+  rw coe_def,
+  rw coe_def,
+  rw neg_eq_cls rfl,
   apply seq_eq_imp_real_eq rfl rfl,
-  intro n,
-  rw [neg_val, neg_val, myrat.neg_neg],
+  intros n,
+  rw cau_seq.neg_val,
+end
+
+open classical
+
+theorem eq_iff_coe_eq (a b : myrat) : (↑a : real) = ↑b ↔ a = b :=
+begin
+  rw [coe_def, coe_def, cau_seq.class_equiv],
+  split; assume h, {
+    unfold cau_seq.equivalent at h,
+    rw ←sub_to_zero_iff_eq,
+    rw ←abs_zero_iff_zero,
+    apply ordered_myring.le_antisymm, {
+      rw le_iff_lt_impl_lt,
+      intros ε hε,
+      cases h ε hε with N hN,
+      apply hN N (@mynat.le_refl N),
+    }, {
+      exact abs_nonneg _,
+    },
+  }, {
+    intros ε hε,
+    existsi (0 : mynat),
+    intros n hn,
+    dsimp,
+    rwa [h, sub_self, abs_zero],
+  },
+end
+
+theorem nontrivial : (0 : real) ≠ 1 :=
+begin
+  rw [real_zero, real_one],
+  assume hydroxide,
+  rw eq_iff_coe_eq at hydroxide,
+  exact myrat.nontrivial hydroxide,
 end
 
 end real

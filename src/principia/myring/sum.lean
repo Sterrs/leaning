@@ -13,6 +13,7 @@ variables {α : Type} [myring α]
 variables a b c d : α
 variables m n k : mynat
 variables term f g : sequence α
+variables (op: α → α → α) (dflt: α)
 
 @[simp] theorem sum_zero: sum term 0 = 0 := rfl
 
@@ -22,8 +23,7 @@ theorem sum_succ: sum term (mynat.succ n) = sum term n + term n := rfl
 @[simp]
 theorem sum_one: sum term 1 = term 0 :=
 begin
-  change 0 + term 0 = term 0,
-  rw zero_add,
+  apply zero_add,
 end
 
 @[simp] theorem prod_zero: product term 0 = 1 := rfl
@@ -35,8 +35,7 @@ product term (mynat.succ n) = product term n * term n := rfl
 @[simp]
 theorem prod_one: product term 1 = term 0 :=
 begin
-  change 1 * term 0 = term 0,
-  rw one_mul,
+  apply one_mul,
 end
 
 -- theorem constant_sum: ∀ n : mynat, sum ↑(1 : α) n = n
@@ -83,25 +82,49 @@ begin
   },
 end
 
-theorem apply_sum: (∀ n, f n = g n) → sum f k = sum g k :=
+theorem apply_accumulate:
+(∀ n, f n = g n) → accumulate op dflt f k = accumulate op dflt g k :=
 begin
   assume h,
-  induction k with k hk,
+  induction k with k hk, {
     refl,
-  rw [sum_succ, sum_succ, h k, hk],
+  }, {
+    dsimp [accumulate],
+    rw h,
+    rw hk,
+  },
+end
+
+theorem apply_sum:
+(∀ n, f n = g n) → sum f k = sum g k :=
+λ h, apply_accumulate k f g (+) 0 h
+
+theorem apply_prod:
+(∀ n, f n = g n) → product f k = product g k :=
+λ h, apply_accumulate k f g (*) 1 h
+
+theorem accumulate_tail
+[hcomm: is_commutative _ op]
+[hassoc: is_associative _ op]:
+accumulate op dflt f (mynat.succ n) =
+op (accumulate op dflt (λ k, f (mynat.succ k)) n) (f 0) :=
+begin
+  induction n with n hn, {
+    refl,
+  }, {
+    unfold accumulate at *,
+    rw hn,
+    ac_refl,
+  },
 end
 
 theorem sum_tail:
 sum f (mynat.succ n) = sum (λ k, f (mynat.succ k)) n + f 0 :=
-begin
-  induction n, {
-    rw sum_succ,
-    simp,
-  }, {
-    rw [sum_succ, n_ih, add_assoc, add_comm (f 0), ←add_assoc,
-        ←sum_succ],
-  },
-end
+accumulate_tail n f (+) 0
+
+theorem prod_tail:
+product f (mynat.succ n) = product (λ k, f (mynat.succ k)) n * f 0 :=
+accumulate_tail n f (*) 1
 
 private theorem restricted_mpr {m : mynat} {f g : sequence α}
 (h : ∀ n, n < m → f n = g n) : ∀ n, n ≤ m → sum f n = sum g n
@@ -307,21 +330,6 @@ begin
   },
 end
 
-theorem prod_tail:
-product f (mynat.succ n) = product (λ k, f (mynat.succ k)) n * f 0 :=
-begin
-  induction n with n hn, {
-    refl,
-  }, {
-    rw prod_succ,
-    rw hn,
-    rw mul_assoc,
-    rw mul_comm (f 0),
-    rw ←mul_assoc,
-    rw ←prod_succ,
-  },
-end
-
 theorem prod_congr:
 (∀ k, f k = g k) → (∀ n, product f n = product g n) :=
 begin
@@ -335,47 +343,6 @@ begin
     rw heq n,
   },
 end
-
--- >:( make this more like sum_split
--- or perhaps a general construction for reductions of commutative
--- associative operations :))
--- theorem prod_split:
--- product f (2 * n) = product f n * product (λ k, f (n + k)) n :=
--- begin
---   induction n with n hn, {
---     rw [mynat.zz, mynat.mul_zero],
---     dsimp only [sequence.product],
---     rw mul_one,
---   }, {
---     rw mynat.mul_succ,
---     rw mynat.add_comm 2,
---     have: product f (2 * n + 2) = product f (2 * n) * f (2 * n) * f (2 * n + 1) := rfl,
---     rw this, clear this,
---     rw hn,
---     have: f (2 * n) * f (2 * n + 1) = f (n + n) * f (n + mynat.succ n), {
---       repeat {rw mynat.mul_comm 2},
---       refl,
---     },
---     rw mul_assoc,
---     rw this,
---     rw mul_assoc,
---     conv {
---       congr, congr, skip,
---       rw ←mul_assoc,
---       rw ←prod_succ,
---       rw ←prod_succ,
---       rw prod_tail,
---       rw mul_comm,
---     },
---     rw ←mul_assoc,
---     rw mynat.add_zero,
---     rw ←prod_succ,
---     have: ∀ k, f (n + mynat.succ k) = f(mynat.succ n + k), {
---       simp,
---     },
---     rw prod_congr _ _ this,
---   },
--- end
 
 end myring
 end hidden

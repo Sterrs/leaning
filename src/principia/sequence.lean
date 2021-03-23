@@ -120,18 +120,21 @@ variables [has_zero α] [has_one β]
 instance: has_zero (sequence α) := ⟨λ k, 0⟩
 instance: has_one (sequence β) := ⟨λ k, 1⟩
 
+def accumulate
+{α : Type} (f: α → α → α) (dflt: α) (seq: sequence α): sequence α
+| 0              := dflt
+| (mynat.succ n) := f (accumulate n) (seq n)
+
 -- sum from k = 0 to n - 1 of term(k)
 -- a bit unconventional, but this is the best way I could think of
 -- to not have to have weird special cases with 0
 def sum {α : Type} [has_add α] [has_zero α]
 (seq: sequence α): sequence α
-| 0        := 0
-| (mynat.succ n) := sum n + seq n
+:= accumulate (+) 0 seq
 
 def product {β : Type} [has_mul β] [has_one β]
-(term : sequence β) : sequence β
-| 0        := 1
-| (mynat.succ n) := product n * term n
+(seq: sequence β): sequence β
+:= accumulate (*) 1 seq
 
 end sequence
 

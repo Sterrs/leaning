@@ -37,7 +37,10 @@ Just a rough guide as to what style we're trying to use
 - For colons, usually put no space before and one space after
   on either side.
 - Parenthesise as you see fit.
-- In weird ambiguous re-write situations, try to use `conv`.
+- In weird ambiguous re-write situations, first, try to use rewrite but specify
+  explicit arguments to clear up the ambiguity, if you don't want to write out
+  the whole term, only write out the distinguishing part and put `_` where you
+  want lean to fill in the gap. As a last resort, use `conv`.
 - Try to keep lines within 70 characters. We'd like lines to not wrap in
   VScode basically
 - No parentheses after quantifiers
@@ -87,12 +90,28 @@ More general tips/useful things not to forget:
   commutativity and associativity of operations.
 - If h is an equality, try using `subst h` to rewrite everything using
   it and then delete it.
+- If you are trying to prove a goal of the form `f a = f b` and you know you can
+  prove `a = b`, use `apply congr_arg,`. If it somehow doesn't get the right
+  `f`, you can explicitly supply a function to `congr_arg`.
+
+  (If you are trying to prove `f a = g b` and you can prove both
+  `f = g` and `a = b` then use `apply congr,`. So `apply congr_arg,` is the same
+  as `apply congr rfl,`).
+- If you want to force lean to write the goal as a definitional equivalent, you
+  can use the tactic `change <new equivalent goal>,`. This can be useful if `rw`
+  is being boneheaded.
+- When using `change`, you don't have to write out the whole goal, you can put
+  `_` for things which lean can deduce. In cases where even this is too
+  cumbersome, create an auxilliary theorem called `..._def` to rewrite this
+  definitional equality
+- If you are doing `rw h at h1 h2 ...,`, you can add "`⊢`" to the list to also
+  target the current goal.
 
 ## Implicit vs Explicit Arguments
 
 - Use explicit arguments by default. Therefore, when using `variables`, normally
 use explicit arguments.
-- Use implicit arguments for any argument which is mentioned in a hypothesis.
+- Use implicit arguments when the theorem is an *implication*, for any argument which appears on *both sides* of the implication.
 - Use explicit arguments if the theorem is an `↔` or `=`, which will usually be used
 via `rw` (so, definitely if it's an `=`, and based on judgement if it's a `↔`).
 This is because `rw` allows you to optionally specify explicit arguments to help it

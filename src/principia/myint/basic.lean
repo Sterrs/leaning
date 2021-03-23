@@ -5,26 +5,20 @@ import ..mynat.basic
 import ..mynat.le
 import ..mynat.nat_sub
 import .int_pair
+import ..myring.integral_domain
 
 namespace hidden
 open mynat
 
-namespace myint
-open myint
 def myint := quotient int_pair.int_pair.setoid
+
+namespace myint
 
 instance: decidable_eq myint := quotient.decidable_eq
 
 instance: has_coe mynat myint := ⟨λ n, ⟦⟨n, 0⟩⟧⟩
 
 theorem coe_nat_def (a: mynat): (↑a: myint) = ⟦⟨a, 0⟩⟧ := rfl
-
-def neg_succ_of_nat (n: mynat): myint := ⟦⟨0, succ n⟩⟧
-
--- should probably be phased out of use
-notation `-[1+ ` n `]` := neg_succ_of_nat n
-
-theorem neg_succ_def (a: mynat): -[1+ a] = ⟦⟨0, succ a⟩⟧ := rfl
 
 instance: has_zero myint := ⟨(0: mynat)⟩
 instance: has_one myint := ⟨(1: mynat)⟩
@@ -39,26 +33,25 @@ def neg: myint → myint :=
 quotient.lift (λ n, ⟦-n⟧) int_pair.neg_well_defined
 
 instance: has_neg myint := ⟨neg⟩
+instance has_neg2: has_neg (quotient int_pair.int_pair.setoid) := ⟨neg⟩
 
-theorem neg_eq_cls {x: int_pair.int_pair} {n: myint}:
-n = ⟦x⟧ → -n = ⟦-x⟧ :=
-λ hnx, by rw hnx; refl
-
-def sign: myint → myint :=
-quotient.lift (λ n, ⟦int_pair.sign n⟧) int_pair.sign_well_defined
-
-theorem sign_eq_cls {x: int_pair.int_pair} {n: myint}:
-n = ⟦x⟧ → sign n = ⟦int_pair.sign x⟧ :=
-λ hnx, by rw hnx; refl
+private theorem neg_eq_cls {x: int_pair.int_pair}:
+-⟦x⟧ = ⟦-x⟧ := rfl
 
 def add: myint → myint → myint :=
 quotient.lift₂ (λ n m, ⟦n + m⟧) int_pair.add_well_defined
 
 instance: has_add myint := ⟨add⟩
+-- so that lean knows what ⟦x⟧ + ⟦y⟧ is
+instance has_add2: has_add (quotient int_pair.int_pair.setoid) := ⟨add⟩
 
-theorem add_eq_cls {x y: int_pair.int_pair} {n m: myint}:
-n = ⟦x⟧ → m = ⟦y⟧ → n + m = ⟦x + y⟧ :=
-λ hnx hmy, by rw [hnx, hmy]; refl
+-- this theorem is a bit of an antique. Really
+-- it and theorems like it can just be replaced
+-- with invocations of `change`, but it can be
+-- nice (and stabler) sometimes to not have to write
+-- out the entire target all the time
+private theorem add_eq_cls {x y: int_pair.int_pair}:
+⟦x⟧ + ⟦y⟧ = ⟦x + y⟧ := rfl
 
 def sub (n m: myint): myint := n + -m
 
@@ -70,10 +63,10 @@ def mul: myint → myint → myint :=
 quotient.lift₂ (λ n m, ⟦n * m⟧) int_pair.mul_well_defined
 
 instance: has_mul myint := ⟨mul⟩
+instance has_mul2: has_mul (quotient int_pair.int_pair.setoid) := ⟨mul⟩
 
-theorem mul_eq_cls {x y: int_pair.int_pair} {n m: myint}:
-n = ⟦x⟧ → m = ⟦y⟧ → n * m = ⟦x * y⟧ :=
-λ hnx hmy, by rw [hnx, hmy]; refl
+private theorem mul_eq_cls {x y: int_pair.int_pair}:
+⟦x⟧ * ⟦y⟧ = ⟦x * y⟧ := rfl
 
 theorem nat_nat_mul {x y: mynat}:
 (↑x: myint) * ↑y = ↑(x * y) :=
@@ -83,27 +76,10 @@ begin
   simp,
 end
 
-def le: myint → myint → Prop :=
-quotient.lift₂ int_pair.le int_pair.le_well_defined
-
-instance: has_le myint := ⟨le⟩
-
-theorem le_eq_cls {x y: int_pair.int_pair} {n m: myint}:
-n = ⟦x⟧ → m = ⟦y⟧ → (n ≤ m ↔ x ≤ y) :=
-λ hnx hmy, by rw [hnx, hmy]; refl
-
-def lt: myint → myint → Prop :=
-quotient.lift₂ int_pair.lt int_pair.lt_well_defined
-
-instance: has_lt myint := ⟨lt⟩
-
-theorem lt_eq_cls {x y: int_pair.int_pair} {n m: myint}:
-n = ⟦x⟧ → m = ⟦y⟧ → (n < m ↔ x < y) :=
-λ hnx hmy, by rw [hnx, hmy]; refl
-
 universe u
 
 -- a decidable relation lifted to a quotient type is decidable
+-- This shouldn't be here...
 def quotient_decidable_rel
 {α : Sort u} {s : setoid α}
 (rel: α → α → Prop)
@@ -114,8 +90,8 @@ def quotient_decidable_rel
 λ q₁ q₂ : quotient s,
   quotient.rec_on_subsingleton₂ q₁ q₂ dr
 
-variables {m n k: myint}
-variables {a b c: mynat}
+variables m n k: myint
+variables a b c: mynat
 
 lemma of_nat_zero: ↑(0: mynat) = (0: myint) := rfl
 
@@ -124,19 +100,6 @@ lemma of_nat_one: ↑(1: mynat) = (1: myint) := rfl
 theorem zero_nat: (↑(0: mynat): myint) = 0 := rfl
 
 theorem one_nat: (↑(1:mynat):myint) = 1 := rfl
-
-theorem neg_one: -(1:myint) = -[1+ 0] := rfl
-
-theorem of_nat_ne_neg_succ: ↑a ≠ -[1+ b] :=
-begin
-  assume haminb,
-  rw coe_nat_def at haminb,
-  rw neg_succ_def at haminb,
-  from succ_ne_zero (quotient.exact haminb),
-end
-
-theorem zero_ne_neg_succ (a : mynat): 0 ≠ -[1+ a] := by
-  apply of_nat_ne_neg_succ
 
 @[simp]
 theorem of_nat_cancel: (↑a: myint) = ↑b ↔ a = b :=
@@ -151,84 +114,204 @@ begin
   },
 end
 
-theorem neg_succ_of_nat_cancel: -[1+ a] = -[1+ b] ↔ a = b :=
-begin
-  repeat {rw coe_nat_def},
-  split, {
-    assume hab,
-    symmetry,
-    have := quotient.exact hab,
-    rw int_pair.setoid_equiv at this,
-    simp at this,
-    assumption,
-  }, {
-    assume hab,
-    rw hab,
-  },
-end
+@[simp]
+theorem coe_succ: (↑(succ a): myint) = ↑a + 1 := rfl
+
+@[simp] theorem coe_coe_add: (↑a: myint) + ↑b = ↑(a + b) := rfl
+
+theorem add_one_succ: (↑a: myint) + 1 = ↑(succ a) := rfl
 
 @[simp]
-theorem neg_neg: - -n = n :=
+theorem coe_coe_mul : (↑a : myint) * ↑b = ↑(a * b) :=
 begin
-  cases (quotient.exists_rep n) with x hx, subst hx,
-  repeat {rw neg_eq_cls rfl},
-  rw int_pair.neg_neg,
+  repeat { rw coe_nat_def, },
+  rw mul_eq_cls,
+  apply congr_arg,
+  rw int_pair.eq_iff_split,
+  simp, -- awsome :o
 end
 
-theorem neg_cancel: n = m ↔ -n = -m :=
+private lemma neq_iff_not_eq: m ≠ n ↔ ¬(m = n) :=
 begin
-  split, {
-    assume hnm, rw hnm,
-  }, {
-    assume hnm,
-    suffices h: - -n = - -m, {
-      simp at h,
-      assumption,
-    }, {
-      rw hnm,
-    },
-  },
+  split; assume hneq heq, all_goals { contradiction },
 end
 
-@[simp]
-theorem sub_self: n - n = 0 :=
+private lemma succ_times_succ_nzero: (succ a) * (succ b) ≠ 0 :=
 begin
-  cases (quotient.exists_rep n) with x hx, subst hx,
-  rw sub_def,
-  rw neg_eq_cls rfl,
-  rw add_eq_cls rfl rfl,
-  apply quotient.sound,
-  rw int_pair.setoid_equiv,
+  assume h,
+  have hsan0 : succ a ≠ 0,
+    assume h₁,
+    from mynat.no_confusion h₁,
+  have hsbn0 : succ b ≠ 0,
+    assume h₁,
+    from mynat.no_confusion h₁,
+  from hsbn0 (mynat.mul_integral hsan0 h),
+end
+
+-- hmmmmmm
+private lemma mul_integral_biased {m n : myint}:
+m ≠ 0 → m * n = 0 → n = 0 :=
+begin
+  cases quotient.exists_rep m with a ha, subst ha,
+  cases quotient.exists_rep n with b hb, subst hb,
+  repeat {rw mul_eq_cls <|> rw int_zero},
+  assume haneq0 hab0,
+  rw int_pair.sound_exact_iff at hab0,
+  rw int_pair.setoid_equiv at hab0,
+  simp at hab0,
+  repeat {rw int_pair.sound_exact_iff <|> rw int_pair.setoid_equiv},
   simp,
-  rw mynat.add_comm,
+  cases (le_total_order a.a a.b) with ha ha; cases ha with d hd, {
+    rw hd at hab0,
+    simp at hab0,
+    rw ←mynat.add_assoc at hab0,
+    rw mynat.add_comm (a.a * b.a) at hab0,
+    rw mynat.add_assoc at hab0,
+    have := mynat.add_cancel (mynat.add_cancel hab0),
+    apply @mynat.mul_cancel d _ _,
+    assume hd0,
+    apply haneq0,
+    apply quotient.sound,
+    rw int_pair.setoid_equiv,
+    rw hd,
+    rw hd0,
+    simp,
+    symmetry, assumption,
+  }, {
+    rw hd at hab0,
+    simp at hab0,
+    conv at hab0 {
+      to_rhs,
+      rw mynat.add_comm,
+    },
+    rw mynat.add_assoc at hab0,
+    have hw := mynat.add_cancel hab0,
+    rw mynat.add_comm at hw,
+    have := mynat.add_cancel hw,
+    apply @mynat.mul_cancel d _ _,
+    assume hd0,
+    apply haneq0,
+    apply quotient.sound,
+    rw int_pair.setoid_equiv,
+    rw hd,
+    rw hd0,
+    simp,
+    assumption,
+  },
 end
 
-@[simp]
-theorem neg_zero: -(0:myint) = 0 := rfl
-
-theorem neg_switch: -m = n → m = -n :=
+theorem nontrivial: (0: myint) ≠ 1 :=
 begin
-  assume h,
-  -- To "do the same to both sides"
-  have h₁ := congr_arg (λ m, -m) h,
-  simp at h₁, -- To simp lambdas
-  assumption,
+  assume h01,
+  rw int_zero at h01,
+  rw int_one at h01,
+  rw int_pair.sound_exact_iff at h01,
+  rw int_pair.setoid_equiv at h01,
+  cases h01,
 end
 
--- Sign
+-- theorem mul_nonzero_nonzero : m * n ≠ 0 ↔ m ≠ 0 ∧ n ≠ 0 :=
+-- begin
+--   split; assume h, {
+--     have : 0 = (0 : myint) := rfl,
+--     split, all_goals {
+--       assume h0,
+--       subst h0,
+--     },
+--     rw zero_mul at h,
+--     contradiction,
+--     rw mul_zero at h,
+--     contradiction,
+--   }, {
+--     assume hmn0,
+--     cases mul_integral hmn0 with hn0 hm0,
+--       from h.right hn0,
+--     from h.left hm0,
+--   },
+-- end
 
-theorem sign_zero: sign 0 = 0 := rfl
+instance: myring myint := ⟨
+  by apply_instance,
+  λ m n k: myint,
+  begin
+    cases quotient.exists_rep m with a ha, subst ha,
+    cases quotient.exists_rep n with b hb, subst hb,
+    cases quotient.exists_rep k with c hc, subst hc,
+    apply congr_arg quotient.mk,
+    rw int_pair.eq_iff_split,
+    simp,
+    split; ac_refl,
+  end,
+  λ m: myint,
+  begin
+    cases quotient.exists_rep m with a ha, subst ha,
+    rw int_zero,
+    apply congr_arg quotient.mk,
+    rw int_pair.eq_iff_split,
+    simp,
+  end,
+  λ m: myint,
+  begin
+    cases quotient.exists_rep m with a ha, subst ha,
+    rw int_zero,
+    rw neg_eq_cls,
+    rw add_eq_cls,
+    apply quotient.sound,
+    rw int_pair.setoid_equiv,
+    simp,
+    rw mynat.add_comm,
+  end,
+  λ m n k: myint,
+  begin
+    cases quotient.exists_rep m with a ha, subst ha,
+    cases quotient.exists_rep n with b hb, subst hb,
+    cases quotient.exists_rep k with c hc, subst hc,
+    apply congr_arg quotient.mk,
+    rw int_pair.eq_iff_split,
+    simp,
+    split, { -- ac_refl takes too long without a little kick-start
+      repeat {rw mynat.add_assoc <|> rw mynat.mul_assoc},
+      apply congr_arg,
+      ac_refl,
+    }, {
+      repeat {rw mynat.add_assoc <|> rw mynat.mul_assoc},
+      apply congr_arg,
+      ac_refl,
+    },
+  end,
+  λ m n: myint,
+  begin
+    cases quotient.exists_rep m with a ha, subst ha,
+    cases quotient.exists_rep n with b hb, subst hb,
+    apply congr_arg quotient.mk,
+    rw int_pair.eq_iff_split,
+    simp,
+    split; ac_refl,
+  end,
+  λ m: myint,
+  begin
+    cases quotient.exists_rep m with a ha, subst ha,
+    rw int_one,
+    apply congr_arg quotient.mk,
+    rw int_pair.eq_iff_split,
+    simp,
+  end,
+  λ m n k: myint,
+  begin
+    cases quotient.exists_rep m with a ha, subst ha,
+    cases quotient.exists_rep n with b hb, subst hb,
+    cases quotient.exists_rep k with c hc, subst hc,
+    apply congr_arg quotient.mk,
+    rw int_pair.eq_iff_split,
+    simp,
+    split; ac_refl,
+  end⟩
 
--- °_° wtf
-theorem sign_succ: sign ↑(succ a) = 1 := rfl
-
-theorem zero_ne_one : (0 : myint) ≠ 1 :=
-begin
-  rw [←one_nat, ←zero_nat],
-  assume h,
-  rw of_nat_cancel at h,
-  from zero_ne_one h,
-end
+instance: integral_domain myint := ⟨begin
+  intros a b ha h,
+  apply mul_integral_biased ha,
+  rwa myring.mul_comm,
+end⟩
 
 end myint
 end hidden
