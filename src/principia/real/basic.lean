@@ -104,7 +104,12 @@ end
 
 theorem coe_neg (a : myrat) : -↑a = (↑(-a) : real) :=
 begin
-  sorry,
+  rw coe_def,
+  rw coe_def,
+  rw neg_eq_cls rfl,
+  apply seq_eq_imp_real_eq rfl rfl,
+  intros n,
+  rw cau_seq.neg_val,
 end
 
 open classical
@@ -112,10 +117,25 @@ open classical
 theorem eq_iff_coe_eq (a b : myrat) : (↑a : real) = ↑b ↔ a = b :=
 begin
   rw [coe_def, coe_def, cau_seq.class_equiv],
-  split; assume h,
-    sorry,
-  intros ε hε,
-  sorry,
+  split; assume h, {
+    unfold cau_seq.equivalent at h,
+    rw ←sub_to_zero_iff_eq,
+    rw ←abs_zero_iff_zero,
+    apply ordered_myring.le_antisymm, {
+      rw le_iff_lt_impl_lt,
+      intros ε hε,
+      cases h ε hε with N hN,
+      apply hN N (@mynat.le_refl N),
+    }, {
+      exact abs_nonneg _,
+    },
+  }, {
+    intros ε hε,
+    existsi (0 : mynat),
+    intros n hn,
+    dsimp,
+    rwa [h, sub_self, abs_zero],
+  },
 end
 
 theorem nontrivial : (0 : real) ≠ 1 :=

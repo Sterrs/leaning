@@ -123,7 +123,22 @@ begin
   rw [add_val, neg_val, ←sub_def, sub_self],
 end
 
-theorem real_two : (2 : real) = ↑(2 : myrat) := sorry
+theorem coe_add (a b : myrat) : ↑(a + b) = ↑a + (↑b : real) :=
+begin
+  repeat { rw coe_def, },
+  rw add_eq_cls rfl rfl,
+  rw cau_seq.class_equiv,
+  apply seq_eq_impl_cau_seq_equiv,
+  intros n,
+  rw cau_seq.add_val,
+end
+
+theorem real_two : (2 : real) = ↑(2 : myrat) :=
+begin
+  change 1 + (1 : real) = ↑(1 + (1 : myrat)),
+  rw coe_add,
+  rw real_one,
+end
 
 theorem two_nzero : (2 : real) ≠ 0 :=
 begin

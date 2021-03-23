@@ -93,7 +93,9 @@ begin
   cases f, cases g,
   dsimp only [],
   intros h,
-  sorry,
+  congr, -- Good old congr
+  apply funext,
+  assumption,
 end
 
 theorem seq_eq_impl_cau_seq_equiv (f g : cau_seq) : (∀ n, f.val n = g.val n) → f ≈ g :=

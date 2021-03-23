@@ -433,6 +433,32 @@ begin
   },
 end
 
+theorem le_iff_lt_impl_lt : a ≤ b ↔ ∀ c, b < c → a < c :=
+begin
+  split; assume h, {
+    intros c hbc,
+    apply le_lt_chain b; assumption,
+  }, {
+    by_contradiction hba,
+    change b < a at hba,
+    apply lt_nrefl a,
+    apply h a hba,
+  },
+end
+
+theorem le_iff_le_impl_le : a ≤ b ↔ ∀ c, b ≤ c → a ≤ c :=
+begin
+  split; assume h, {
+    intros c hbc,
+    transitivity b; assumption,
+  }, {
+    by_contradiction hab,
+    apply hab,
+    apply h b,
+    refl,
+  },
+end
+
 section abs_max
 
 def max (a b: α): α :=
@@ -652,6 +678,7 @@ begin
   from max_comm _ _,
 end
 
+-- Rename to abs_sub?
 theorem abs_sub_switch : abs (a - b) = abs (b - a) :=
 by rw [sub_def, ←abs_neg, neg_distr, neg_neg, add_comm, ←sub_def]
 
@@ -803,9 +830,10 @@ begin
   },
 end
 
-theorem zero_iff_abs_zero : a = 0 ↔ abs a = 0 :=
+-- I renamed this because it's so handy to have `abs` at the front to help find it
+theorem abs_zero_iff_zero : abs a = 0 ↔ a = 0 :=
 begin
-  split, {
+  split, tactic.swap, {
     assume hm0,
     rw hm0,
     rw abs_zero,
@@ -880,7 +908,7 @@ theorem sign_zero_iff_zero : sign a = 0 ↔ a = 0 :=
 begin
   split, {
     assume hsgnm,
-    rw zero_iff_abs_zero,
+    rw ←abs_zero_iff_zero,
     rw ←sign_mul_self_abs,
     rw hsgnm,
     rw mul_zero,

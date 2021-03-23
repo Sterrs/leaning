@@ -165,8 +165,6 @@ begin
   },
 end
 
-private theorem zero_nonpos : ¬positive (0 : real) := sorry
-
 private theorem neg_pos_impl_nonpos (x : real) : positive (-x) → ¬positive x :=
 begin
   assume hx,
@@ -224,13 +222,84 @@ begin
   },
 end
 
+private theorem zero_nonpos : ¬positive (0 : real) :=
+begin
+  by_contradiction h,
+  rw ←neg_zero at h,
+  have h₁ := neg_pos_impl_nonpos _ h,
+  rw neg_zero at h,
+  contradiction,
+end
+
 -- And partial converse
 private theorem nzero_npos_impl_neg_pos {x : real} : x ≠ 0 → ¬positive x → positive (-x) :=
 begin
   intros hx0 hx,
   cases exists_rep x with a ha,
   subst ha,
-  sorry,
+  rw neg_eq_cls rfl,
+  rw pos_cls rfl,
+  rw pos_cls rfl at hx,
+  rw not_exists at hx,
+  change ¬⟦a⟧ = (0 : real) at hx0,
+  rw [real_zero, coe_def, cau_seq.class_equiv] at hx0,
+  change ¬a ≈ _ at hx0,
+  cases cau_seq.nzero_impl_abs_eventually_bounded_below a hx0 with δ h,
+  cases h with N hN,
+  cases hN with hδ hN,
+  existsi δ,
+  split,
+    assumption,
+  have hδ2 := hx δ,
+  rw not_and at hδ2,
+  have hδ3 := hδ2 hδ,
+  rw not_exists at hδ3,
+  cases a.property δ hδ with M hM,
+  -- Here
+  have hδ4 := hδ3 (N.max M),
+  rw not_forall at hδ4,
+  cases hδ4 with n hn,
+  rw not_imp at hn,
+  cases hn with hNn hδ5,
+  clear hδ2 hδ3 hx,
+  -- And here
+  existsi (N.max M),
+  intros m hNm,
+  rw neg_val,
+  rw lt_neg_switch_iff,
+  rw neg_neg,
+  have hn := hN n (mynat.max_le_cancel_left hNn),
+  have hm := hN m (mynat.max_le_cancel_left hNm),
+  clear hN,
+  cases lt_abs_impl_lt_either _ _ hm, {
+    assumption,
+  }, {
+    exfalso,
+    clear hm,
+    cases lt_abs_impl_lt_either _ _ hn, {
+      have := hM n m (mynat.max_le_cancel_right hNn) (mynat.max_le_cancel_right hNm),
+      rw abs_sub_switch at this,
+      rw abs_lt_iff_lt_both at this,
+      apply lt_very_antisymmetric 0 (a.val n),
+      cases this with hneg hpos,
+      split, {
+        rw ←neg_add δ,
+        rw ←myring.add_zero (a.val n),
+        rw ←neg_add (a.val m),
+        rw ←myring.add_assoc,
+        apply lt_comb; assumption,
+      }, {
+        transitivity -δ,
+          assumption,
+        rw lt_neg_switch_iff,
+        rw neg_zero,
+        rw neg_neg,
+        assumption,
+      },
+    }, {
+      contradiction,
+    },
+  },
 end
 
 def le (x y : real) := ¬positive (x - y)
