@@ -1,4 +1,5 @@
 import .basic
+import ..mynat.lt
 import ..logic
 
 namespace hidden
@@ -1092,6 +1093,34 @@ begin
   rw neg_distr at h,
   rw neg_distr,
   from abs_diff_lt_left _ _ _ h,
+end
+
+open mynat
+
+-- Should be somewhere else
+def max_upto : mynat → (mynat → α) → α
+| 0        f := f 0
+| (succ M) f := max (f (succ M)) (max_upto M f)
+
+theorem max_upto_ge_before {N n : mynat} (hnN : n ≤ N) (f  : mynat → α): f n ≤ max_upto N f :=
+begin
+  induction N with N hN,
+    dsimp at *,
+    have hn := mynat.le_zero hnN,
+    subst hn,
+    refl,
+  change _ ≤ max (f (succ N)) (max_upto N f),
+  rw mynat.le_iff_lt_or_eq at hnN,
+  cases hnN with hlt heq, {
+    rw ←le_iff_lt_succ at hlt,
+    transitivity max_upto N f,
+      apply hN,
+      assumption,
+    apply le_max_right,
+  }, {
+    subst heq,
+    apply le_max_left,
+  },
 end
 
 end abs_max

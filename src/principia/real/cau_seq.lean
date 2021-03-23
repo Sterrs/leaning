@@ -123,15 +123,66 @@ instance: has_zero cau_seq := ⟨⟨λ n, 0, constant_cauchy 0⟩⟩
 
 instance: has_one cau_seq := ⟨⟨λ n, 1, constant_cauchy 1⟩⟩
 
+local attribute [instance] classical.prop_decidable
+
 theorem abs_bounded_above (f : cau_seq) :
 ∃ (u : myrat), 0 < u ∧ ∀ n, abs (f.val n) < u:=
 begin
-  sorry,
+  cases f.property 1 (ordered_myring.nontrivial_zero_lt_one myrat.nontrivial) with N h,
+  existsi max (1 + (max_upto N $ λ n, abs (f.val n))) (abs (f.val N) + 1),
+  split, {
+    apply lt_le_chain (abs (f.val N) + 1),
+      rw ←add_zero (0 : myrat),
+      apply le_lt_comb,
+        exact abs_nonneg _,
+      exact (ordered_myring.nontrivial_zero_lt_one myrat.nontrivial),
+    apply ordered_myring.le_max_right,
+  }, {
+    intros n,
+    have := h n N,
+    by_cases hNn : N ≤ n, {
+      have := this hNn (@mynat.le_refl N),
+      apply lt_le_chain (abs (f.val N) + 1), {
+        rw lt_add_cancel_left _ _ (-abs (f.val N)),
+        rw add_comm,
+        rw ←add_assoc,
+        rw neg_add,
+        rw zero_add,
+        apply le_lt_chain (abs (f.val N - f.val n)), {
+          transitivity abs (abs (f.val n) + -abs (f.val N)),
+            apply self_le_abs,
+          rw ←sub_def,
+          rw abs_sub_switch,
+          apply triangle_ineq_sub,
+        }, {
+          assumption,
+        },
+      }, {
+        apply ordered_myring.le_max_right,
+      },
+    }, {
+      change n < N at hNn,
+      have hNn₂ := mynat.lt_impl_le hNn,
+      apply lt_le_chain (1 + max_upto N (λ (n : mynat), abs (f.val n))), {
+        rw ←zero_add (abs (f.val n)),
+        apply lt_le_comb, {
+          exact (ordered_myring.nontrivial_zero_lt_one myrat.nontrivial),
+        }, {
+          -- `change` comes into its own
+          change ((λ (n : mynat), abs (f.val n)) n) ≤ _,
+          apply max_upto_ge_before,
+          assumption,
+        },
+      }, {
+        apply ordered_myring.le_max_left,
+      },
+    },
+  },
 end
 
 -- Why was this so hard ffs
 theorem nzero_impl_abs_eventually_bounded_below (f : cau_seq) (hnf0 : ¬f ≈ 0) :
-∃ (δ : myrat) (N : mynat), 0 < δ ∧ ∀ n : mynat, N ≤ n → δ  < abs (f.val n) :=
+∃ (δ : myrat) (N : mynat), 0 < δ ∧ ∀ n : mynat, N ≤ n → δ < abs (f.val n) :=
 begin
   change ¬(f.equivalent 0) at hnf0,
   unfold cau_seq.equivalent at hnf0,
